@@ -4,11 +4,11 @@
 |---|---|
 | **Status** | frozen for MVP |
 | **Purpose** | Chốt hình dạng dữ liệu và các bất biến phải luôn đúng |
-| **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
+| **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M100.15 — `decks.sibling_position`, index theo sibling order và schema v13; M100.13 — `end_reason = scheduler_changed` và schema v12: tách BR-164 khỏi `scheduler_reset`; ma trận `status` × `end_reason` có thêm một hàng · M99.33 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 33…37, và bất biến 1…5/15/29 đo trên hàng đang active · M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học hằng ngày, migration v10 |
-| **Last updated** | 2026-08-31 |
+| **Updated by task** | M100.95 — gỡ hai đoạn "đang implement định nghĩa đã bị thay" và "chưa tồn tại ở schema nào", cả hai đã sai từ schema v5; Scope thôi nói `lib/core/database/` chưa tồn tại · M100.15 — `decks.sibling_position`, index theo sibling order và schema v13; M100.13 — `end_reason = scheduler_changed` và schema v12: tách BR-164 khỏi `scheduler_reset`; ma trận `status` × `end_reason` có thêm một hàng · M99.33 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 33…37, và bất biến 1…5/15/29 đo trên hàng đang active · M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học hằng ngày, migration v10 |
+| **Last updated** | 2026-09-16 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
 `lib/core/database/tables/`, hiện ở **schema v13**.
@@ -44,23 +44,14 @@ tra ngược được từ cột về luật nếu không có bảng này. Ngư�
 | `decks.study_config` | BR-147 |
 | `app_settings.card_limit` · `new_card_order` | BR-147, BR-148 |
 
-**Năm chỗ trong `lib/` đang implement định nghĩa đã bị thay.** Chúng **đúng với
-schema v4** và sẽ đổi cùng migration mang `learned_at`; liệt kê ở đây để không ai
-đọc chúng rồi tưởng tài liệu sai, hoặc sửa chúng trước khi có cột để sửa:
-
-| Nơi | Đang dùng | Phải thành |
-|---|---|---|
-| `card_state_model.dart` | `answerCount == 0` ⇒ `new` | `learned_at IS NULL` (BR-90) |
-| `card.drift` — `newCount` | `answer_count = 0` | `learned_at IS NULL` |
-| `deck.drift` ×2 | `due_at IS NULL OR due_at <= now` | hai số tách biệt (BR-150) |
-| `study.drift` | cùng vị từ trên cho hàng đợi | hai tập của BR-142 |
-| `card_list_query_mapper.dart` | comment nói quan hệ này "đúng hôm nay" | vị từ đổi, quan hệ giữ (invariant 24, 25) |
-
-**Chưa tồn tại ở schema nào** — đến cùng đợt migration tiếp theo của M5: bảng
-`study_queue_items`; `study_sessions.current_mode`, `cursor`, `card_limit`;
-`study_answers.mode`, `outcome_reason`, `comparison_version`, `used_hint`; giá trị
-`interrupted` của `end_reason`; và hai StudyMode `browse` / `self_assess`.
-Mọi tên còn lại trong tài liệu này **đã là tên thật trong database** kể từ schema v4.
+**Định nghĩa `new` theo `learned_at` đã vào code từ schema v5.** Bản trước của
+tài liệu này liệt kê năm chỗ trong `lib/` còn đếm `answer_count = 0` hoặc
+`due_at IS NULL OR due_at <= now`, và một danh sách tên "chưa tồn tại ở schema
+nào". Migration v5 (`app_database_migrations_v5.dart`) thêm `learned_at`, bảng
+`study_queue_items`, và dựng lại `study_sessions` với `current_mode` cùng giá trị
+`interrupted`; các migration sau thêm những cột Study còn lại. Năm chỗ đó hôm nay
+đọc `learned_at` theo BR-90 và BR-142, và **mọi tên trong tài liệu này là tên thật
+trong database** ở schema v13.
 
 Ba nguyên tắc chi phối cách chia bảng:
 

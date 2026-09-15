@@ -4,11 +4,11 @@
 |---|---|
 | **Status** | active |
 | **Purpose** | Cho thấy các use case nối vào nhau thành hành trình nào, thứ mà đọc từng UC riêng lẻ không thấy được |
-| **Scope** | Đồ thị chuyển tiếp giữa UC-01…UC-20, tách theo đối tượng nghiệp vụ. Ngoài phạm vi: nội dung của từng UC, mọi luật nghiệp vụ, và mọi chi tiết màn hình |
+| **Scope** | Đồ thị chuyển tiếp giữa UC-01…UC-20 và ánh xạ UC-01…UC-22 → milestone, tách theo đối tượng nghiệp vụ. Ngoài phạm vi: nội dung của từng UC, mọi luật nghiệp vụ, và mọi chi tiết màn hình |
 | **Source of truth for** | Đồ thị chuyển tiếp giữa các UC · điểm vào của từng luồng · ánh xạ UC → milestone xây nó |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md`, `use-cases.md` |
-| **Updated by task** | M99.32 — UC-20 vào bảng §6: tìm kiếm toàn thư viện từ header Library, kết quả card mở chi tiết chỉ đọc UC-19; UC-06 thôi quảng cáo tìm kiếm theo subtree đã bị thay thế; trước đó M99.31 — nhánh `J`: chạm một hàng card mở chi tiết chỉ đọc (UC-19), Edit thành action tường minh; bảng §6 bổ sung UC-10…UC-19 |
-| **Last updated** | 2026-08-16 |
+| **Updated by task** | M100.95 — bảng §6 theo code: UC-01, UC-03, UC-05, UC-07 đã xây; thêm UC-12…UC-17, UC-21, UC-22; hai chỗ lệch đã hết hiệu lực; trước đó M99.32 — UC-20 vào bảng §6: tìm kiếm toàn thư viện từ header Library, kết quả card mở chi tiết chỉ đọc UC-19; UC-06 thôi quảng cáo tìm kiếm theo subtree đã bị thay thế; trước đó M99.31 — nhánh `J`: chạm một hàng card mở chi tiết chỉ đọc (UC-19), Edit thành action tường minh; bảng §6 bổ sung UC-10…UC-19 |
+| **Last updated** | 2026-09-16 |
 
 ---
 
@@ -230,32 +230,38 @@ lại ở đây; cột cuối chỉ nói cái gì đã có trong `lib/` hôm nay
 
 | UC | Đối tượng | Xây ở | Có trong `lib/` hôm nay |
 |---|---|---|---|
-| UC-01 | deck | M4.12a | Template tự cài lúc khởi động qua `app/startup/fixture_seeder_widget.dart`. **Màn thư viện để người dùng duyệt template và chọn chế độ ôn tập cho bản sao thì chưa có** — bước 4–7 của UC-01 |
+| UC-01 | deck | M4.12a / M99.9 | Đủ — màn Starter library cho duyệt template, chọn chế độ ôn tập cho bản sao và thêm bản thứ hai có xác nhận. `app/startup/fixture_seeder_widget.dart` chỉ tự cài template ở môi trường development |
 | UC-02 | deck | M4.10 | Đủ |
-| UC-03 | deck | M4.10 | Đổi tên, xoá kèm impact, đưa `content_type` về `unset` đã có. **Đổi chế độ ôn tập chưa có** — không có use case nào cho nó |
+| UC-03 | deck | M4.10 / M99.16 / M99.33 | Đủ — đổi tên; xoá vào Trash kèm impact; đổi chế độ ôn tập khi chưa khoá (M99.16). `content_type` về `unset` do hệ thống tự làm (BR-163) |
 | UC-04 | card | M4.11 | Đủ, và **nhiều hơn UC-04 mô tả**: cờ, tag và ba trường phụ (BR-92…BR-95) |
-| UC-05 | review | M5 | Chưa xây. `lib/features/study/` mới có một repository chưa có method và một placeholder screen |
+| UC-05 | review | M5.0…M5.20 | Đủ — phiên học mới theo chuỗi stage và phiên ôn tập một mode, sáu mode, tổng kết phiên |
 | UC-06 | deck | M4.10 | Đủ. Tìm kiếm theo subtree từng là phần thêm ngoài UC-06, đã bị thay bằng tìm kiếm toàn thư viện (UC-20, M99.32) |
-| UC-07 | review | M5 | Chưa xây |
+| UC-07 | review | M5.21 | Đủ — reset kèm chọn thuật toán cho chu kỳ mới |
 | UC-08 | deck | M4.10 | Đủ |
 | UC-09 | deck | M4.10 | Đủ |
 | UC-10 | card | M4.12 / M99.19 | Đủ — wizard import ba bước |
 | UC-11 | card | M99.21 | Đủ — sheet export ba format |
+| UC-12 | progress | M99.23 | Đủ — streak, hôm nay, bảy ngày gần nhất |
+| UC-13 | progress | M99.24 | Đủ — hai khoảng 7/30 ngày, drill-down theo cây deck |
+| UC-14 | review | M5.26 | Có — tab Study liệt kê root deck theo workload và cho tiếp tục phiên dở trong ngày |
+| UC-15 | review | M99.27 | Đủ — chọn chiều hỏi cho phiên ôn `self_assess` của deck `sm2` |
+| UC-16 | settings | M99.28 | Đủ — mặc định học, theme, ngôn ngữ, reset tùy chọn |
+| UC-17 | settings | M99.29 | Có — nhắc học hằng ngày, xin quyền notification sau khi bật |
 | UC-18 | card | M99.30 | Đủ — catalog tag ở `/tags`, lọc nhiều tag trên card list, rename/gộp và xoá |
 | UC-19 | card | M99.31 | Đủ — chi tiết chỉ đọc cộng lịch sử phân trang keyset |
 | UC-20 | search | M99.32 | Đủ — tìm kiếm deck, hai mặt card và tag từ header Library; kết quả deck mở màn deck, kết quả card mở chi tiết chỉ đọc (UC-19) |
+| UC-21 | trash | M99.33 | Đủ — xoá vào Trash, restore có chọn đích, undo, purge |
+| UC-22 | deck | M100.15 | Đủ — sắp xếp deck cùng cấp |
 
-### Ba chỗ tài liệu và code đã lệch
+### Chỗ tài liệu và code còn lệch
 
-Ghi lại chứ **không** sửa ở đây: cả ba đều thuộc `use-cases.md`, đang
-`frozen for MVP`, và M99.1 không có quyền sửa nó ngoài dòng trỏ sang tài liệu này.
+Ghi lại chứ **không** sửa ở đây: nó thuộc `use-cases.md`, đang `frozen for MVP`.
 
 1. **UC-04 không nhắc cờ và tag.** BR-93 và BR-95 khai `Related: UC-04`, nhưng
-   dòng `Business rules` của UC-04 chỉ liệt kê BR-07…BR-10, BR-63, BR-163. Tham
-   chiếu một chiều: BR biết UC, UC không biết BR.
-2. **UC-06 không nhắc tìm kiếm.** `search_decks_use_case.dart` tồn tại và màn
-   danh sách có ô tìm kiếm toàn thư viện; UC-06 xếp tìm kiếm card vào mục "cố ý
-   không đặc tả" (S1) và không nói gì về tìm deck.
-3. **UC-01 mô tả một màn thư viện chưa tồn tại.** Phần đã xây là seed tự động cho
-   demo, không phải luồng người dùng chọn. Hai thứ này khác nhau ở chỗ ai quyết
-   định `scheduler_type` của bản sao.
+   dòng `Business rules` của UC-04 liệt kê BR-07…BR-10, BR-63, BR-163 và
+   BR-165…BR-167, không có luật cờ và tag. Tham chiếu một chiều: BR biết UC, UC
+   không biết BR.
+
+Hai chỗ lệch từng ghi ở đây đã hết hiệu lực (M100.95): tìm kiếm không còn là phần
+thêm ngoài UC-06 mà là UC-20 (M99.32), và màn thư viện starter mà UC-01 mô tả đã
+được xây ở M99.9.

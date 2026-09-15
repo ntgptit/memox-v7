@@ -7,8 +7,8 @@
 | **Scope** | Toàn bộ `docs/`. Ngoài phạm vi: nội dung của từng tài liệu |
 | **Source of truth for** | Danh mục tài liệu · trạng thái từng tài liệu · tài liệu chưa viết và phase sở hữu |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.11 |
-| **Last updated** | 2026-08-02 |
+| **Updated by task** | M100.95 — số ID và phạm vi từng tài liệu theo trạng thái thật; `claude-design/`; phạm vi quét của `check_docs.py` |
+| **Last updated** | 2026-09-16 |
 
 Format và thứ tự đọc: [`document-conventions.md`](document-conventions.md).
 
@@ -19,14 +19,14 @@ Format và thứ tự đọc: [`document-conventions.md`](document-conventions.m
 | [`document-conventions.md`](document-conventions.md) | Hợp đồng tài liệu: thứ tự đọc, header bắt buộc, template AD/BR/UC/WBS, MUST/SHOULD/MAY | **frozen for MVP** |
 | [`checklist.md`](checklist.md) | The canonical 22-phase development plan | **frozen for MVP** |
 | [`wbs.md`](wbs.md) | Live progress ledger — the source of truth for what is done | active |
-| [`wbs-study.md`](wbs-study.md) | The Study feature's remaining work, from M5.7 on — `wbs.md` keeps M5.0…M5.6, which are done | active |
+| [`wbs-study.md`](wbs-study.md) | The Study feature's remaining work, from M5.7 on — M5.0…M5.6 are done and archived in `wbs-archive/m5.md` | active |
 | [`wbs-archive/`](wbs-archive/) | entry WBS đã đóng, tách khỏi `wbs.md` ở M100.65. Vẫn nằm trong kiểm trùng ID và đồ thị dependency; xem `wbs-archive/README.md` | active |
 | [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | **frozen for MVP** |
-| [`architecture.md`](architecture.md) | Architecture decisions AD-01…11 with reasoning | active |
-| [`use-cases.md`](use-cases.md) | UC-01…09 cho must-have MVP | **frozen for MVP** |
-| [`master-flow.md`](master-flow.md) | Đồ thị nối UC-01…09 thành hành trình, tách theo đối tượng deck / card / study | active |
-| [`business-rules.md`](business-rules.md) | BR-01…95: cây deck, hai scheduler, kind, session lifecycle, reset/generation, starter template, trạng thái thẻ, cờ và tag | **frozen for MVP** |
-| [`data-model.md`](data-model.md) | Schema + 15 câu query bất biến: decks (cây nhiều cấp), cards, card_study_states, study_answers, study_sessions, templates | **frozen for MVP** |
+| [`architecture.md`](architecture.md) | Architecture decisions AD-01…23 with reasoning | active |
+| [`use-cases.md`](use-cases.md) | UC-01…22 cho phạm vi MVP | **frozen for MVP** |
+| [`master-flow.md`](master-flow.md) | Đồ thị nối UC-01…20 thành hành trình, tách theo đối tượng deck / card / study | active |
+| [`business-rules.md`](business-rules.md) | BR-01…270 (phần StudyMode ở `business-rules/study-mode.md`): cây deck, hai scheduler, kind, session lifecycle, reset/generation, starter template, trạng thái thẻ, cờ và tag, import/export, tiến độ, Study Home, Settings, nhắc học, tìm kiếm, Trash | **frozen for MVP** |
+| [`data-model.md`](data-model.md) | Schema v13 + 37 câu query bất biến: decks (cây nhiều cấp), cards, card_study_states, tags, study_sessions, study_answers, study_queue_items, app_settings, delete_batches; template là asset, không phải bảng runtime | **frozen for MVP** |
 
 "Frozen for MVP" nghĩa là đặc tả đã chốt và code được viết theo nó. Đổi một tài
 liệu frozen là một quyết định có chủ đích, phải kèm cập nhật mọi tài liệu tham
@@ -34,19 +34,19 @@ chiếu tới nó trong cùng commit — không phải một chỉnh sửa tiệ
 
 ### Tài liệu theo task
 
-Hai thư mục con giữ tài liệu gắn với **một** task chứ không phải với sản phẩm.
-Chúng nằm ngoài bảng trên vì vòng đời khác: một report đóng lại khi task đóng,
-còn `use-cases.md` thì không.
+Các thư mục con dưới đây giữ tài liệu gắn với **một** task hoặc **một** lần bàn
+giao, chứ không phải với sản phẩm. Chúng nằm ngoài bảng trên vì vòng đời khác: một
+report đóng lại khi task đóng, còn `use-cases.md` thì không.
 
 | Thư mục | Chứa gì | Vòng đời |
 |---|---|---|
 | [`wireframes/`](wireframes/) | Bố cục và hành vi UI chốt **trước** khi viết code một task | `draft` → `active` khi code land |
 | [`reviews/`](reviews/) | Report và checklist của một vòng review đã chạy | Đóng băng sau khi task đóng |
 | [`reviews/archive/`](reviews/archive/) | Audit mà finding đã thành code và không còn gì trong working tree trích dẫn — xem `reviews/archive/README.md` | Đóng băng, di chuyển ở M100.65 |
+| [`claude-design/`](claude-design/) | Bản chụp dẫn xuất cho Claude Design, công cụ không đọc được repo (M100.94): product context, yêu cầu theo khu vực, contract, DDL, dữ liệu mẫu và research note | Chụp ở một base commit; khi lệch, tài liệu gốc và code thắng |
 
-`design-system/` là ngoại lệ trong hai thư mục con: nó gắn với **sản phẩm**, không
-với một task, nên nó có header bảy dòng như tài liệu cấp một và `check_docs.py`
-quét nó (M100.29).
+`design-system/` là ngoại lệ: nó gắn với **sản phẩm**, không với một task, nên nó
+có header bảy dòng như tài liệu cấp một và `check_docs.py` quét nó (M100.29).
 
 | Document | Purpose | Status |
 |---|---|---|
@@ -54,10 +54,13 @@ quét nó (M100.29).
 | [`design-system/tokyo-component-mapping.md`](design-system/tokyo-component-mapping.md) | Ma trận component → canonical M3 role (đọc từ SDK ghim), dịch ý đồ Tokyo, và bốn sai lệch role đã biết | active |
 | [`design-system/card-recipes.md`](design-system/card-recipes.md) | Mười recipe của `MxCard`: nghĩa, caller, fill/viền/độ sâu/góc/padding, hợp đồng `option`, và quyết định tên `tonal` | active |
 
-Cả hai MUST tham chiếu BR/AD/UC bằng ID và MUST NOT phát biểu lại luật — cùng
-quy tắc canonical location ở `document-conventions.md` §5. `check_docs.py` chỉ
-quét `docs/*.md` cấp một, nên header bảy dòng ở đây là kỷ luật tự giác, không
-phải thứ được cưỡng chế.
+`wireframes/` và `reviews/` MUST tham chiếu BR/AD/UC bằng ID và MUST NOT phát
+biểu lại luật — cùng quy tắc canonical location ở `document-conventions.md` §5.
+`claude-design/` là ngoại lệ có chủ đích: người đọc của nó không mở được repo nên
+nó phát biểu lại luật kèm ID, và header của nó khai `Source of truth for: —`.
+`check_docs.py` quét `docs/*.md`, `docs/it-scenarios/` và `docs/design-system/`,
+không quét các thư mục theo task, nên header bảy dòng ở đó là kỷ luật tự giác,
+không phải thứ được cưỡng chế.
 
 **ID là vĩnh viễn.** BR, AD và UC không bao giờ được đánh số lại; rule mới append
 vào số tiếp theo. Lần renumber trước đã làm hỏng tham chiếu ngầm mà không có gì

@@ -56,8 +56,8 @@ CREATE TABLE decks (
     -- Starts at 1, +1 on every reset (BR-40).
     scheduler_generation INTEGER NULL,
 
-    -- NULL means no `scheduled` review in the current generation, so the
-    -- scheduler choice is still unlocked (AD-06).
+    -- NULL means no card of the current generation has finished the learning
+    -- chain yet, so the scheduler choice is still unlocked (BR-13, AD-06).
     first_answered_at DATETIME NULL,
 
     -- JSON overriding the app-wide study options, ROOT ONLY, same rule the
