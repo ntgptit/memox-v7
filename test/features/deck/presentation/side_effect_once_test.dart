@@ -69,9 +69,7 @@ void main() {
       final repository = FakeDeckRepository();
       await pumpDeckApp(tester, repository: repository);
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.enterText(deckFormField, 'Japanese N5');
       await tester.tap(find.text(english.schedulerSm2Label));

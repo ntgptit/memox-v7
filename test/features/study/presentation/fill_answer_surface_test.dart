@@ -47,8 +47,8 @@ void main() {
 
       // The card's own padding is all that separates them; anything more is a
       // box inside a box.
-      expect(field.height, closeTo(card.height - AppSpacing.card * 2, 1));
-      expect(field.width, closeTo(card.width - AppSpacing.card * 2, 1));
+      expect(field.height, closeTo(card.height - AppSpacing.lg * 2, 1));
+      expect(field.width, closeTo(card.width - AppSpacing.lg * 2, 1));
     });
 
     testWidgets('tapping the card away from the editable starts typing', (

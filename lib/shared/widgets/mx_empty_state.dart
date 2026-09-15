@@ -67,7 +67,7 @@ class MxEmptyState extends StatelessWidget {
             // hue reads as a mark on the page at 11.36:1. This used to reach
             // for a separate text-safe token because the old fill tone managed
             // 3.29:1 there.
-            MxIcon(icon, ink: AppInk.accent, size: MxIconSize.xl),
+            MxIcon(icon, ink: AppInk.accent, size: MxIconSize.lg),
             const SizedBox(height: AppSpacing.lg),
             Text(
               title,
@@ -101,7 +101,7 @@ class MxEmptyState extends StatelessWidget {
                   ),
                   secondary: MxActionButton(
                     label: secondaryActionLabel!,
-                    variant: MxActionButtonVariant.tonal,
+                    variant: MxActionButtonVariant.secondary,
                     onPressed: onSecondaryAction,
                   ),
                 )

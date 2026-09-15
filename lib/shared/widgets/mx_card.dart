@@ -186,7 +186,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.card,
+         radius: AppRadius.lg,
        ),
        // Not an initializing formal: the field is private so a caller cannot
        // read the spec back, while the parameter has to be public to be named.
@@ -208,7 +208,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.card,
-         radius: AppRadius.card,
+         radius: AppRadius.lg,
        ),
        // Not an initializing formal: the field is private so a caller cannot
        // read the spec back, while the parameter has to be public to be named.
@@ -219,7 +219,7 @@ class MxCard extends StatefulWidget {
 
   /// The focal surface a whole screen is built around: a study prompt.
   ///
-  /// [AppRadius.card] because a card filling the screen reads tighter at the
+  /// [AppRadius.xl] because a card filling the screen reads tighter at the
   /// same corner as a list row does, and [AppElevation.raised] because the
   /// prompt is deliberately lifted above its neighbours. Informational only —
   /// the study screens' controls are their own widgets, so the recipe grows a
@@ -230,7 +230,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.raised,
-         radius: AppRadius.card,
+         radius: AppRadius.xl,
        ),
        isSelected = null,
        _selectionTreatment = MxCardSelectionTreatment.edge,
@@ -253,7 +253,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.card,
+         radius: AppRadius.xl,
          fill: _MxCardFill.recessed,
        ),
        isSelected = null,
@@ -274,7 +274,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.card,
+         radius: AppRadius.lg,
          fill: _MxCardFill.feedback,
        ),
        padding = MxCardPadding.compact,
@@ -305,7 +305,7 @@ class MxCard extends StatefulWidget {
   const MxCard.muted({required this.child, super.key})
     : _spec = const _MxCardSpec(
         elevation: AppElevation.none,
-        radius: AppRadius.card,
+        radius: AppRadius.lg,
         fill: _MxCardFill.muted,
       ),
       padding = MxCardPadding.compact,
@@ -335,7 +335,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.card,
+         radius: AppRadius.lg,
          fill: _MxCardFill.tonal,
        ),
        isSelected = null,
@@ -353,7 +353,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.raised,
-         radius: AppRadius.card,
+         radius: AppRadius.lg,
          edge: _MxCardRestingEdge.accent,
        ),
        isSelected = null,
@@ -421,7 +421,7 @@ class MxCard extends StatefulWidget {
        isSelected = isSelected,
        _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.card,
+         radius: AppRadius.lg,
          edge: _MxCardRestingEdge.option,
        ),
        padding = MxCardPadding.compact,
@@ -588,12 +588,9 @@ class _MxCardState extends State<MxCard> {
       return semantic.surfaceSelected;
     }
 
-    // **The paper is `Lowest` and the recess is the page** (M100.87). The
-    // Tokyo handoff draws its card on `surfaceContainerLowest`; the only
-    // surface below that in both modes is the page itself.
     return switch (widget._spec.fill) {
-      _MxCardFill.surface => scheme.surfaceContainerLowest,
-      _MxCardFill.recessed => scheme.surface,
+      _MxCardFill.surface => scheme.surfaceContainerLow,
+      _MxCardFill.recessed => scheme.surfaceContainerLowest,
       _MxCardFill.muted => scheme.surfaceContainerHigh,
       _MxCardFill.tonal => semantic.surfaceEmphasis,
       // Exhaustive over the tone so a second tone fails the build here
@@ -663,7 +660,7 @@ class _MxCardState extends State<MxCard> {
   EdgeInsetsGeometry get _paddingInsets => switch (widget.padding) {
     MxCardPadding.none => EdgeInsets.zero,
     MxCardPadding.compact => const EdgeInsets.all(AppSpacing.md),
-    MxCardPadding.standard => const EdgeInsets.all(AppSpacing.card),
+    MxCardPadding.standard => const EdgeInsets.all(AppSpacing.lg),
   };
 
   @override

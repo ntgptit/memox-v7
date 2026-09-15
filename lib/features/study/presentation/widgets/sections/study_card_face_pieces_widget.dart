@@ -40,7 +40,7 @@ class _CardHalf extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        MxSectionLabel(label: label),
+        MxSectionLabel(label: label, rung: MxSectionLabelRung.small),
         Expanded(
           child: Center(
             // **A scrollbar, because this half scrolls in the ordinary case now.**

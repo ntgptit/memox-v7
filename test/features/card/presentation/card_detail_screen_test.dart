@@ -308,7 +308,7 @@ void main() {
       // `MxActionButton` keeps the label in the tree either way — at
       // `opacity 0` under the spinner by default, beside it when
       // `shouldKeepLabelWhileLoading` is on, which widens the button by
-      // `AppIconSize.xs + AppSpacing.sm`. Both halves are asserted because only
+      // `AppIconSize.sm + AppSpacing.sm`. Both halves are asserted because only
       // together do they say which shape is on screen, and only the default one
       // leaves the rect where the finger found it.
       expect(

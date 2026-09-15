@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../foundations/app_semantic_colors.dart';
 import '../../foundations/app_stroke.dart';
 import '../../states/app_interaction_states.dart';
 
@@ -8,17 +7,17 @@ import '../../states/app_interaction_states.dart';
 /// `docs/wbs.md` records as blocked on a study-answers screen rather than on a
 /// design.
 ///
-/// **The selected label is the brand's ink, and the indicator its fill**
-/// (M100.87). A tab's label is text on the page or a card, and the Tokyo
-/// handoff's light `primary` reads 3.95:1 there, so the label takes
-/// `AppSemanticColors.accentInk` while the indicator — a graphic — keeps the
-/// kit's `primary`.
+/// **`primary` for the selected label, which is M3's own answer and was not
+/// available until M100.18.** A tab's label sits on the page or a card, not on a
+/// selection fill, so it wants the brand hue as a label — and the old dark fill
+/// tone could not be one, at 3.33:1 on the page against the 4.5:1 text needs. A
+/// separate accent token carried it until the palette inverted; `primary` now
+/// measures 11.36:1 there.
 TabBarThemeData buildTabBarTheme(
   ColorScheme scheme,
-  AppSemanticColors semantic,
   TextTheme texts,
 ) => TabBarThemeData(
-  labelColor: semantic.accentInk,
+  labelColor: scheme.primary,
   unselectedLabelColor: scheme.onSurfaceVariant,
   labelStyle: texts.titleSmall,
   unselectedLabelStyle: texts.titleSmall,

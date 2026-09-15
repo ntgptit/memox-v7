@@ -68,6 +68,10 @@ class CardProgressPanelWidget extends ConsumerWidget {
 /// filled `primary` control on this screen, because it is the one thing a
 /// learner comes here to do.
 ///
+/// The session itself is M5; until then the tap says so, exactly as
+/// `deck_study_button_widget.dart` does — one place to change when the review
+/// screen lands.
+///
 /// **It never says "due" about a card nobody has seen.** BR-22's queue is
 /// `due_at IS NULL OR due_at <= now`, so a card created a minute ago is in it —
 /// and the state table in `business-rules.md` calls that same card `new`, not

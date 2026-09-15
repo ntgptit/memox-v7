@@ -99,9 +99,7 @@ void main() {
   testWidgets('the create form', (tester) async {
     await pumpDeckApp(tester, repository: FakeDeckRepository());
 
-    await tester.tap(
-      find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-    );
+    await tester.tap(find.text(english.deckCreateRootAction));
     await tester.pumpAndSettle();
 
     // Scoped to the form: the action that opened it carries the same words and

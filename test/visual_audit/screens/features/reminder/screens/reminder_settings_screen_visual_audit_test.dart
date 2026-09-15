@@ -75,8 +75,8 @@ void main() {
         detailContains: '_RenderInkFeatures',
         // 4 since M100.36: MxListTile owns its transparent Material (the
         // caller's shim went), so the time row brings one ink layer of its own.
-        // 5 since A20.1 P2-13: MxSwitchRow owns its transparent Material, for
-        // the same reason the tile has one — an InkWell row since M100.92.
+        // 5 since A20.1 P2-13: MxSwitchRow is a SwitchListTile inside its own
+        // transparent Material, for the same reason the tile has one.
         expectedMatches: 5,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the '
@@ -85,8 +85,15 @@ void main() {
             'row. Splash and highlight paint into these; the overlay colours '
             'are asserted in app_theme_test.dart.',
       ),
-      // No `_SwitchPainter` allowance since M100.92: MxSwitch paints its track
-      // and thumb as decorated boxes, which the audit reads directly.
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.customPainter,
+        detailContains: '_SwitchPainter',
+        rationale:
+            'The toggle draws its track and thumb through a CustomPainter; its '
+            'colours come from SwitchThemeData and are pinned by the '
+            'mx_components goldens.',
+      ),
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.customPainter,

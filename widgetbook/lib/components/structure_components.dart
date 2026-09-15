@@ -4,9 +4,6 @@ import 'package:memox/shared/widgets/mx_async_view.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
-import 'package:memox/shared/widgets/mx_icon_tile.dart';
-import 'package:memox/core/theme/foundations/app_spacing.dart';
-import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_sheet_insets.dart';
@@ -69,10 +66,9 @@ WidgetbookComponent contentShellComponent() {
                   ]
                 : null,
             floatingActionButton: hasFab
-                ? const MxFab(
-                    icon: Icons.add,
-                    label: 'New deck',
+                ? const FloatingActionButton(
                     onPressed: _noop,
+                    child: Icon(Icons.add),
                   )
                 : null,
             body: Column(
@@ -211,24 +207,6 @@ WidgetbookComponent searchFieldComponent() {
             ],
           );
         },
-      ),
-      WidgetbookUseCase(
-        // The handoff's trailing voice glyph on an empty field. No production
-        // caller passes `onVoice` yet (owner decision 10).
-        name: 'Voice slot',
-        builder: (BuildContext context) => const CatalogListPage(
-          children: <Widget>[
-            MxSearchField(
-              value: '',
-              onChanged: _noopString,
-              hintText: 'Search decks and cards',
-              semanticLabel: 'Search your library',
-              clearSemanticLabel: 'Clear search',
-              onVoice: _noop,
-              voiceSemanticLabel: 'Voice search',
-            ),
-          ],
-        ),
       ),
       WidgetbookUseCase(
         // Focused, and at the text scale the pill used to clip at: 48 is a
@@ -370,27 +348,6 @@ WidgetbookComponent sheetInsetsComponent() {
             ),
           );
         },
-      ),
-    ],
-  );
-}
-
-WidgetbookComponent iconTileComponent() {
-  return WidgetbookComponent(
-    name: 'MxIconTile',
-    useCases: <WidgetbookUseCase>[
-      WidgetbookUseCase(
-        name: 'Sizes',
-        builder: (BuildContext context) => CatalogCenterPage(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: AppSpacing.lg,
-            children: <Widget>[
-              for (final size in MxIconTileSize.values)
-                MxIconTile(icon: Icons.folder_outlined, size: size),
-            ],
-          ),
-        ),
       ),
     ],
   );

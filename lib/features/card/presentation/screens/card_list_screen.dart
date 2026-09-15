@@ -162,7 +162,6 @@ class CardListScreen extends ConsumerWidget {
       leading: selection.isSelecting
           ? MxIconButton(
               icon: Icons.close,
-              placement: MxIconButtonPlacement.bar,
               semanticLabel: context.l10n.cardSelectionCloseLabel,
               onPressed: () => _clearSelection(ref, deckId),
             )
@@ -213,7 +212,6 @@ class CardListScreen extends ConsumerWidget {
         if (deckTotal > 0 && !selection.isSelecting)
           MxIconButton(
             icon: Icons.checklist,
-            placement: MxIconButtonPlacement.bar,
             semanticLabel: context.l10n.cardSelectAction,
             tooltip: context.l10n.cardSelectAction,
             onPressed: () => _beginSelection(ref, deckId),

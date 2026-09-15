@@ -27,28 +27,12 @@ void main() {
       // opacity have scales of their own and are not covered by this rule.
       for (final (String name, double value) in <(String, double)>[
         ('touchTarget', AppSizing.touchTarget),
-        ('buttonCompact', AppSizing.buttonCompact),
-        ('fab', AppSizing.fab),
+        ('controlCompact', AppSizing.controlCompact),
+        ('floatingAction', AppSizing.floatingAction),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
         // Not a control, and on the grid all the same: the rhythm is what
         // keeps a mark aligned with the text it sits beside.
         ('statusDot', AppSizing.statusDot),
-        // Painted marks too: the handoff IconTile's three extents.
-        ('iconTileSm', AppSizing.iconTileSm),
-        ('iconTileMd', AppSizing.iconTileMd),
-        ('iconTileLg', AppSizing.iconTileLg),
-        // Where a row divider starts past the leading column.
-        ('listDividerIndent', AppSizing.listDividerIndent),
-        // A painted mark: the handoff MasteryRing.
-        ('masteryRing', AppSizing.masteryRing),
-        // The handoff field: 52 single-line, 40 multi-line.
-        ('input', AppSizing.input),
-        ('inputMultilineMin', AppSizing.inputMultilineMin),
-        // The handoff Switch's track width and thumb. Its 26 track height and
-        // 3 inset are the kit's FIXED values and sit off the grid on purpose:
-        // (26 - 20) / 2 centres the thumb.
-        ('switchTrackWidth', AppSizing.switchTrackWidth),
-        ('switchThumb', AppSizing.switchThumb),
       ]) {
         expect(
           value % 4,
@@ -59,17 +43,13 @@ void main() {
     });
 
     test(
-      'the reading row sits on the touch floor, and the theme states it',
+      'the reading row is above the touch floor, and the theme states it',
       () {
-        // The handoff ListRow: 48 MINIMUM, growing with its content (M100.91).
-        // It was 56 — Material's `_defaultTileHeight` — from M100.36 4J until
-        // the kit's list row replaced it. Owned here rather than left to
-        // Flutter, and put on the theme so every ListTile reads it.
-        expect(
-          AppSizing.rowMinHeight,
-          greaterThanOrEqualTo(AppSizing.touchTarget),
-        );
-        expect(AppSizing.rowMinHeight, 48);
+        // 48 is a floor a finger needs; 56 is what a list the eye reads down
+        // wants (M100.36 4J). Owned here rather than left to Flutter's
+        // `_defaultTileHeight`, and put on the theme so every ListTile reads it.
+        expect(AppSizing.rowMinHeight, greaterThan(AppSizing.touchTarget));
+        expect(AppSizing.rowMinHeight, 56);
         for (final build in <ThemeData Function()>[
           buildLightTheme,
           buildDarkTheme,
@@ -83,7 +63,7 @@ void main() {
       // The whole point of the compact tier: the body comes down, the finger's
       // floor does not. If these ever met, `MaterialTapTargetSize.padded` would
       // be doing nothing and the tier would be a second name for `standard`.
-      expect(AppSizing.buttonCompact, lessThan(AppSizing.touchTarget));
+      expect(AppSizing.controlCompact, lessThan(AppSizing.touchTarget));
     });
 
     test('the FAB clearance is derived from the FAB, not repeated', () {
@@ -92,7 +72,7 @@ void main() {
       // so a FAB that ever changed size could not leave the clearance behind.
       expect(
         AppSpacing.fabScrollClearance,
-        AppSizing.fab + AppSpacing.lg + AppSpacing.xxxl,
+        AppSizing.floatingAction + AppSpacing.lg + AppSpacing.lg,
       );
     });
   });
@@ -115,27 +95,13 @@ void main() {
       });
 
       test('$mode: an icon button cannot be built below the target', () {
-        // The handoff IconButton paints a 36 ink circle (M100.90); the target
-        // is what `MaterialTapTargetSize.padded` restores around it, so the
-        // contract is the pair — never a smaller ink without the padding.
-        final ButtonStyle? style = build().iconButtonTheme.style;
-        final Size? minimum = style?.minimumSize?.resolve(
-          const <WidgetState>{},
-        );
+        final Size? minimum = build().iconButtonTheme.style?.minimumSize
+            ?.resolve(const <WidgetState>{});
 
-        expect(minimum, const Size.square(AppSizing.iconButtonInk));
-        expect(style?.tapTargetSize, MaterialTapTargetSize.padded);
+        expect(minimum, isNotNull);
+        expect(minimum!.height, AppSizing.touchTarget);
+        expect(minimum.width, AppSizing.touchTarget);
       });
     }
-  });
-
-  test('a row that leads with a tile puts its text on the divider indent', () {
-    // The handoff fixes the icon tile steps, the 16 gutter, the 12 grouped gap
-    // and the Divider indent (`0 / 56`); they agree only at the small tile
-    // (UI audit P2, M100.91). A step that moves alone fails here.
-    expect(
-      AppSpacing.lg + AppSizing.iconTileSm + AppSpacing.md,
-      AppSizing.listDividerIndent,
-    );
   });
 }

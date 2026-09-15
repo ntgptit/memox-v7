@@ -49,8 +49,8 @@ void main() {
     );
     expect(
       style.fontFamily,
-      AppTypography.family,
-      reason: '$slot is not set in the app face',
+      anyOf(AppTypography.bodyFamily, AppTypography.displayFamily),
+      reason: '$slot is not set in one of the two app faces',
     );
   }
 
@@ -161,13 +161,12 @@ void main() {
         }
       });
 
-      test('the navigation label is label-md in both states', () {
+      test('the navigation label is label-md, and selection re-weights it', () {
         // The bar resolves per state, so both faces have to be asked for.
-        // Both are the rung untouched: selected was the rung re-weighted to
-        // 600 until the rung itself became 600 (D1, M100.89). The axis
-        // comparison inside the helper still matters — this slot once shipped
-        // a `copyWith(fontWeight:)` that reported 600 and painted 500
-        // (theme-composition review, 2026-08).
+        // Unselected is the rung untouched; selected is the rung at 600 — and
+        // the axis assertion inside the helper is the whole point, because
+        // this slot shipped a `copyWith(fontWeight:)` that reported 600 and
+        // painted 500 (theme-composition review, 2026-08).
         final WidgetStateProperty<TextStyle?>? label =
             theme.navigationBarTheme.labelTextStyle;
         expect(label, isNotNull, reason: 'the bar declares no label style');
@@ -177,10 +176,11 @@ void main() {
           label!.resolve(const <WidgetState>{}),
           texts.labelMedium,
         );
-        expectSameRung(
+        expectRungReweighted(
           'navigationBarTheme.labelTextStyle (selected)',
           label.resolve(const <WidgetState>{WidgetState.selected}),
           texts.labelMedium,
+          FontWeight.w600,
         );
       });
 
@@ -191,9 +191,6 @@ void main() {
         // its line box as the first character landed (#433 F6); Material's
         // own hint is `bodyLarge`. NEW (M100.36 4F): the value's rung, and a
         // `WidgetStateTextStyle` so the disabled fade M3 gives it is back.
-        // **The fade moved to the field at M100.92**: the handoff dims a
-        // disabled field as a whole to 0.38 (`MxTextField`), so the hint keeps
-        // its resting ink rather than fading twice.
         // AUTHORITY: `_InputDecoratorDefaultsM3.hintStyle` and
         // `_getInlineHintStyle`, Flutter 3.44.8.
         final hint = theme.inputDecorationTheme.hintStyle!;
@@ -215,8 +212,8 @@ void main() {
           WidgetStateProperty.resolveAs(hint, const <WidgetState>{
             WidgetState.disabled,
           }).color,
-          theme.colorScheme.onSurfaceVariant,
-          reason: 'the field dims as a whole; the hint must not fade again',
+          isNot(theme.colorScheme.onSurfaceVariant),
+          reason: 'a disabled empty field keeps its placeholder at full ink',
         );
       });
 
@@ -236,8 +233,8 @@ void main() {
         );
         expect(
           theme.dialogTheme.titleTextStyle?.fontWeight,
-          FontWeight.w500,
-          reason: 'the dialog title is title-md — body large, 16/500 (D1)',
+          FontWeight.w600,
+          reason: 'the dialog title is back on Material 3 title-md',
         );
         expectSameRung(
           'dialogTheme.contentTextStyle',

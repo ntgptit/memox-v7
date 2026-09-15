@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 /// **Does any combination of states move a slot off its canonical role?**
 ///
@@ -98,19 +97,18 @@ void main() {
         holds('fill', fill, <Set<WidgetState>>[
           selected,
           selectedFocused,
-        ], scheme.primaryContainer);
-        // The handoff Chip rests on `surfaceContainer` since M100.92.
+        ], scheme.secondaryContainer);
         holds('fill', fill, <Set<WidgetState>>[
           resting,
           focused,
-        ], scheme.surfaceContainer);
+        ], scheme.surfaceContainerLow);
       });
 
       test('the label ink stays with its container in every combination', () {
         holds('label', label, <Set<WidgetState>>[
           selected,
           selectedFocused,
-        ], scheme.onPrimaryContainer);
+        ], scheme.onSecondaryContainer);
         holds('label', label, <Set<WidgetState>>[
           resting,
           focused,
@@ -125,29 +123,26 @@ void main() {
       Color? track(Set<WidgetState> s) => sw.trackColor!.resolve(s);
       Color? edge(Set<WidgetState> s) => sw.trackOutlineColor!.resolve(s);
 
-      test(
-        'off keeps surfaceBright on surfaceContainerHighest under focus',
-        () {
-          holds('thumb', thumb, <Set<WidgetState>>[
-            resting,
-            focused,
-          ], scheme.surfaceBright);
-          holds('track', track, <Set<WidgetState>>[
-            resting,
-            focused,
-          ], scheme.surfaceContainerHighest);
-          holds('trackOutline', edge, <Set<WidgetState>>[
-            resting,
-            focused,
-          ], Colors.transparent);
-        },
-      );
+      test('off keeps outline on surfaceContainerHighest under focus', () {
+        holds('thumb', thumb, <Set<WidgetState>>[
+          resting,
+          focused,
+        ], scheme.outline);
+        holds('track', track, <Set<WidgetState>>[
+          resting,
+          focused,
+        ], scheme.surfaceContainerHighest);
+        holds('trackOutline', edge, <Set<WidgetState>>[
+          resting,
+          focused,
+        ], scheme.outline);
+      });
 
       test('on keeps its pair, and the edge stays gone under focus', () {
         holds('thumb', thumb, <Set<WidgetState>>[
           selected,
           selectedFocused,
-        ], scheme.surfaceBright);
+        ], scheme.onPrimary);
         holds('track', track, <Set<WidgetState>>[
           selected,
           selectedFocused,
@@ -264,13 +259,12 @@ void main() {
         holds('side', side, <Set<WidgetState>>[focused], scheme.primary);
       });
 
-      // The brand as text, so its ink (M100.87) — see `m3_role_contract_test`.
-      test('the label is the brand ink in every state', () {
+      test('the label is primary in both', () {
         holds('foreground', fg, <Set<WidgetState>>[
           resting,
           focused,
           hovered,
-        ], theme.extension<AppSemanticColors>()!.accentInk);
+        ], scheme.primary);
       });
     });
 
@@ -379,7 +373,7 @@ void main() {
         ]) {
           expect(
             chipFill.resolve(state),
-            isNot(scheme.primaryContainer),
+            isNot(scheme.secondaryContainer),
             reason: '$mode: a disabled chip looks as live as an enabled one',
           );
           expect(

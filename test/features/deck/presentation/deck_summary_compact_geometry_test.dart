@@ -23,10 +23,8 @@ const double heroViewportCeiling = 0.22;
 /// **The defect this locks was reported as a picture, not as a value.** The
 /// panel answered four questions at once and stood 320px tall on a 393x852
 /// device — 37.6% of the viewport — which left one deck card whole above the
-/// bottom bar and half of a second. It measured 140px and 16.4% when this was
-/// written (104px since M100.89), and three cards were whole until the
-/// handoff's type roles left the third 3.4px under the bar — see the test
-/// below. Every number involved was a legitimate token; the bug lived in
+/// bottom bar and half of a second. It is 140px and 16.4% now, and three cards
+/// are whole. Every number involved was a legitimate token; the bug lived in
 /// the *sum* of five stacked bands, so only geometry after layout can see it.
 /// `getRect`, therefore, and not a widget finder.
 ///
@@ -35,7 +33,7 @@ const double heroViewportCeiling = 0.22;
 /// navigation bar covers the rest. An earlier pass measured without the shell,
 /// read three whole cards off it, and was wrong on a device by exactly that
 /// bar — the kind of confidently wrong figure the gallery rule exists to
-/// prevent. The count is taken here because the fold is where the bar starts.
+/// prevent. Three is true here because the fold is where the bar starts.
 void main() {
   /// The owner's reported figures: 15 due of which 8 missed their day, 46 new
   /// across 868 cards.
@@ -103,8 +101,9 @@ void main() {
     );
   });
 
-  testWidgets('two deck cards are whole above the bottom bar, the third all '
-      'but whole', (tester) async {
+  testWidgets('three deck cards are whole above the bottom bar', (
+    tester,
+  ) async {
     // **Three, and the 16px that bought the third one has changed hands.**
     // The first pass reached two whole cards and 89% of a third: the hero was
     // at its floor and the chrome had given back all it had. Folding the
@@ -128,14 +127,10 @@ void main() {
       (i) => tester.getRect(tiles.at(i)),
     );
 
-    // **Three whole again** (M100.91, closing PLAN-DEV-2.9). The handoff's
-    // type roles and card interior had left the third card 11.4px under the
-    // bar; the handoff's rows on one card, each without a gauge band or a
-    // Study button, give back more than that.
     expect(
       rects.where((r) => r.bottom <= fold).length,
       greaterThanOrEqualTo(3),
-      reason: 'three deck rows must be readable end to end without scrolling',
+      reason: 'three deck cards must be readable end to end without scrolling',
     );
   });
 

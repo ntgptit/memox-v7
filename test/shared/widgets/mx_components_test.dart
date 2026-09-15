@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -116,7 +115,7 @@ void main() {
       expect(size.width, greaterThanOrEqualTo(48));
     });
 
-    testWidgets('compact draws 36 and still hits 48', (tester) async {
+    testWidgets('compact draws 40 and still hits 48', (tester) async {
       // The size axis exists so the deck tile's chip-row verb could stop
       // hand-building a `FilledButton` — the geometry is only safe to share if
       // lowering the body cannot lower the target with it.
@@ -136,14 +135,14 @@ void main() {
 
       // What it paints: the Material inside the button. The outer box is the
       // wrong thing to measure — `padded` wraps it back up to the target, so
-      // asserting 36 there fails against the very mechanism under test.
+      // asserting 40 there fails against the very mechanism under test.
       final drawn = tester.getSize(
         find.descendant(
           of: find.byType(FilledButton),
           matching: find.byType(Material),
         ),
       );
-      expect(drawn.height, AppSizing.buttonCompact);
+      expect(drawn.height, 40);
 
       // What a finger gets: the padded outer box restores the floor.
       expect(
@@ -226,7 +225,7 @@ void main() {
   });
 
   group('MxFab', () {
-    testWidgets('label is painted and named; theme owns the look', (
+    testWidgets('label reaches tooltip and semantics; theme owns the look', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -242,13 +241,12 @@ void main() {
         ),
       );
 
-      // The handoff FAB is extended (M100.90): the label is on the button, so
-      // it is the accessible name too, and a tooltip would say it twice.
+      // One string, two jobs: the long-press tooltip and the accessible name
+      // of a control that paints no text of its own.
       final fab = tester.widget<FloatingActionButton>(
         find.byType(FloatingActionButton),
       );
-      expect(fab.tooltip, isNull);
-      expect(find.text('New deck'), findsOneWidget);
+      expect(fab.tooltip, 'New deck');
       expect(find.bySemanticsLabel('New deck'), findsOneWidget);
 
       // The wrapper passes no colour and no shape, so what renders is the
@@ -257,53 +255,8 @@ void main() {
       expect(fab.shape, isNull);
 
       final size = tester.getSize(find.byType(FloatingActionButton));
-      expect(size.height, AppSizing.fab);
-      expect(size.width, greaterThanOrEqualTo(AppSizing.touchTarget));
-    });
-
-    testWidgets('the longest label fits a 320x568 phone at textScale 2.0', (
-      tester,
-    ) async {
-      tester.view.physicalSize = const Size(320, 568);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-
-      // `deckCreateSubDeckAction` in Vietnamese: the longest label a screen
-      // gives the FAB.
-      const label = 'Bộ thẻ con mới';
-      await tester.pumpWidget(
-        host(
-          Builder(
-            builder: (context) => MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: const TextScaler.linear(2)),
-              child: Scaffold(
-                floatingActionButton: MxFab(
-                  icon: Icons.add,
-                  label: label,
-                  onPressed: () {},
-                ),
-                body: const SizedBox.shrink(),
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pump();
-
-      // Measured, not read off `takeException`: the SDK lays the extended
-      // FAB's row out unconstrained inside `_ChildOverflowBox` and centres it,
-      // so a label too long for the screen spills past both edges and raises
-      // no overflow error.
-      final fab = tester.getRect(find.byType(FloatingActionButton));
-      final text = tester.getRect(find.text(label));
-      expect(fab.left, greaterThanOrEqualTo(0));
-      expect(fab.right, lessThanOrEqualTo(320));
-      expect(text.left, greaterThanOrEqualTo(fab.left));
-      expect(text.right, lessThanOrEqualTo(fab.right));
-      expect(text.top, greaterThanOrEqualTo(fab.top));
-      expect(text.bottom, lessThanOrEqualTo(fab.bottom));
+      expect(size.height, greaterThanOrEqualTo(48));
+      expect(size.width, greaterThanOrEqualTo(48));
     });
   });
 
@@ -381,29 +334,6 @@ void main() {
   });
 
   group('MxEmptyState', () {
-    testWidgets('an empty state\'s second action is tonal, not outlined', (
-      tester,
-    ) async {
-      // D6 (Tokyo redesign): Outlined is dismiss, back, cancel, clear or leave;
-      // a second way *forward* beside the primary is the handoff's TonalButton.
-      await tester.pumpWidget(
-        host(
-          Scaffold(
-            body: MxEmptyState(
-              title: 'No decks',
-              actionLabel: 'Starter library',
-              onAction: () {},
-              secondaryActionLabel: 'New deck',
-              onSecondaryAction: () {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(OutlinedButton), findsNothing);
-      expect(find.byType(FilledButton), findsNWidgets(2));
-    });
-
     test('half an action is refused at construction', () {
       // Same trap, and the more likely of the two to be written: an empty state
       // whose whole purpose is the call to action, shipped with the label wired

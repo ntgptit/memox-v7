@@ -168,10 +168,10 @@ void main() {
       // rather than a lucky one.
       expect(
         badge.right,
-        closeTo(hero.right - AppSpacing.card, 1),
+        closeTo(hero.right - AppSpacing.lg, 1),
         reason: 'the badge left the trailing inset of the hero',
       );
-      expect(badge.left, greaterThan(hero.left + AppSpacing.card));
+      expect(badge.left, greaterThan(hero.left + AppSpacing.lg));
     }
   });
 
@@ -233,7 +233,7 @@ void main() {
             )
             .first,
       );
-      expect(badge.right, closeTo(hero.right - AppSpacing.card, 1));
+      expect(badge.right, closeTo(hero.right - AppSpacing.lg, 1));
       expect(tester.takeException(), isNull);
     }
   });

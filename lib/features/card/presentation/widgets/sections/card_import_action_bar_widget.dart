@@ -276,7 +276,7 @@ class CardImportActionBarWidget extends ConsumerWidget {
         return MxButtonPair(
           secondary: MxActionButton(
             label: l10n.cardImportAnotherAction,
-            variant: MxActionButtonVariant.tonal,
+            variant: MxActionButtonVariant.secondary,
             onPressed: onReset,
           ),
           primary: MxActionButton(

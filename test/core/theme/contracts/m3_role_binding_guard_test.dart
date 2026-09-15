@@ -34,14 +34,12 @@ void main() {
       final _SchemeRoles reads = _readsIn(binding);
       final Set<String> roles = reads.roles;
 
-      // **A slot that names an app token its row did not ask for is a
-      // substitute.** `primaryInk` passed every runtime pin while it stood in
-      // for `primary` (M100.27), because the two resolved to one value; only
-      // the source said which one the slot read. Since M100.87 a row may
-      // *require* a semantic token — the brand's ink for a text slot — and
-      // then that token, and only that one, is not a substitute.
+      // **A slot that names an app token instead of a scheme role is the
+      // substitute this file exists to refuse (M100.28).** `primaryInk` passed
+      // every runtime pin while it stood in for `primary`, because the two
+      // resolved to one value; only the source said which one the slot read.
       final Set<String> substitutes = reads.semanticReads.difference(
-        _allowedSemanticReads.union(binding.requiresSemantic.toSet()),
+        _allowedSemanticReads,
       );
       expect(
         substitutes,
@@ -60,16 +58,6 @@ void main() {
           reason:
               '${binding.component}.${binding.slot} no longer reads '
               '`scheme.$required`. ${binding.because}',
-        );
-      }
-
-      for (final String required in binding.requiresSemantic) {
-        expect(
-          reads.semanticReads,
-          contains(required),
-          reason:
-              '${binding.component}.${binding.slot} no longer reads '
-              '`semantic.$required`. ${binding.because}',
         );
       }
 
@@ -96,16 +84,11 @@ class RoleBinding {
     required this.requires,
     required this.refuses,
     required this.because,
-    this.requiresSemantic = const <String>[],
   });
 
   final String component;
   final String slot;
   final String file;
-
-  /// `semantic.<token>` reads the slot must perform — the brand's ink on a
-  /// text slot (M100.87). Empty for every role-only row.
-  final List<String> requiresSemantic;
 
   /// The declaration the slot lives in — a top-level function name, or
   /// `Type.method` for a method on an enum or class. The slot is then found

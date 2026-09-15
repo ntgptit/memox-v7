@@ -69,7 +69,7 @@ class MxLoadingState extends StatelessWidget {
     final Widget indicator = RepaintBoundary(
       child: switch (_shape) {
         _MxLoadingShape.inline => SizedBox.square(
-          dimension: AppIconSize.xs,
+          dimension: AppIconSize.sm,
           child: CircularProgressIndicator(
             strokeWidth: AppStroke.indicator,
             semanticsLabel: semanticsLabel,

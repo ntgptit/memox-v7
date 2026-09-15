@@ -34,9 +34,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // `mxScreenGutter`: 16 at every width since M100.89 — the same helper
-        // every other screen takes its gutter from.
-        const gutter = AppSpacing.lg;
+        // `mxScreenGutter`: `md` below 360dp, `lg` at or above it — the same
+        // helper every other screen takes its gutter from.
+        final gutter = size.width < 360 ? AppSpacing.md : AppSpacing.lg;
         final hero = tester.getRect(heroCard());
         final panel = tester.getRect(progressPanel());
         expect(hero.left, gutter);
@@ -83,9 +83,7 @@ void main() {
         expect(historyHeading.left, hero.left);
       });
 
-      testWidgets('the summary insets its content by the card interior', (
-        tester,
-      ) async {
+      testWidgets('the summary insets its content by one `lg`', (tester) async {
         await pumpCardDetail(
           tester,
           loaded(),
@@ -96,7 +94,7 @@ void main() {
 
         expect(
           tester.getRect(find.text('안녕하세요')).left,
-          tester.getRect(heroCard()).left + AppSpacing.card,
+          tester.getRect(heroCard()).left + AppSpacing.lg,
         );
       });
 
@@ -117,8 +115,8 @@ void main() {
         final panel = tester.getRect(progressPanel());
         // The track runs the full inner width, so its first and last steps sit
         // on the same edges as every other row of the panel.
-        expect(track.left, panel.left + AppSpacing.card);
-        expect(track.right, panel.right - AppSpacing.card);
+        expect(track.left, panel.left + AppSpacing.lg);
+        expect(track.right, panel.right - AppSpacing.lg);
 
         final steps = tester
             .widgetList<Container>(

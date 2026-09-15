@@ -6,7 +6,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// What on a deck row is a target, and what it opens.
+/// What on a deck card is a target, and what it opens.
 ///
 /// **The regression this pins.** Only the card's top band used to take the tap —
 /// the well, the name and the counts were wrapped in their own `InkWell` — so the
@@ -20,22 +20,23 @@ import 'support/fake_deck_repository.dart';
 void main() {
   final english = AppLocalizationsEn();
 
-  FakeDeckRepository serving() =>
-      FakeDeckRepository.withSummaries(<DeckSummary>[
-        fakeSummary(
-          id: 'deck-1',
-          name: 'Korean',
-          totalCardCount: 40,
-          // Both have to exist for the test to mean anything: the ring is drawn
-          // only when the deck has cards, and the due chip only when something
-          // is waiting.
-          dueCardCount: 5,
-          learnedCardCount: 10,
-        ),
-      ]);
+  FakeDeckRepository serving() => FakeDeckRepository.withSummaries(
+    <DeckSummary>[
+      fakeSummary(
+        id: 'deck-1',
+        name: 'Korean',
+        totalCardCount: 40,
+        // Both bands have to exist for the test to mean anything: the progress
+        // bar is drawn only when the deck has cards, and the due chip only when
+        // something is waiting.
+        dueCardCount: 5,
+        learnedCardCount: 10,
+      ),
+    ],
+  );
 
-  group('the deck row is one target', () {
-    testWidgets('its bottom edge opens the deck, not only its name', (
+  group('the deck card is one target', () {
+    testWidgets('its bottom band opens the deck, not only its top one', (
       tester,
     ) async {
       final repository = serving();

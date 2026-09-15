@@ -32,14 +32,12 @@ abstract final class AppSizing {
   /// `chip.dart:1493` and nothing here said so).
   static const double touchTarget = 48;
 
-  /// The handoff's compact button (`size-button-sm`): paints 36, and
-  /// `MaterialTapTargetSize.padded` restores [touchTarget] around it.
+  /// A control that draws smaller than the target it keeps.
   ///
-  /// The deck tile's Study verb is the case it encoded first: a button living
-  /// in a row of chips and gauges rather than in an action bar, so the body
-  /// comes down and the finger's floor does not. It painted 40 as
-  /// `controlCompact` (owner review, 2026-08-20) until M100.90 moved it to the
-  /// handoff's value.
+  /// The deck tile's Study verb is the case it encodes: a button living in a
+  /// row of chips and gauges rather than in an action bar. It paints 40 and
+  /// `MaterialTapTargetSize.padded` restores [touchTarget] around it, so the
+  /// body comes down and the finger's floor does not.
   ///
   /// **Two heights, not a five-rung ladder.** 32 / 40 / 48 / 56 / 64 is the
   /// usual control scale and this app renders two of them; the other three
@@ -47,15 +45,10 @@ abstract final class AppSizing {
   /// the unrendered component themes in `app_theme.dart` already follow. It was a
   /// private `_kCompactHeight` in `mx_action_button.dart` until M100.30 — the
   /// one control dimension the design system could not see.
-  static const double buttonCompact = 36;
-
-  /// The handoff icon button's painted circle (`size-icon-btn`). The target
-  /// around it is still [touchTarget]: expand the hit area, never the ink.
-  static const double iconButtonInk = 36;
+  static const double controlCompact = 40;
 
   /// The dense tier — a chip's content box, the compact breadcrumb line, the
-  /// 32 dp icon well beside a metric. The catalog row led with one too until
-  /// it took the handoff's `MxIconTile` (M100.91).
+  /// 32 dp icon well beside a metric or a catalog row.
   ///
   /// **One owner for a number that had five spellings** (A20.1 P2-12):
   /// `app_chip_theme._containerHeight`, `MxBreadcrumb.compactLineHeight`,
@@ -69,48 +62,26 @@ abstract final class AppSizing {
   /// The scrollbar's thumb — Material's own 4, stated (A20.1 P3-09).
   static const double scrollbarThickness = 4;
 
-  /// The handoff's list row: 48 MINIMUM, grows with content. Text is never
-  /// clipped to hold it.
+  /// The one-line reading or control row — `ListTile`'s own 56, stated.
   ///
-  /// **It was 56 until M100.91** — Material's `_defaultTileHeight`, stated at
-  /// M100.36 4J on the argument that a list the eye reads down wants more than
-  /// a finger's floor. The Tokyo handoff's ListRow and SettingsTile set the
-  /// row at the touch floor and let content grow it, and the redesign follows
-  /// the kit. A two-line row still grows past it.
-  static const double rowMinHeight = 48;
+  /// **A row is not a button** (M100.36 4J). [touchTarget] is the floor a
+  /// finger needs; a list the eye reads down wants more than the floor, and
+  /// Material's `_defaultTileHeight` gives it 56 for one line, 72 for two.
+  /// The number was Flutter's and nobody's here (#431 P2-1) — the kit says 48
+  /// for a desktop tile, and the app had been rendering 56 + 4 + 4 without a
+  /// token to say so. A *minimum*: a two-line row grows past it, and text is
+  /// never clipped to hold it. Compact mode keeps it; 48 is reserved for
+  /// controls that are only a target.
+  static const double rowMinHeight = 56;
 
-  /// Where a row divider starts when the rows lead with a tile (handoff
-  /// Divider `indent 0 / 56`): past the leading column, under the text. It is
-  /// under the text only because `lg` + [iconTileSm] + `md` add up to it —
-  /// the sum `app_sizing_test` pins (UI audit P2, M100.91).
-  static const double listDividerIndent = 56;
-
-  /// Handoff MasteryRing extent (`40×3px`). A painted mark, not a control: the
-  /// row it sits in carries the target, so no 48 floor applies.
-  static const double masteryRing = 40;
-
-  /// The handoff text and search field height (`size-input`): a MINIMUM —
-  /// large text grows it (M100.92).
-  static const double input = 52;
-
-  /// A multi-line field's minimum (handoff TextField, multiline state): the
-  /// shell drops to 40 and its text wraps instead of truncating.
-  static const double inputMultilineMin = 40;
-
-  /// Handoff Switch geometry (FIXED): a 44 × 26 track and a 20 thumb, 3 in
-  /// from the track's edge. A painted mark: the row around it carries the 48
-  /// target (`MxSwitchRow`).
-  static const double switchTrackWidth = 44;
-  static const double switchTrackHeight = 26;
-  static const double switchThumb = 20;
-  static const double switchThumbInset = 3;
-
-  /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
+  /// Material's floating action button, which declares no public constant for
+  /// its own size.
   ///
-  /// It was Material's 56 circle as `floatingAction` until M100.90; the kit has
-  /// no circular variant. The FAB theme sizes the button from it, and
-  /// `AppSpacing.fabScrollClearance` derives the list's tail from it.
-  static const double fab = 52;
+  /// Read only to derive clearances — `AppSpacing.fabScrollClearance` — and
+  /// never to size a FAB: `FloatingActionButton` sizes itself, and a widget
+  /// that restated this number would be a second answer able to drift from the
+  /// SDK's.
+  static const double floatingAction = 56;
 
   /// The narrowest a button is allowed to be, label notwithstanding.
   ///
@@ -136,10 +107,4 @@ abstract final class AppSizing {
   /// ladder asks for, and `app_sizing_test` holds it to the 4dp grid with the
   /// rest.
   static const double statusDot = 8;
-
-  /// Handoff IconTile extents — a row's tinted leading square. Painted marks,
-  /// not controls: the row carries the target, so no 48 floor applies.
-  static const double iconTileSm = 28;
-  static const double iconTileMd = 36;
-  static const double iconTileLg = 44;
 }

@@ -104,15 +104,13 @@ void main() {
     });
 
     test('a colour that is neither is reported, but does not block', () {
-      // A fuchsia: no token in this palette is near it and no pair of them
+      // A teal-green: no token in this palette is near it and no pair of them
       // blends to it. It was an orange-brown until M100.32, when `warning` was
-      // retuned a step darker and the old fixture fell *inside* the closure,
-      // and a teal-green until M100.91, when the handoff's `mastery`
-      // (#1F8A5B) landed beside it. Both times the rule stopped reporting and
-      // this self-test caught it. The fixture is the thing that has to be
-      // outside; the rule was right every time.
+      // retuned a step darker and the old fixture fell *inside* the closure —
+      // so the rule stopped reporting and this self-test caught it. The fixture
+      // is the thing that has to be outside; the rule was right both times.
       final findings = closureOn(
-        paintOf(const Color(0xFFA21CAF), source: PaintSource.raster),
+        paintOf(const Color(0xFF1F7A5A), source: PaintSource.raster),
       );
 
       expect(findings, hasLength(1));
@@ -198,35 +196,5 @@ void main() {
       expect(findings, hasLength(1));
       expect(findings.first.message, contains('below 3.0'));
     });
-
-    test(
-      'an accepted pair holds its own floor, and only on its own ground',
-      () {
-        const edge = Color(0xFFB0B0B0); // 2.17:1 on white
-        List<AuditFinding> blocking(
-          Map<(int, int), double> floors,
-        ) => runAuditRules(
-          auditOf(<AuditPaint>[
-            paintOf(edge, source: PaintSource.declared, role: PaintRole.border),
-            background,
-          ]),
-          <AuditRule>[
-            NonTextContrastRule(const <Color>[edge], acceptedFloors: floors),
-          ],
-        ).where((finding) => finding.isBlocking).toList();
-
-        final onWhite = (edge.toARGB32(), white.toARGB32());
-        expect(blocking(<(int, int), double>{onWhite: 2.1}), isEmpty);
-        // Sunk below the figure it was accepted at: it blocks again.
-        expect(blocking(<(int, int), double>{onWhite: 2.3}), hasLength(1));
-        // Accepted on another ground only: this ground still owes 3:1.
-        expect(
-          blocking(<(int, int), double>{
-            (edge.toARGB32(), black.toARGB32()): 2.1,
-          }),
-          hasLength(1),
-        );
-      },
-    );
   });
 }

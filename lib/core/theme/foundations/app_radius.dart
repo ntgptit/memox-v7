@@ -1,27 +1,25 @@
-/// Corner radii — the handoff's radius roles, on the handoff's names.
+/// Corner radii.
+///
+/// Restrained on purpose: this is a study tool for adults at work, and heavily
+/// rounded surfaces read as playful rather than focused.
 abstract final class AppRadius {
-  /// Badge, micro surface.
-  static const double xs = 4;
-
-  /// Small tile, icon tile.
+  /// Chips, badges, small indicators.
   static const double sm = 8;
 
-  /// Button, input.
+  /// Buttons and inputs.
   static const double md = 12;
 
-  /// FAB.
+  /// Cards and sheets.
   static const double lg = 16;
 
-  /// Card, dialog, the bottom sheet's top corners — the roomiest common
-  /// surface (D12: the Dialog and BottomSheet specs name 20 over 16 and 24).
-  static const double card = 20;
+  /// The study card, which is the one surface a whole screen is built around.
+  ///
+  /// **Four pixels above [lg], and it is the only thing at this radius.** A card
+  /// filling the screen reads tighter than the same corner does on a list row,
+  /// so the focal surface gets its own step rather than every card getting a
+  /// softer one.
+  static const double xl = 20;
 
-  /// The handoff's `radius-xl`.
-  static const double xl = 24;
-
-  /// A large focal surface.
-  static const double xxl = 28;
-
-  /// Pill — chip, avatar, toggle track.
-  static const double full = 999;
+  /// Fully rounded, for pill-shaped controls.
+  static const double pill = 999;
 }

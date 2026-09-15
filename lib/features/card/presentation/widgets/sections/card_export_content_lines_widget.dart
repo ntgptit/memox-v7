@@ -62,7 +62,7 @@ class CardExportContentLinesWidget extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const MxIcon(Icons.info_outline, size: MxIconSize.xs),
+              const MxIcon(Icons.info_outline, size: MxIconSize.sm),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

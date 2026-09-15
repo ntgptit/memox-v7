@@ -139,11 +139,11 @@ void main() {
     // untended or third-party one degrades on-palette. `app_theme.dart` names
     // each of these where it sets them.
     'cardTheme': 'safety net for a bare `Card`; MxCard paints itself',
-    'switchTheme': 'safety net for a bare `Switch`; MxSwitch paints itself',
     // The waiting room. Every entry here is justified in
     // `app_planned_themes.dart`, and this list is what stops it growing.
     'datePickerTheme': 'planned — reminder date, deferred history range',
     'segmentedButtonTheme': 'planned — deferred progress range switch',
+    'sliderTheme': 'planned — SM-2 parameters, deferred in CLAUDE.md',
     'tabBarTheme': 'planned — deferred card History view',
   };
 
@@ -178,12 +178,8 @@ void main() {
       // and `showModalBottomSheet<bool>(` are how these are actually written,
       // and a name-then-paren pattern misses every generic call site — which
       // reported the radio and the bottom sheet as unrendered while both were
-      // on screen. The optional `.named` is the same bug for a named
-      // constructor: `FloatingActionButton.extended(` is the only FAB the app
-      // builds since M100.90.
-      final call = RegExp(
-        '(?<![A-Za-z0-9_])$name(\\.[a-z][A-Za-z0-9_]*)?\\s*(<[^()]*>)?\\s*\\(',
-      );
+      // on screen.
+      final call = RegExp('(?<![A-Za-z0-9_])$name\\s*(<[^()]*>)?\\s*\\(');
       if (sources.any(call.hasMatch)) found.add(name);
     }
 
@@ -306,18 +302,16 @@ void main() {
     // widget it is known not to build is not.
     final rendered = renderedNames();
 
-    // OLD ASSERTION: `SwitchListTile` — `MxSwitchRow` built one (A20.1
-    // P2-13).
-    // WHY IT WAS WRONG: since M100.92 the row paints `MxSwitch`, and no
-    // hand-written file builds a Material switch at all.
-    // NEW CONTRACT: the scan sees the chip every pill is built from.
-    // AUTHORITY: M100.92 (handoff Switch); `ChoiceChip(` is what
-    // `lib/shared/widgets/mx_pill_button.dart` constructs, pinned by
-    // `mx_pill_button_construction_test.dart`.
+    // OLD ASSERTION: `Switch` — the reminder toggle built a bare one.
+    // WHY IT WAS WRONG: `MxSwitchRow` is a `SwitchListTile` since A20.1
+    // P2-13 (one state channel), and no hand-written file builds a `Switch`.
+    // NEW CONTRACT: the scan sees the tile the app actually draws.
+    // FLUTTER-A20.1 AUTHORITY: A20.1 P2-13; `SwitchListTile` is the
+    // widget `lib/shared/widgets/mx_switch_row.dart` constructs.
     expect(
       rendered,
-      contains('ChoiceChip'),
-      reason: 'every MxPillButton builds one — the scan is broken',
+      contains('SwitchListTile'),
+      reason: 'the reminder toggle builds one — the scan is broken',
     );
     expect(
       rendered,

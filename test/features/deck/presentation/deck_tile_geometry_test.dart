@@ -1,23 +1,21 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_icon_area_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_workload_line_widget.dart';
-import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:flutter/material.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_study_button_widget.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
-import 'package:memox/shared/widgets/mx_card.dart';
-import 'package:memox/shared/widgets/mx_icon_button.dart';
-import 'package:memox/shared/widgets/mx_icon_tile.dart';
-import 'package:memox/shared/widgets/mx_mastery_ring.dart';
-import 'package:memox/shared/widgets/mx_row_group.dart';
+import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// The row's geometry contracts, measured — split from
+/// The tile's geometry contracts, measured — split from
 /// `deck_tile_counts_test.dart` at the 400-line guard, and the seam is real:
 /// that file asks *what* each state shows, this one asks *where* it stands.
 ///
@@ -25,19 +23,8 @@ import 'support/fake_deck_repository.dart';
 /// re-split of a padding or a copied dimension fails as arithmetic rather than
 /// surviving as a quietly different screen.
 void main() {
-  final english = AppLocalizationsEn();
-
   Finder onTile(Finder matching) =>
       find.descendant(of: find.byType(DeckTileWidget), matching: matching);
-
-  DeckSummary nouns() => fakeSummary(
-    id: 'd1',
-    name: 'Nouns',
-    totalCardCount: 60,
-    newCardCount: 14,
-    dueCardCount: 7,
-    learnedCardCount: 22,
-  );
 
   Future<void> pump(WidgetTester tester, DeckSummary summary) => pumpDeckScreen(
     tester,
@@ -45,16 +32,35 @@ void main() {
     screen: const DeckListScreen(),
   );
 
-  group('the row grid', () {
-    testWidgets('the text column keeps one rhythm: name, cards, counts', (
+  group('the tile grid', () {
+    testWidgets('the block keeps one rhythm: title, metadata and workload', (
       tester,
     ) async {
       // All three lines live in one column, and each line break is the same
       // step. Measured on the real text boxes, so a stray floor, padding or
-      // alignment cannot quietly stretch one seam past the other. The pair is
-      // asserted against each other first and against the token second.
-      await pump(tester, nouns());
+      // alignment cannot quietly stretch one seam past the other.
+      //
+      // **`sm` since M100.79, and the guard's subject did not move.** What it
+      // has always held is that the two seams are *equal* — one rhythm, not
+      // two — and the token is the consequence. The brief of 2026-09-10 asked
+      // for the identity block to read as three kinds of fact rather than one
+      // paragraph with breaks in it, and 4 was below the step this system asks
+      // anyone to see. So the pair is asserted against each other first and
+      // against the token second: swapping to a single hard-coded 8 would have
+      // let one seam drift while the other stayed.
+      await pump(
+        tester,
+        fakeSummary(
+          id: 'd1',
+          name: 'Nouns',
+          totalCardCount: 60,
+          newCardCount: 14,
+          dueCardCount: 7,
+          learnedCardCount: 22,
+        ),
+      );
 
+      final english = AppLocalizationsEn();
       final title = tester.getRect(find.text('Nouns'));
       final meta = tester.getRect(
         onTile(find.text(english.deckCardCountLabel(60))),
@@ -66,104 +72,44 @@ void main() {
         workload.top - meta.bottom,
         reason: 'one rhythm, whatever the step is',
       );
-      expect(meta.top - title.bottom, AppSpacing.xs);
+      expect(meta.top - title.bottom, AppSpacing.sm);
     });
 
-    testWidgets('tile, text, ring and overflow stand on the handoff grid', (
-      tester,
-    ) async {
-      await pump(tester, nouns());
-
-      final row = tester.getRect(find.byType(DeckTileWidget));
-      final tile = tester.getRect(onTile(find.byType(MxIconTile)));
-      final title = tester.getRect(find.text('Nouns'));
-      final ring = tester.getRect(onTile(find.byType(MxMasteryRing)));
-      final overflow = tester.getRect(onTile(find.byType(MxIconButton)));
-
-      expect(tile.left - row.left, AppSpacing.lg);
-      // The small tile: with the 16 inset and the 12 gap it is the one step
-      // that puts the text on the handoff's 56 hairline (UI audit P2).
-      expect(tile.size, const Size.square(AppSizing.iconTileSm));
-      // The text column starts one `md` past the tile, and every line of it
-      // on that one axis.
-      expect(title.left - tile.right, AppSpacing.md);
-      expect(
-        tester.getRect(find.byType(DeckWorkloadLineWidget)).left,
-        title.left,
-      );
-      expect(ring.size, const Size.square(AppSizing.masteryRing));
-      // `xs` at the end: 4 + the overflow's own 12 inset puts its glyph on
-      // the 16 gutter.
-      expect(row.right - overflow.right, AppSpacing.xs);
-      // Centred on the row, not hung from its top.
-      expect(tile.center.dy, moreOrLessEquals(row.center.dy, epsilon: 0.5));
-      expect(ring.center.dy, moreOrLessEquals(row.center.dy, epsilon: 0.5));
-    });
-
-    testWidgets('the row stands at least 48, and its overflow is a 48 target', (
-      tester,
-    ) async {
-      // The shortest row there is: no cards, so no ring.
-      await pump(tester, fakeSummary(id: 'd1', name: 'Brand new'));
-
-      expect(
-        tester.getSize(find.byType(DeckTileWidget)).height,
-        greaterThanOrEqualTo(AppSizing.rowMinHeight),
-      );
-      final overflow = tester.getSize(onTile(find.byType(MxIconButton)));
-      expect(overflow.width, greaterThanOrEqualTo(AppSizing.touchTarget));
-      expect(overflow.height, greaterThanOrEqualTo(AppSizing.touchTarget));
-    });
-
-    testWidgets('a level is one card, its rows split by hairlines at the '
-        'leading inset', (tester) async {
-      await pumpDeckScreen(
+    testWidgets('the workload line shares the title axis; the gauge keeps '
+        'the full content width', (tester) async {
+      // Option 1A: identity, metadata and workload all start on one vertical
+      // axis — the eye reads down a single column instead of jumping back to
+      // the card edge — while the progress row below stays at the content
+      // gutter, because a shortened gauge changes what it appears to measure.
+      await pump(
         tester,
-        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
-          nouns(),
-          fakeSummary(id: 'd2', name: 'Verbs', totalCardCount: 8),
-          fakeSummary(id: 'd3', name: 'Kanji', totalCardCount: 3),
-        ]),
-        screen: const DeckListScreen(),
+        fakeSummary(
+          id: 'd1',
+          name: 'Nouns',
+          totalCardCount: 60,
+          newCardCount: 14,
+          dueCardCount: 7,
+          learnedCardCount: 22,
+        ),
       );
 
-      final group = find.byType(MxRowGroup);
-      expect(group, findsOneWidget);
-      expect(
-        find.ancestor(of: group, matching: find.byType(MxCard)),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(of: group, matching: find.byType(DeckTileWidget)),
-        findsNWidgets(3),
-      );
+      final titleLeft = tester.getRect(find.text('Nouns')).left;
+      final workloadLeft = tester
+          .getRect(find.byType(DeckWorkloadLineWidget))
+          .left;
+      final well = tester.getRect(find.byType(DeckIconArea));
+      final gauge = tester.getRect(onTile(find.byType(MxProgressBar)));
 
-      final hairlines = find.descendant(
-        of: group,
-        matching: find.byType(Divider),
-      );
-      expect(hairlines, findsNWidgets(2), reason: 'none after the last row');
+      expect(workloadLeft, titleLeft, reason: 'one axis for the text column');
+      // The indent is derived, not copied: the well's edge plus the header's
+      // gap beside it.
+      expect(workloadLeft - well.left, DeckIconArea.dimension + AppSpacing.md);
       expect(
-        tester.widget<Divider>(hairlines.first).indent,
-        AppSizing.listDividerIndent,
+        gauge.left,
+        well.left,
+        reason: 'the gauge starts at the content gutter, not the text axis',
       );
-      // **The hairline starts under the text, not under the tile** (UI audit
-      // P2, M100.91). Pinned on the laid-out name, so a tile or inset that
-      // moves alone pulls the two apart here.
-      expect(
-        tester.getRect(find.text('Verbs')).left,
-        tester.getRect(hairlines.first).left + AppSizing.listDividerIndent,
-      );
-      // Nothing between two rows but the hairline.
-      final hairline = tester.getRect(hairlines.first);
-      expect(
-        hairline.top,
-        tester.getRect(find.byType(DeckTileWidget).at(0)).bottom,
-      );
-      expect(
-        tester.getRect(find.byType(DeckTileWidget).at(1)).top,
-        hairline.bottom,
-      );
+      expect(workloadLeft - gauge.left, DeckIconArea.dimension + AppSpacing.md);
     });
   });
 
@@ -172,8 +118,21 @@ void main() {
     /// The rule is the owner's and it is worth a test rather than a comment:
     /// the values that broke it — a 6px track, an 11/14 inset — each arrived
     /// as a local optical fix, and a local fix is invisible to the next one.
-    testWidgets('the chip and the path line land on it', (tester) async {
-      await pump(tester, nouns());
+    testWidgets('the chip, the verb and the path line all land on it', (
+      tester,
+    ) async {
+      final english = AppLocalizationsEn();
+      await pump(
+        tester,
+        fakeSummary(
+          id: 'd1',
+          name: 'Nouns',
+          totalCardCount: 60,
+          newCardCount: 14,
+          dueCardCount: 7,
+          learnedCardCount: 22,
+        ),
+      );
 
       final chip = tester
           .getRect(
@@ -186,6 +145,12 @@ void main() {
           )
           .height;
       expect(chip, 24, reason: 'due chip: 8 across, 24 tall');
+
+      // The painted button is 40; the hit area is the touch floor, which
+      // `MaterialTapTargetSize.padded` adds around it.
+      final study = tester.getSize(find.byType(DeckStudyButtonWidget));
+      expect(study.height, AppSizing.touchTarget);
+      expect(study.width, greaterThanOrEqualTo(80));
 
       // The root header has no path — it states the level's figures — so the
       // line itself is measured one level in, by `deck_path_test.dart`.
@@ -214,6 +179,7 @@ void main() {
         textScale: 2,
       );
 
+      final english = AppLocalizationsEn();
       expect(
         onTile(find.text(english.deckTileDueChipLabel(7))),
         findsOneWidget,
@@ -222,17 +188,8 @@ void main() {
         onTile(find.text(english.deckTileNewChipLabel(14))),
         findsOneWidget,
       );
-      expect(onTile(find.byType(MxMasteryRing)), findsOneWidget);
-      expect(onTile(find.byType(MxIconButton)), findsOneWidget);
+      expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
       expect(tester.takeException(), isNull);
-
-      // One inset on every width: the row no longer steps its gutter down
-      // below the compact breakpoint the way the card did (M100.91).
-      expect(
-        tester.getRect(onTile(find.byType(MxIconTile))).left -
-            tester.getRect(find.byType(DeckTileWidget)).left,
-        AppSpacing.lg,
-      );
 
       // No separators left to strand: each count has its own ground.
       expect(
@@ -243,60 +200,5 @@ void main() {
         findsNothing,
       );
     });
-  });
-
-  group('the row across the matrix (UI re-audit, M100.91)', () {
-    // Vietnamese at 360–412 is `deck_text_fit_test`'s: it renders the real
-    // root list in `vi` and fails on any cut word. This group holds the
-    // geometry the fix put in place where that gate does not reach.
-    List<DeckSummary> three() => <DeckSummary>[
-      nouns(),
-      fakeSummary(
-        id: 'd2',
-        name: 'A deck with a deliberately long name that wraps',
-        totalCardCount: 8,
-        dueCardCount: 3,
-      ),
-      fakeSummary(id: 'd3', name: 'Kanji', totalCardCount: 3),
-    ];
-
-    for (final (String label, Size surface, double scale)
-        in <(String, Size, double)>[
-          ('320 x 2.0', const Size(320, 640), 2),
-          ('412', const Size(412, 915), 1),
-          ('landscape', const Size(852, 393), 1),
-        ]) {
-      testWidgets('$label: rows fit, text on the hairline, 48 targets', (
-        tester,
-      ) async {
-        await pumpDeckScreen(
-          tester,
-          repository: FakeDeckRepository.withSummaries(three()),
-          screen: const DeckListScreen(),
-          surface: surface,
-          textScale: scale,
-        );
-
-        expect(tester.takeException(), isNull);
-        final group = find.byType(MxRowGroup);
-        expect(group, findsOneWidget);
-        final hairline = tester.getRect(
-          find.descendant(of: group, matching: find.byType(Divider)).first,
-        );
-        expect(
-          tester.getRect(find.text('Nouns')).left,
-          hairline.left + AppSizing.listDividerIndent,
-        );
-        for (final element
-            in find
-                .descendant(of: group, matching: find.byType(MxIconButton))
-                .evaluate()) {
-          expect(
-            element.size!.height,
-            greaterThanOrEqualTo(AppSizing.touchTarget),
-          );
-        }
-      });
-    }
   });
 }

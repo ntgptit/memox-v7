@@ -125,10 +125,6 @@ class DeckWorkloadLineWidget extends StatelessWidget {
 /// today's reviews, and `surfaceMuted` for new — new is **not** a warning, and
 /// the blue it used to wear was the only place in the app where a metric read
 /// as a link.
-/// The workload chip's height on the owner's 4px grid
-/// (`deck_tile_geometry_test.dart`).
-const double _chipMinHeight = 24; // off-scale: a control height, not a gap
-
 class _WorkloadChip extends StatelessWidget {
   const _WorkloadChip({
     required this.label,
@@ -147,29 +143,20 @@ class _WorkloadChip extends StatelessWidget {
         color: fill,
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
-      // **A 24 floor with the label centred, not a 4 inset each way.** The
-      // inset added up to 24 only while the caption's line was 16; at the
-      // handoff's 1.4 leading it is 16.8 and the chip came out 25, off the
-      // owner's 4px grid (M100.89). A floor rather than a height, so a scaled
-      // label still grows the chip instead of clipping.
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: _chipMinHeight),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          child: Align(
-            widthFactor: 1,
-            heightFactor: 1,
-            child: Text(
-              label,
-              style: context.texts.bodySmall!.inked(
-                context,
-                ink,
-                isEmphasized: true,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        child: Text(
+          label,
+          style: context.texts.bodySmall!.inked(
+            context,
+            ink,
+            isEmphasized: true,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

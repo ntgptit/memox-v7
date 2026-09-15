@@ -5,7 +5,6 @@ import 'package:memox/features/search/domain/models/search_result_model.dart';
 import 'package:memox/features/search/presentation/widgets/items/card_result_tile_widget.dart';
 import 'package:memox/features/search/presentation/widgets/items/deck_result_tile_widget.dart';
 import 'package:memox/features/search/presentation/widgets/sections/search_group_header_widget.dart';
-import 'package:memox/shared/widgets/mx_row_group.dart';
 
 import 'support/fake_library_search_repository.dart';
 import 'support/search_screen_harness.dart';
@@ -39,7 +38,9 @@ void main() {
     ('393', Size(393, 852)),
   ]) {
     group('the result list keeps the app\'s rhythm — $label', () {
-      testWidgets('two rows of one group meet at one hairline', (tester) async {
+      testWidgets('two rows of one group are a list-item gap apart', (
+        tester,
+      ) async {
         await pumpSearchScreen(
           tester,
           repository: FakeLibrarySearchRepository.serving(
@@ -64,20 +65,13 @@ void main() {
             .toList();
 
         expect(rows, hasLength(2));
-        // **Rows on one card since M100.91** (handoff ListRow): the item gap
-        // that was `lg` between two cards is the group's hairline now, and
-        // nothing else sits between two results.
-        final double hairline = tester
-            .getSize(
-              find
-                  .descendant(
-                    of: find.byType(MxRowGroup).last,
-                    matching: find.byType(Divider),
-                  )
-                  .first,
-            )
-            .height;
-        expect(rows[1].top - rows[0].bottom, hairline);
+        expect(
+          rows[1].top - rows[0].bottom,
+          AppSpacing.lg,
+          reason:
+              'the row carries a 12dp vertical inset of its own, so at sm the '
+              'space between two rows was tighter than the space inside one',
+        );
       });
 
       testWidgets('the break between the two groups is a section gap', (

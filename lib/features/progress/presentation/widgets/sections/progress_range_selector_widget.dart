@@ -37,13 +37,8 @@ class ProgressRangeSelectorWidget extends StatelessWidget {
     return Semantics(
       container: true,
       label: context.l10n.progressRangeSelectorSemanticLabel,
-      // **A `Wrap`, not a `Row`.** Two pills in a row fit the 296 a 320dp
-      // screen had inside a 12 gutter; inside the handoff's 16 (M100.89) the
-      // row has 288, and at text scale 2.0 the pair wanted 1.6px more. The
-      // second pill takes the next line instead of the pair clipping.
-      child: Wrap(
+      child: Row(
         spacing: AppSpacing.sm,
-        runSpacing: AppSpacing.sm,
         children: <Widget>[
           for (final ProgressRange option in ProgressRange.values)
             MxPillButton(

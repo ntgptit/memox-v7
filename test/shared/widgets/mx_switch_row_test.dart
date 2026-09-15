@@ -12,9 +12,8 @@ import 'package:memox/shared/widgets/mx_switch_row.dart';
 /// (`value: 'On'`) on a switch that also carried `toggled`, and the label was
 /// "the tap target for nothing". WHY WRONG: two channels for one state — a
 /// reader heard "On, switch, on" (A19-19). NEW CONTRACT: the row is a
-/// one merged node — its name is the label, its state is the toggle, and
-/// the whole row toggles; drawn as `MxSwitch` since M100.92. AUTHORITY: A20.1
-/// P2-13.
+/// `SwitchListTile` — its name is the label, its state is the toggle, and
+/// the whole row toggles. AUTHORITY: A20.1 P2-13.
 /// The toggle state, on the node or on the switch node beneath it.
 Tristate _toggledIn(SemanticsNode node) {
   var found = node.flagsCollection.isToggled;
@@ -55,10 +54,11 @@ void main() {
       MxSwitchRow(label: 'Reminders', isOn: true, onChanged: (_) {}),
     );
 
-    final node = tester.getSemantics(find.byType(MxSwitchRow));
+    final node = tester.getSemantics(find.byType(SwitchListTile));
     expect(node.label, contains('Reminders'));
-    // `MergeSemantics` folds the label and the toggle into the row's one
-    // node, and the painted switch is excluded. One name, one state.
+    // Flutter 3.44's `SwitchListTile` keeps the switch's own node under the
+    // named tile — `MergeSemantics` folds the name onto the tile and leaves
+    // the toggle where the platform reads a toggle. One name, one state.
     expect(_toggledIn(node), Tristate.isTrue);
     expect(node.value, isEmpty, reason: 'a second state channel');
     expect(_valuesIn(node), everyElement(isEmpty), reason: 'no "On" text');
@@ -83,7 +83,7 @@ void main() {
       tester,
       const MxSwitchRow(label: 'Reminders', isOn: true, onChanged: null),
     );
-    final node = tester.getSemantics(find.byType(MxSwitchRow));
+    final node = tester.getSemantics(find.byType(SwitchListTile));
     expect(node.flagsCollection.isEnabled, Tristate.isFalse);
     handle.dispose();
   });

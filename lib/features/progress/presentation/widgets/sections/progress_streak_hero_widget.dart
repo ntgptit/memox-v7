@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/typography/app_typography.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -110,14 +111,12 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                       // property the extremes test reads off the render
                       // object is only populated once something states it.
                       textScaler: MediaQuery.textScalerOf(context),
-                      // The headline role at its own 700 (D1). It was this rung
-                      // re-weighted to the hero numeral's 700 while the rung
-                      // was lighter; restating a weight now would only pin it
-                      // against the OS bold-text setting.
-                      style: texts.headlineMedium!.inked(
-                        context,
-                        AppInk.stated,
-                      ),
+                      // The one weight a feature adds, by its name: the hero
+                      // numeral's (A20.1 P1-10).
+                      style: AppTypography.withWeight(
+                        texts.headlineMedium!,
+                        AppTypography.heroNumeralWeight,
+                      ).inked(context, AppInk.stated),
                     ),
                   ),
                 ],

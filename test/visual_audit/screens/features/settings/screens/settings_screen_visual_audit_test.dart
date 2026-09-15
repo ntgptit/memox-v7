@@ -67,13 +67,7 @@ void main() {
         // `settings_reset_test.dart` still drives it end to end through
         // `ensureVisible`, and its ink and shape are the same two nodes the
         // save button's allowances above already describe.
-        //
-        // **Eight again, and the reset link is the one that came back.**
-        // M100.91's 48 rows and 20 card interior left the screen shorter on
-        // net, so the link's top edge is inside the 1040 viewport once more.
-        // Measured, not inferred: putting `rowMinHeight` back to 56 and the
-        // standard card padding back to 16 restores seven.
-        expectedMatches: 8,
+        expectedMatches: 7,
         rationale:
             'Material ink layers. Splash and highlight are painted onto '
             'Material, so no render object carries them; the overlay colours '
@@ -122,13 +116,11 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        // Six since M100.91: the reset link is back on surface — see the ink
-        // layers above.
-        expectedMatches: 6,
+        expectedMatches: 5,
         rationale:
             'A clip with no painter: the card-limit field, the three radio '
-            'groups, the daily-reminder row and the reset link each clip '
-            'through a CustomPaint with no painter of its own.',
+            'groups and the daily-reminder row each clip through a CustomPaint '
+            'with no painter of its own.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',

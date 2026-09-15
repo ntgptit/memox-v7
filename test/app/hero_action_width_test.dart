@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/foundations/app_breakpoints.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
@@ -101,7 +100,7 @@ void main() {
 
       expect(
         width,
-        lessThan(referenceWidth - 2 * AppSpacing.lg - 2 * AppSpacing.card),
+        lessThan(referenceWidth - 32 - 32),
         reason:
             'The Library hero primary is filling its card at $referenceWidth. '
             'Either the rule was removed, or the LayoutBuilder moved inside the '
@@ -113,10 +112,7 @@ void main() {
     testWidgets('Study Home', (tester) async {
       final width = await primaryWidth(tester, studyHero(), referenceWidth);
 
-      expect(
-        width,
-        lessThan(referenceWidth - 2 * AppSpacing.lg - 2 * AppSpacing.card),
-      );
+      expect(width, lessThan(referenceWidth - 32 - 32));
     });
   });
 
@@ -126,7 +122,7 @@ void main() {
 
       expect(
         width,
-        greaterThan(crampedWidth - 2 * AppSpacing.lg - 2 * AppSpacing.card - 1),
+        greaterThan(crampedWidth - 32 - 32 - 1),
         reason:
             'At $crampedWidth the card is ${crampedWidth - 32}dp, under the '
             '${AppBreakpoints.compact} tier, so the primary should run the full '
@@ -137,10 +133,7 @@ void main() {
     testWidgets('Study Home', (tester) async {
       final width = await primaryWidth(tester, studyHero(), crampedWidth);
 
-      expect(
-        width,
-        greaterThan(crampedWidth - 2 * AppSpacing.lg - 2 * AppSpacing.card - 1),
-      );
+      expect(width, greaterThan(crampedWidth - 32 - 32 - 1));
     });
   });
 

@@ -9,6 +9,7 @@ import 'package:memox/features/search/domain/models/search_cursor_model.dart';
 import 'package:memox/features/search/presentation/widgets/items/card_result_tile_widget.dart';
 import 'package:memox/features/search/presentation/widgets/items/deck_result_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_section_label.dart';
 
@@ -114,8 +115,7 @@ void main() {
     // WCAG 1.4.11 asks 3:1 of a focus indicator. `AppStateOpacity.focus`'s own
     // documentation measures the 10% wash at ~1.15:1, so the ring is the part
     // that carries the requirement — and a hand-drawn `Material` + `InkWell`
-    // has none. The row's `MxPressable` carries the shared `MxFocusRing`,
-    // which does (it was the row's own `MxCard` until M100.91).
+    // has none. This row is an `MxCard` now, which does.
     // A keyboard has to exist for the claim to be checkable: widget tests
     // start in touch mode, and the ring is now keyboard-only — the same gate
     // `MxActionButton.shouldAutofocus` follows (M99.75, and MxCard since
@@ -150,12 +150,13 @@ void main() {
     ).requestFocus();
     await tester.pumpAndSettle();
 
-    // The ring is a foreground layer, so it is found among the row's
-    // foreground decorations rather than on the first `DecoratedBox`.
+    // The ring is a foreground layer since M100.33, so it is found among the
+    // card's foreground decorations rather than on the first `DecoratedBox` —
+    // that one carries the fill and the shadow and no longer paints an edge.
     final List<BorderSide> edges = tester
         .widgetList<DecoratedBox>(
           find.descendant(
-            of: find.byType(DeckResultTileWidget),
+            of: find.byType(MxCard),
             matching: find.byType(DecoratedBox),
           ),
         )

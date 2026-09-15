@@ -135,8 +135,9 @@ class _Catalog extends StatelessWidget {
         // read as one more card to tap.
         const SizedBox(height: AppSpacing.xl),
         for (final (index, row) in rows.indexed) ...<Widget>[
-          // `lg`, the gap between two list items, for one `MxCard.raised`
-          // per row. Each card pads itself `lg` inside, so the
+          // `lg`, the gap between two list items, and what
+          // `deck_list_sliver_widget.dart` settled on for the same
+          // `MxCard.raised` row. Each card pads itself `lg` inside, so the
           // old `sm` made the space *between* two cards half the space
           // *inside* one and the grouping cue pointed the wrong way. Leading,
           // so the last card leaves the end gap to the list's own padding

@@ -1,43 +1,293 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
-
-/// Every line the app draws around or inside a component — the Tokyo
-/// handoff's (M100.87).
+/// Every line the app draws around or inside a component.
 ///
-/// **The hairline and the control edge are the kit's hex verbatim, and the
-/// control edge is recorded where it falls short.** `outlineVariant` is the
-/// decorative hairline on cards, dividers and a resting chip; `outline` is the
-/// edge of something a finger acts on — a text field, an outlined button, a
-/// switch's resting thumb. The owner accepted (2026-09-13) that `outline` sits
-/// under WCAG 1.4.11's 3:1 on the higher rungs: light 2.92 on a dialog or sheet
-/// and 2.74 on a switch track; dark 2.65 on `surfaceContainer`, 2.25 on a
-/// dialog and 1.96 on a switch track. `control_border_grounds_test.dart` pins
-/// those figures as floors, so they record a decision rather than drift.
+/// **Split out of `AppColors` at M100.1**, alongside [AppSurfaceColors], for the
+/// reason `AppMaterialRoles` was split off at M99.5: one file had six roles in
+/// it and had passed the guard's 400-line ceiling again.
+///
+/// The family is a ladder of its own, and the order is the point — a card's
+/// resting edge is quieter than a control's, a control's quieter than a picked
+/// one's, and the focus ring is louder than all of them in both modes. Each
+/// value carries the measurement that puts it in that order.
+///
+/// Nothing changed value in that move. M100.26 then moved every value onto
+/// Tokyo's: the resting edge is Tokyo's `alpha.black[12]` divider (light) and
+/// its `#222743` divider (dark); the picked edge is Tokyo's `primary.main`
+/// light and its dark-theme `primary` dark; the accent and option edges are
+/// tints of Tokyo's primary; the control edge is a low-chroma grey at Tokyo's
+/// ink hue, because `app_palette_test.dart` holds the light canvas — input
+/// border included — under chroma 0.06.
+///
+/// **The palette is Tokyo's since M100.26.** The owner asked for the theme to
+/// match `ntgptit/tokyo-react-admin-dashboard`, and every value in this file is
+/// now one of three things: a Tokyo literal, a Tokyo primitive flattened over a
+/// Tokyo surface (its `alpha.black`/`primary.lighter` idiom, precomputed as
+/// AD-14 requires), or the value this file already had re-hued onto a Tokyo
+/// key with its tone and chroma kept — so every L\* step and ratio the tests
+/// hold survived without a rule moving. Measurements quoted below that predate
+/// M100.26 describe the A2 palette and are kept as the record of *why* a token
+/// exists; the current numbers are the tests' output.
 abstract final class AppBorderColors {
-  /// The hairline — `outlineVariant`. 1.61:1 on a light card, 1.42:1 on a dark
-  /// one: present as an edge, absent as a frame.
-  static const Color borderSubtleLight = Color(0xFFC5CBE3);
-  static const Color borderSubtleDark = Color(0xFF2A3267);
+  /// Hairline between rows, around cards, and an input at rest.
+  ///
+  /// **The two modes are no longer matched on this number, and that is the
+  /// point.** Until M4.10h both stood at 1.82:1 against the card, because the
+  /// border was the only depth cue either had. Light now has a shadow
+  /// (`AppElevation`), so its border can stand down to 1.50:1; dark has no
+  /// shadow — measured, not chosen: at the bottom of the lightness scale a
+  /// shadow moves the page by ΔL* 0.26 — so its border keeps carrying the edge,
+  /// at 1.69:1 since the ladder moved onto the page's hue (1.82:1 before).
+  ///
+  /// **That drop is a consequence, not a decision.** Both the border and the
+  /// card it is drawn on gained chroma at their new hue, and a border reads
+  /// against its card: 1.69 is what holding the border's L* step at the new
+  /// saturation produces. It stays well above the 1.40 that was measured as too
+  /// weak, and what the tests actually pin — the total lift of a card off its
+  /// page — is unaffected, because the border was deliberately taken out of that
+  /// measurement at M4.10h.
+  ///
+  /// Matching the borders was the right rule when the border was everything, and
+  /// it is the wrong rule now: it would force light to draw a frame it no longer
+  /// needs. What `app_theme_test.dart` pins instead is the **step a card's edge
+  /// produces** — ΔL* 8.04 in light against 6.58 in dark — which is the thing a
+  /// reader actually perceives, and which stays symmetric while the mechanisms
+  /// differ.
+  ///
+  /// Both values are hue 240 and inside the light canvas's chroma budget. The
+  /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
+  /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
+  // **Retuned at M100.80, and the reason is which surface it actually sits
+  // on.** The pinned figure for this token has always been measured against
+  // `scheme.surface` — #F2F5F9, the page ground — where #E4E7EA read 1.14:1.
+  // But almost every divider in this app is drawn *inside* an `MxCard`, whose
+  // face is #FFFFFF, and on white the same value reads **1.24:1**: 0.24 of ink
+  // against the 0.14 it was calibrated for, 1.8x heavier than intended.
+  //
+  // #E9ECEF puts the card case at **1.19** (0.19 of ink) and the page case at
+  // **1.08**. The page number is where the caution lives: at #EEF1F4 the card
+  // would finally read 1.13 — the figure this token was designed for — and the
+  // page would fall to **1.04**, which is the page colour itself. That is the
+  // exact failure #431 P2-4 removed when it deleted `borderDivider`, so the
+  // retune stops short of it deliberately rather than chasing the number.
+  static const Color borderSubtleLight = Color(0xFFE9E9ED);
 
-  /// A control's edge — `outline`. 3.62:1 on the light card and 3.44 on the
-  /// page; 3.36 and 3.75 in dark.
-  static const Color borderControlLight = Color(0xFF7C85AB);
-  static const Color borderControlDark = Color(0xFF5A6BAE);
+  // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
+  // reads on OLED. Same hue and saturation (0.41), lightness only.
+  // Dark moves with it, by the same proportion rather than to the same
+  // figure: this hairline reads 1.33 on the dark card where light read 1.24,
+  // so it was the heavier of the two to begin with. #222743 brings the card
+  // case to 1.24 and the page case from 1.41 to 1.32.
+  static const Color borderSubtleDark = Color(0xFF3C3D48);
 
-  /// The edge a picked card or option wears — the brand, which is what the kit
-  /// draws around a selected answer or match tile.
-  static const Color borderSelectedLight = AppColors.primaryLight;
-  static const Color borderSelectedDark = AppColors.primaryDark;
+  static const Color borderSelectedLight = Color(0xFF4454CC);
 
-  /// The resting edge of a selectable card (`MxCard.option`) — the control
-  /// edge, because an option *is* a control.
-  static const Color borderOptionLight = borderControlLight;
-  static const Color borderOptionDark = borderControlDark;
+  /// See [borderSelectedLight]. Dimmer than the focus indicator on purpose —
+  /// that ring is `scheme.primary` at [AppStroke.focus].
+  static const Color borderSelectedDark = Color(0xFFBBBCE9);
 
-  /// The hairline a panel wears when it is the screen's answer rather than one
-  /// row among many — the brand at 38% over the paper, resolved here rather
-  /// than at paint time (MX-VIS-002 R7).
-  static const Color borderAccentLight = Color(0xFFBDC4FB);
-  static const Color borderAccentDark = Color(0xFF414B85);
+  /// The hairline a panel wears when it is the screen's *answer* rather than
+  /// one row among many — today the Library's Today card.
+  ///
+  /// **The brand at 38% over the surface, resolved here rather than at paint
+  /// time.** `primaryContainer` was tried and is a fill: against `surface` it
+  /// is a step of ΔL* 4, which reads as a slightly different white rather than
+  /// as an edge (owner review, 2026-08-20). Blending keeps the hue and buys
+  /// the contrast, and a resolved constant is what MX-VIS-002 rule R7 asks
+  /// for — a translucent border composites against whatever is behind it, and
+  /// the audit cannot read it back.
+  static const Color borderAccentLight = Color(0xFFB0B7EA);
+
+  /// Same recipe as [borderAccentLight], over the dark surface.
+  /// **Solved against the one rule that matters here, and it is not the same
+  /// recipe as [borderAccentLight]** (M99.98). It shipped as `#31306F`, which
+  /// measures **1.33:1** on `MxCard.accent`'s own fill while the plain hairline
+  /// every other card used to wear measured **2.04:1** — the one recipe whose
+  /// job is emphasis had the faintest edge on the screen. Worse, the ranking
+  /// flipped between modes: in light the accent edge is 1.89:1 against the
+  /// hairline's 1.45, so the same recipe read "emphasised" in one mode and
+  /// "receded" in the other.
+  ///
+  /// `#6560B8` measures **2.93:1** on that fill — above the old hairline in both
+  /// modes, and still short of the focus ring, which has to stay the loudest
+  /// edge a card can wear.
+  static const Color borderAccentDark = Color(0xFF73789A);
+
+  /// The resting edge of a selectable **card** — `MxCard.option`.
+  ///
+  /// **Split off `borderControl` at M100.2, and the split is the point.** The
+  /// owner's review asked why a card that must draw a border draws it in a
+  /// colour unrelated to the brand. The answer for the *input* border is a
+  /// recorded rule — `app_palette_test.dart`'s "the light canvas carries no
+  /// lavender tint" names `input` explicitly and caps the tint at 0.06 — and
+  /// that rule is right: an empty text field is canvas, and putting the accent
+  /// on every one of them is the density problem M99.98 just took off Library.
+  ///
+  /// But that rule names the *input*, not every consumer of one token. An
+  /// option card is a card, sitting on a page, next to other cards whose edges
+  /// M99.99 already moved into the brand family. It was borrowing canvas
+  /// furniture, and the borrowing is what made it look wrong.
+  ///
+  /// `#8887CE` measures **3.18:1** on a card and **3.01** on the page — above
+  /// the 3:1 WCAG 1.4.11 asks of a control boundary, where `borderControl`
+  /// managed 3.19 and 3.02 — at chroma **0.105**, roughly nine times the grey
+  /// it replaces. It is deliberately **1.34 quieter than
+  /// [borderSelectedLight]**, so a picked option still wins its own row.
+  ///
+  /// **Two things it does not touch, and both are deliberate.** The input
+  /// border keeps `borderControl` and its canvas rule. So does
+  /// `guess_option_item_widget`, which writes down that its row "is a control
+  /// (WCAG 1.4.11), not a card" — the same distinction from the other side.
+  // **Retuned within its own family** (A20.1 P2-14, A19-02): `#8896FF`
+  // measured 2.67:1 on the option card's own fill (`surfaceContainerLow`,
+  // white in light) — the whole boundary of a component that *is* its edge,
+  // under the 3:1 WCAG 1.4.11 asks. Same hue (233°), same saturation, one
+  // step darker: 3.27:1, and still 1.32 quieter than `borderSelectedLight`'s
+  // 4.33, so a picked option keeps winning its row. Not `primary`: the
+  // family is the point, and the role is a fill.
+  static const Color borderOptionLight = Color(0xFF838EDD);
+
+  /// See [borderOptionLight]. Measured on the fill `.option` actually has in
+  /// dark (`surface`, since the recipe is flat): **3.22:1**, chroma 0.120, and
+  /// 1.37 quieter than [borderSelectedDark].
+  static const Color borderOptionDark = Color(0xFF747FDA);
+
+  /// A control's edge at the 3:1 WCAG 1.4.11 asks. Why a control and not a
+  /// card, and the measurements: `AppSemanticColors.borderControl`.
+  ///
+  /// **"Cleared against every neighbour it touches" is what this comment used
+  /// to say, and it was not true.** It had been measured on two grounds — the
+  /// page and `surface` — because those are the two a token review naturally
+  /// reaches for. The outlined button and the empty text field spend most of
+  /// their life on a third: `surfaceContainer`, the fill of every card that
+  /// holds a row.
+  ///
+  /// Both modes were raised at M100.3, for the same reason and by very
+  /// different amounts. Light was at **2.94** on `surfaceContainer` and is now
+  /// **3.06**: two steps darker, chroma untouched at 0.031 — far under the 0.06
+  /// the light-canvas rule caps an input border at, which is the constraint
+  /// that makes darkening the only direction available here.
+  ///
+  /// **Light draws 0 px on that ground today** — the census found the light
+  /// card is `surface`, not `surfaceContainer`, so this is debt rather than a
+  /// live defect. It is paid anyway: a rule that holds in one mode and is
+  /// waived in the other stops being a rule and becomes a note, and the next
+  /// screen to put an outlined button on a light `surfaceContainer` would
+  /// inherit the failure with nothing objecting.
+  /// Darkened from `#8A8A92` at M100.22 by the switch, which is the first
+  /// component to read this role against the *top* of the surface ladder.
+  ///
+  /// M3's unselected switch is `outline` on `surfaceContainerHighest`, and the
+  /// app had been avoiding that pairing — thumb re-pointed to
+  /// `onSurfaceVariant`, track to `surfaceMuted` — because `#8A8A92` scores
+  /// **2.72:1** on `#E3E5EC`, under the 3:1 WCAG 1.4.11 asks of the visual
+  /// information identifying a control's state. On a switch the thumb *is* the
+  /// state, so the exemption does not apply.
+  ///
+  /// `#7D7D85` is the same hue (240) at the same chroma (0.031), 5.07 L\*
+  /// lower, and it clears the pairing at **3.24:1**. Every other ground this
+  /// role is drawn on improves, because all of them are lighter than it:
+  ///
+  /// | ground | was | now |
+  /// |---|---|---|
+  /// | `surfaceContainerHighest` | 2.72 | 3.24 |
+  /// | `surface` | 3.32 | 3.95 |
+  /// | page | 3.14 | 3.74 |
+  /// | `surfaceContainer` | 3.06 | 3.65 |
+  ///
+  /// Darkening was the only lever available: the alternative is lowering
+  /// `surfaceContainerHighest`, and it is the top rung — pushing it down
+  /// compresses it into `surfaceContainerHigh` and breaks the ladder to fix a
+  /// control.
+  /// Lightened from `#6F727B` at M100.48, because the value had drifted past
+  /// the constraint that set it and the drift was visible.
+  ///
+  /// **The number the block above derives is `#7D7D85`, and the constant said
+  /// something else.** M100.22 measured that value against the tightest ground
+  /// this role is drawn on — M3's resting switch thumb, `outline` on
+  /// `surfaceContainerHighest` — and landed it at 3.24:1, a deliberate 0.24
+  /// over the floor. The Tokyo palette move then darkened the token to
+  /// `#6F727B` as part of re-hueing the neutrals, and nothing re-derived it:
+  /// the ground moved too, and the pair ended up at **3.81:1**, 0.81 clear of a
+  /// 3.0 floor. A contrast test only ever asks whether a value is dark enough,
+  /// so nothing objected.
+  ///
+  /// What that cost is legible on the Guess screen, where five answer rows draw
+  /// this edge on `surfaceContainerLow` — white, the lightest ground in the
+  /// palette, and therefore the pairing where an over-dark token shows most.
+  /// At `#6F727B` the row edge scored **4.81:1** and the five options read as
+  /// five heavy form fields rather than as five things to choose between. The
+  /// dialog's Cancel button draws the same token on the same white.
+  ///
+  /// **It also out-ranked the state above it.** A resting edge must be quieter
+  /// than a selected one; on the page `#6F727B` measured 4.40 against
+  /// `borderSelected`'s 3.96, so the hierarchy was inverted — the loudest edge
+  /// on a card was the one that means nothing has happened.
+  ///
+  /// `#7B7E88` is the same neutral line — hue 226 against 225, raw chroma 0.051
+  /// against 0.047 and both far under the 0.06 the light-canvas rule caps a
+  /// border at — 4.79 L\* lighter. Every ground softens by about a sixth, and
+  /// the binding one keeps a real margin rather than a rounding one:
+  ///
+  /// | ground | was | now | floor |
+  /// |---|---|---|---|
+  /// | `surfaceContainerLow` (white: guess row, dialog button) | 4.81 | 4.05 | 3.0 |
+  /// | page / `surface` | 4.40 | 3.71 | 3.0 |
+  /// | `surfaceContainer` | 4.29 | 3.62 | 3.0 |
+  /// | `surfaceContainerHigh` | 4.02 | 3.39 | 3.0 |
+  /// | **`surfaceContainerHighest`** (switch thumb) | 3.81 | **3.21** | 3.0 |
+  ///
+  /// The ordering is right way up again: `borderSubtle` 1.08 → this 3.71 →
+  /// `borderSelected` 3.96 → `primary` 5.67, all on the page.
+  ///
+  /// **Dark is untouched.** Its own binding pairing sits at 3.04 — a margin of
+  /// 0.04, not 0.81 — so the two modes drifted in opposite directions and only
+  /// one of them has room to give back.
+  static const Color borderControlLight = Color(0xFF787C87);
+
+  /// Raised from `#66628D` at M100.3, and the census is the reason.
+  ///
+  /// Every one of the 51 dark goldens was scanned for pixels of this colour and
+  /// asked which colour each one *touches*. Four grounds, and the third is the
+  /// one two years of review never measured:
+  ///
+  /// | ground | px adjacent | old `#66628D` | now `#6E6A98` |
+  /// |---|---|---|---|
+  /// | page `#0A082D` | 40 342 | 3.41 | 3.85 |
+  /// | `surface` `#1A1838` | 8 012 | 3.00 | 3.39 |
+  /// | **`surfaceContainer` `#221E44`** | **5 858** | **2.76** | **3.12** |
+  /// | `surfaceMuted`, `primaryContainer` | 0 | — | — |
+  ///
+  /// The same census in light returns 0 px on `surfaceContainer`, because a
+  /// light card is `surface` and a dark one is `surfaceContainer` — an
+  /// asymmetry in the palette that is exactly why one mode shipped the defect
+  /// and the other only carried it as debt.
+  ///
+  /// **A card's edge would have been exempt; a control's is not.**
+  /// `app_high_contrast_test.dart` writes the distinction down — "a card is
+  /// identified by its content and its edge is decoration, which is the
+  /// exemption WCAG grants". The two components reading this token are an
+  /// outlined button and a text field, and a control's boundary is the
+  /// information 1.4.11 exists to protect.
+  ///
+  /// The rise is 0.44 of a ratio point on the page and keeps the ladder in
+  /// order: `borderSubtle` 2.32 → this 3.85 → `borderSelected` 5.00 →
+  /// `focusRing` 6.26. The two grounds at 0 px are left failing on purpose —
+  /// sizing a token to a pairing nothing draws is how a palette drifts bright.
+  /// Raised again at M100.22, for the mirror of the reason light was lowered:
+  /// `#6E6A98` scored **2.47:1** on `surfaceContainerHighest`, which in dark is
+  /// `#332F58`. `#7D79A2` holds hue 245 and clears it at **3.04:1**, and every
+  /// other ground improves because all of them are darker than it:
+  ///
+  /// | ground | was | now |
+  /// |---|---|---|
+  /// | `surfaceContainerHighest` | 2.47 | 3.04 |
+  /// | `surface` | 3.39 | 4.16 |
+  /// | page | 3.85 | 4.72 |
+  /// | `surfaceContainer` | 3.12 | 3.84 |
+  ///
+  /// It stays well under `onSurfaceVariant` (L\* 52.56 against 69.43), so the
+  /// edge is still quieter than the secondary label it sits beside — the
+  /// ordering the M100.3 census established, kept while the number moved.
+  static const Color borderControlDark = Color(0xFFACADBA);
 }

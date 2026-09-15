@@ -43,10 +43,10 @@ const double _kRowFixedWidth = AppSizing.touchTarget + AppSpacing.sm * 2;
 
 /// How far inside its own box the close button draws its glyph.
 ///
-/// Derived, not chosen: the button centres an [AppIconSize.sm] glyph in
+/// Derived, not chosen: the button centres an [AppIconSize.mdCompact] glyph in
 /// an [AppSizing.touchTarget] box. Writing it out is what lets the bar
 /// place the *glyph* on a line and let the box fall where it must.
-const double _kGlyphInset = (AppSizing.touchTarget - AppIconSize.sm) / 2;
+const double _kGlyphInset = (AppSizing.touchTarget - AppIconSize.mdCompact) / 2;
 
 /// Where the ✕ *glyph* sits: on the screen gutter, like any leading action.
 ///
@@ -166,6 +166,7 @@ class MxSessionTopBar extends StatelessWidget {
               icon: Icons.close,
               semanticLabel: closeLabel,
               onPressed: onClose,
+              isCompact: true,
             ),
             // **No spacer here, and that is the fix rather than a smaller
             // button.** The gap the eye sees is not spacing: the button centres
@@ -233,7 +234,7 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
       color: context.semanticColors.surfaceMuted,
-      borderRadius: BorderRadius.circular(AppRadius.full),
+      borderRadius: BorderRadius.circular(AppRadius.pill),
     ),
     child: Padding(
       padding: const EdgeInsets.symmetric(

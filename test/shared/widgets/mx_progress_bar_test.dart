@@ -45,26 +45,24 @@ void main() {
       .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator));
 
   group('colour', () {
-    testWidgets("below 100% the fill is the handoff's primary tone", (
+    testWidgets('below 100% the fill is secondary, never the accent', (
       tester,
     ) async {
-      // **`primary`, by the Tokyo handoff** (M100.87). Its LinearProgress spec
-      // names the tone `primary / mastery`, so the M99 rule that kept the bar
-      // off the brand — "neither reads as the pressable one" — gives way to
-      // the kit. `progressFill` stays the token, so a later spec can move it
-      // in one place.
+      // The whole reason this is a component. A bar filled with `primary` sits
+      // beside a button filled with `primary` and neither reads as the pressable
+      // one.
       await pumpApp(tester, const MxProgressBar(value: 0.62));
       await tester.pumpAndSettle();
 
       expect(indicatorOf(tester).color, semantic.progressFill);
-      expect(indicatorOf(tester).color, light.colorScheme.primary);
+      expect(indicatorOf(tester).color, isNot(light.colorScheme.primary));
     });
 
-    testWidgets('at 100% the fill turns mastery', (tester) async {
+    testWidgets('at 100% the fill turns success', (tester) async {
       await pumpApp(tester, const MxProgressBar(value: 1));
       await tester.pumpAndSettle();
 
-      expect(indicatorOf(tester).color, semantic.mastery);
+      expect(indicatorOf(tester).color, semantic.success);
     });
 
     testWidgets('the track is the progress track token', (tester) async {
@@ -143,7 +141,7 @@ void main() {
       tester,
     ) async {
       // The accessibility contract removes movement, never information. A
-      // reduced-motion build that also dropped the mastery colour or the
+      // reduced-motion build that also dropped the success colour or the
       // announcement would be answering a different request.
       final handle = tester.ensureSemantics();
 
@@ -154,7 +152,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(indicatorOf(tester).color, semantic.mastery);
+      expect(indicatorOf(tester).color, semantic.success);
       expect(find.bySemanticsLabel('20 of 20 learned'), findsOneWidget);
       handle.dispose();
     });

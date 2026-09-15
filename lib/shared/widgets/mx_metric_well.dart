@@ -46,11 +46,11 @@ class MxMetricWell extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: fill.resolve(context),
-        borderRadius: BorderRadius.circular(AppRadius.full),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xs),
-        child: MxIcon(icon, ink: tint, size: MxIconSize.xs),
+        child: MxIcon(icon, ink: tint, size: MxIconSize.sm),
       ),
     );
   }

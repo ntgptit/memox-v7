@@ -32,7 +32,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   return testMain();
 }
 
-/// Loads the bundled Plus Jakarta Sans and its Korean fallback.
+/// Loads the bundled Inter and Plus Jakarta Sans.
 ///
 /// Read straight from `assets/fonts/` rather than through the asset bundle:
 /// `flutter test` does not populate the bundle with declared fonts, which is
@@ -79,12 +79,11 @@ Future<void> _loadAppFonts() async {
 /// it is **every family named anywhere in `AppTypography`**. Adding a face to
 /// `pubspec.yaml` is half the change.
 const Map<String, String> _appFonts = <String, String>{
+  'Inter': 'assets/fonts/Inter-Variable.ttf',
   'PlusJakartaSans': 'assets/fonts/PlusJakartaSans-Variable.ttf',
-  // Korean only, matching what the app bundles. Kana, Han and, since Inter
-  // left (M100.89), the IPA letters Plus Jakarta Sans lacks are the platform's
-  // job (IT-PLAT-009), and no golden draws any of them — every CJK literal
-  // under `test/` that reaches a picture is Hangul, and pronunciation
-  // specimens are respelled.
+  // Korean only, matching what the app bundles. Kana and Han are the
+  // platform's job now (IT-PLAT-009), and no golden draws either — every
+  // CJK literal under `test/` that reaches a picture is Hangul.
   'NotoSansKR': 'assets/fonts/NotoSansKR-Variable.ttf',
 };
 

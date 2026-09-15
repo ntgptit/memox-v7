@@ -4,7 +4,6 @@ import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
-import 'package:memox/shared/widgets/mx_mastery_ring.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/deck_screen_harness.dart';
@@ -138,12 +137,11 @@ void main() {
     // Nothing new and nothing due. The panel used to wait behind a one-line
     // link; the link went with the dismiss button it existed to undo (owner
     // decision, 2026-08-25), so a caught-up level simply gets its list. The
-    // deck row's own ring still carries the finished progress, which is the
-    // one figure the panel would have added — complete, so `mastery` (BR-88).
+    // deck card's own bar still carries the finished progress, which is the
+    // one figure the panel would have added.
     expect(find.byType(DeckLevelSummaryWidget), findsNothing);
 
-    final ring = tester.widget<MxMasteryRing>(find.byType(MxMasteryRing));
-    expect(ring.value, 1);
-    expect(ring.isComplete, isTrue);
+    final bar = tester.widget<MxProgressBar>(find.byType(MxProgressBar).first);
+    expect(bar.value, 1);
   });
 }

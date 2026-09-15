@@ -275,9 +275,12 @@ class _LoadedPreview extends ConsumerWidget {
                     _updateHeaderChoice(ref, deckId, value: value),
               ),
               const SizedBox(height: AppSpacing.md),
-              // The panel's inner group label, in the same overline as the
-              // section labels outside (one rung since M100.91).
-              MxSectionLabel(label: context.l10n.cardImportMappingHeading),
+              // The panel's inner group label — a rung below the section
+              // labels outside, same tracked-uppercase voice.
+              MxSectionLabel(
+                label: context.l10n.cardImportMappingHeading,
+                rung: MxSectionLabelRung.small,
+              ),
               const SizedBox(height: AppSpacing.sm),
               for (var column = 0; column < (sheet?.columnCount ?? 0); column++)
                 CardImportMappingRowWidget(

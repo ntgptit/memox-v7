@@ -11,13 +11,11 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/foundations/app_surface_colors.dart';
 import 'package:memox/core/theme/foundations/app_border_colors.dart';
-import 'package:memox/core/theme/states/app_interaction_states.dart';
-import 'package:memox/shared/widgets/mx_icon.dart';
 
 void main() {
   group('AppSpacing', () {
-    test("is exactly the handoff's 4/8/12/16/20/24/32/48 scale", () {
-      expect(AppSpacing.scale, <double>[4, 8, 12, 16, 20, 24, 32, 48]);
+    test('is exactly the 4/8/12/16/24/32 scale', () {
+      expect(AppSpacing.scale, <double>[4, 8, 12, 16, 24, 32]);
     });
 
     test('the scale is strictly increasing and has no duplicates', () {
@@ -36,10 +34,8 @@ void main() {
         AppSpacing.sm,
         AppSpacing.md,
         AppSpacing.lg,
-        AppSpacing.card,
         AppSpacing.xl,
         AppSpacing.xxl,
-        AppSpacing.xxxl,
       ];
 
       expect(declared.toSet(), AppSpacing.scale.toSet());
@@ -47,41 +43,16 @@ void main() {
   });
 
   group('required tokens exist', () {
-    test("radius ladder is the handoff's", () {
-      expect(
-        <double>[
-          AppRadius.xs,
-          AppRadius.sm,
-          AppRadius.md,
-          AppRadius.lg,
-          AppRadius.card,
-          AppRadius.xl,
-          AppRadius.xxl,
-          AppRadius.full,
-        ],
-        <double>[4, 8, 12, 16, 20, 24, 28, 999],
-      );
-    });
+    test('radius, icon size, duration and breakpoint tokens are present', () {
+      expect(AppRadius.sm, lessThan(AppRadius.md));
+      expect(AppRadius.md, lessThan(AppRadius.lg));
+      expect(AppRadius.lg, lessThan(AppRadius.xl));
+      expect(AppRadius.pill, greaterThan(AppRadius.xl));
 
-    test("icon ladder is the handoff's", () {
-      expect(
-        <double>[
-          AppIconSize.xs,
-          AppIconSize.sm,
-          AppIconSize.md,
-          AppIconSize.lg,
-          AppIconSize.xl,
-        ],
-        <double>[16, 20, 24, 32, 40],
-      );
-      expect(MxIconSize.values.map((s) => s.dp), <double>[16, 20, 24, 32, 40]);
-    });
+      expect(AppIconSize.sm, lessThan(AppIconSize.mdCompact));
+      expect(AppIconSize.mdCompact, lessThan(AppIconSize.md));
+      expect(AppIconSize.md, lessThan(AppIconSize.lg));
 
-    test('pressed state layer is the handoff op-press', () {
-      expect(AppStateOpacity.stateLayerPressed, 0.12);
-    });
-
-    test('duration and breakpoint tokens are present', () {
       expect(AppDurations.fast, lessThan(AppDurations.normal));
       expect(AppDurations.normal, lessThan(AppDurations.slow));
       // Motion during a review must not become something the user waits on.
@@ -116,8 +87,6 @@ void main() {
       expect(AppStroke.hairline, 1);
       expect(AppStroke.control, 1.5);
       expect(AppStroke.focus, 2);
-      // The handoff MasteryRing's arc (`40×3px`, M100.91).
-      expect(AppStroke.ring, 3);
     });
   });
 
@@ -127,38 +96,6 @@ void main() {
     // the ceiling on motion, so parking a 500ms interaction delay there would
     // say the app may animate for half a second.
     expect(kTooltipWaitDuration, greaterThan(AppDurations.slow));
-  });
-
-  /// The appearance words a colour token may not be named after.
-  const physicalWords = <String>{
-    'red',
-    'green',
-    'blue',
-    'yellow',
-    'orange',
-    'purple',
-    'grey',
-    'gray',
-  };
-
-  /// Whether [name] carries an appearance word **as a word**.
-  ///
-  /// By camelCase word, not by substring (M100.91): `statusMasteredLight`
-  /// contains `red` inside `Mastered`, and a substring check called a meaning
-  /// name an appearance name — the same would happen to any `Registered`,
-  /// `Deferred` or `Covered`.
-  bool isAppearanceName(String name) => RegExp(r'[A-Z]?[a-z]+|[A-Z]+|\d+')
-      .allMatches(name)
-      .map((Match m) => m.group(0)!.toLowerCase())
-      .any(physicalWords.contains);
-
-  test('the appearance check reads words, not substrings', () {
-    // Probes, so the rule cannot pass by matching nothing.
-    expect(isAppearanceName('successGreenLight'), isTrue);
-    expect(isAppearanceName('redLight'), isTrue);
-    expect(isAppearanceName('onGreyContainer'), isTrue);
-    expect(isAppearanceName('statusMasteredLight'), isFalse);
-    expect(isAppearanceName('borderedSurfaceDark'), isFalse);
   });
 
   test('colour tokens are named for meaning, not appearance', () {
@@ -173,11 +110,22 @@ void main() {
 
     expect(declarations, isNotEmpty);
     for (final name in declarations) {
-      expect(
-        isAppearanceName(name),
-        isFalse,
-        reason: '$name is named after its appearance',
-      );
+      for (final physical in <String>[
+        'red',
+        'green',
+        'blue',
+        'yellow',
+        'orange',
+        'purple',
+        'grey',
+        'gray',
+      ]) {
+        expect(
+          name.toLowerCase(),
+          isNot(contains(physical)),
+          reason: '$name is named after its appearance',
+        );
+      }
     }
   });
 

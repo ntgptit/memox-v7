@@ -101,10 +101,7 @@ class TextContrastRule implements AuditRule {
 /// This project ships a `focusRing` token whose entire job is to be a non-text
 /// indicator, so leaving it to a text rule would leave it unchecked.
 class NonTextContrastRule implements AuditRule {
-  const NonTextContrastRule(
-    this.informationalColors, {
-    this.acceptedFloors = const <(int, int), double>{},
-  });
+  const NonTextContrastRule(this.informationalColors);
 
   /// The tokens whose job is to *tell the user something*: focus, selection,
   /// validity, verdict.
@@ -115,14 +112,6 @@ class NonTextContrastRule implements AuditRule {
   /// of what the palette is for. Intent cannot be inferred from a rectangle, so
   /// it comes from the token vocabulary, which already encodes it.
   final List<Color> informationalColors;
-
-  /// Pairs a person accepted under 3:1, keyed by `(border, ground)` ARGB, each
-  /// with the figure it was accepted at.
-  ///
-  /// **A floor, not an exemption.** The pair still blocks if it sinks below its
-  /// figure, and the same border on any other ground still owes 3:1 — so the
-  /// decision is recorded without widening into a colour that may go anywhere.
-  final Map<(int, int), double> acceptedFloors;
 
   static const double _minimum = 3.0;
 
@@ -143,17 +132,14 @@ class NonTextContrastRule implements AuditRule {
         if (background == paint.color) continue;
 
         final ratio = contrast(paint.color, background);
-        final floor =
-            acceptedFloors[(paint.color.toARGB32(), background.toARGB32())] ??
-            _minimum;
-        if (ratio >= floor) continue;
+        if (ratio >= _minimum) continue;
 
         yield AuditFinding(
           rule: name,
           itemId: item.id,
           message:
               'border ${hexOf(paint.color)} on ${hexOf(background)} is '
-              '${ratio.toStringAsFixed(2)}:1, below $floor',
+              '${ratio.toStringAsFixed(2)}:1, below $_minimum',
           isBlocking: true,
         );
       }

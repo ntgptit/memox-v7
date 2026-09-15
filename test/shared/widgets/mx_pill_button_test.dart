@@ -201,8 +201,8 @@ void main() {
       );
 
       // The short axis: the pill paints 34 tall inside the 48 box. (On the
-      // wide axis the 24dp leading slot (M100.86) already carries even a
-      // one-glyph pill past 48, so there is no horizontal padding to land in.)
+      // wide axis the 16dp leading slot already carries even a one-glyph
+      // pill past 48, so there is no horizontal padding to land in.)
       final Rect target = tester.getRect(find.byType(MxPillButton));
       final Rect painted = tester.getRect(find.byType(ChoiceChip));
       expect(painted.top, greaterThan(target.top + 2));

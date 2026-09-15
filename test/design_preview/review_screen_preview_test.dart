@@ -67,12 +67,12 @@ class _ReviewScreen extends StatelessWidget {
                 Icon(
                   Icons.local_fire_department,
                   size: 16,
-                  color: semantic.infoInk,
+                  color: semantic.info,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   '7-day streak',
-                  style: texts.bodySmall?.copyWith(color: semantic.infoInk),
+                  style: texts.bodySmall?.copyWith(color: semantic.info),
                 ),
               ],
             ),
@@ -126,7 +126,7 @@ class _ReviewScreen extends StatelessWidget {
 
             Row(
               children: <Widget>[
-                Icon(Icons.error_outline, size: 18, color: semantic.dangerInk),
+                Icon(Icons.error_outline, size: 18, color: semantic.danger),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -167,8 +167,7 @@ class _VerdictRow extends StatelessWidget {
             Expanded(
               child: VerdictAction(
                 label: 'Forgotten',
-                // Inks: the tint is the verdict's label and edge (M100.87).
-                tint: semantic.dangerInk,
+                tint: semantic.danger,
                 isSelected: selected == false,
               ),
             ),
@@ -176,7 +175,7 @@ class _VerdictRow extends StatelessWidget {
             Expanded(
               child: VerdictAction(
                 label: 'Remembered',
-                tint: semantic.successInk,
+                tint: semantic.success,
                 isSelected: selected ?? false,
               ),
             ),

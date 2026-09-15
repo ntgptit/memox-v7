@@ -108,7 +108,7 @@ class MxFeedbackBand extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            MxIcon(icon, ink: ink, size: MxIconSize.sm),
+            MxIcon(icon, ink: ink, size: MxIconSize.mdCompact),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(

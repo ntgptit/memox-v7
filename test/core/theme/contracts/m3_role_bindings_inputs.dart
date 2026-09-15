@@ -92,13 +92,12 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
     slot: 'enabledBorder',
     file: _inputs,
     scope: 'buildInputDecorationTheme',
-    requires: <String>['outlineVariant'],
-    refuses: <String>['outline', 'onSurface', 'primary'],
+    requires: <String>['outline'],
+    refuses: <String>['outlineVariant', 'onSurface', 'primary'],
     because:
-        'The handoff TextField rests on a filled surfaceContainerLowest with '
-        'a 1px ghost border — `outlineVariant`, D2 — so the fill, not a '
-        'strong edge, identifies the field (M100.92). `outline` was the '
-        'canonical M3 edge the redesign leaves.',
+        '_InputDecoratorDefaultsM3.outlineBorder rests on outline. The '
+        'hairline (outlineVariant, once `borderSubtle`) measured 1.38:1 and '
+        'an empty field is identified by its edge alone.',
   ),
   RoleBinding(
     component: 'TextField',
@@ -176,12 +175,11 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
     slot: 'selectedColor',
     file: _listTile,
     scope: 'buildListTileTheme',
-    requires: <String>['onPrimaryContainer'],
-    refuses: <String>['primary', 'secondary', 'onSecondaryContainer'],
+    requires: <String>['primary'],
+    refuses: <String>['secondary', 'onSecondaryContainer'],
     because:
-        'A picked row sits on surfaceSelected — the handoff\'s '
-        'primaryContainer — where the brand reads 4.32:1 as text; its label '
-        'takes the container\'s own ink, the pair the kit gives a selected '
-        'chip (M100.87).',
+        '_LisTileDefaultsM3.selectedColor is primary; the secondary accent '
+        'belongs to the card edge and the glyph (3:1 graphics), not to a row '
+        'label that needs 4.5:1.',
   ),
 ];

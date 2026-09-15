@@ -8,9 +8,6 @@ import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
-import 'package:memox/shared/widgets/mx_card.dart';
-import 'package:memox/shared/widgets/mx_icon_tile.dart';
-import 'package:memox/shared/widgets/mx_row_group.dart';
 
 import 'support/fake_tag_catalog_repository.dart';
 import 'support/tag_catalog_harness.dart';
@@ -167,26 +164,5 @@ void main() {
     expect(find.text('Nhãn'), findsOneWidget);
     expect(find.text('12 thẻ'), findsOneWidget);
     expect(find.text('Không có thẻ nào'), findsOneWidget);
-  });
-
-  testWidgets('the rows sit on one card, a hairline between each (handoff '
-      'ListRow, M100.91)', (tester) async {
-    await pump(tester, FakeTagCatalogRepository.seeded(tags));
-    await tester.pumpAndSettle();
-
-    final rows = find.byType(MxRowGroup);
-    expect(rows, findsOneWidget);
-    expect(
-      find.ancestor(of: rows, matching: find.byType(MxCard)),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: rows, matching: find.byType(Divider)),
-      findsNWidgets(tags.length - 1),
-    );
-    expect(
-      find.descendant(of: rows, matching: find.byType(MxIconTile)),
-      findsNWidgets(tags.length),
-    );
   });
 }

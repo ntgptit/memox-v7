@@ -327,6 +327,7 @@ void main() {
         final Rect empty = tester.getRect(find.byType(MxEmptyState));
         expect(empty.left, 0);
         expect(empty.right, surface.width);
+        expect(copyColumnOf(tester, MxEmptyState).left, AppSpacing.xl);
       });
 
       testWidgets('the error face keeps its own xl at $surface', (
@@ -348,26 +349,6 @@ void main() {
         expect(error.right, surface.width);
       });
     }
-
-    testWidgets('the empty copy starts at its own xl on the narrow tier', (
-      tester,
-    ) async {
-      // Asserted at 320 only, for the error copy's reason below. It was
-      // asserted at 393 too while the copy wrapped to the full column; set in
-      // Plus Jakarta Sans (M100.89) its longest line is narrower than the
-      // column there, and the edge measures centring.
-      await pumpProgressScreen(
-        tester,
-        repository: seeded(
-          totals: const <int>[0, 0, 0, 0, 0, 0, 0],
-          streak: 0,
-          hasLifetimeActivity: false,
-        ),
-        surface: const Size(320, 640),
-      );
-
-      expect(copyColumnOf(tester, MxEmptyState).left, AppSpacing.xl);
-    });
 
     testWidgets('the error copy starts at its own xl on the narrow tier', (
       tester,

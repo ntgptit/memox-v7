@@ -125,11 +125,6 @@ List<_ColorEntry> _semanticEntries(BuildContext context) {
 
   return <_ColorEntry>[
     _ColorEntry('success', semantic.success),
-    _ColorEntry('mastery', semantic.mastery),
-    _ColorEntry('statusNew', semantic.statusNew),
-    _ColorEntry('statusLearning', semantic.statusLearning),
-    _ColorEntry('statusReviewing', semantic.statusReviewing),
-    _ColorEntry('statusMastered', semantic.statusMastered),
     _ColorEntry('warning', semantic.warning),
     _ColorEntry('danger', semantic.danger),
     _ColorEntry('info', semantic.info),

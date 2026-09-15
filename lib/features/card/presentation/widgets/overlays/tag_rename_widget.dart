@@ -223,7 +223,7 @@ class _MergeNotice extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: AppSpacing.sm,
         children: <Widget>[
-          const MxIcon(Icons.merge, size: MxIconSize.xs),
+          const MxIcon(Icons.merge, size: MxIconSize.sm),
           Expanded(
             child: Text(
               context.l10n.tagMergeNotice(targetName),

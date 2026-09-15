@@ -4,7 +4,6 @@ import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_status_badge.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_badge.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -28,13 +27,12 @@ import '../support/card_tag_chip_widget.dart';
 /// (`onSurfaceVariant` clears 4.5:1 as text where the state hues do not on both
 /// themes). Tags and the due badge are quiet filled pills — the deck's chip
 /// language — rather than the colour-per-state the reference draws.
-// off-grid: between `AppIconSize.xs` (16) and `md` (24): the flag sits beside a 14 label and at 16 it read as punctuation
+// off-grid: between `AppIconSize.sm` (16) and `md` (24): the flag sits beside a 14 label and at 16 it read as punctuation
 const double _flagIconSize = 18;
 
-/// The state column's width — the check that replaces the dot while selecting
-/// shares it, so the list does not reflow. The dot inside it is the handoff
-/// StatusBadge's 8 (`AppSizing.statusDot`, M100.91).
-// off-grid: the column the dot and the selection check share; 8 would shrink the check
+/// The state dot's diameter — small, because colour and position carry it, not
+/// size.
+// off-grid: colour and position carry the dot; 8 vanished beside a 16 glyph and 12 read as a control
 const double _stateDotSize = 10;
 
 class CardTileWidget extends StatelessWidget {
@@ -139,15 +137,16 @@ class _StateDot extends StatelessWidget {
     // belonging to the card rather than floating above it.
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
-      child: SizedBox.square(
-        dimension: _stateDotSize,
-        child: Center(
-          child: MxStatusBadge(
-            tone: context.cardStateTone(item.state),
-            form: MxStatusBadgeForm.dot,
-            label: context.l10n.cardStateDotSemantics(
-              context.cardStateLabel(item.state),
-            ),
+      child: Semantics(
+        label: context.l10n.cardStateDotSemantics(
+          context.cardStateLabel(item.state),
+        ),
+        child: Container(
+          width: _stateDotSize,
+          height: _stateDotSize,
+          decoration: BoxDecoration(
+            color: context.cardStateColor(item.state),
+            shape: BoxShape.circle,
           ),
         ),
       ),
@@ -204,12 +203,13 @@ class _CardFace extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             Text(
-              // Uppercase **and** in the state's own ink. This became legal
-              // when the row turned into a card, and since M100.87 every state
-              // resolves to an ink solved to clear 4.5:1 on the card and the
-              // page alike (`AppColors`), so the label no longer depends on
-              // which ground it sits on. Colour is still never alone: the dot
-              // and the word carry the same fact.
+              // Uppercase **and** in the state's own colour. This became legal
+              // when the row turned into a card: measured on the card surface
+              // every state clears 4.5:1 — info 5.23/7.84, warning 4.58/8.58,
+              // accent 7.27/5.51, success 5.20/8.10 (light/dark) — where on the
+              // page ground warning sat at 4.33 and the label had to stay
+              // neutral. Colour is still never alone: the dot and the word carry
+              // the same fact.
               context.cardStateLabel(item.state).toUpperCase(),
               style: context.textStyles.stateChipLabel.inked(
                 context,

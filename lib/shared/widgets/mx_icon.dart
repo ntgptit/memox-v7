@@ -7,19 +7,16 @@ import '../../core/theme/extensions/app_ink.dart';
 /// a call site names a step instead of shipping a number.
 enum MxIconSize {
   /// 16 — inline with text, leading a label.
-  xs(AppIconSize.xs),
-
-  /// 20 — compact controls: dense rows, metadata, in-content icon buttons.
   sm(AppIconSize.sm),
+
+  /// 20 — the compact rows' step.
+  mdCompact(AppIconSize.mdCompact),
 
   /// 24 — the default glyph.
   md(AppIconSize.md),
 
-  /// 32 — large emphasis: feature tiles.
-  lg(AppIconSize.lg),
-
   /// 40 — hero glyphs in empty/result states.
-  xl(AppIconSize.xl);
+  lg(AppIconSize.lg);
 
   const MxIconSize(this.dp);
 

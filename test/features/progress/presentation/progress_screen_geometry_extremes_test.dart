@@ -59,7 +59,7 @@ void main() {
       final today = rectOf(tester, ProgressTodayWidget);
       final week = rectOf(tester, ProgressWeekWidget);
 
-      expect(hero.left, AppSpacing.lg);
+      expect(hero.left, AppSpacing.md);
       expect(today.left, hero.left);
       expect(week.left, hero.left);
       expect(today.right, hero.right);
@@ -302,10 +302,6 @@ void main() {
     // This does not assert the floor. It asserts the number X7 records, so the
     // day somebody caps the value column or shortens the label to `1.2k`, this
     // fails and the divergence is closed on purpose rather than by drift.
-    //
-    // Re-measured for M100.89 — Plus Jakarta Sans, and a 16 gutter at 320 —
-    // against a 64.0dp floor; and again for M100.91, when the card interior
-    // became 20: the 8dp it took came out of the one flexible bar column.
     await pumpProgressScreen(
       tester,
       repository: seeded(totals: const <int>[0, 0, 0, 0, 0, 0, 1234]),
@@ -316,9 +312,9 @@ void main() {
 
     final Rect bar = tester.getRect(find.byType(ProgressWeekBarWidget).first);
     final double content =
-        rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.card;
+        rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
 
-    expect(bar.width, closeTo(53.9, 1));
+    expect(bar.width, closeTo(63.8, 1));
     expect(bar.width, lessThan(content / 4));
     expect(tester.takeException(), isNull);
   });

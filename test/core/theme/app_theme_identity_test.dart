@@ -4,7 +4,6 @@ import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/schemes/app_compact_scale.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/core/theme/typography/app_text_styles.dart';
 
 /// **A theme is only as cheap as its identity.**
 ///
@@ -68,15 +67,14 @@ void main() {
     });
 
     test('and it still applies the compact pass', () {
-      // Caching a wrong answer is worse than not caching. The card prompt is
-      // the cheapest proof that the returned theme is the scaled one — the app
-      // bar title was, until the title role made it the same at every width.
+      // Caching a wrong answer is worse than not caching. The app bar title is
+      // the cheapest proof that the returned theme is the scaled one.
       final ThemeData base = buildLightTheme();
       final ThemeData compact = applyCompactScale(base);
 
       expect(
-        compact.extension<AppTextStyles>()!.cardPrompt.fontSize,
-        lessThan(base.extension<AppTextStyles>()!.cardPrompt.fontSize!),
+        compact.textTheme.titleLarge?.fontSize,
+        lessThan(base.textTheme.titleLarge!.fontSize!),
       );
     });
   });

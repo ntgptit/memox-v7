@@ -138,7 +138,6 @@ class CardDetailScreen extends ConsumerWidget {
           // tonal pill has a visible edge that an `IconButton` does not.
           MxIconButton(
             icon: Icons.edit_outlined,
-            placement: MxIconButtonPlacement.bar,
             semanticLabel: context.l10n.cardDetailEditAction,
             tooltip: context.l10n.cardDetailEditAction,
             onPressed: () => _openEditor(context),

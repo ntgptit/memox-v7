@@ -134,12 +134,12 @@ class _MenuRow extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 // A stable slot, so rows do not shift as the choice moves.
                 SizedBox.square(
-                  dimension: AppIconSize.xs,
+                  dimension: AppIconSize.sm,
                   child: action.isSelected
                       ? const MxIcon(
                           Icons.check,
                           ink: AppInk.accent,
-                          size: MxIconSize.xs,
+                          size: MxIconSize.sm,
                         )
                       : null,
                 ),

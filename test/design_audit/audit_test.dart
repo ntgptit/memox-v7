@@ -64,10 +64,8 @@ void main() {
       // the reason the message below states, so it moves only when someone
       // decided it should; 71 until M100.35 dropped `semantic.surfaceElevated`,
       // an alias holding the same two hexes as the `surfaceBright` Sys role
-      // that is still listed here; 70 until M100.87 added the extension's eight
-      // text inks, without which every `*Ink` call site reported as
-      // unresolvable.
-      hasLength(83),
+      // that is still listed here.
+      hasLength(70),
       reason:
           'a role added to Material and not listed in auditTokensOf is '
           'invisible to every later step',

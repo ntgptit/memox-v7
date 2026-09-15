@@ -62,7 +62,7 @@ class CardCreateActionBarWidget extends StatelessWidget {
         ),
         secondary: MxActionButton(
           label: context.l10n.cardEditorSaveAndAdd,
-          variant: MxActionButtonVariant.tonal,
+          variant: MxActionButtonVariant.secondary,
           onPressed: onSaveAndAdd,
         ),
       ),

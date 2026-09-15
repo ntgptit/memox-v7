@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/components/actions/app_icon_button_theme.dart';
 import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// What an icon button's glyph *means*, on the one axis a bar action has.
@@ -17,10 +18,8 @@ enum MxIconButtonTone {
   standard,
 
   /// A state worth noticing, set by the user and reversible: the card editor's
-  /// raised flag. `AppSemanticColors.warningInk` — a glyph is read like a word,
-  /// so it takes the warning ink rather than the handoff's fill, which reads
-  /// 2.15:1 on the card (M100.87). The same family the tone axis on dialogs
-  /// uses for the same meaning.
+  /// raised flag. `AppSemanticColors.warning`, the same role the tone axis on
+  /// dialogs uses for the same meaning.
   ///
   /// **It is never the only signal.** The glyph itself changes with the state —
   /// outlined to filled — so the flag reads as raised without colour vision,
@@ -46,17 +45,6 @@ enum MxIconButtonShape {
   outlined,
 }
 
-/// Where the button sits, which decides its glyph (D16): the handoff's
-/// IconButton draws 20; its Foundations give app-bar and navigation actions 24.
-enum MxIconButtonPlacement {
-  /// Rows, cards, fields, sheets — everything that is not the top bar.
-  content,
-
-  /// An action in the screen's app bar, or in the contextual bar that stands in
-  /// for it during selection.
-  bar,
-}
-
 /// An action with no visible label.
 ///
 /// [semanticLabel] is **required**, and that is the entire reason this widget
@@ -70,16 +58,18 @@ enum MxIconButtonPlacement {
 /// "button", "enabled" and the tap action; the icon's label merges into that
 /// node instead and leaves all three intact.
 ///
-/// Size comes from `IconButtonThemeData`: a 36 ink circle inside a 48 target.
-/// [placement] is the one adjustment, and it moves the **glyph**, never the
-/// circle or the target — 20 in content, 24 in a bar (D16).
+/// Size comes from `AppIconSize` and the 48×48 minimum from
+/// `IconButtonThemeData`. [isCompact] is the one adjustment, and it moves the
+/// **glyph**, never the target. It exists for the study session's top bar, where
+/// the close button shares a row with a progress track that has to read as a
+/// measure — see `AppIconSize.mdCompact`.
 class MxIconButton extends StatelessWidget {
   const MxIconButton({
     required this.icon,
     required this.semanticLabel,
     required this.onPressed,
     this.tooltip,
-    this.placement = MxIconButtonPlacement.content,
+    this.isCompact = false,
     this.tone = MxIconButtonTone.standard,
     this.shape = MxIconButtonShape.plain,
     super.key,
@@ -99,10 +89,18 @@ class MxIconButton extends StatelessWidget {
   /// two cannot drift apart.
   final String? tooltip;
 
-  /// Where the button sits: [MxIconButtonPlacement.bar] keeps the
-  /// Foundations' 24 glyph for app-bar actions; everything else draws the
-  /// handoff IconButton's 20.
-  final MxIconButtonPlacement placement;
+  /// Drops the glyph to [AppIconSize.mdCompact], for a control sharing a row
+  /// with something that needs the width.
+  ///
+  /// **It does not make the button narrower, and it never did.** This used to
+  /// constrain the box to 36 wide; Material's tap-target padding re-inflated it
+  /// to 48 and centred the 36 inside, so the row spent 48 either way. The
+  /// constraint is gone rather than fixed — 48 is [AppSizing.touchTarget]
+  /// and shrinking below it fails `androidTapTargetGuideline`, which
+  /// `study_accessibility_test.dart` asserts. A row that needs its leading glyph
+  /// closer to the screen edge than 14px has to be laid out edge-to-edge; see
+  /// `MxSessionTopBar`.
+  final bool isCompact;
 
   /// What the glyph means. [MxIconButtonTone.standard] keeps the theme's ink,
   /// which is every existing caller.
@@ -140,15 +138,19 @@ class MxIconButton extends StatelessWidget {
       // the control can be pressed.
       color: switch (tone) {
         MxIconButtonTone.standard => null,
-        MxIconButtonTone.warning => context.semanticColors.warningInk,
+        MxIconButtonTone.warning => context.semanticColors.warning,
       },
       tooltip: tooltip ?? semanticLabel,
+      constraints: isCompact
+          ? const BoxConstraints.tightFor(
+              width: AppSizing.touchTarget,
+              height: AppSizing.touchTarget,
+            )
+          : null,
+      padding: isCompact ? EdgeInsets.zero : null,
       icon: Icon(
         icon,
-        size: switch (placement) {
-          MxIconButtonPlacement.content => AppIconSize.sm,
-          MxIconButtonPlacement.bar => AppIconSize.md,
-        },
+        size: isCompact ? AppIconSize.mdCompact : AppIconSize.md,
         semanticLabel: semanticLabel,
       ),
     );

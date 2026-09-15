@@ -49,7 +49,7 @@ class SettingsSectionWidget extends StatelessWidget {
       Align(
         alignment: AlignmentDirectional.centerStart,
         // **The app's one section-heading treatment** (D18). It was
-        // `labelLarge`, which resolved to the same w600 14px style as
+        // `labelLarge`, which resolves to the same Inter w600 14/20 as
         // `titleSmall` — the role the field labels *inside* the card use — so a
         // group heading and the field under it rendered identically and the
         // heading carried no hierarchy at all. This screen's own design preview
