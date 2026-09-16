@@ -118,7 +118,7 @@ SCREENS = [
     ('Deck — overlay', 'deck_actions_child', 'Deck actions — sub-deck', 'Chỉ sub-deck mới có Move (BR-06)'),
     ('Deck — overlay', 'deck_library_menu', 'Library menu', 'Tag catalog, Trash, lọc due-only'),
     ('Deck — overlay', 'deck_sort_sheet', 'Sort sheet', 'Các thứ tự một danh sách có thể nhận'),
-    ('Deck — overlay', 'deck_create_root', 'New deck', 'Tên + chọn scheduler, khoá sau review đầu'),
+    ('Deck — overlay', 'deck_create_root', 'New deck', 'Tên + chọn scheduler, khoá khi thẻ đầu tiên học xong'),
     ('Deck — overlay', 'deck_create_child_kind', 'Thêm gì vào deck unset', 'BR-61/62: cả sub-deck lẫn card'),
     ('Deck — overlay', 'deck_rename_form', 'Rename', 'Cùng form, tên đã điền sẵn'),
     ('Deck — overlay', 'deck_move_picker', 'Move picker', 'Mục bị chặn nêu lý do (BR-69/70)'),

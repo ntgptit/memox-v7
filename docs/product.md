@@ -7,7 +7,7 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.95 (Settings, Export, bốn stage chấm điểm, S1 và S3 theo trạng thái đã triển khai; khoá scheduler theo BR-13) · M99.24 (Progress tốt nghiệp khỏi scaffold ở M99.23 và có thêm cấp deck ở M99.24; phần còn lại của S2 vẫn should-have) · M99.29 và M99.30 (N2 và N3 rời khỏi bảng nice-to-have chưa làm) |
+| **Updated by task** | M100.96 (M1: xoá deck vào Trash) · M100.95 (Settings, Export, bốn stage chấm điểm, S1 và S3 theo trạng thái đã triển khai; khoá scheduler theo BR-13) · M99.24 (Progress tốt nghiệp khỏi scaffold ở M99.23 và có thêm cấp deck ở M99.24; phần còn lại của S2 vẫn should-have) · M99.29 và M99.30 (N2 và N3 rời khỏi bảng nice-to-have chưa làm) |
 | **Last updated** | 2026-09-16 |
 
 ## Problem
@@ -82,7 +82,7 @@ tính năng.
 
 | # | Feature | Done when |
 |---|---|---|
-| M1 | Tạo/sửa/xoá deck | Deck tồn tại sau khi restart app; xoá deck xoá cascade toàn bộ card của nó |
+| M1 | Tạo/sửa/xoá deck | Deck tồn tại sau khi restart app; xoá deck chuyển nó cùng toàn bộ card vào Trash, và xoá vĩnh viễn thì cascade (BR-03, BR-256) |
 | M2 | Tạo/sửa/xoá card trong deck | Card có mặt trước/sau; sửa không làm mất lịch sử ôn tập |
 | M3 | Phiên học theo lịch SRS | Chỉ hiện card đến hạn; đánh giá kết quả cập nhật lịch ôn lần sau |
 | M4 | Danh sách deck với tiến độ | Mỗi deck hiện số card đến hạn hôm nay |

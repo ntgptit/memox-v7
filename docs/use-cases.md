@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M100.10 — UC-22: sắp xếp root/sub-deck cùng cấp; M99.33 — UC-21: Trash và khôi phục item đã xoá; M99.32 — UC-20: tìm kiếm toàn thư viện (deck, hai mặt card, tag); M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
-| **Last updated** | 2026-08-31 |
+| **Updated by task** | M100.96 — UC-03 xoá deck vào Trash (BR-03, BR-04, BR-256, BR-265) và điều kiện khoá theo BR-13; UC-04 xoá card vào Trash, giới hạn độ dài theo BR-08/BR-95, cờ, tag và mở chi tiết (BR-92…BR-95, BR-246); M100.10 — UC-22: sắp xếp root/sub-deck cùng cấp; M99.33 — UC-21: Trash và khôi phục item đã xoá; M99.32 — UC-20: tìm kiếm toàn thư viện (deck, hai mặt card, tag); M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
+| **Last updated** | 2026-09-16 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -146,7 +146,7 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
 1. Người dùng đổi tên deck.
 2. Hệ thống validate (BR-01) và lưu.
 
-**Main flow (đổi chế độ ôn tập — chỉ trên root deck, chỉ khi chưa có lượt học):**
+**Main flow (đổi chế độ ôn tập — chỉ trên root deck, chỉ khi chưa có thẻ nào học xong chuỗi học mới):**
 1. Hệ thống hiển thị phần chọn chế độ ở trạng thái **mở khoá**
    (`first_answered_at IS NULL`, BR-12).
 2. Người dùng chọn chế độ khác.
@@ -159,13 +159,15 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
    phiên đang mở của cây — trong một transaction (BR-14, BR-164).
 
 **Main flow (xoá):**
-1. Hệ thống hỏi xác nhận, nêu rõ số deck con và số card sẽ mất (BR-04).
+1. Hệ thống hỏi xác nhận, nêu rõ số deck con và số card sẽ cùng vào Trash (BR-04, BR-256).
 2. Người dùng xác nhận.
-3. Hệ thống xoá deck; toàn bộ descendant, card, study state, study answers và
-   study session bị xoá cascade (BR-03).
+3. Hệ thống chuyển deck cùng mọi descendant đang active vào Trash dưới một batch,
+   trong một transaction; phiên đang mở chạm tới chúng bị đóng (BR-256, BR-258,
+   BR-259). Khôi phục, Undo và xoá vĩnh viễn đi theo UC-21; chỉ lúc xoá vĩnh viễn
+   dữ liệu mới bị xoá cascade (BR-03, BR-265).
 
 **Alternative flows:**
-- **A1 — Root deck đã có lượt học:** phần chọn chế độ hiển thị ở trạng thái **khoá**,
+- **A1 — Root deck đã có thẻ học xong chuỗi học mới:** phần chọn chế độ hiển thị ở trạng thái **khoá**,
   kèm giải thích và lối đi tới Reset learning progress (UC-07). Không ẩn đi — ẩn
   khiến người dùng tưởng tính năng không tồn tại (BR-13).
 - **A2 — Sửa deck con:** không có phần chọn chế độ (BR-06).
@@ -192,12 +194,14 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
 - Sau đổi chế độ: `scheduler_type` mới, mọi study state trong cây khởi tạo lại,
   `scheduler_generation` **không đổi** (chưa có gì để reset), `first_answered_at`
   vẫn NULL, và không còn phiên `in_progress` nào của cây (BR-164).
-- Sau xoá: không còn deck con, card, study state, history hay session mồ côi.
+- Sau xoá: deck và mọi descendant đang active mang cùng một batch trong Trash,
+  không bề mặt active nào còn hiện chúng (BR-257), và không còn phiên
+  `in_progress` nào chạm tới chúng (BR-259).
 - Sau xoá một deck con: nếu deck cha là **sub-deck** và vừa mất phần tử con cuối
-  cùng, `content_type` của nó tự về `unset` trong cùng transaction (BR-163). Deck
-  cha là root thì giữ `deck` (BR-58).
+  cùng, `content_type` của nó tự về `unset` trong cùng transaction (BR-163,
+  BR-260). Deck cha là root thì giữ `deck` (BR-58).
 
-**Business rules:** BR-01, BR-03, BR-04, BR-06, BR-12, BR-13, BR-14, BR-163, BR-164
+**Business rules:** BR-01, BR-03, BR-04, BR-06, BR-12, BR-13, BR-14, BR-163, BR-164, BR-256, BR-257, BR-258, BR-259, BR-260, BR-265
 **UI states:** loaded · submitting · error
 
 ---
@@ -214,8 +218,9 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
 
 **Main flow:**
 1. Người dùng thấy danh sách card của deck.
-2. Người dùng thêm card: nhập mặt trước và mặt sau.
-3. Hệ thống validate (BR-07, BR-08).
+2. Người dùng thêm card: nhập mặt trước và mặt sau, tuỳ chọn thêm ví dụ, gợi ý
+   và phiên âm (BR-95).
+3. Hệ thống validate (BR-07, BR-08, BR-95).
 4. Hệ thống tạo card **và** study state của nó trong cùng transaction, theo
    scheduler của root deck (tra qua `root_deck_id`) và generation hiện tại (BR-09).
 5. Card xuất hiện; số card đến hạn của deck tăng.
@@ -225,9 +230,11 @@ Card đầu tiên của một deck `unset` được tạo qua UC-08, và chính 
 
 **Alternative flows:**
 - **A1 — Sửa card:** nội dung đổi; study state và history **không** đổi (BR-10).
-- **A2 — Xoá card:** hỏi xác nhận; xoá kèm study state và history của card đó.
-  Nếu đó là card **cuối cùng**, deck atomically trở về `content_type = unset`
-  trong cùng transaction (BR-163); sau đó người dùng quay về màn hình deck và
+- **A2 — Xoá card:** hỏi xác nhận; card chuyển vào Trash cùng study state và
+  history của nó, và màn đang đứng cho Undo (BR-256, BR-263). Khôi phục và xoá
+  vĩnh viễn đi theo UC-21. Nếu đó là card **cuối cùng** đang active, deck
+  atomically trở về `content_type = unset` trong cùng transaction (BR-163,
+  BR-260); sau đó người dùng quay về màn hình deck và
   lại chọn được tạo card hay tạo sub-deck. "Deck `card` rỗng" không còn là một
   trạng thái ổn định của hệ thống.
 - **A3 — Deck còn card nhưng danh sách rỗng theo bộ lọc:** empty state của bộ
@@ -242,6 +249,11 @@ Card đầu tiên của một deck `unset` được tạo qua UC-08, và chính 
   chọn toàn bộ tập kết quả theo filter và search hiện tại, không chỉ phần đã
   tải (BR-167). Mỗi thao tác là all-or-nothing (BR-166).
 - **A4 — Thêm liên tiếp nhiều card:** sau khi lưu, giữ form mở và xoá trống các ô.
+- **A7 — Cờ:** người dùng bật hoặc bỏ cờ của một thẻ (BR-92).
+- **A8 — Tag:** người dùng gắn tag theo tên — dùng lại tag trùng tên đã fold, tạo
+  mới nếu chưa có — hoặc gỡ tag khỏi thẻ (BR-93, BR-94).
+- **A9 — Mở chi tiết:** chạm một thẻ ở chế độ thường mở chi tiết chỉ đọc (UC-19);
+  sửa là action riêng (BR-246).
 
 **Error flows:**
 - **E1 — Mặt trước hoặc mặt sau rỗng:** lỗi inline ở đúng ô đó.
@@ -252,14 +264,16 @@ Card đầu tiên của một deck `unset` được tạo qua UC-08, và chính 
   gì (BR-165).
 - **E6 — Một thẻ trong lô vi phạm:** cả lô rollback; danh sách và selection giữ
   nguyên, lỗi nêu rõ vì sao (BR-166).
-- **E2 — Vượt 2000 ký tự:** lỗi inline, chặn nhập thêm.
+- **E2 — Vượt giới hạn độ dài** (BR-08, BR-95): lỗi inline ở đúng ô đó.
 - **E3 — Ghi thất bại:** hiện lỗi, giữ nội dung; không tạo card không có study
 state.
+- **E7 — Tag không hợp lệ, hoặc thẻ đã đủ 10 tag:** lỗi có kiểu; tag của thẻ giữ
+  nguyên (BR-93, BR-94).
 
 **Postconditions:** Card tồn tại kèm đúng một study state, đúng scheduler và
 đúng generation của root deck.
 
-**Business rules:** BR-07, BR-08, BR-09, BR-10, BR-63, BR-163, BR-165, BR-166, BR-167
+**Business rules:** BR-07, BR-08, BR-09, BR-10, BR-63, BR-92, BR-93, BR-94, BR-95, BR-163, BR-165, BR-166, BR-167, BR-246, BR-256, BR-260, BR-263
 **UI states:** loading · loaded · empty · submitting · error
 
 ---

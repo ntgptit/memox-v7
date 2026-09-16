@@ -7,7 +7,7 @@
 | **Scope** | Đồ thị chuyển tiếp giữa UC-01…UC-20 và ánh xạ UC-01…UC-22 → milestone, tách theo đối tượng nghiệp vụ. Ngoài phạm vi: nội dung của từng UC, mọi luật nghiệp vụ, và mọi chi tiết màn hình |
 | **Source of truth for** | Đồ thị chuyển tiếp giữa các UC · điểm vào của từng luồng · ánh xạ UC → milestone xây nó |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md`, `use-cases.md` |
-| **Updated by task** | M100.95 — bảng §6 theo code: UC-01, UC-03, UC-05, UC-07 đã xây; thêm UC-12…UC-17, UC-21, UC-22; hai chỗ lệch đã hết hiệu lực; trước đó M99.32 — UC-20 vào bảng §6: tìm kiếm toàn thư viện từ header Library, kết quả card mở chi tiết chỉ đọc UC-19; UC-06 thôi quảng cáo tìm kiếm theo subtree đã bị thay thế; trước đó M99.31 — nhánh `J`: chạm một hàng card mở chi tiết chỉ đọc (UC-19), Edit thành action tường minh; bảng §6 bổ sung UC-10…UC-19 |
+| **Updated by task** | M100.96 — sơ đồ xoá deck theo Trash; UC-04 đã nêu cờ và tag, mục "chỗ lệch" không còn gì mở; trước đó M100.95 — bảng §6 theo code: UC-01, UC-03, UC-05, UC-07 đã xây; thêm UC-12…UC-17, UC-21, UC-22; hai chỗ lệch đã hết hiệu lực; trước đó M99.32 — UC-20 vào bảng §6: tìm kiếm toàn thư viện từ header Library, kết quả card mở chi tiết chỉ đọc UC-19; UC-06 thôi quảng cáo tìm kiếm theo subtree đã bị thay thế; trước đó M99.31 — nhánh `J`: chạm một hàng card mở chi tiết chỉ đọc (UC-19), Edit thành action tường minh; bảng §6 bổ sung UC-10…UC-19 |
 | **Last updated** | 2026-09-16 |
 
 ---
@@ -97,8 +97,8 @@ flowchart TD
 
     B -->|"Đổi tên"| E["Validate rồi lưu · UC-03, BR-01"]
 
-    B -->|"Xoá"| F["Xác nhận, nêu rõ số deck con và số card sẽ mất · UC-03, BR-04"]
-    F -->|"Đồng ý"| F1["Xoá cascade toàn bộ descendant · BR-03"]
+    B -->|"Xoá"| F["Xác nhận, nêu rõ số deck con và số card sẽ cùng vào Trash · UC-03, BR-04"]
+    F -->|"Đồng ý"| F1["Chuyển cả cây vào Trash dưới một batch · BR-03, BR-256 · khôi phục ở UC-21"]
     F -->|"Huỷ"| F2["Không xảy ra gì · UC-03 A4"]
 
     B -->|"Di chuyển"| G{"Bốn phép kiểm, theo thứ tự · UC-09"}
@@ -233,7 +233,7 @@ lại ở đây; cột cuối chỉ nói cái gì đã có trong `lib/` hôm nay
 | UC-01 | deck | M4.12a / M99.9 | Đủ — màn Starter library cho duyệt template, chọn chế độ ôn tập cho bản sao và thêm bản thứ hai có xác nhận. `app/startup/fixture_seeder_widget.dart` chỉ tự cài template ở môi trường development |
 | UC-02 | deck | M4.10 | Đủ |
 | UC-03 | deck | M4.10 / M99.16 / M99.33 | Đủ — đổi tên; xoá vào Trash kèm impact; đổi chế độ ôn tập khi chưa khoá (M99.16). `content_type` về `unset` do hệ thống tự làm (BR-163) |
-| UC-04 | card | M4.11 | Đủ, và **nhiều hơn UC-04 mô tả**: cờ, tag và ba trường phụ (BR-92…BR-95) |
+| UC-04 | card | M4.11 | Đủ — gồm cờ, tag và ba trường phụ (BR-92…BR-95) |
 | UC-05 | review | M5.0…M5.20 | Đủ — phiên học mới theo chuỗi stage và phiên ôn tập một mode, sáu mode, tổng kết phiên |
 | UC-06 | deck | M4.10 | Đủ. Tìm kiếm theo subtree từng là phần thêm ngoài UC-06, đã bị thay bằng tìm kiếm toàn thư viện (UC-20, M99.32) |
 | UC-07 | review | M5.21 | Đủ — reset kèm chọn thuật toán cho chu kỳ mới |
@@ -253,15 +253,9 @@ lại ở đây; cột cuối chỉ nói cái gì đã có trong `lib/` hôm nay
 | UC-21 | trash | M99.33 | Đủ — xoá vào Trash, restore có chọn đích, undo, purge |
 | UC-22 | deck | M100.15 | Đủ — sắp xếp deck cùng cấp |
 
-### Chỗ tài liệu và code còn lệch
+### Chỗ tài liệu và code từng lệch
 
-Ghi lại chứ **không** sửa ở đây: nó thuộc `use-cases.md`, đang `frozen for MVP`.
-
-1. **UC-04 không nhắc cờ và tag.** BR-93 và BR-95 khai `Related: UC-04`, nhưng
-   dòng `Business rules` của UC-04 liệt kê BR-07…BR-10, BR-63, BR-163 và
-   BR-165…BR-167, không có luật cờ và tag. Tham chiếu một chiều: BR biết UC, UC
-   không biết BR.
-
-Hai chỗ lệch từng ghi ở đây đã hết hiệu lực (M100.95): tìm kiếm không còn là phần
-thêm ngoài UC-06 mà là UC-20 (M99.32), và màn thư viện starter mà UC-01 mô tả đã
-được xây ở M99.9.
+Không còn chỗ nào mở. Ba chỗ từng ghi ở đây đã đóng: tìm kiếm không còn là phần
+thêm ngoài UC-06 mà là UC-20 (M99.32), màn thư viện starter mà UC-01 mô tả đã
+được xây ở M99.9 (cả hai ghi nhận ở M100.95), và UC-04 đã nêu cờ, tag và ba
+trường phụ cùng BR-92…BR-95 (M100.96).

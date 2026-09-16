@@ -133,7 +133,7 @@ void main() {
     // entered (BR-44).
     await pumpSheet(tester, hasStudyProgress: true);
 
-    expect(find.textContaining('locks after the first review'), findsNothing);
+    expect(find.text(english.schedulerLockNotice), findsNothing);
   });
 
   testWidgets('cancelling writes nothing', (tester) async {

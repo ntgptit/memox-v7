@@ -537,7 +537,7 @@
   "@schedulerSm2Description": {
     "description": "One-line explanation of the SM-2 mode in the study-mode picker (UC-02 step 3)."
   },
-  "schedulerLockNotice": "Chế độ ôn tập sẽ bị khoá sau lượt ôn đầu tiên.",
+  "schedulerLockNotice": "Chế độ ôn tập sẽ bị khoá khi thẻ đầu tiên học xong.",
   "@schedulerLockNotice": {
     "description": "Warning shown in the study-mode picker. Required by UC-02 step 3 so the choice is understood as hard to undo."
   },
