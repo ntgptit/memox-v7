@@ -194,8 +194,8 @@ void main() {
       // alone, so a reader who chose a study mode and then cancelled lost it
       // with no question — while one typed character earned a confirmation.
       // The silent one is the more expensive: the algorithm is the deck's, it
-      // locks after the first review (BR-06), and the create-root form makes
-      // it required.
+      // locks once the first card finishes learning (BR-13), and the create-root
+      // form makes it required.
       await pumpDeckApp(tester, repository: FakeDeckRepository());
 
       await tester.tap(find.text(english.deckCreateRootAction));

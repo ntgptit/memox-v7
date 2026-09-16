@@ -537,7 +537,7 @@
   "@schedulerSm2Description": {
     "description": "One-line explanation of the SM-2 mode in the study-mode picker (UC-02 step 3)."
   },
-  "schedulerLockNotice": "The study mode locks after the first review.",
+  "schedulerLockNotice": "The study mode locks once the first card finishes learning.",
   "@schedulerLockNotice": {
     "description": "Warning shown in the study-mode picker. Required by UC-02 step 3 so the choice is understood as hard to undo."
   },
