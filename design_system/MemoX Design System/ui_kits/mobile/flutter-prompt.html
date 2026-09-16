@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MemoX — Flutter handoff specs</title>
+<link rel="stylesheet" href="../../colors_and_type.css" />
+<style>
+:root{--doc-ink:#1b1f3a;--doc-ink-2:#5a5f72;--doc-ink-3:#7a7f92;--doc-accent:#3346d6;--doc-surface:#fff;--doc-stage:#e6e8ea;--doc-line:rgba(20,24,48,.1);--doc-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-stage);color:var(--doc-ink);font-family:var(--memox-font-sans,system-ui,sans-serif);font-size:14px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:clamp(16px,3vw,32px)}
+header{margin-bottom:20px}
+header .back{font-size:12px;font-weight:600;color:var(--doc-accent);text-decoration:none}
+header .back:hover{text-decoration:underline}
+h1{font-size:clamp(20px,2.4vw,26px);font-weight:800;letter-spacing:-.5px;margin:10px 0 6px}
+header p{margin:0;font-size:13px;color:var(--doc-ink-2);max-width:70ch;text-wrap:pretty}
+.cols{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:20px;align-items:start}
+nav.idx{background:var(--doc-surface);border:1px solid var(--doc-line);border-radius:14px;padding:8px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+nav.idx .grp{font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--doc-ink-3);padding:12px 10px 5px}
+nav.idx a{display:block;padding:7px 10px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--doc-ink-2);text-decoration:none}
+nav.idx a:hover{background:rgba(51,70,214,.07);color:var(--doc-accent)}
+nav.idx a[aria-current="true"]{background:var(--doc-accent);color:#fff}
+main{background:var(--doc-surface);border:1px solid var(--doc-line);border-radius:14px;padding:clamp(16px,2.4vw,26px);min-width:0}
+/* Narrow screens: the 42-item list would push the prompt a full screen down, so
+   the picker collapses to a native select and the prompt stays at the top. */
+.pick{display:none;margin-bottom:16px}
+.pick label{display:block;font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--doc-ink-3);margin-bottom:6px}
+.pick select{width:100%;font:inherit;font-size:14px;font-weight:600;color:var(--doc-ink);background:var(--doc-surface);border:1px solid var(--doc-line);border-radius:10px;padding:11px 12px;min-height:48px}
+@media(max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}nav.idx{display:none}.pick{display:block}}
+.mh{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:4px}
+.mh h2{font-size:clamp(17px,2vw,21px);font-weight:800;letter-spacing:-.3px;margin:0}
+.mh .sec{font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--doc-ink-3);white-space:nowrap}
+.tgt{font-family:var(--doc-mono);font-size:12px;font-weight:600;color:var(--doc-accent);margin-bottom:14px;overflow-wrap:anywhere}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:-6px 0 14px}
+.run b{font-size:10px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--doc-ink-3)}
+.run .pill{font-family:var(--doc-mono);font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap;border:1px solid var(--doc-line);color:var(--doc-ink-2);background:var(--doc-surface)}
+.run .pill.t3{border-color:#b4472f;color:#b4472f}
+.run .pill.t2{border-color:var(--doc-accent);color:var(--doc-accent)}
+.run .why{font-size:11.5px;color:var(--doc-ink-3);flex:1 1 240px;min-width:0}
+button.act{font:inherit;font-size:12.5px;font-weight:700;padding:9px 15px;min-height:48px;border-radius:10px;border:1px solid var(--doc-accent);background:var(--doc-accent);color:#fff;cursor:pointer;white-space:nowrap;line-height:1.2}
+button.act.sec{background:transparent;color:var(--doc-accent)}
+button.act:hover{filter:brightness(1.08)}
+pre{margin:0;background:#f6f7fb;border:1px solid var(--doc-line);border-radius:12px;padding:16px;font-family:var(--doc-mono);font-size:12px;line-height:1.62;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--doc-ink)}
+pre::selection,pre *::selection{background:rgba(51,70,214,.22)}
+.hint{font-size:11.5px;color:var(--doc-ink-3);margin:10px 0 0;text-wrap:pretty}
+a{color:var(--doc-accent)}a:hover{color:var(--doc-ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<a class="back" href="components.html">&larr; Back to the component gallery</a>
+<h1>Flutter handoff specs</h1>
+<p>One design specification per widget in the kit, written for an agent that has the Flutter repository and not this design. Exact values are the deliverable: both themes, the type scale, spacing roles, every dimension tagged FIXED / MINIMUM / CONTENT-DRIVEN / SYSTEM-OWNED, the state matrix, and the web techniques that must not be copied literally. Copy it into your coding agent as-is.</p>
+</header>
+<div class="cols">
+<nav class="idx" id="idx"></nav>
+<main>
+<div class="pick"><label for="sel">Widget</label><select id="sel"></select></div>
+<div class="mh"><h2 id="wname">&mdash;</h2><span class="sec" id="wsec"></span></div>
+<div class="tgt" id="wtgt"></div>
+<div class="run" id="wrun"></div>
+<div class="bar">
+<button class="act" id="copy" type="button">Copy spec</button>
+<button class="act sec" id="copyall" type="button">Copy Foundations (run once)</button>
+<button class="act sec" id="dl" type="button">Download all as JSON</button>
+</div>
+<pre id="out"></pre>
+<p class="hint"><strong>Run Foundations once</strong>, then one widget spec per task — the widget specs omit the token, colour, type and composition sections on purpose, so you are not paying for them 46 times. Every value is read from <code>colors_and_type.css</code> at page load, for both themes, so the extracted spec cannot drift from the design. Component facts come from the widget's gallery card. Full rules: <code>docs/MEMOX_DESIGN_TO_FLUTTER_SPEC_TEMPLATE.md</code>.</p>
+</main>
+</div>
+</div>
+<script>
+/* Token reads — the contract block is built from these at load, never typed out,
+   so a token change flows into all 42 prompts with no second copy to maintain. */
+const cs = getComputedStyle(document.documentElement);
+const T = (n) => cs.getPropertyValue('--memox-' + n).trim();
+const N = (n) => T(n).replace('px', '');
+
+/* Values are read from colors_and_type.css at load, for both themes, so the
+   extracted spec is exact and cannot drift from the design.
+   Per docs/MEMOX_DESIGN_TO_FLUTTER_SPEC_TEMPLATE.md §2: raw hex IS the
+   deliverable here — the downstream agent has the repo, we have the design. */
+const root = document.documentElement;
+const readAll = (names) => {
+  const grab = () => { const c = getComputedStyle(root); return names.map(n => c.getPropertyValue('--memox-' + n).trim()); };
+  const prev = root.getAttribute('data-memox-theme');
+  root.removeAttribute('data-memox-theme');
+  const light = grab();
+  root.setAttribute('data-memox-theme', 'dark');
+  const dark = grab();
+  if (prev === null) root.removeAttribute('data-memox-theme'); else root.setAttribute('data-memox-theme', prev);
+  const out = {};
+  names.forEach((n, i) => { out[n] = { l: light[i], d: dark[i] }; });
+  return out;
+};
+let V = {};
+const duo = (n, role, use) => {
+  const v = V[n] || { l: '?', d: '?' };
+  const val = v.l === v.d ? v.l + '  (both themes)' : v.l.padEnd(9) + ' / ' + v.d;
+  return '  ' + role.padEnd(24) + val.padEnd(24) + (use ? '  ' + use : '');
+};
+const one = (n, role, use) => '  ' + role.padEnd(24) + (V[n] ? V[n].l : '?').padEnd(24) + (use ? '  ' + use : '');
+
+const COLOR_TOKENS = ['primary','on-primary','primary-container','on-primary-container','secondary','on-secondary','secondary-container','on-secondary-container','tertiary','on-tertiary','tertiary-container','on-tertiary-container','error','on-error','error-container','on-error-container','success','warning','mastery','surface','on-surface','on-surface-variant','surface-dim','surface-bright','surface-container-lowest','surface-container-low','surface-container','surface-container-high','surface-container-highest','outline','outline-variant','inverse-surface','on-inverse-surface','inverse-primary','shadow','scrim','text-primary','text-secondary','text-muted','status-new','status-learning','status-reviewing','status-mastered','op-disabled','op-hover','op-press','op-glass'];
+const NUM_TOKENS = ['fs-caption','fs-body','fs-body-lg','fs-title','fs-headline','fs-display','fs-stat','fw-regular','fw-medium','fw-semibold','fw-bold','fw-extrabold','lh-display','lh-heading','lh-body','lh-caption','ls-heading','ls-label','ls-section','space-xs','space-sm','space-md','space-lg','space-card','space-xl','space-xxl','space-xxxl','space-screen','space-section','radius-xs','radius-sm','radius-md','radius-lg','radius-card','radius-xl','radius-xxl','radius-full','size-icon-xs','size-icon-sm','size-icon-md','size-icon-lg','size-icon-xl','size-touch','size-button','size-button-sm','size-button-lg','size-input','size-chip','size-chip-sm','size-appbar','size-bottom-nav','size-bottom-bar','size-statusbar','size-icon-btn','size-fab','shadow-card','shadow-chrome','shadow-fab','font-sans','font-headline'];
+const px = (n) => (V[n] ? V[n].l : '?').replace('px', '');
+
+const globalSpec = () => `## Visual direction
+
+MemoX runs two themes from one structure: Tokyo Pure Light, a cool blue-tinted
+white where every neutral carries a trace of indigo and nothing is warm; and
+Tokyo Nebula, a deep navy dark theme where the brand indigo lifts for contrast
+rather than the surfaces inverting. The language is flat and quiet — surfaces
+separate by a one-pixel hairline and a very soft shadow, not by heavy elevation.
+Indigo carries every primary action, violet is the signature accent, and green
+is reserved for mastery and success so it always reads as progress. Type is set
+in a single sans with a tight-tracked display face for figures, and the layout
+keeps a steady 16px gutter with generous card interiors.
+
+## Colors
+
+Format: light / dark. “both themes” means the role is deliberately invariant.
+
+Brand & action
+${duo('primary','primary','fills primary actions, active nav, links')}
+${duo('on-primary','onPrimary','label/glyph on a primary fill')}
+${duo('primary-container','primaryContainer','tonal button, selected chip, soft emphasis')}
+${duo('on-primary-container','onPrimaryContainer','text on primaryContainer')}
+${duo('secondary','secondary','secondary emphasis, muted brand')}
+${duo('on-secondary','onSecondary','on a secondary fill')}
+${duo('secondary-container','secondaryContainer','')}
+${duo('on-secondary-container','onSecondaryContainer','')}
+${duo('tertiary','tertiary','the violet signature accent')}
+${duo('on-tertiary','onTertiary','')}
+${duo('tertiary-container','tertiaryContainer','')}
+${duo('on-tertiary-container','onTertiaryContainer','')}
+
+Surfaces — the ladder is ordered lowest to highest
+${duo('surface','surface','the page ground')}
+${duo('surface-dim','surfaceDim','')}
+${duo('surface-bright','surfaceBright','')}
+${duo('surface-container-lowest','surfaceContainerLowest','')}
+${duo('surface-container-low','surfaceContainerLow','input fill, sheet')}
+${duo('surface-container','surfaceContainer','chip, inactive track')}
+${duo('surface-container-high','surfaceContainerHigh','dialog')}
+${duo('surface-container-highest','surfaceContainerHighest','')}
+
+Text & lines
+${duo('on-surface','onSurface','primary text')}
+${duo('on-surface-variant','onSurfaceVariant','secondary text, inactive glyph')}
+${duo('text-muted','text muted','tertiary text, timestamps')}
+${duo('outline','outline','visible borders, focus rings')}
+${duo('outline-variant','outlineVariant','hairline dividers and card borders')}
+
+Feedback & progress
+${duo('error','error','')}
+${duo('on-error','onError','')}
+${duo('error-container','errorContainer','')}
+${duo('on-error-container','onErrorContainer','')}
+${duo('success','success','')}
+${duo('warning','warning','')}
+${duo('mastery','mastery','mastery/progress green')}
+${duo('status-new','status new','')}
+${duo('status-learning','status learning','')}
+${duo('status-reviewing','status reviewing','')}
+${duo('status-mastered','status mastered','')}
+
+Inverse & effects
+${duo('inverse-surface','inverseSurface','snackbar slate — does NOT flip with the theme')}
+${duo('on-inverse-surface','onInverseSurface','label on the snackbar')}
+${duo('inverse-primary','inversePrimary','action inside a snackbar')}
+${duo('shadow','shadow','shadow base color, mixed at the use site')}
+${duo('scrim','scrim','modal scrim base, used at 45% alpha')}
+
+Opacities
+  disabled                ${V['op-disabled'] ? V['op-disabled'].l : '?'}
+  hover overlay           ${V['op-hover'] ? V['op-hover'].l : '?'}
+  pressed overlay         ${V['op-press'] ? V['op-press'].l : '?'}
+  glass chrome            ${V['op-glass'] ? V['op-glass'].l : '?'}
+
+## Typography
+
+Family: ${V['font-sans'] ? V['font-sans'].l : '?'}
+Display/figures: ${V['font-headline'] ? V['font-headline'].l : '?'}
+
+  role            size  weight  line-height  tracking   usage
+  caption         ${px('fs-caption')}    ${V['fw-semibold'].l}     ${V['lh-caption'].l}          ${px('ls-section')}        overlines, metadata — hard 12px floor
+  body            ${px('fs-body')}    ${V['fw-regular'].l}     ${V['lh-body'].l}          0          default running text
+  body large      ${px('fs-body-lg')}    ${V['fw-medium'].l}     ${V['lh-body'].l}          0          list titles, emphasised body
+  title           ${px('fs-title')}    ${V['fw-bold'].l}     ${V['lh-heading'].l}          ${px('ls-heading')}      section and screen titles
+  headline        ${px('fs-headline')}    ${V['fw-bold'].l}     ${V['lh-heading'].l}          ${px('ls-heading')}      screen headline
+  display         ${px('fs-display')}    ${V['fw-extrabold'].l}     ${V['lh-display'].l}          ${px('ls-heading')}      hero figure
+  stat            ${px('fs-stat')}    ${V['fw-semibold'].l}     1.0          ${px('ls-heading')}      large metric, tabular numerals
+
+Weights available: ${[V['fw-regular'].l, V['fw-medium'].l, V['fw-semibold'].l, V['fw-bold'].l, V['fw-extrabold'].l].join(' / ')}
+Type is NOT on the spacing grid — do not snap a size to a multiple of 4.
+
+## Spacing
+
+  value  role                usage
+  ${px('space-xs')}      micro gap           icon-to-label, inside a chip
+  ${px('space-sm')}      control internal    button padding, tight stacks
+  ${px('space-md')}     grouped items       related rows inside one block
+  ${px('space-lg')}     screen gutter       horizontal screen padding AND list/item gap
+  ${px('space-card')}     card padding        card and sheet interior
+  ${px('space-xl')}     section gap         between sections of a screen
+  ${px('space-xxl')}     major separation    between major visual groups
+  ${px('space-xxxl')}     page-end clearance  scroll tail above pinned chrome
+
+Spacing is gap / padding / inset only. Component size is a separate system —
+see below.
+
+## Radius & geometry
+
+Radius roles
+  ${px('radius-xs')}    badge, micro surface
+  ${px('radius-sm')}    small tile, icon tile
+  ${px('radius-md')}   button, input
+  ${px('radius-lg')}   FAB, dialog, sheet
+  ${px('radius-card')}   card — the roomiest common surface
+  ${px('radius-xl')}   bottom sheet top corners
+  ${px('radius-xxl')}   large focal surface
+  ${px('radius-full')}  pill — chip, avatar, toggle track
+
+Component geometry — each with its dimension class
+  button height            ${px('size-button')}   FIXED     (compact ${px('size-button-sm')} · large ${px('size-button-lg')})
+  input height             ${px('size-input')}   FIXED
+  chip height              ${px('size-chip')}   FIXED     (compact ${px('size-chip-sm')})
+  icon-button ink box      ${px('size-icon-btn')}   FIXED     the painted circle only
+  touch target             ${px('size-touch')}   MINIMUM   applies to every interactive element
+  app bar height           ${px('size-appbar')}   FIXED
+  bottom nav block         ${px('size-bottom-nav')}   FIXED     bar drawn at ${px('size-bottom-bar')}, rest is inset
+  FAB height               ${px('size-fab')}   FIXED     extended only; width CONTENT-DRIVEN
+  card height              —    CONTENT-DRIVEN
+  list row height          ${px('size-touch')}   MINIMUM   grows with content
+  preview status bar       ${px('size-statusbar')}   SYSTEM-OWNED  device-frame chrome, never an app dimension
+
+## Icons
+
+  size  role                usage
+  ${px('size-icon-xs')}    inline              inside body text, compact utility
+  ${px('size-icon-sm')}    compact control     dense rows, metadata, nav glyphs, FAB glyph
+  ${px('size-icon-md')}    standard action     app-bar and navigation actions
+  ${px('size-icon-lg')}    large emphasis      feature tiles
+  ${px('size-icon-xl')}    illustrative        empty states, hero marks
+
+Visual icon size and touch area are separate. A ${px('size-icon-sm')}px glyph in a ${px('size-icon-btn')}px ink box
+still needs a ${px('size-touch')}px interactive region; expand the hit area, never the painted box.
+Nothing goes below ${px('size-icon-xs')}px.
+
+## Elevation / border / shadow
+
+Surfaces separate by a hairline plus a very soft shadow — there is no heavy
+elevation anywhere in this design.
+
+  border         1px solid outlineVariant on cards, inputs and dividers
+  card           ${V['shadow-card'] ? V['shadow-card'].l : '?'}
+  chrome         ${V['shadow-chrome'] ? V['shadow-chrome'].l : '?'}
+  floating       ${V['shadow-fab'] ? V['shadow-fab'].l : '?'}
+  scrim          scrim at 45% alpha behind dialogs and sheets
+  glass chrome   translucent surface + backdrop blur on the bottom nav
+
+Hierarchy: page ground → card (hairline + card shadow) → sheet/dialog
+(container surface + scrim) → floating action (fab shadow). Shadows are neutral,
+never tinted with the brand color.`;
+let GLOBAL = '', DATA = [], cur = null;
+
+const foundationsSpec = () => `/superpowers:subagent-driven-development
+
+# MemoX — Foundations (run ONCE, before any component spec)
+
+Source: MemoX HTML design kit. Every value below is read live from
+colors_and_type.css at page load, for both themes, so it cannot drift from the
+design. Load this once as shared context; each component spec that follows is
+written against it and will not repeat these values.
+
+${globalSpec()}
+
+## Screen composition
+
+The component sits on the ${px('space-lg')}px screen gutter, in a single content column.
+Vertical rhythm around it: ${px('space-md')} between related rows, ${px('space-lg')} between list items,
+${px('space-xl')} between sections, ${px('space-xxl')} between major groups. Card interiors are ${px('space-card')}.
+Scrollable content clears pinned chrome by ${px('space-xxxl')} at the tail so the last item is
+never trapped under the bottom nav or the floating action.
+Hierarchy on any screen using it: primary focal surface → supporting metadata →
+primary action (anchored) → secondary action (inline, lower contrast).
+
+## Responsive / Android notes
+
+  compact phone   the content column narrows; the gutter stays ${px('space-lg')}. Nothing
+                  in this design depends on a fixed viewport width.
+  large text      every text container must grow. Do not clamp text scale and
+                  do not put a fixed height around text.
+  landscape       the column stays single; pinned chrome remains reachable.
+  keyboard open   the focused field and the primary action stay reachable; the
+                  IME inset is supplied at runtime, never hardcoded.
+
+SYSTEM-OWNED geometry — Android supplies all of it:
+  status bar · display cutout · gesture/navigation inset · keyboard inset ·
+  system Back. The kit's ${px('size-statusbar')}px status bar and its phone bezel are preview
+  chrome. Never convert them into application dimensions.
+
+## HTML/JSX translation notes
+
+  WEB TECHNIQUE   absolutely-positioned FAB and bottom nav inside the frame
+  VISUAL INTENT   the action stays anchored above the content, clear of the
+                  system inset
+  HANDOFF         preserve the anchored relationship; absolute positioning is
+                  not part of the design
+
+  WEB TECHNIQUE   a ::after box widening a small control's tap area
+  VISUAL INTENT   the painted control stays compact while the tap area meets
+                  ${px('size-touch')}px
+  HANDOFF         keep visual size and hit area separate; the technique is
+                  irrelevant
+
+  WEB TECHNIQUE   backdrop-filter blur on the bottom nav
+  VISUAL INTENT   chrome reads as translucent glass over scrolling content
+  HANDOFF         reproduce the visual result; a solid surface at the same
+                  value is acceptable if blur is costly
+
+  WEB TECHNIQUE   color-mix() overlays for hover and pressed tints
+  VISUAL INTENT   a percentage tint of the role color over the surface
+  HANDOFF         use the platform's own overlay mechanism at the same
+                  percentage
+
+  WEB TECHNIQUE   Scrim / Dialog / BottomSheet are absolutely positioned with
+                  inset:0 INSIDE the phone div, and Dialog and BottomSheet each
+                  draw their own Scrim unless passed scrim={false}
+  VISUAL INTENT   a modal layer covering the app surface, dimmed to 45% of the
+                  scrim role color, with the panel centred (dialog) or
+                  bottom-anchored (sheet)
+  HANDOFF         the platform's own modal route owns the barrier and the full
+                  window — the scrim={false} flag exists only because this mock
+                  nests overlays inside a preview frame. Do NOT carry it across
+                  as a widget parameter; take the dim percentage, the panel
+                  geometry and the motion, nothing else.
+
+  WEB TECHNIQUE   TextField and SearchField are static mocks — a <span> holding
+                  placeholder text plus a CSS-animated caret, not a real input
+  VISUAL INTENT   the rest / focus / error appearance of a filled field
+  HANDOFF         "focused" and "error" here are VISUAL STATES, not behaviour.
+                  Real focus, caret, selection, IME and validation are the
+                  platform's; only the borders, fill and message styling transfer.
+
+  Also do not copy: hover-only affordances (there is no hover on Android), the
+  fake status bar, the device bezel, or any fixed pixel box drawn around text.
+
+## Priorities
+
+  P0  palette and both themes; type scale; ${px('space-lg')} gutter and the spacing rhythm
+  P1  this component's surface treatment, radius, geometry class and states
+  P2  icon sizing per role, hairline and shadow treatment
+  P3  decorative polish — flip timing, glass blur, the skeleton's opacity
+      pulse (0.45 ↔ 0.75 over 1.4s — a pulse, not a shimmer sweep)
+
+
+## Implementation handoff — foundations
+
+GLOBAL VISUAL TOKENS:
+  spacing ${px('space-xs')}/${px('space-sm')}/${px('space-md')}/${px('space-lg')}/${px('space-card')}/${px('space-xl')}/${px('space-xxl')}/${px('space-xxxl')} · radius ${px('radius-xs')}/${px('radius-sm')}/${px('radius-md')}/${px('radius-lg')}/${px('radius-card')}/${px('radius-xl')}/${px('radius-full')}
+  icons ${px('size-icon-xs')}/${px('size-icon-sm')}/${px('size-icon-md')}/${px('size-icon-lg')}/${px('size-icon-xl')} · touch target ${px('size-touch')} minimum
+
+COLOR / THEME SPEC:
+  two themes, light / dark, in the Colors section above. inverseSurface is
+  invariant. tertiary is the violet accent; green is reserved for mastery.
+
+TYPOGRAPHY:
+  ${px('fs-caption')} / ${px('fs-body')} / ${px('fs-body-lg')} / ${px('fs-title')} / ${px('fs-headline')} / ${px('fs-display')} / ${px('fs-stat')}, ${px('fs-caption')} is a hard floor, not on the 4dp grid
+
+COMPONENT CONTRACTS:
+  supplied per component, in the specs that follow this one — each carries its
+  own dimension table, icon list and state matrix
+
+SCREEN COMPOSITION:
+  ${px('space-lg')} gutter · ${px('space-lg')} list gap · ${px('space-xl')} section gap · ${px('space-xxl')} major separation · ${px('space-xxxl')} scroll tail
+
+RESPONSIVE RULES:
+  single column, no fixed widths, no fixed heights around text, no text-scale
+  clamping, pinned chrome always reachable
+`;
+
+const specFor = (w) => {
+  const sys = w.kind !== 'production';
+  const geom = w.vars.map(([l, v, k]) => '  ' + l.padEnd(16) + (v || '—').padEnd(22) + k).join('\n');
+  const states = w.states
+    ? w.states.map(([n, d]) => '  ' + n.padEnd(18) + d).join('\n')
+    : '  Non-interactive — no pressed, focused, selected or disabled state.';
+  const sysBlock = sys
+    ? `\nSYSTEM-OWNED — DO NOT IMPLEMENT AS APP UI\nThis item exists in the kit only because the HTML preview draws a device frame.\nAndroid supplies it at runtime. Do not build a widget for it, do not paint it,\nand do not turn any dimension below into an app token or a fixed spacer.\n`
+    : '';
+  const iconList = (w.icons && w.icons.length)
+    ? w.icons.map((i) => '  ' + i).join('\n')
+    : '  none — this component paints no glyph of its own';
+  const icons = `
+## Icons — ${w.nm}
+
+Glyph names this component paints, verbatim from the kit:
+
+${iconList}
+
+These are LUCIDE names. The kit uses Lucide as a stand-in because the HTML
+preview has no Material Symbols dependency; the app ships Material Symbols.
+Do not treat the string as an Icons.* identifier — pick the nearest Material
+Symbol by MEANING, and keep the meaning stable across every screen that uses
+it (one concept, one glyph). Where the glyph arrives as a prop, the name above
+is what the kit demonstrates, not a fixed part of the contract; the size step
+in the dimension table IS fixed.
+`;
+  return `/superpowers:subagent-driven-development
+
+# ${w.nm} — design specification for Flutter handoff
+
+Source: MemoX HTML design kit · ${w.sec}
+Closest Flutter/Material equivalent: ${w.fl}
+Nature: ${sys ? 'PREVIEW / SYSTEM CHROME — not application UI' : 'production component'}
+${sysBlock}
+> Run the MemoX Foundations spec ONCE before this prompt. It carries the palette
+> (both themes), the type scale, the spacing / radius / icon / elevation scales,
+> screen composition, responsive rules and the web techniques that must not be
+> copied. Everything below assumes it and names tokens instead of repeating values.
+
+## Component contract — ${w.nm}
+
+${w.ds}
+
+Dimensions, each with its class:
+${geom}
+
+FIXED means reproduce the value. MINIMUM means never go below it, grow freely.
+CONTENT-DRIVEN means the content sets it — do not convert it into a fixed box.
+RESPONSIVE means it changes with width or text scale. SYSTEM-OWNED means the
+platform supplies it.
+${icons}
+## State matrix — ${w.nm}
+
+${states}
+
+Entries marked [INFERRED] are not drawn in the mock; they follow the design
+language and should be confirmed rather than copied blindly.
+
+## Implementation handoff — ${w.nm}
+
+COMPONENT CONTRACT:
+  ${w.nm} — dimension table + state matrix above; classes are binding
+  glyphs (Lucide names, map by meaning to Material Symbols): ${(w.icons && w.icons.length) ? w.icons.join(' · ') : 'none'}
+
+Everything else (tokens, colour, type, spacing, composition, responsive rules)
+comes from the Foundations spec — do not re-derive it from this prompt.
+
+SYSTEM-OWNED — DO NOT IMPLEMENT AS APP UI:
+  status bar (${px('size-statusbar')} in the preview) · cutout · gesture/nav inset · keyboard
+  inset · system Back · the device bezel${sys ? '\n  THIS ITEM IS ONE OF THEM — build nothing.' : ''}
+
+DO NOT COPY LITERALLY FROM HTML/JSX:
+  absolute positioning · ::after hit expanders · backdrop-filter · color-mix
+  overlays · hover states · fake system chrome · fixed pixel boxes around text
+
+P0 CHANGES:
+  palette + both themes, type scale, ${px('space-lg')} gutter and spacing rhythm`;
+};
+
+/* Suggested run profile — a SCREEN-ONLY hint, deliberately not written into
+   flutter-prompts.json and not injected into the prompt text. It is a heuristic
+   over the spec surface (state count, judgement-bearing dimensions, inferred
+   states, and whether the component involves custom painting, motion, a modal
+   layer or a gesture) — not a measurement of Flutter difficulty. If the repo
+   already has an equivalent widget, drop everything one tier. */
+const PAINT = /\bCustomPaint\b|\barc\b|\bfl_chart\b|\bchart\b(?!-)/i;
+const MOTION = /\banimat|\bflip\b|\btransition\b|memox(Sheet|Dialog|Scrim|Skel|Spin)|\bpulse\b|\d+ms\b/i;
+const OVERLAY = /\bbarrier\b|showDialog|showModalBottomSheet|\bmodal\b|\bscrim\b/i;
+const GESTURE = /\bdrag|\bswipe|\bslider\b|\bscrub|\breorder\b|follows the finger/i;
+/* Components the formula cannot see as painted from their Flutter target alone. */
+const PAINT_EXTRA = new Set(['masteryring']);
+
+const runProfile = (w) => {
+  if (w.kind !== 'production') return { tier: 'T0', model: 'Haiku', effort: 'none', why: 'preview / system chrome — the spec says do not build it' };
+  const blob = [w.nm, w.fl, w.ds, JSON.stringify(w.states || []), JSON.stringify(w.vars)].join(' ');
+  const states = (w.states || []).length;
+  const soft = w.vars.filter((v) => v[2] !== 'FIXED').length;
+  const inferred = (w.states || []).filter((s) => /INFERRED/.test(s[1])).length;
+  const paint = PAINT.test(w.fl) || PAINT.test(w.nm) || PAINT_EXTRA.has(w.slug);
+  const motion = MOTION.test(blob), overlay = OVERLAY.test(blob), gesture = GESTURE.test(blob);
+  const score = states + soft * 0.8 + inferred * 0.6 + (paint ? 4 : 0) + (motion ? 2 : 0) + (overlay ? 3 : 0) + (gesture ? 3 : 0);
+  // Hand-drawing a shape is work the state count cannot measure, so painting
+  // floors the tier at T2 however few states the component has.
+  let tier = score >= 9 ? 'T3' : score >= 5 ? 'T2' : score >= 2 ? 'T1' : 'T0';
+  if (paint && (tier === 'T1' || tier === 'T0')) tier = 'T2';
+  const drivers = [paint && 'custom painting', motion && 'motion', overlay && 'modal layer', gesture && 'gesture'].filter(Boolean);
+  const why = tier === 'T3'
+    ? 'the spec deliberately does not own ' + (overlay ? 'the modal route and barrier' : 'platform focus / IME') + ' — reconciling that is the work'
+    : drivers.length ? drivers.join(' + ') + ' on top of ' + states + ' states'
+    : states ? states + ' states, maps close to a Material widget'
+    : 'maps almost directly onto a Material widget';
+  return { tier, model: tier === 'T0' ? 'Haiku' : 'Sonnet', effort: tier === 'T3' ? 'think hard' : tier === 'T2' ? 'think' : 'none', why, score: score.toFixed(1) };
+};
+
+const render = () => {
+  const w = DATA.find(x => x.slug === cur) || DATA[0];
+  if (!w) return;
+  cur = w.slug;
+  document.getElementById('wname').textContent = w.nm;
+  document.getElementById('wsec').textContent = w.sec;
+  document.getElementById('wtgt').textContent = w.fl + (w.kind !== 'production' ? '  ·  PREVIEW / SYSTEM CHROME — not application UI' : '');
+  const rp = runProfile(w);
+  document.getElementById('wrun').innerHTML =
+    '<b>Suggested run</b>' +
+    '<span class="pill ' + rp.tier.toLowerCase() + '">' + rp.tier + '</span>' +
+    '<span class="pill ' + rp.tier.toLowerCase() + '">' + rp.model + '</span>' +
+    '<span class="pill ' + rp.tier.toLowerCase() + '">effort: ' + rp.effort + '</span>' +
+    '<span class="why">' + rp.why + (rp.score ? ' \u00b7 score ' + rp.score : '') + '</span>';
+  document.getElementById('out').textContent = specFor(w);
+  for (const a of document.querySelectorAll('#idx a')) a.setAttribute('aria-current', String(a.dataset.slug === cur));
+  document.getElementById('sel').value = cur;
+  document.title = 'MemoX — Flutter handoff spec · ' + w.nm;
+};
+
+const buildPickers = () => {
+  const idx = document.getElementById('idx');
+  const sel = document.getElementById('sel');
+  let last = null, og = null;
+  for (const w of DATA) {
+    if (w.sec !== last) {
+      const g = document.createElement('div');
+      g.className = 'grp';
+      g.textContent = w.sec;
+      idx.appendChild(g);
+      og = document.createElement('optgroup');
+      og.label = w.sec;
+      sel.appendChild(og);
+      last = w.sec;
+    }
+    const a = document.createElement('a');
+    a.href = '#' + w.slug;
+    a.dataset.slug = w.slug;
+    a.textContent = w.nm;
+    idx.appendChild(a);
+    const o = document.createElement('option');
+    o.value = w.slug;
+    o.textContent = w.nm;
+    og.appendChild(o);
+  }
+};
+
+const flash = (btn, msg) => {
+  if (btn.dataset.busy) return;
+  const old = btn.dataset.label || btn.textContent;
+  btn.dataset.label = old;
+  btn.dataset.busy = '1';
+  btn.textContent = msg;
+  setTimeout(() => { btn.textContent = old; delete btn.dataset.busy; }, 1600);
+};
+
+/* Copying from inside a preview iframe: the async Clipboard API rejects with
+   NotAllowedError ("Document is not focused") unless the frame holds focus, so
+   fall through to execCommand, then to selecting the text so the reader can
+   still press Cmd/Ctrl-C. */
+const copy = (text, btn) => {
+  const legacy = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  };
+  const selectOut = () => {
+    const r = document.createRange();
+    r.selectNodeContents(document.getElementById('out'));
+    const s = getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+  };
+  window.focus();
+  const fallback = () => { if (legacy()) flash(btn, 'Copied'); else { selectOut(); flash(btn, 'Selected — press ⌘/Ctrl-C'); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => flash(btn, 'Copied'), fallback);
+    return;
+  }
+  fallback();
+};
+
+fetch('flutter-prompts.json').then(r => r.json()).then(d => {
+  V = readAll([...COLOR_TOKENS, ...NUM_TOKENS]);
+  GLOBAL = globalSpec();
+  DATA = d;
+  buildPickers();
+  cur = location.hash.slice(1) || DATA[0].slug;
+  render();
+});
+
+addEventListener('hashchange', () => { cur = location.hash.slice(1); render(); });
+document.getElementById('sel').addEventListener('change', (e) => { location.hash = e.target.value; });
+document.getElementById('copy').addEventListener('click', (e) => copy(document.getElementById('out').textContent, e.currentTarget));
+document.getElementById('copyall').addEventListener('click', (e) => copy(foundationsSpec(), e.currentTarget));
+
+/* Export every widget's spec as ONE file, with tokens already resolved.
+   This is a dead artifact for an agent with no browser — a snapshot of one
+   handoff, never a second source of truth. `colors_and_type.css` stays
+   authoritative; anything downloaded here is stale the moment a token moves,
+   which is why the payload carries the generation timestamp and the theme
+   values it was rendered against. */
+const exportAll = () => ({
+  generated: new Date().toISOString(),
+  source: 'ui_kits/mobile/flutter-prompt.html',
+  warning: 'Snapshot. colors_and_type.css is authoritative — regenerate after any token change.',
+  tokens: Object.fromEntries(Object.entries(V).map(([k, v]) => [k, { light: v.l, dark: v.d }])),
+  foundations: foundationsSpec(),
+  usage: 'Send foundations once as shared context, then one widget spec per task. Widget specs deliberately omit the token/colour/type/composition sections — they are in foundations.',
+  widgets: DATA.map((w) => ({
+    name: w.nm, slug: w.slug, section: w.sec, flutterTarget: w.fl, kind: w.kind,
+    description: w.ds,
+    icons: { set: 'lucide', note: 'Map to Material Symbols by meaning; not Icons.* identifiers.', names: w.icons || [] },
+    dimensions: w.vars.map(([label, value, scope]) => ({ label, value, classification: scope })),
+    states: (w.states || []).map(([name, detail]) => ({ name, detail, inferred: /INFERRED/.test(detail || '') })),
+    spec: specFor(w)
+  }))
+});
+
+document.getElementById('dl').addEventListener('click', (e) => {
+  const blob = new Blob([JSON.stringify(exportAll(), null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'memox-flutter-handoff.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  flash(e.currentTarget, 'Downloaded · ' + DATA.length + ' widgets');
+});
+</script>
+</body>
+</html>

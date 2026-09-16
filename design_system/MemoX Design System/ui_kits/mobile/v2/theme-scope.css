@@ -1,0 +1,115 @@
+/* MemoX v2 — scoped dark theme (Tokyo Nebula).
+   Extracted verbatim from ui_kits/mobile/index.html so the two galleries
+   cannot drift. Wrap any subtree in .memox-dark to paint it in dark tokens
+   without touching the OS preference. */
+  .memox-dark {
+    --memox-surface:                    #0A0E27;
+    --memox-surface-bright:             #232B5A;
+    --memox-surface-dim:                #060925;
+    --memox-surface-container-lowest:   #131A3A;
+    --memox-surface-container-low:      #1B2249;
+    --memox-surface-container:          #232B5A;
+    --memox-surface-container-high:     #2C356E;
+    --memox-surface-container-highest:  #353D7E;
+    --memox-on-surface:          #E4E8FA;
+    --memox-on-surface-variant:  #A4ACD0;
+    --memox-outline:             #5A6BAE;
+    --memox-outline-variant:     #2A3267;
+    --memox-mastery: #6FE0BD;
+    --memox-error:   #FF8FA3;
+    /* Solid danger-button fill — deep rose, so dark-mode delete CTAs don't glare
+       like the light-pink text/icon error color (#FF8FA3) did as a full fill */
+    --memox-error-fill: #B0485C;
+    --memox-on-error-fill: #FFFFFF;  /* unchanged — fill is dark in both modes */
+    --memox-on-streak:     #FFFFFF;  /* unchanged — streak always warm, needs white text */
+    --memox-streak:  #FFAE6E;
+    --memox-chrome-glass: rgba(10, 14, 39, 0.84);
+    --memox-border-ghost: 1px solid rgba(139, 154, 255, 0.16);
+    --memox-primary:    #8B9AFF;              /* Phase 0: accessible dark primary (was #5265F5) */
+    --memox-on-primary: #11173A;              /* deep navy content on the light-indigo fill */
+    --memox-primary-bright: #8B9AFF;          /* alias — equal to --memox-primary now */
+    --memox-primary-container:    #2D346A;
+    --memox-on-primary-container: #D9DFFF;
+    /* 5–8 Secondary */
+    --memox-secondary:              #9DA8E8;
+    --memox-on-secondary:           #1A2150;
+    --memox-secondary-container:    #343C78;
+    --memox-on-secondary-container: #DDE2FB;
+    /* 9–12 Tertiary — signature violet */
+    --memox-tertiary:              #B5A0FF;
+    --memox-on-tertiary:           #240B63;
+    --memox-tertiary-container:    #443078;
+    --memox-on-tertiary-container: #E6DCFF;
+    --memox-accent:    var(--memox-tertiary);
+    --memox-on-accent: var(--memox-on-tertiary);
+    /* 13–16 Error (--memox-error above) */
+    --memox-on-error:           #52061B;
+    --memox-error-container:    #7A2036;
+    --memox-on-error-container: #FFD9DF;
+    /* 22–24 Inverse — invariant across themes (fixed-dark toasts) */
+    --memox-inverse-surface:     #34395D;
+    --memox-on-inverse-surface:  #E8EAFC;
+    --memox-inverse-primary:     #5265F5;
+    /* 25–26 Effects */
+    --memox-shadow: #000000;
+    --memox-scrim:  #000000;
+    /* 34–45 Fixed roles are intentionally NOT overridden in dark. */
+    --memox-success:   #6FE0BD;
+    --memox-warning:   #FFC658;
+    --memox-mastery-fixed:    #1F4A37;
+    --memox-on-mastery-fixed: #C7F2D8;
+    /* Card status + rating — dark values (previously fell back to light tokens) */
+    --memox-status-new:        #6B75A3;
+    --memox-status-learning:   #FFC658;
+    --memox-status-reviewing:  #8B9AFF;
+    --memox-status-mastered:   #6FE0BD;
+    --memox-rating-again:      #FF8FA3;
+    --memox-rating-hard:       #FFC658;
+    --memox-rating-good:       #8B9AFF;
+    --memox-rating-easy:       #6FE0BD;
+    --memox-self-missed:  #FF8FA3;
+    --memox-self-partial: #FFC658;
+    --memox-self-gotit:   #6FE0BD;
+    --memox-mastery-low:  #8B4F66;
+    --memox-mastery-mid:  #8B7338;
+    --memox-mastery-high: #3F8070;
+    /* ── Phase 0 — semantic role layer (dark, mirrors colors_and_type.css) ── */
+    --memox-bg:              var(--memox-surface);
+    --memox-surface-raised:  var(--memox-surface-container-lowest); /* paper indigo — aligned with colors_and_type.css dark */
+    --memox-surface-muted:   var(--memox-surface-container-low);
+    --memox-surface-hero:    color-mix(in srgb, var(--memox-primary) 12%, var(--memox-surface));
+    --memox-chrome:          var(--memox-chrome-glass);
+    --memox-border:          var(--memox-outline-variant);
+    --memox-text-primary:    var(--memox-on-surface);
+    --memox-text-secondary:  var(--memox-on-surface-variant);
+    --memox-text-muted:      var(--memox-outline);
+    --memox-primary-hover:   #A6B2FF;
+    --memox-primary-soft:    color-mix(in srgb, var(--memox-primary) 20%, transparent);
+    --memox-primary-border:  color-mix(in srgb, var(--memox-primary) 32%, transparent);
+    --memox-danger:          var(--memox-error);
+    --memox-on-danger:       #2A0A12;
+    --memox-danger-soft:     color-mix(in srgb, var(--memox-error) 16%, transparent);
+    --memox-danger-border:   color-mix(in srgb, var(--memox-error) 32%, transparent);
+    --memox-on-success:      #06231A;
+    --memox-success-soft:    color-mix(in srgb, var(--memox-success) 18%, transparent);
+    --memox-success-border:  color-mix(in srgb, var(--memox-success) 32%, transparent);
+    --memox-on-warning:      #2A1E00;
+    --memox-warning-soft:    color-mix(in srgb, var(--memox-warning) 18%, transparent);
+    --memox-warning-border:  color-mix(in srgb, var(--memox-warning) 32%, transparent);
+    --memox-progress-track:  var(--memox-surface-container-high);
+    --memox-badge-bg:        var(--memox-surface-container);
+    --memox-shadow-none:     none;
+    --memox-shadow-soft:     none;
+    --memox-shadow-card:     0 16px 40px rgba(0,0,0,0.42);
+    --memox-shadow-chrome:   0 -2px 14px rgba(0,0,0,0.36);
+    --memox-shadow-fab:      0 10px 28px rgba(0,0,0,0.5);
+  }
+
+
+/* Text on a warning (amber) tint. The amber role itself is a FILL/ICON colour:
+   #F59E0B as 12px text on its own 13% tint measures ~2:1 in light. The v2
+   screens paint warning TEXT with this ink instead — dark brown in light,
+   the amber itself on the navy dark surface. Tints, fills and icons are
+   unchanged, and no global token is touched. */
+:root { --memox-warning-ink: var(--memox-on-warning); }
+.memox-dark { --memox-warning-ink: var(--memox-warning); }
