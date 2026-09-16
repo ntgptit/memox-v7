@@ -1,0 +1,686 @@
+/*
+ * MemoX Design Tokens — CSS custom properties
+ *
+ * Source of truth: lib/core/theme/tokens/** in github.com/ntgptit/memox @ main.
+ * This file mirrors those Dart abstract-final classes as CSS variables and
+ * provides semantic selectors (h1, .caption, etc) so agents can style quickly.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
+
+:root {
+  /* ── Type families ─────────────────────────────────────────── */
+  --memox-font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --memox-font-headline: var(--memox-font-sans);
+
+  /* ── Type scale — 7 bậc, mỗi bậc là một giá trị thật đang dùng ────
+   * Trước đây khối này có 15 tên cho 7 giá trị: 8 tên trùng giá trị với tên
+   * khác và 5 tên không được gọi lần nào. Giờ mỗi token là một cỡ riêng biệt,
+   * kèm role M3 chia sẻ đúng giá trị đó để Flutter map sang TextTheme.
+   * Đếm thực tế trong 25 màn: 12px 269 lượt · 14px 190 · 16px 69 · 24px 10 ·
+   * 32px 4 · 20px 2. Thang lệch M3 ở 3 bậc, ghi rõ bên dưới. */  --memox-fs-caption:  12px;  /* M3 bodySmall · labelMedium (M3 labelSmall 11 → sàn 12) */
+  --memox-fs-body:     14px;  /* M3 bodyMedium · labelLarge · titleSmall */
+  --memox-fs-body-lg:  16px;  /* M3 bodyLarge · titleMedium */
+  --memox-fs-title:    20px;  /* M3 titleLarge — M3 dùng 22, lệch để giữ lưới 4 */
+  --memox-fs-headline: 24px;  /* M3 headlineSmall */
+  --memox-fs-display:  32px;  /* M3 displaySmall — M3 dùng 36 */
+  --memox-fs-stat:     40px;  /* số liệu lớn — ngoài thang M3, giữ 40 vì đây là
+                                 chuẩn hoá lưới 4dp cho spacing, không phải ép type
+                                 vào spacing scale. 48 sẽ tăng 20% và đè lên hierarchy,
+                                 32 sẽ giảm 20% và mất vai trò "large stat". */
+
+  /* ── Font weights ──────────────────────────────────────────── */
+  --memox-fw-regular: 400; /* @kind font */
+  --memox-fw-medium: 500; /* @kind font */
+  --memox-fw-semibold: 600; /* @kind font */
+  --memox-fw-bold: 700; /* @kind font */
+  --memox-fw-extrabold: 800; /* @kind font */
+
+  /* ── Letter spacing ────────────────────────────────────────── */
+  --memox-ls-heading: -0.64px; /* @kind font */ /* tight, applied to display + headlines */
+  --memox-ls-label: 0.72px; /* @kind font */
+  --memox-ls-section: 1.2px; /* @kind font */ /* ALL CAPS overlines */
+
+  /* ── Line heights ──────────────────────────────────────────── */
+  --memox-lh-display: 1.1; /* @kind font */
+  --memox-lh-heading: 1.2; /* @kind font */
+  --memox-lh-body: 1.5; /* @kind font */
+  --memox-lh-caption: 1.4; /* @kind font */
+
+  /* ── Seeds (user-switchable in Settings) ───────────────────── */
+  --memox-seed-indigo: #5265F5;   /* Tokyo Pure Light primary */
+  --memox-seed-violet: #A78BFA;   /* Nebula accent */
+  --memox-seed-teal:   #4DB6AC;
+  --memox-seed-rose:   #E57373;
+  --memox-seed-amber:  #FFB74D;
+  --memox-seed-sage:   #81C784;
+
+  /* ═══════════════════════════════════════════════════════════════
+     STANDARD COLOR ROLES — 26 · Tokyo Pure Light
+     The role contract. Role names are camelCase in spec, kebab-case here:
+     onPrimaryContainer → --memox-on-primary-container.
+     Nothing in the kit may write a hex literal; everything reads a role.
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* 1–4 Primary */
+  --memox-primary:              #5265F5;
+  --memox-on-primary:           #FFFFFF;
+  --memox-primary-container:    #E0E5FE;
+  --memox-on-primary-container: #1A2580;
+
+  /* 5–8 Secondary */
+  --memox-secondary:              #6E7CD9;
+  --memox-on-secondary:           #FFFFFF;
+  --memox-secondary-container:    #E3E6F7;
+  --memox-on-secondary-container: #262E6E;
+
+  /* 9–12 Tertiary — the violet accent. (Was #004E1A green; green now lives
+     only in the semantic --memox-mastery / --memox-success roles.) */
+  --memox-tertiary:              #8B6FF5;
+  --memox-on-tertiary:           #FFFFFF;
+  --memox-tertiary-container:    #EBE3FE;
+  --memox-on-tertiary-container: #33177E;
+
+  /* 13–16 Error */
+  --memox-error:              #DC2D4E;
+  --memox-on-error:           #FFFFFF;
+  --memox-error-container:    #FBDDE3;
+  --memox-on-error-container: #7A0A23;
+
+  /* 17–19 Surface */
+  --memox-surface:             #F7F9FE;
+  --memox-on-surface:          #0F1638;   /* deep cool navy text */
+  --memox-on-surface-variant:  #4A5278;   /* muted navy */
+
+  /* 20–21 Outline */
+  --memox-outline:             #7C85AB;   /* cool gray-indigo */
+  --memox-outline-variant:     #C5CBE3;   /* very light indigo */
+
+  /* 22–24 Inverse — MemoX deviation, deliberate: inverseSurface does NOT flip
+     with the theme. Snackbars/toasts are a fixed dark slate with light text in
+     both Light and Nebula (see AUDIT.md), so both roles hold one value. */
+  --memox-inverse-surface:     #34395D;
+  --memox-on-inverse-surface:  #E8EAFC;
+  --memox-inverse-primary:     #8B9AFF;   /* the Nebula primary, quoted in Light */
+
+  /* 25–26 Effects — raw COLORS, mixed at the usage site
+     (color-mix(in srgb, var(--memox-scrim) 45%, transparent)).
+     Not to be confused with the --memox-shadow-level*/ /* box-shadow values below. */
+  --memox-shadow: #0F1638;
+  --memox-scrim:  #0A0E27;
+
+  /* ═══════════════════════════════════════════════════════════════
+     ADD-ON COLOR ROLES — 19 · Tokyo Pure Light
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* 27–33 Surface ladder — cool, blue-tinted whites, never warm. Subtle lift. */
+  --memox-surface-dim:                #DAE0EF;
+  --memox-surface-bright:             #FFFFFF;
+  --memox-surface-container-lowest:   #FFFFFF;
+  --memox-surface-container-low:      #F1F4FB;
+  --memox-surface-container:          #E9EDF7;
+  --memox-surface-container-high:     #E2E7F3;
+  --memox-surface-container-highest:  #DAE0EF;
+
+  /* 34–45 Fixed roles — theme-INVARIANT by definition: declared once here and
+     never overridden in the dark scopes. Use them for anything that must keep
+     its color while the theme flips (theme previews, shared-surface chrome). */
+  --memox-primary-fixed:              #E0E5FE;
+  --memox-primary-fixed-dim:          #C2CBFD;
+  --memox-on-primary-fixed:           #0B1252;
+  --memox-on-primary-fixed-variant:   #2B3AB8;
+
+  --memox-secondary-fixed:            #E3E6F7;
+  --memox-secondary-fixed-dim:        #C8CEF0;
+  --memox-on-secondary-fixed:         #131A4E;
+  --memox-on-secondary-fixed-variant: #4453A8;
+
+  --memox-tertiary-fixed:             #EBE3FE;
+  --memox-tertiary-fixed-dim:         #D7C8FD;
+  --memox-on-tertiary-fixed:          #1D0A57;
+  --memox-on-tertiary-fixed-variant:  #6A4AD4;
+
+  /* ── Invariants outside the 45 ──────────────────────────────────
+     Needed by screens that must paint a color the current theme does not hold. */
+  --memox-inverse-error:       #FFB4AB;   /* error icon on the fixed-dark toast */
+  --memox-surface-fixed-light: #F7F9FE;   /* Appearance theme preview: Light chip  */
+  --memox-surface-fixed-dark:  #0A0E27;   /* Appearance theme preview: Nebula chip */
+  --memox-outline-fixed-light: #DAE0EF;
+  --memox-outline-fixed-dark:  #2C356E;
+  /* Third-party brand surface — exempt from theming by Google's sign-in spec. */
+  --memox-brand-google-surface:    #FFFFFF;
+  --memox-brand-google-on-surface: #191C1E;
+  --memox-brand-google-outline:    rgba(0, 0, 0, 0.12); /* @kind other */
+
+  /* ── Legacy aliases — kept so existing screens keep resolving ── */
+  --memox-accent:     var(--memox-tertiary);
+  --memox-on-accent:  var(--memox-on-tertiary);
+  /* Names the Mx* components read, which used to live in the archived
+     tokens/ lineage (2026-09 cleanup). Mapped onto this file's equivalents so
+     the component cards resolve against the one remaining palette. */
+  --memox-text:               var(--memox-text-primary);
+  --memox-text-tertiary:      var(--memox-text-muted);
+  --memox-space-4:            var(--memox-space-lg);
+  --memox-gutter:             var(--memox-space-lg);
+  --memox-bottom-nav-height:  var(--memox-size-bottom-nav);
+  /* Lifted indigo for primary-COLORED TEXT/ICONS on the page surface.
+     In light it equals --memox-primary (passes AA on light). In dark it lifts
+     so primary-colored text/links/icons clear AA on the deep-navy surface,
+     while --memox-primary stays the brand-solid button FILL (white text). */
+  --memox-primary-bright:     #5265F5;
+
+  /* ── Semantic (light) ──────────────────────────────────────── */
+  --memox-success:           #2BA88B;
+  --memox-warning:           #F59E0B;
+  --memox-mastery:           #1F8A5B;   /* friendlier green than #004E1A */
+  --memox-mastery-fixed:     #C7F2D8;
+  --memox-on-mastery-fixed:  #04331A;
+  --memox-streak:            #F97316;
+
+  /* ── Mastery gradient (low → mid → high) ──────────────────── */
+  --memox-mastery-low:  #E57373;
+  --memox-mastery-mid:  #F59E0B;
+  --memox-mastery-high: #1F8A5B;
+
+  /* ── Card status ───────────────────────────────────────────── */
+  --memox-status-new:        #8C95B8;
+  --memox-status-learning:   #F59E0B;
+  --memox-status-reviewing:  #5265F5;
+  --memox-status-mastered:   #1F8A5B;
+
+  /* ── Review ratings ────────────────────────────────────────── */
+  --memox-rating-again: #E57373;
+  --memox-rating-hard:  #F59E0B;
+  --memox-rating-good:  #5265F5;
+  --memox-rating-easy:  #2BA88B;
+
+  /* ── Recall self-assessment ────────────────────────────────── */
+  --memox-self-missed:  #E57373;
+  --memox-self-partial: #FFB74D;
+  --memox-self-gotit:   #4DB6AC;
+
+  /* ── Spacing (4dp grid) ────────────────────────────────────── */
+  --memox-space-xxs: 2px;
+  --memox-space-xs:  4px;
+  --memox-space-sm:  8px;
+  --memox-space-md:  12px;
+  --memox-space-lg:  16px;
+  --memox-space-xl:  24px;
+  --memox-space-xxl: 32px;
+  --memox-space-xxxl: 48px;
+
+  --memox-space-card:    20px;  /* .card thật: pass "flatter card" chọn 20, không phải 16 */
+  --memox-space-screen:  16px;  /* = --screen-gutter của kit; 24 cũ không được dùng ở đâu */
+  --memox-space-section: 32px;  /* chưa có call site nào */
+
+  /* ── Radii ─────────────────────────────────────────────────── */
+  --memox-radius-xs:   4px;
+  --memox-radius-sm:   8px;
+  --memox-radius-md:   12px;
+  --memox-radius-lg:   16px;
+  --memox-radius-xl:   24px;
+  --memox-radius-xxl:  28px;
+  --memox-radius-full: 999px;
+  --memox-radius-card:   20px;  /* .card thạt: 20, roomier radius của pass "flatter card" */
+  --memox-radius-button: 12px;
+  --memox-radius-input:  12px;
+  --memox-radius-chip:   999px;
+  --memox-radius-fab:    16px;  /* .fab thật dùng radius-lg = 16, không phải 28 */
+
+  /* ── Sizes ─────────────────────────────────────────────────── */
+  --memox-size-touch: 48px;
+  /* ── Icon scale \u2014 semantic, 5 b\u1eadc ────────────────────────────
+   * M\u1ed7i b\u1eadc l\u00e0 m\u1ed9t vai tr\u00f2, kh\u00f4ng ph\u1ea3i m\u1ed9t con s\u1ed1. `Ic`/`Spinner`/`GoogleG`
+   * nh\u1eadn t\u00ean b\u1eadc (xs/sm/md/lg/xl) v\u00e0 gi\u1ea3i qua window.ICON trong _shared.jsx \u2014
+   * gi\u00e1 tr\u1ecb ph\u1ea3i tr\u00f9ng v\u1edbi b\u1ed9 d\u01b0\u1edbi \u0111\u00e2y.
+   *   xs 16  inline / compact utility \u2014 s\u00e0n cho m\u1ecdi icon UI
+   *   sm 20  control nh\u1ecf, metadata, h\u00e0ng d\u00e0y
+   *   md 24  action + navigation ti\u00eau chu\u1ea9n (M3 standard)
+   *   lg 32  visual emphasis
+   *   xl 40  illustrative \u2014 empty state, hero mark
+   * K\u00edch th\u01b0\u1edbc icon KH\u00c1C v\u00f9ng ch\u1ea1m: xem --memox-size-touch. */
+  --memox-size-icon-xs: 16px;
+  --memox-size-icon-sm: 20px;
+  --memox-size-icon-md: 24px;
+  --memox-size-icon-lg: 32px;
+  --memox-size-icon-xl: 40px;
+  --memox-size-button:    48px;
+  --memox-size-button-sm: 36px;
+  --memox-size-button-lg: 52px;
+  --memox-size-input:   52px;
+  --memox-size-chip:    32px;
+  --memox-size-chip-sm: 24px;
+  --memox-size-appbar:    56px;
+  --memox-size-bottom-nav: 80px;  /* cả block .bottom-nav-wrap; thanh bên trong là 64 */
+  --memox-size-bottom-bar: 64px;  /* .bottom-nav — thanh vẽ ra */
+  --memox-size-statusbar: 44px;
+  --memox-size-icon-btn:  36px;   /* hộp mực của .icon-btn; vùng chạm là --memox-size-touch */
+  --memox-size-fab: 52px;         /* extended FAB thật = 52 (--fab-h), không phải 56 */
+
+  /* ── Borders ───────────────────────────────────────────────── */
+  --memox-border-width: 1px;
+  --memox-border-width-thick: 4px;
+  /* Ghost border — defining low-contrast edge, indigo-tinted (Tokyo) */
+  --memox-border-ghost: 1px solid rgba(82, 101, 245, 0.14); /* @kind other */
+  --memox-border-strong: 1px solid var(--memox-outline-variant);
+  --memox-border-accent: 4px solid var(--memox-primary);
+
+  /* ── Opacity tokens ────────────────────────────────────────── */
+  --memox-op-soft-tint: 0.05; /* @kind other */
+  --memox-op-hover: 0.08; /* @kind other */
+  --memox-op-focus: 0.12; /* @kind other */
+  --memox-op-press: 0.12; /* @kind other */
+  --memox-op-drag: 0.16; /* @kind other */
+  --memox-op-selected: 0.18; /* @kind other */
+  --memox-op-disabled: 0.38; /* @kind other */
+  --memox-op-hint: 0.50; /* @kind other */
+  --memox-op-divider: 0.12; /* @kind other */
+  --memox-op-outline: 0.08; /* @kind other */
+  --memox-op-border-subtle: 0.15; /* @kind other */
+  --memox-op-glass: 0.84; /* @kind other */
+  --memox-op-scrim: 0.32; /* @kind other */
+  --memox-op-fade-out: 0.40; /* @kind other */
+
+  /* ── Elevation (tonal; shadows cap at 6%) ──────────────────── */
+  --memox-shadow-max-opacity: 0.06; /* @kind other */
+  --memox-shadow-level0: none;
+  --memox-shadow-level1: 0 1px 2px rgba(25, 28, 30, 0.04), 0 1px 1px rgba(25, 28, 30, 0.03);
+  --memox-shadow-level2: 0 4px 12px rgba(25, 28, 30, 0.04);
+  --memox-shadow-level3: 0 12px 32px rgba(25, 28, 30, 0.06);
+  --memox-shadow-level5: 0 24px 48px rgba(25, 28, 30, 0.06);
+
+  /* ── Motion ────────────────────────────────────────────────── */
+  --memox-dur-instant: 50ms; /* @kind other */
+  --memox-dur-fast:    100ms; /* @kind other */
+  --memox-dur-normal:  200ms; /* @kind other */
+  --memox-dur-slow:    300ms; /* @kind other */
+  --memox-dur-slower:  500ms; /* @kind other */
+  --memox-dur-card-flip: 350ms; /* @kind other */
+  --memox-dur-count-up:  400ms; /* @kind other */
+  --memox-dur-chart-draw: 600ms; /* @kind other */
+
+  --memox-ease-standard: cubic-bezier(0.2, 0, 0, 1); /* @kind other */ /* M3 standard (easeInOut) */
+  --memox-ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1); /* @kind other */ /* M3 emphasized */
+  --memox-ease-enter: cubic-bezier(0, 0, 0.2, 1); /* @kind other */
+  --memox-ease-exit:  cubic-bezier(0.4, 0, 1, 1); /* @kind other */
+
+  /* ── Chrome glass ──────────────────────────────────────────── */
+  --memox-chrome-glass: rgba(247, 249, 254, 0.84);
+  --memox-chrome-blur: saturate(180%) blur(18px); /* @kind other */
+
+  /* ── Phase 0 — semantic role layer (the kit consumes THESE) ───
+   * Stable, intent-named tokens mapped onto the ladder above. Old vars
+   * remain as the underlying source values; these are the public surface. */
+  --memox-bg:              var(--memox-surface);            /* page background */
+  --memox-surface-raised:  var(--memox-surface-bright);     /* elevated card */
+  --memox-surface-muted:   var(--memox-surface-container-low);
+  --memox-surface-hero:    color-mix(in srgb, var(--memox-primary) 5%, var(--memox-surface-bright));
+  --memox-chrome:          var(--memox-chrome-glass);
+  --memox-border:          var(--memox-outline-variant);
+  --memox-text-primary:    var(--memox-on-surface);
+  --memox-text-secondary:  var(--memox-on-surface-variant);
+  --memox-text-muted:      var(--memox-outline);
+
+  --memox-primary-hover:   #4453D4;
+  --memox-primary-soft:    color-mix(in srgb, var(--memox-primary) 10%, transparent);
+  --memox-primary-border:  color-mix(in srgb, var(--memox-primary) 24%, transparent);
+
+  --memox-danger:          var(--memox-error);
+  --memox-on-danger:       var(--memox-on-error);
+  --memox-danger-soft:     color-mix(in srgb, var(--memox-error) 8%, transparent);
+  --memox-danger-border:   color-mix(in srgb, var(--memox-error) 22%, transparent);
+  --memox-error-fill:      #DC2D4E; /* solid destructive-button fill (light) */
+  --memox-on-error-fill:   #FFFFFF;   /* text/icons on error-fill CTA — fill is dark in both modes, white invariant */
+  --memox-on-streak:       #FFFFFF;   /* text/icons on streak-orange fill — invariant white */
+
+  --memox-on-success:      #FFFFFF;
+  --memox-success-soft:    color-mix(in srgb, var(--memox-success) 10%, transparent);
+  --memox-success-border:  color-mix(in srgb, var(--memox-success) 22%, transparent);
+
+  --memox-on-warning:      #3A2A00;
+  --memox-warning-soft:    color-mix(in srgb, var(--memox-warning) 12%, transparent);
+  --memox-warning-border:  color-mix(in srgb, var(--memox-warning) 26%, transparent);
+
+  --memox-progress-track:  var(--memox-surface-container-high);
+  --memox-badge-bg:        var(--memox-surface-container);
+
+  --memox-shadow-none:     none;
+  --memox-shadow-soft:     0 1px 2px rgba(15,22,56,0.04);
+  --memox-shadow-card:     0 12px 32px rgba(15,22,56,0.10);
+  --memox-shadow-chrome:   0 -2px 12px rgba(15,22,56,0.05);
+  /* Neutral FAB elevation — replaces the old colored primary glow. Tonal, not branded. */
+  --memox-shadow-fab:      0 8px 24px rgba(15,22,56,0.12);
+}
+
+/* ── Dark mode — Tokyo Nebula ────────────────────────────────
+ * Deep navy night sky. Paper indigo cards. Violet accent.
+ * Outlines stay indigo (faded), never gray — that's the signature.
+ */
+/* Manual dark — applies regardless of OS preference. The declaration block is
+   identical to the auto/OS-dark block below; keep the two in sync. */
+:root[data-memox-theme="dark"] {
+    /* Phase 0: ONE accessible dark primary. The light-indigo #8B9AFF clears AA
+       as text/icons/links on the navy surface AND, with the deep-navy
+       --memox-on-primary, as a solid CTA fill. Manual (.memox-dark) and this
+       media-query scope are kept identical. */
+    --memox-primary:            #8B9AFF;   /* was #5265F5 — see Phase 0 note */
+    --memox-on-primary:         #11173A;   /* deep navy content on the light-indigo fill */
+    --memox-primary-bright:     #8B9AFF;   /* alias — equal to --memox-primary now */
+    --memox-primary-container:  #2D346A;
+    --memox-on-primary-container: #D9DFFF;
+    /* 5–8 Secondary */
+    --memox-secondary:              #9DA8E8;
+    --memox-on-secondary:           #1A2150;
+    --memox-secondary-container:    #343C78;
+    --memox-on-secondary-container: #DDE2FB;
+
+    /* 9–12 Tertiary — signature violet */
+    --memox-tertiary:              #B5A0FF;
+    --memox-on-tertiary:           #240B63;
+    --memox-tertiary-container:    #443078;
+    --memox-on-tertiary-container: #E6DCFF;
+    --memox-accent:             var(--memox-tertiary);
+    --memox-on-accent:          var(--memox-on-tertiary);
+
+    /* 13–16 Error (--memox-error set below with the other semantics) */
+    --memox-on-error:           #52061B;
+    --memox-error-container:    #7A2036;
+    --memox-on-error-container: #FFD9DF;
+
+    /* 22–24 Inverse — invariant, same values as Light (see note there) */
+    --memox-inverse-surface:     #34395D;
+    --memox-on-inverse-surface:  #E8EAFC;
+    --memox-inverse-primary:     #5265F5;
+
+    /* 25–26 Effects */
+    --memox-shadow: #000000;
+    --memox-scrim:  #000000;
+
+    /* 34–45 Fixed roles are NOT overridden here — that is the point of them. */
+
+    --memox-surface:                    #0A0E27;   /* deep navy night */
+    --memox-surface-bright:             #232B5A;
+    --memox-surface-dim:                #060925;
+    --memox-surface-container-lowest:   #131A3A;   /* paper indigo — cards float */
+    --memox-surface-container-low:      #1B2249;
+    --memox-surface-container:          #232B5A;
+    --memox-surface-container-high:     #2C356E;
+    --memox-surface-container-highest:  #353D7E;
+
+    --memox-on-surface:          #E4E8FA;
+    --memox-on-surface-variant:  #A4ACD0;
+    --memox-outline:             #5A6BAE;   /* mid indigo — visible */
+    --memox-outline-variant:     #2A3267;   /* faded indigo — never gray */
+
+    --memox-success: #6FE0BD;
+    --memox-mastery: #6FE0BD;
+    --memox-mastery-fixed: #1F4A37;
+    --memox-on-mastery-fixed: #C7F2D8;
+    --memox-error:   #FF8FA3;
+    --memox-warning: #FFC658;
+    --memox-streak:  #FFAE6E;
+
+    --memox-status-new:        #6B75A3;
+    --memox-status-learning:   #FFC658;
+    --memox-status-reviewing:  #8B9AFF;
+    --memox-status-mastered:   #6FE0BD;
+
+    --memox-rating-again: #FF8FA3;
+    --memox-rating-hard:  #FFC658;
+    --memox-rating-good:  #8B9AFF;
+    --memox-rating-easy:  #6FE0BD;
+
+    --memox-mastery-low:  #8B4F66;
+    --memox-mastery-mid:  #8B7338;
+    --memox-mastery-high: #3F8070;
+
+    --memox-border-ghost: 1px solid rgba(139, 154, 255, 0.16); /* @kind other */
+    --memox-chrome-glass: rgba(10, 14, 39, 0.84);
+
+    /* ── Phase 0 — semantic role layer (dark) ─────────────────── */
+    --memox-bg:              var(--memox-surface);
+    --memox-surface-raised:  var(--memox-surface-container-lowest);  /* paper indigo — floated card, matches .card intent */
+    --memox-surface-muted:   var(--memox-surface-container-low);
+    --memox-surface-hero:    color-mix(in srgb, var(--memox-primary) 12%, var(--memox-surface));
+    --memox-chrome:          var(--memox-chrome-glass);
+    --memox-border:          var(--memox-outline-variant);
+    --memox-text-primary:    var(--memox-on-surface);
+    --memox-text-secondary:  var(--memox-on-surface-variant);
+    --memox-text-muted:      var(--memox-outline);
+    --memox-primary-hover:   #A6B2FF;
+    --memox-primary-soft:    color-mix(in srgb, var(--memox-primary) 20%, transparent);
+    --memox-primary-border:  color-mix(in srgb, var(--memox-primary) 32%, transparent);
+    --memox-danger:          var(--memox-error);
+    --memox-on-danger:       #2A0A12;
+    --memox-danger-soft:     color-mix(in srgb, var(--memox-error) 16%, transparent);
+    --memox-danger-border:   color-mix(in srgb, var(--memox-error) 32%, transparent);
+    --memox-error-fill:      #B0485C; /* solid destructive-button fill (dark) */
+    --memox-on-error-fill:   #FFFFFF;   /* unchanged — fill is dark in both modes */
+    --memox-on-streak:       #FFFFFF;   /* unchanged — streak always warm, needs white text */
+    --memox-on-success:      #06231A;
+    --memox-success-soft:    color-mix(in srgb, var(--memox-success) 18%, transparent);
+    --memox-success-border:  color-mix(in srgb, var(--memox-success) 32%, transparent);
+    --memox-on-warning:      #2A1E00;
+    --memox-warning-soft:    color-mix(in srgb, var(--memox-warning) 18%, transparent);
+    --memox-warning-border:  color-mix(in srgb, var(--memox-warning) 32%, transparent);
+    --memox-progress-track:  var(--memox-surface-container-high);
+    --memox-badge-bg:        var(--memox-surface-container);
+    --memox-shadow-none:     none;
+    --memox-shadow-soft:     none;
+    --memox-shadow-card:     0 16px 40px rgba(0,0,0,0.42);
+    --memox-shadow-chrome:   0 -2px 14px rgba(0,0,0,0.36);
+    --memox-shadow-fab:      0 10px 28px rgba(0,0,0,0.5);
+  }
+
+/* Auto — follow the OS preference. */
+@media (prefers-color-scheme: dark) {
+  :root[data-memox-theme="auto"] {
+    /* Phase 0: ONE accessible dark primary. The light-indigo #8B9AFF clears AA
+       as text/icons/links on the navy surface AND, with the deep-navy
+       --memox-on-primary, as a solid CTA fill. Manual (.memox-dark) and this
+       media-query scope are kept identical. */
+    --memox-primary:            #8B9AFF;   /* was #5265F5 — see Phase 0 note */
+    --memox-on-primary:         #11173A;   /* deep navy content on the light-indigo fill */
+    --memox-primary-bright:     #8B9AFF;   /* alias — equal to --memox-primary now */
+    --memox-primary-container:  #2D346A;
+    --memox-on-primary-container: #D9DFFF;
+    /* 5–8 Secondary */
+    --memox-secondary:              #9DA8E8;
+    --memox-on-secondary:           #1A2150;
+    --memox-secondary-container:    #343C78;
+    --memox-on-secondary-container: #DDE2FB;
+
+    /* 9–12 Tertiary — signature violet */
+    --memox-tertiary:              #B5A0FF;
+    --memox-on-tertiary:           #240B63;
+    --memox-tertiary-container:    #443078;
+    --memox-on-tertiary-container: #E6DCFF;
+    --memox-accent:             var(--memox-tertiary);
+    --memox-on-accent:          var(--memox-on-tertiary);
+
+    /* 13–16 Error (--memox-error set below with the other semantics) */
+    --memox-on-error:           #52061B;
+    --memox-error-container:    #7A2036;
+    --memox-on-error-container: #FFD9DF;
+
+    /* 22–24 Inverse — invariant, same values as Light (see note there) */
+    --memox-inverse-surface:     #34395D;
+    --memox-on-inverse-surface:  #E8EAFC;
+    --memox-inverse-primary:     #5265F5;
+
+    /* 25–26 Effects */
+    --memox-shadow: #000000;
+    --memox-scrim:  #000000;
+
+    /* 34–45 Fixed roles are NOT overridden here — that is the point of them. */
+
+    --memox-surface:                    #0A0E27;   /* deep navy night */
+    --memox-surface-bright:             #232B5A;
+    --memox-surface-dim:                #060925;
+    --memox-surface-container-lowest:   #131A3A;   /* paper indigo — cards float */
+    --memox-surface-container-low:      #1B2249;
+    --memox-surface-container:          #232B5A;
+    --memox-surface-container-high:     #2C356E;
+    --memox-surface-container-highest:  #353D7E;
+
+    --memox-on-surface:          #E4E8FA;
+    --memox-on-surface-variant:  #A4ACD0;
+    --memox-outline:             #5A6BAE;   /* mid indigo — visible */
+    --memox-outline-variant:     #2A3267;   /* faded indigo — never gray */
+
+    --memox-success: #6FE0BD;
+    --memox-mastery: #6FE0BD;
+    --memox-mastery-fixed: #1F4A37;
+    --memox-on-mastery-fixed: #C7F2D8;
+    --memox-error:   #FF8FA3;
+    --memox-warning: #FFC658;
+    --memox-streak:  #FFAE6E;
+
+    --memox-status-new:        #6B75A3;
+    --memox-status-learning:   #FFC658;
+    --memox-status-reviewing:  #8B9AFF;
+    --memox-status-mastered:   #6FE0BD;
+
+    --memox-rating-again: #FF8FA3;
+    --memox-rating-hard:  #FFC658;
+    --memox-rating-good:  #8B9AFF;
+    --memox-rating-easy:  #6FE0BD;
+
+    --memox-mastery-low:  #8B4F66;
+    --memox-mastery-mid:  #8B7338;
+    --memox-mastery-high: #3F8070;
+
+    --memox-border-ghost: 1px solid rgba(139, 154, 255, 0.16); /* @kind other */
+    --memox-chrome-glass: rgba(10, 14, 39, 0.84);
+
+    /* ── Phase 0 — semantic role layer (dark) ─────────────────── */
+    --memox-bg:              var(--memox-surface);
+    --memox-surface-raised:  var(--memox-surface-container-lowest);  /* paper indigo — floated card, matches .card intent */
+    --memox-surface-muted:   var(--memox-surface-container-low);
+    --memox-surface-hero:    color-mix(in srgb, var(--memox-primary) 12%, var(--memox-surface));
+    --memox-chrome:          var(--memox-chrome-glass);
+    --memox-border:          var(--memox-outline-variant);
+    --memox-text-primary:    var(--memox-on-surface);
+    --memox-text-secondary:  var(--memox-on-surface-variant);
+    --memox-text-muted:      var(--memox-outline);
+    --memox-primary-hover:   #A6B2FF;
+    --memox-primary-soft:    color-mix(in srgb, var(--memox-primary) 20%, transparent);
+    --memox-primary-border:  color-mix(in srgb, var(--memox-primary) 32%, transparent);
+    --memox-danger:          var(--memox-error);
+    --memox-on-danger:       #2A0A12;
+    --memox-danger-soft:     color-mix(in srgb, var(--memox-error) 16%, transparent);
+    --memox-danger-border:   color-mix(in srgb, var(--memox-error) 32%, transparent);
+    --memox-error-fill:      #B0485C; /* solid destructive-button fill (dark) */
+    --memox-on-error-fill:   #FFFFFF;   /* unchanged — fill is dark in both modes */
+    --memox-on-streak:       #FFFFFF;   /* unchanged — streak always warm, needs white text */
+    --memox-on-success:      #06231A;
+    --memox-success-soft:    color-mix(in srgb, var(--memox-success) 18%, transparent);
+    --memox-success-border:  color-mix(in srgb, var(--memox-success) 32%, transparent);
+    --memox-on-warning:      #2A1E00;
+    --memox-warning-soft:    color-mix(in srgb, var(--memox-warning) 18%, transparent);
+    --memox-warning-border:  color-mix(in srgb, var(--memox-warning) 32%, transparent);
+    --memox-progress-track:  var(--memox-surface-container-high);
+    --memox-badge-bg:        var(--memox-surface-container);
+    --memox-shadow-none:     none;
+    --memox-shadow-soft:     none;
+    --memox-shadow-card:     0 16px 40px rgba(0,0,0,0.42);
+    --memox-shadow-chrome:   0 -2px 14px rgba(0,0,0,0.36);
+    --memox-shadow-fab:      0 10px 28px rgba(0,0,0,0.5);
+  }
+}
+
+/* ── Base element mapping ────────────────────────────────────── */
+html, body {
+  font-family: var(--memox-font-sans);
+  background: var(--memox-surface);
+  color: var(--memox-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Semantic type roles ─────────────────────────────────────── */
+.memox-stat-display {
+  font-size: var(--memox-fs-stat);
+  font-weight: var(--memox-fw-semibold);
+  line-height: var(--memox-lh-display);
+  letter-spacing: var(--memox-ls-heading);
+  font-variant-numeric: tabular-nums;
+}
+h1, .memox-display-large, .memox-h1 {
+  font-size: var(--memox-fs-display);
+  font-weight: var(--memox-fw-bold);
+  line-height: var(--memox-lh-heading);
+  letter-spacing: var(--memox-ls-heading);
+  margin: 0;
+}
+h2, .memox-headline-large, .memox-h2 {
+  font-size: var(--memox-fs-headline);
+  font-weight: var(--memox-fw-semibold);
+  line-height: var(--memox-lh-heading);
+  letter-spacing: var(--memox-ls-heading);
+  margin: 0;
+}
+h3, .memox-headline-medium, .memox-h3 {
+  font-size: var(--memox-fs-title);
+  font-weight: var(--memox-fw-semibold);
+  line-height: var(--memox-lh-heading);
+  margin: 0;
+}
+h4, .memox-title-medium, .memox-h4 {
+  font-size: var(--memox-fs-body-lg);
+  font-weight: var(--memox-fw-medium);
+  line-height: var(--memox-lh-body);
+  margin: 0;
+}
+p, .memox-body {
+  font-size: var(--memox-fs-body-lg);
+  font-weight: var(--memox-fw-regular);
+  line-height: var(--memox-lh-body);
+  margin: 0;
+}
+.memox-body-small {
+  font-size: var(--memox-fs-body);
+  line-height: var(--memox-lh-body);
+  color: var(--memox-on-surface-variant);
+}
+.memox-caption {
+  font-size: var(--memox-fs-caption);
+  font-weight: var(--memox-fw-medium);
+  line-height: var(--memox-lh-caption);
+  letter-spacing: var(--memox-ls-label);
+  color: var(--memox-on-surface-variant);
+}
+.memox-overline {
+  font-size: var(--memox-fs-caption);
+  font-weight: var(--memox-fw-bold);
+  line-height: var(--memox-lh-caption);
+  letter-spacing: var(--memox-ls-section);
+  text-transform: uppercase;
+  color: var(--memox-on-surface-variant);
+}
+.memox-app-title {
+  font-size: var(--memox-fs-headline);
+  font-weight: var(--memox-fw-extrabold);
+  line-height: var(--memox-lh-heading);
+  letter-spacing: var(--memox-ls-heading);
+}
+.memox-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Primitives ──────────────────────────────────────────────── */
+.memox-card {
+  background: var(--memox-surface-container-lowest);
+  border: var(--memox-border-ghost);
+  border-radius: var(--memox-radius-card);
+  padding: var(--memox-space-card);
+}
+.memox-chrome {
+  background: var(--memox-chrome-glass);
+  backdrop-filter: var(--memox-chrome-blur);
+  -webkit-backdrop-filter: var(--memox-chrome-blur);
+}
+.memox-focus-ring:focus-visible {
+  outline: 2px solid var(--memox-primary);
+  outline-offset: 2px;
+}

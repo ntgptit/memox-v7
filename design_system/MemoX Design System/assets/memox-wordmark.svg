@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 56">
+  <rect x="0" y="4" width="48" height="48" rx="12" fill="#5265F5"></rect>
+  <text x="24" y="38" text-anchor="middle" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="800" font-size="22" fill="#fff" letter-spacing="-1">Mx</text>
+  <text x="60" y="40" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="800" font-size="32" fill="#0F1638" letter-spacing="-0.64">memo<tspan fill="#5265F5">X</tspan></text>
+</svg>

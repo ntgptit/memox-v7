@@ -1,0 +1,2 @@
+- Source is a Claude Design export of project "MemoX Design System_origin", not a code repo; sync = re-upload as-is.
+- Legacy README.md was deleted from the remote on 2026-09-16; readme.md is the only readme. CLAUDE.md is a reserved path and cannot be uploaded.

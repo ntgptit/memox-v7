@@ -1,0 +1,12 @@
+/* ============================================================
+   MemoX Design System — global entry.
+   Consumers link THIS file.
+
+   The 2026-09 cleanup archived the second token lineage
+   (tokens/*.css + components.css, primary #4f46e5) into
+   backup/202609/. What ships now is the one palette the mobile
+   kit actually renders: Tokyo Pure Light / Tokyo Nebula.
+   ============================================================ */
+
+@import url('colors_and_type.css');
+@import url('components.css');

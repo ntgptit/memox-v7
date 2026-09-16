@@ -1,0 +1,1666 @@
+<!doctype html>
+<!-- @dsCard group="UI Kit — Mobile" name="Components · MemoX Mobile" subtitle="Foundations only — design tokens + shared widget library, light + dark. Screens live in the UI Kit card." viewport="1800x900" -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MemoX — Components & Foundations</title>
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  /* ── Documentation chrome palette ────────────────────────────────────
+     The gallery shell (stage, phone bezel, controls, token tables, widget
+     card frames) is NOT the product. It had accumulated 27 near-duplicate
+     hexes — an accidental third palette next to Tokyo Pure / Tokyo Nebula.
+     These 8 roles replace them. They are deliberately NOT --memox-* : nothing
+     here ships, and mapping doc chrome onto the production ColorScheme would
+     make the kit look like it has colors it does not. */
+  :root {
+    --doc-ink:        #1b1f3a;  /* headings, strong labels */
+    --doc-ink-2:      #5a5f72;  /* body, control labels */
+    --doc-ink-3:      #7a7f92;  /* muted: row numbers, corner tags */
+    --doc-accent:     #3346d6;  /* code / Dart symbol blue — syntax, not brand */
+    --doc-surface:    #ffffff;  /* doc panels, token cards, spec tables */
+    --doc-control:    #ffffff;  /* active segment, stepper button */
+    --doc-on-control: #191c1e;
+    --doc-stage:      #e6e8ea;  /* page behind the phone frames */
+    --doc-bezel:      #1a1a1a;  /* phone bezel */
+  }
+  body.stage-dark {
+    --doc-ink:        #E4E8FA;
+    --doc-ink-2:      #b8bdd2;
+    --doc-ink-3:      #8b91a8;
+    --doc-accent:     #b5c0ff;
+    --doc-surface:    #131A3A;
+    --doc-control:    #35353a;
+    --doc-on-control: #e5e5e7;
+    --doc-stage:      #0d0d0f;
+    --doc-bezel:      #2a2a2c;
+  }
+
+  body { margin: 0; background: var(--doc-stage); font-family: var(--memox-font-sans); transition: background 200ms cubic-bezier(0.2,0,0,1); }
+  body.stage-dark { background: var(--doc-stage); }
+  .stage {
+    padding: 28px;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    overflow-x: auto;
+    min-height: 100vh;
+  }
+  .phone {
+    width: var(--phone-w, 390px);
+    height: 780px;
+    background: var(--memox-bg);
+    border-radius: 44px;
+    border: 8px solid var(--doc-bezel);
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 24px 60px rgba(25,28,30,0.12);
+  }
+  .memox-dark .phone {
+    border-color: var(--doc-bezel);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+  }
+  .phone-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--memox-text-secondary);
+    margin-top: 8px;
+  }
+  .phone-col { display: flex; flex-direction: column; align-items: center; }
+  /* ─────────────────────────────────────────────────────────────────────
+     SHARED MOBILE LAYOUT SYSTEM  (Flutter mapping in mind — see LAYOUT.md)
+     Every screen is a column: [ AppBar ] [ ScreenScroll (Expanded) ] [ BottomBar ].
+     Pinned chrome (FAB, sheets, scrims, toasts) is the ONLY absolutely-
+     positioned layer. All bottom clearance is derived from the tokens below —
+     never hand-tuned per screen.
+       .app           → Flutter  Scaffold + SafeArea
+       .scroll        → Flutter  Expanded( SingleChildScrollView )
+       .bottom-nav    → Flutter  Scaffold.bottomNavigationBar
+       sticky footer  → Flutter  Scaffold.bottomNavigationBar / persistentFooterButtons
+       .fab           → Flutter  Scaffold.floatingActionButton
+     ───────────────────────────────────────────────────────────────────── */
+  .app {
+    height: 100%; width: 100%; display: flex; flex-direction: column;
+    background: var(--memox-bg); color: var(--memox-text-primary);
+    position: relative; overflow: hidden;
+    /* ── Layout constants (the single source of truth for spacing/clearance) ── */
+    --screen-gutter: 16px;                          /* one shared horizontal screen padding (matches app bars + footers) */
+    --safe-bottom: env(safe-area-inset-bottom, 0px);/* device safe area → Flutter SafeArea  */
+    --fab-h: 52px;                                  /* extended-FAB height                   */
+    --fab-inset: var(--memox-space-xl);             /* FAB offset from the screen bottom (24)*/
+    --fab-nav-gap: 4px;                             /* FAB lift above the bottom-nav block   */
+    --clear-comfort: var(--memox-space-xl);         /* breathing room above any pinned UI(24)*/
+    /* Composite bottom clearances — measured from the scroll container's own bottom edge.
+       The bottom nav & sticky footers are in-flow siblings (they do NOT overlap scroll),
+       so a scroll only ever needs to clear the FAB, which is the lone overlapping chrome. */
+    --clear-base:    calc(var(--clear-comfort) + var(--safe-bottom));                           /* nav / footer / plain */
+    --clear-fab:     calc(var(--fab-inset) + var(--fab-h) + var(--clear-comfort) + var(--safe-bottom)); /* FAB, no nav     */
+    --clear-fab-nav: calc(var(--fab-nav-gap) + var(--fab-h) + var(--clear-comfort) + var(--safe-bottom)); /* FAB above nav */
+  }
+  .statusbar { height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 24px; font-size: 14px; font-weight: 600; }
+  /* .appbar / .card / .pill-btn / .icon-btn / .fab / .bottom-nav / .ov / .icon-tile
+     / .status-dot now live in ../../components.css (linked above). */
+  /* ScreenScroll — the one scrollable region per screen. Horizontal gutter + bottom
+     clearance both come from tokens; clearance variant set by a modifier class, never
+     a per-screen pixel value. */
+  .scroll { flex: 1; overflow-y: auto; padding: 0 var(--screen-gutter) var(--clear-base); scrollbar-width: none; -ms-overflow-style: none; }
+  .scroll.scroll-fab     { padding-bottom: var(--clear-fab); }      /* screen has a FAB, no bottom nav */
+  .scroll.scroll-fab-nav { padding-bottom: var(--clear-fab-nav); } /* screen has a FAB above the nav  */
+  .scroll::-webkit-scrollbar { display: none; }
+  /* Hit-target floor — 48dp (AppSpacing.minimumTouchTarget).
+     Scoped to .pill-btn, the kit's one button contract: it owns a height
+     (28–48px) and always sits in a footer, action row or card with room around
+     it, so a centred 48px band cannot reach a neighbour. Bare inline text
+     buttons are deliberately NOT expanded — a blanket rule gave them a 48px
+     band that overhung into adjacent controls and stole their taps.
+     .icon-btn brings its own expander; .fab is 52px and pinned. */
+  .app .pill-btn:not(.fab) { position: relative; }
+  .app .pill-btn:not(.fab)::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 100%; height: var(--memox-size-touch);
+    min-width: var(--memox-size-touch);
+    transform: translate(-50%, -50%);
+  }
+  /* Chip rows scroll horizontally with a 10px band between rows — narrower than
+     the (48 − 28)/2 = 10px overhang. There the hit area is the painted chip and
+     the 48dp floor is met by the row, not by growing each chip into the next. */
+  .app .scroll-x .pill-btn::after { width: 100%; height: 100%; min-width: 0; }
+
+  /* Scroll row — hide scrollbar but keep scrolling */
+  .scroll-x { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  .scroll-x::-webkit-scrollbar { display: none; }
+  /* Bottom-nav block — in-flow chrome (Flutter Scaffold.bottomNavigationBar).
+     Bottom padding carries the device safe-area inset so the nav clears the home bar. */
+
+  /* ── Dark mode (scoped, not via media query so users can toggle per preview) ── */
+  /* Tokyo Nebula — deep navy night, paper indigo cards, violet accent */
+  .memox-dark {
+    --memox-surface:                    #0A0E27;
+    --memox-surface-bright:             #232B5A;
+    --memox-surface-dim:                #060925;
+    --memox-surface-container-lowest:   #131A3A;
+    --memox-surface-container-low:      #1B2249;
+    --memox-surface-container:          #232B5A;
+    --memox-surface-container-high:     #2C356E;
+    --memox-surface-container-highest:  #353D7E;
+    --memox-on-surface:          #E4E8FA;
+    --memox-on-surface-variant:  #A4ACD0;
+    --memox-outline:             #5A6BAE;
+    --memox-outline-variant:     #2A3267;
+    --memox-mastery: #6FE0BD;
+    --memox-error:   #FF8FA3;
+    /* Solid danger-button fill — deep rose, so dark-mode delete CTAs don't glare
+       like the light-pink text/icon error color (#FF8FA3) did as a full fill */
+    --memox-error-fill: #B0485C;
+    --memox-on-error-fill: #FFFFFF;  /* unchanged — fill is dark in both modes */
+    --memox-on-streak:     #FFFFFF;  /* unchanged — streak always warm, needs white text */
+    --memox-streak:  #FFAE6E;
+    --memox-chrome-glass: rgba(10, 14, 39, 0.84);
+    --memox-border-ghost: 1px solid rgba(139, 154, 255, 0.16);
+    --memox-primary:    #8B9AFF;              /* Phase 0: accessible dark primary (was #5265F5) */
+    --memox-on-primary: #11173A;              /* deep navy content on the light-indigo fill */
+    --memox-primary-bright: #8B9AFF;          /* alias — equal to --memox-primary now */
+    --memox-primary-container:    #2D346A;
+    --memox-on-primary-container: #D9DFFF;
+    /* 5–8 Secondary */
+    --memox-secondary:              #9DA8E8;
+    --memox-on-secondary:           #1A2150;
+    --memox-secondary-container:    #343C78;
+    --memox-on-secondary-container: #DDE2FB;
+    /* 9–12 Tertiary — signature violet */
+    --memox-tertiary:              #B5A0FF;
+    --memox-on-tertiary:           #240B63;
+    --memox-tertiary-container:    #443078;
+    --memox-on-tertiary-container: #E6DCFF;
+    --memox-accent:    var(--memox-tertiary);
+    --memox-on-accent: var(--memox-on-tertiary);
+    /* 13–16 Error (--memox-error above) */
+    --memox-on-error:           #52061B;
+    --memox-error-container:    #7A2036;
+    --memox-on-error-container: #FFD9DF;
+    /* 22–24 Inverse — invariant across themes (fixed-dark toasts) */
+    --memox-inverse-surface:     #34395D;
+    --memox-on-inverse-surface:  #E8EAFC;
+    --memox-inverse-primary:     #5265F5;
+    /* 25–26 Effects */
+    --memox-shadow: #000000;
+    --memox-scrim:  #000000;
+    /* 34–45 Fixed roles are intentionally NOT overridden in dark. */
+    --memox-success:   #6FE0BD;
+    --memox-warning:   #FFC658;
+    --memox-mastery-fixed:    #1F4A37;
+    --memox-on-mastery-fixed: #C7F2D8;
+    /* Card status + rating — dark values (previously fell back to light tokens) */
+    --memox-status-new:        #6B75A3;
+    --memox-status-learning:   #FFC658;
+    --memox-status-reviewing:  #8B9AFF;
+    --memox-status-mastered:   #6FE0BD;
+    --memox-rating-again:      #FF8FA3;
+    --memox-rating-hard:       #FFC658;
+    --memox-rating-good:       #8B9AFF;
+    --memox-rating-easy:       #6FE0BD;
+    --memox-self-missed:  #FF8FA3;
+    --memox-self-partial: #FFC658;
+    --memox-self-gotit:   #6FE0BD;
+    --memox-mastery-low:  #8B4F66;
+    --memox-mastery-mid:  #8B7338;
+    --memox-mastery-high: #3F8070;
+    /* ── Phase 0 — semantic role layer (dark, mirrors colors_and_type.css) ── */
+    --memox-bg:              var(--memox-surface);
+    --memox-surface-raised:  var(--memox-surface-container-lowest); /* paper indigo — aligned with colors_and_type.css dark */
+    --memox-surface-muted:   var(--memox-surface-container-low);
+    --memox-surface-hero:    color-mix(in srgb, var(--memox-primary) 12%, var(--memox-surface));
+    --memox-chrome:          var(--memox-chrome-glass);
+    --memox-border:          var(--memox-outline-variant);
+    --memox-text-primary:    var(--memox-on-surface);
+    --memox-text-secondary:  var(--memox-on-surface-variant);
+    --memox-text-muted:      var(--memox-outline);
+    --memox-primary-hover:   #A6B2FF;
+    --memox-primary-soft:    color-mix(in srgb, var(--memox-primary) 20%, transparent);
+    --memox-primary-border:  color-mix(in srgb, var(--memox-primary) 32%, transparent);
+    --memox-danger:          var(--memox-error);
+    --memox-on-danger:       #2A0A12;
+    --memox-danger-soft:     color-mix(in srgb, var(--memox-error) 16%, transparent);
+    --memox-danger-border:   color-mix(in srgb, var(--memox-error) 32%, transparent);
+    --memox-on-success:      #06231A;
+    --memox-success-soft:    color-mix(in srgb, var(--memox-success) 18%, transparent);
+    --memox-success-border:  color-mix(in srgb, var(--memox-success) 32%, transparent);
+    --memox-on-warning:      #2A1E00;
+    --memox-warning-soft:    color-mix(in srgb, var(--memox-warning) 18%, transparent);
+    --memox-warning-border:  color-mix(in srgb, var(--memox-warning) 32%, transparent);
+    --memox-progress-track:  var(--memox-surface-container-high);
+    --memox-badge-bg:        var(--memox-surface-container);
+    --memox-shadow-none:     none;
+    --memox-shadow-soft:     none;
+    --memox-shadow-card:     0 16px 40px rgba(0,0,0,0.42);
+    --memox-shadow-chrome:   0 -2px 14px rgba(0,0,0,0.36);
+    --memox-shadow-fab:      0 10px 28px rgba(0,0,0,0.5);
+  }
+  .mode-toggle {
+    position: sticky; top: 16px; z-index: 5;
+    display: inline-flex; gap: 4px;
+    padding: 4px; border-radius: 999px;
+    background: rgba(0,0,0,0.06); backdrop-filter: blur(8px);
+    border: 1px solid rgba(0,0,0,0.06);
+    margin: 0 0 20px;
+    font-family: var(--memox-font-sans);
+  }
+  body.stage-dark .mode-toggle { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+  .mode-toggle button {
+    border: none; background: transparent; border-radius: 999px;
+    height: 32px; padding: 0 16px; font-size: 12px; font-weight: 600;
+    color: var(--doc-ink-2); display: inline-flex; align-items: center; gap: 4px;
+  }
+  body.stage-dark .mode-toggle button { color: #C2C2C8; }
+  .mode-toggle button.active { background: var(--doc-surface); color: var(--doc-on-control); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+  body.stage-dark .mode-toggle button.active { background: var(--doc-control); color: var(--doc-on-control); }
+  .mode-toggle svg { width: 14px; height: 14px; }
+  .stage-header { padding: 0 28px; position: sticky; top: 0; z-index: 6; }
+
+  /* ── Rewritten gallery shell: per-screen rows, light+dark pairs, state steppers ── */
+  .controls {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px;
+    padding: 16px 28px;
+    background: rgba(230,232,234,0.88);
+    backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid rgba(20,24,48,0.08);
+  }
+  body.stage-dark .controls { background: rgba(13,13,15,0.88); border-bottom-color: rgba(255,255,255,0.08); }
+  .brandblock { display: flex; flex-direction: column; margin-right: auto; gap: 2px; }
+  .brand { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; color: var(--doc-ink); }
+  .sub { font-size: 12px; font-weight: 500; color: var(--doc-ink-2); }
+  body.stage-dark .brand { color: var(--doc-ink); }
+  body.stage-dark .sub { color: var(--doc-ink-3); }
+  .ctl { display: inline-flex; align-items: center; gap: 8px; }
+  .seg-label { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--doc-ink-2); }
+  body.stage-dark .seg-label { color: var(--doc-ink-3); }
+  .seg { display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(20,24,48,0.06); }
+  body.stage-dark .seg { background: rgba(255,255,255,0.07); }
+  .seg button {
+    border: none; background: transparent; border-radius: 999px;
+    height: 30px; min-width: 44px; padding: 0 16px; cursor: pointer;
+    font-family: var(--memox-font-sans); font-size: 12px; font-weight: 600;
+    color: var(--doc-ink-2); display: inline-flex; align-items: center; justify-content: center;
+    transition: background 100ms cubic-bezier(0.2,0,0,1), color 100ms cubic-bezier(0.2,0,0,1);
+  }
+  body.stage-dark .seg button { color: var(--doc-ink-2); }
+  .seg button.active { background: var(--doc-surface); color: var(--doc-ink); box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+  body.stage-dark .seg button.active { background: #353A52; color: var(--doc-surface); }
+  .kitlink {
+    display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 16px;
+    border-radius: 999px; text-decoration: none; cursor: pointer;
+    font-family: var(--memox-font-sans); font-size: 12px; font-weight: 700;
+    color: var(--doc-ink-2); background: rgba(20,24,48,0.06);
+    transition: background 100ms cubic-bezier(0.2,0,0,1), color 100ms cubic-bezier(0.2,0,0,1);
+  }
+  .kitlink:hover { background: rgba(20,24,48,0.11); color: var(--doc-ink); }
+  body.stage-dark .kitlink { color: var(--doc-ink-2); background: rgba(255,255,255,0.07); }
+  body.stage-dark .kitlink:hover { background: rgba(255,255,255,0.13); color: var(--doc-surface); }
+
+  .gallery { padding: 8px 28px 96px; }
+  .section-head {
+    padding: 40px 4px 8px; font-size: 12px; font-weight: 800;
+    letter-spacing: 1.4px; text-transform: uppercase; color: var(--doc-ink-2);
+  }
+  body.stage-dark .section-head { color: var(--doc-ink-3); }
+  .row { padding: 12px 0 8px; }
+  .row-head { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .row-num { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--doc-ink-3); }
+  .row-title { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; color: var(--doc-ink); }
+  body.stage-dark .row-title { color: var(--doc-ink); }
+  .stepper { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(20,24,48,0.05); }
+  body.stage-dark .stepper { background: rgba(255,255,255,0.06); }
+  .stepper button {
+    width: 32px; height: 32px; border: none; border-radius: 999px; background: var(--doc-surface); color: var(--doc-ink-2);
+    display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  body.stage-dark .stepper button { background: var(--doc-control); color: var(--doc-ink); }
+  .stepper svg { width: 16px; height: 16px; }
+  .st-label { min-width: 150px; text-align: center; font-size: 12px; font-weight: 600; color: var(--doc-ink-2); }
+  body.stage-dark .st-label { color: var(--doc-ink-2); }
+  .st-single { min-width: 0; opacity: 0.6; font-weight: 600; }
+  .pair { display: flex; gap: 24px; align-items: flex-start; }
+  .frame-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .theme-label { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--doc-ink-3); }
+  body.stage-dark .theme-label { color: var(--doc-ink-3); }
+  .theme-dot { width: 8px; height: 8px; border-radius: 999px; }
+  .row-placeholder { height: 822px; }
+
+  /* ── A11y layer (added in audit pass) ───────────────────────────────
+     Applies uniformly to every screen via shared primitives.
+     Flutter mapping: focus ring → Material focus highlight;
+     44px hit floor → IconButton's default 48dp tap target. */
+  /* Visible keyboard focus on every interactive control */
+  .app button:focus-visible,
+  .icon-btn:focus-visible,
+  .pill-btn:focus-visible,
+  .bn-item:focus-visible,
+  [role="switch"]:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--memox-primary);
+    outline-offset: 2px;
+  }
+  .icon-btn::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: var(--memox-size-touch); height: var(--memox-size-touch); transform: translate(-50%, -50%);
+  }
+  /* Bottom-nav items are real <button>s now — reset native chrome + give a tall tap area */
+  .bn-item { background: none; border: none; width: 100%; padding: 8px 0; font-family: inherit; }
+  /* Hidden-scrollbar utility for in-screen scrollers (matches .scroll behavior).
+     overflow-x pinned to hidden: setting only overflow-y:auto makes overflow-x
+     compute to auto too, which produced a stray horizontal scrollbar. */
+  .hide-scroll { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+  .hide-scroll::-webkit-scrollbar { display: none; }
+
+  /* Shared caret blink (SearchField + focused text-field mocks) */
+  @keyframes memoxBlink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+  /* Respect reduced-motion: quiet the infinite skeleton/pulse loops */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ── Design-token reference panel (Foundations) ───────────────────────
+     A full-width, Flutter-handoff documentation surface. Independent of the
+     phone-frame width: always shows the LIGHT (Tokyo Pure) + DARK (Tokyo
+     Nebula) value of every token side by side, plus its Dart token reference. */
+  :root { --tok-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace; }
+  .tokens-doc { color: var(--doc-ink); }
+  body.stage-dark .tokens-doc { color: var(--doc-ink); }
+  .tok-intro {
+    background: var(--doc-surface); border: 1px solid rgba(20,24,48,0.10); border-radius: 20px;
+    padding: 24px 24px; margin-bottom: 8px;
+    box-shadow: 0 1px 2px rgba(25,28,30,0.04);
+  }
+  body.stage-dark .tok-intro { background: var(--doc-surface); border-color: rgba(139,154,255,0.16); box-shadow: none; }
+  .tok-intro h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; margin: 0 0 4px; }
+  .tok-intro p { font-size: 13.5px; line-height: 1.55; color: var(--doc-ink-2); margin: 0; max-width: 760px; }
+  body.stage-dark .tok-intro p { color: var(--doc-ink-3); }
+  .tok-intro code { font-family: var(--tok-mono); font-size: 12px; background: color-mix(in srgb, var(--memox-primary) 10%, transparent); color: var(--doc-accent); /* doc-only code-syntax blue — not a theme token */ padding: 1px 4px; border-radius: 4px; }
+  body.stage-dark .tok-intro code { background: rgba(139,154,255,0.16); color: var(--doc-accent); }
+  .tok-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; font-size: 11.5px; color: var(--doc-ink-2); }
+  body.stage-dark .tok-legend { color: var(--doc-ink-3); }
+  .tok-legend b { color: var(--doc-ink); font-weight: 700; }
+  body.stage-dark .tok-legend b { color: var(--doc-ink); }
+
+  .tok-block { margin-top: 32px; }
+  .tok-block-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tok-block-head .n { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--doc-ink-3); font-family: var(--tok-mono); }
+  .tok-block-head h3 { font-size: 16px; font-weight: 800; letter-spacing: -0.2px; margin: 0; }
+  .tok-block-head .dart { font-size: 11.5px; font-weight: 600; font-family: var(--tok-mono); color: var(--doc-accent); /* doc-only code-syntax blue — not a theme token */ background: color-mix(in srgb, var(--memox-primary) 8%, transparent); padding: 2px 8px; border-radius: 4px; }
+  body.stage-dark .tok-block-head .dart { color: var(--doc-accent); background: rgba(139,154,255,0.14); }
+  .tok-block-head .note { font-size: 12px; color: var(--doc-ink-2); }
+  body.stage-dark .tok-block-head .note { color: var(--doc-ink-3); }
+
+  /* color swatch grid */
+  .tok-cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(244px, 100%), 1fr)); gap: 12px; }
+  .tok-color {
+    background: var(--doc-surface); border: 1px solid rgba(20,24,48,0.09); border-radius: 16px; overflow: hidden;
+  }
+  body.stage-dark .tok-color { background: var(--doc-surface); border-color: rgba(139,154,255,0.14); }
+  .tok-color .chips { display: flex; height: 64px; }
+  .tok-color .chip { flex: 1; position: relative; }
+  .tok-color .chip span { position: absolute; left: 8px; bottom: 6px; font-family: var(--tok-mono); font-size: 10px; font-weight: 600; padding: 1px 4px; border-radius: 4px; background: rgba(255,255,255,0.82); color: var(--doc-ink); }
+  .tok-color .chip.is-dark span { background: rgba(10,14,39,0.7); color: var(--doc-ink); }
+  .tok-color .meta { padding: 8px 12px 12px; }
+  .tok-color .meta .role { font-size: 12.5px; font-weight: 700; }
+  .tok-color .meta .dart { font-family: var(--tok-mono); font-size: 10.5px; color: var(--doc-ink-2); margin-top: 2px; word-break: break-all; }
+  body.stage-dark .tok-color .meta .dart { color: var(--doc-ink-3); }
+  .tok-corner-tags { display: flex; gap: 4px; padding: 0 12px 12px; }
+  .tok-corner-tags em { font-style: normal; font-size: 9.5px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--doc-ink-3); background: rgba(20,24,48,0.05); padding: 2px 4px; border-radius: 4px; }
+  body.stage-dark .tok-corner-tags em { color: var(--doc-ink-3); background: rgba(255,255,255,0.06); }
+
+  /* spec table (type, spacing, radius, sizes, opacity, motion) */
+  .tok-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--doc-surface); border: 1px solid rgba(20,24,48,0.09); border-radius: 16px; overflow: hidden; }
+  body.stage-dark .tok-table { background: var(--doc-surface); border-color: rgba(139,154,255,0.14); }
+  .tok-table th { text-align: left; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--doc-ink-3); padding: 12px 16px; border-bottom: 1px solid rgba(20,24,48,0.08); }
+  body.stage-dark .tok-table th { color: var(--doc-ink-3); border-bottom-color: rgba(139,154,255,0.14); }
+  .tok-table td { padding: 8px 16px; border-bottom: 1px solid rgba(20,24,48,0.05); vertical-align: middle; }
+  body.stage-dark .tok-table td { border-bottom-color: rgba(139,154,255,0.08); }
+  .tok-table tr:last-child td { border-bottom: none; }
+  .tok-table .mono { font-family: var(--tok-mono); font-size: 12px; color: var(--doc-accent); /* doc-only code-syntax blue — not a theme token */ }
+  body.stage-dark .tok-table .mono { color: var(--doc-accent); }
+  .tok-table .val { font-family: var(--tok-mono); font-size: 12.5px; font-weight: 600; }
+  .tok-table .muted { color: var(--doc-ink-2); }
+  body.stage-dark .tok-table .muted { color: var(--doc-ink-3); }
+  .tok-swrap { background: rgba(20,24,48,0.03); border-radius: 4px; display: inline-block; }
+  body.stage-dark .tok-swrap { background: rgba(255,255,255,0.04); }
+  .tok-bar { background: var(--memox-primary); border-radius: 4px; height: 12px; display: inline-block; vertical-align: middle; }
+  .tok-radius-demo { border: 2px solid var(--memox-primary); background: color-mix(in srgb, var(--memox-primary) 8%, transparent); }
+  body.stage-dark .tok-radius-demo { background: rgba(139,154,255,0.12); }
+
+  /* ── Shared-widget library (Components) ──────────────────────────────────
+     Every reusable widget the screens compose from, each shown as a LIGHT and
+     a DARK specimen (real MemoX tokens, .memox-dark scope) plus its Flutter
+     widget mapping + variant list. Handoff doc for the Flutter component layer. */
+  .wid-doc { color: var(--doc-ink); }
+  body.stage-dark .wid-doc { color: var(--doc-ink); }
+  .wid-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr)); gap: 16px; align-items: start; }
+  .wid-card { background: var(--doc-surface); border: 1px solid rgba(20,24,48,0.09); border-radius: 16px; overflow: hidden; }
+  body.stage-dark .wid-card { background: var(--doc-surface); border-color: rgba(139,154,255,0.14); }
+  .wid-card.span2 { grid-column: span 2; }
+  .wid-head { padding: 12px 16px 12px; border-bottom: 1px solid rgba(20,24,48,0.07); }
+  body.stage-dark .wid-head { border-bottom-color: rgba(139,154,255,0.12); }
+  .wid-head .nm { font-size: 13.5px; font-weight: 800; letter-spacing: -0.2px; display: flex; align-items: center; gap: 8px; }
+  .wid-head .fl { font-family: var(--tok-mono); font-size: 11px; font-weight: 600; color: var(--doc-accent); /* doc-only code-syntax blue — not a theme token */ margin-top: 4px; display: inline-block; }
+  body.stage-dark .wid-head .fl { color: var(--doc-accent); }
+  .wid-head .ds { font-size: 11.5px; color: var(--doc-ink-2); margin-top: 4px; line-height: 1.45; }
+  /* Per-widget handoff link → flutter-prompt.html, deep-linked by widget slug. */
+  .wid-head .pmt { margin-left: auto; flex-shrink: 0; font-size: 10.5px; font-weight: 700; letter-spacing: 0.2px;
+    color: var(--doc-accent); text-decoration: none; border: 1px solid currentColor; border-radius: 999px;
+    padding: 4px 9px; white-space: nowrap; opacity: 0.72; }
+  .wid-head .pmt:hover { opacity: 1; background: rgba(51,70,214,0.08); }
+  body.stage-dark .wid-head .pmt:hover { background: rgba(181,192,255,0.12); }
+  body.stage-dark .wid-head .ds { color: var(--doc-ink-3); }
+  /* dual-theme specimen stage — panes STACK vertically so each specimen gets
+     the card's full width (side-by-side halved the width and broke the fonts) */
+  .wid-stage { display: flex; flex-direction: column; }
+  .wid-pane { padding: 20px 16px; min-height: 76px; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 8px; position: relative; }
+  /* Fixed surface literals so the widget pane backdrop is immune to outer .memox-dark token
+     overrides — the pane itself IS the scope boundary (light pane always light, dark always dark)
+     so using var(--memox-bg) here would collapse when the pane sits inside .memox-dark. */
+  .wid-pane.l { background: var(--memox-surface-fixed-light); /* = --memox-surface light */ color: var(--memox-text-primary); }
+  .wid-pane.d { background: var(--memox-surface-fixed-dark); /* = --memox-surface dark  */ color: var(--memox-text-primary); }
+  .wid-pane.l + .wid-pane.d { border-top: 1px solid rgba(139,154,255,0.16); }
+  .wid-pane > .lab { position: absolute; top: 7px; right: 9px; font-family: var(--tok-mono); font-size: 8.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: rgba(20,24,48,0.30); }
+  .wid-pane.d > .lab { color: rgba(228,232,250,0.34); }
+  /* variant chips footer */
+  .wid-foot { padding: 8px 16px 12px; display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px solid rgba(20,24,48,0.06); }
+  body.stage-dark .wid-foot { border-top-color: rgba(139,154,255,0.10); }
+  .wid-foot .vt { font-size: 10.5px; font-weight: 600; font-family: var(--tok-mono); color: #4a5278; background: rgba(20,24,48,0.05); padding: 2px 8px; border-radius: 4px; }
+  body.stage-dark .wid-foot .vt { color: #A4ACD0; background: rgba(255,255,255,0.06); }
+  .wid-foot .vt b { color: var(--doc-accent); /* doc-only code-syntax blue — not a theme token */ font-weight: 700; }
+  body.stage-dark .wid-foot .vt b { color: var(--doc-accent); }
+
+  /* Narrow-screen pass — kept LAST in the sheet on purpose: these rules must
+     win on source order over the .tok-*/.wid-* defaults above (the span-2
+     widget cards would otherwise out-order .wid-grid > *). */
+  @media (max-width: 700px) {
+    .stage { padding: 16px; gap: 16px; }
+    .stage-header { padding: 0 16px; }
+    .controls { padding: 12px 16px; gap: 8px 16px; }
+    .tokens-doc { padding-left: 0; padding-right: 0; }
+    .tok-intro { padding: 16px 16px 20px; border-radius: 16px; }
+    .tok-intro h2 { font-size: 18px; }
+    .tok-block { margin-top: 24px; }
+    .tok-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
+    .tok-table { min-width: 560px; }
+    .st-label { min-width: 0; }
+    /* One column at phone width. The span-2 cards need their span neutralised
+       too, or a single explicit track leaves them forcing an implicit 2nd
+       column that the gap pushes past the viewport. */
+    .wid-grid { grid-template-columns: 1fr; }
+    .wid-grid > * { grid-column: 1 / -1; }
+    .section-head { padding-top: 28px; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- ───────────────────────────────────────────────────────────────
+     Screen components live in ./screens/*.jsx, one file per screen, so each
+     can be reviewed and edited in isolation. _shared.jsx (loaded first)
+     publishes shared chrome to window; each screen file reads it back and
+     re-publishes its own component. The gallery harness below stays inline
+     and references the screen components as window globals.
+     ─────────────────────────────────────────────────────────────── -->
+<script type="text/babel" src="screens/_shared.jsx"></script>
+<!-- OnboardingScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/OnboardingScreen/states/welcome.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/states/zero.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/states/createDeck.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/states/createForImp.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/states/signingIn.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/states/restorePrompt.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/states/restoring.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/states/restoreFailed.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/states/importHandoff.jsx"></script>
+<script type="text/babel" src="screens/OnboardingScreen/OnboardingScreen.jsx"></script>
+<!-- DashboardScreen — folderised: one state per file, then the main shell.
+     States register into window.MemoXStates.Dashboard; the main file resolves
+     the active state's body at render time, so load order is not load-critical. -->
+<script type="text/babel" src="screens/DashboardScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/states/onboarding.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/states/goalOff.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/states/resumeOnly.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/states/streakBroken.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/states/error.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/states/offline.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/states/multiResume.jsx"></script>
+<script type="text/babel" src="screens/DashboardScreen/DashboardScreen.jsx"></script>
+<!-- LibraryOverviewScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/empty.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/error.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/search.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/overflow.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/createFolder.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/renameFolder.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/moveFolder.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/archiveFolder.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/states/deleteFolder.jsx"></script>
+<script type="text/babel" src="screens/LibraryOverviewScreen/LibraryOverviewScreen.jsx"></script>
+<!-- FolderDetailScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/FolderDetailScreen/states/decks.jsx"></script>
+<script type="text/babel" src="screens/FolderDetailScreen/states/subfolders.jsx"></script>
+<script type="text/babel" src="screens/FolderDetailScreen/states/unlocked.jsx"></script>
+<script type="text/babel" src="screens/FolderDetailScreen/states/searchEmpty.jsx"></script>
+<script type="text/babel" src="screens/FolderDetailScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/FolderDetailScreen/states/error.jsx"></script>
+<script type="text/babel" src="screens/FolderDetailScreen/states/delConfirm.jsx"></script>
+<script type="text/babel" src="screens/FolderDetailScreen/states/moveSheet.jsx"></script>
+<script type="text/babel" src="screens/FolderDetailScreen/FolderDetailScreen.jsx"></script>
+<!-- LibrarySearchScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/LibrarySearchScreen/states/emptyQuery.jsx"></script>
+<script type="text/babel" src="screens/LibrarySearchScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/LibrarySearchScreen/states/results.jsx"></script>
+<script type="text/babel" src="screens/LibrarySearchScreen/states/noResults.jsx"></script>
+<script type="text/babel" src="screens/LibrarySearchScreen/states/error.jsx"></script>
+<script type="text/babel" src="screens/LibrarySearchScreen/LibrarySearchScreen.jsx"></script>
+<!-- FlashcardListScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/FlashcardListScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/FlashcardListScreen/states/empty.jsx"></script>
+<script type="text/babel" src="screens/FlashcardListScreen/states/searchEmpty.jsx"></script>
+<script type="text/babel" src="screens/FlashcardListScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/FlashcardListScreen/states/error.jsx"></script>
+<script type="text/babel" src="screens/FlashcardListScreen/states/delCard.jsx"></script>
+<script type="text/babel" src="screens/FlashcardListScreen/states/delDeck.jsx"></script>
+<script type="text/babel" src="screens/FlashcardListScreen/states/reorder.jsx"></script>
+<script type="text/babel" src="screens/FlashcardListScreen/FlashcardListScreen.jsx"></script>
+<!-- FlashcardCreateScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/FlashcardCreateScreen/states/emptyForm.jsx"></script>
+<script type="text/babel" src="screens/FlashcardCreateScreen/states/valid.jsx"></script>
+<script type="text/babel" src="screens/FlashcardCreateScreen/states/details.jsx"></script>
+<script type="text/babel" src="screens/FlashcardCreateScreen/states/validationErr.jsx"></script>
+<script type="text/babel" src="screens/FlashcardCreateScreen/states/saving.jsx"></script>
+<script type="text/babel" src="screens/FlashcardCreateScreen/states/saveFailed.jsx"></script>
+<script type="text/babel" src="screens/FlashcardCreateScreen/FlashcardCreateScreen.jsx"></script>
+<!-- FlashcardEditScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/FlashcardEditScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/FlashcardEditScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/FlashcardEditScreen/states/loadError.jsx"></script>
+<script type="text/babel" src="screens/FlashcardEditScreen/states/validationErr.jsx"></script>
+<script type="text/babel" src="screens/FlashcardEditScreen/states/dirtySaving.jsx"></script>
+<script type="text/babel" src="screens/FlashcardEditScreen/states/saveFailed.jsx"></script>
+<script type="text/babel" src="screens/FlashcardEditScreen/states/delConfirm.jsx"></script>
+<script type="text/babel" src="screens/FlashcardEditScreen/FlashcardEditScreen.jsx"></script>
+<!-- FlashcardHistoryScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/FlashcardHistoryScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/FlashcardHistoryScreen/states/empty.jsx"></script>
+<script type="text/babel" src="screens/FlashcardHistoryScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/FlashcardHistoryScreen/states/error.jsx"></script>
+<script type="text/babel" src="screens/FlashcardHistoryScreen/states/partial.jsx"></script>
+<script type="text/babel" src="screens/FlashcardHistoryScreen/FlashcardHistoryScreen.jsx"></script>
+<!-- DeckImportScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/DeckImportScreen/states/empty.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/states/fileSelected.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/states/parsing.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/states/previewAll.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/states/previewMix.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/states/importing.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/states/success.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/states/partial.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/states/failed.jsx"></script>
+<script type="text/babel" src="screens/DeckImportScreen/DeckImportScreen.jsx"></script>
+<!-- TagManagementScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/TagManagementScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/empty.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/searchEmpty.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/sheet.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/rename.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/renameMerge.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/merge.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/del.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/busy.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/states/opError.jsx"></script>
+<script type="text/babel" src="screens/TagManagementScreen/TagManagementScreen.jsx"></script>
+<script type="text/babel" src="screens/StudyScreen/StudyScreen.jsx"></script>
+<script type="text/babel" src="screens/MatchScreen/MatchScreen.jsx"></script>
+<script type="text/babel" src="screens/GuessScreen/GuessScreen.jsx"></script>
+<script type="text/babel" src="screens/RecallScreen/RecallScreen.jsx"></script>
+<script type="text/babel" src="screens/FillScreen/FillScreen.jsx"></script>
+<!-- StudyResultScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/StudyResultScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/StudyResultScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/StudyResultScreen/states/goalOff.jsx"></script>
+<script type="text/babel" src="screens/StudyResultScreen/states/finFailed.jsx"></script>
+<script type="text/babel" src="screens/StudyResultScreen/states/defensive.jsx"></script>
+<script type="text/babel" src="screens/StudyResultScreen/states/toughEmpty.jsx"></script>
+<script type="text/babel" src="screens/StudyResultScreen/StudyResultScreen.jsx"></script>
+<script type="text/babel" src="screens/StatsScreen/StatsScreen.jsx"></script>
+<!-- ProgressScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/ProgressScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/ProgressScreen/states/month.jsx"></script>
+<script type="text/babel" src="screens/ProgressScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/ProgressScreen/states/empty.jsx"></script>
+<script type="text/babel" src="screens/ProgressScreen/states/insufficient.jsx"></script>
+<script type="text/babel" src="screens/ProgressScreen/states/partial.jsx"></script>
+<script type="text/babel" src="screens/ProgressScreen/states/error.jsx"></script>
+<script type="text/babel" src="screens/ProgressScreen/ProgressScreen.jsx"></script>
+<!-- SettingsScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/SettingsScreen/states/populated.jsx"></script>
+<script type="text/babel" src="screens/SettingsScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/SettingsScreen/states/signedOut.jsx"></script>
+<script type="text/babel" src="screens/SettingsScreen/states/signingIn.jsx"></script>
+<script type="text/babel" src="screens/SettingsScreen/states/syncError.jsx"></script>
+<script type="text/babel" src="screens/SettingsScreen/SettingsScreen.jsx"></script>
+<!-- AccountSyncScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/AccountSyncScreen/states/signedOut.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/states/signingIn.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/states/signInFailed.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/states/noBackup.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/states/ready.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/states/uploading.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/states/restoreWarn.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/states/restoring.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/states/tokenExpired.jsx"></script>
+<script type="text/babel" src="screens/AccountSyncScreen/AccountSyncScreen.jsx"></script>
+<!-- LearningSettingsScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/LearningSettingsScreen/states/goalOn.jsx"></script>
+<script type="text/babel" src="screens/LearningSettingsScreen/states/goalOff.jsx"></script>
+<script type="text/babel" src="screens/LearningSettingsScreen/states/reminderOn.jsx"></script>
+<script type="text/babel" src="screens/LearningSettingsScreen/states/permDenied.jsx"></script>
+<script type="text/babel" src="screens/LearningSettingsScreen/states/saving.jsx"></script>
+<script type="text/babel" src="screens/LearningSettingsScreen/LearningSettingsScreen.jsx"></script>
+<!-- AudioSpeechScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/AudioSpeechScreen/states/loaded.jsx"></script>
+<script type="text/babel" src="screens/AudioSpeechScreen/states/english.jsx"></script>
+<script type="text/babel" src="screens/AudioSpeechScreen/states/loading.jsx"></script>
+<script type="text/babel" src="screens/AudioSpeechScreen/states/empty.jsx"></script>
+<script type="text/babel" src="screens/AudioSpeechScreen/states/engineErr.jsx"></script>
+<script type="text/babel" src="screens/AudioSpeechScreen/states/playing.jsx"></script>
+<script type="text/babel" src="screens/AudioSpeechScreen/states/saving.jsx"></script>
+<script type="text/babel" src="screens/AudioSpeechScreen/AudioSpeechScreen.jsx"></script>
+<!-- AppearanceScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/AppearanceScreen/states/system.jsx"></script>
+<script type="text/babel" src="screens/AppearanceScreen/states/light.jsx"></script>
+<script type="text/babel" src="screens/AppearanceScreen/states/dark.jsx"></script>
+<script type="text/babel" src="screens/AppearanceScreen/AppearanceScreen.jsx"></script>
+<!-- LanguageScreen — folderised: states/* then main shell. -->
+<script type="text/babel" src="screens/LanguageScreen/states/default.jsx"></script>
+<script type="text/babel" src="screens/LanguageScreen/states/searching.jsx"></script>
+<script type="text/babel" src="screens/LanguageScreen/states/changed.jsx"></script>
+<script type="text/babel" src="screens/LanguageScreen/LanguageScreen.jsx"></script>
+
+<script type="text/babel">
+/* ─────── App wrapper with multiple phones ─────── */
+// Lazy-mounts its screen only while near the horizontal viewport. With 129 frames,
+// mounting every React tree on load is what made the gallery heavy — this keeps just
+// the handful of frames in (and near) view mounted, and tears the rest down so the DOM
+// stays small while scrolling. The .phone box is a fixed 390×780, so the placeholder
+// reserves identical space and the scroll position never jumps.
+const noop = () => {};
+
+// Robust lazy-mount: mount a row's frames once it scrolls within ~1.6 viewports.
+// Uses getBoundingClientRect on scroll/resize + an interval fallback, so it works
+// in every environment (the old IntersectionObserver gate never fired in some webviews).
+function useNear(ref) {
+  const [near, setNear] = React.useState(false);
+  React.useEffect(() => {
+    if (near) return;
+    let raf = null, iv = null, done = false;
+    const cleanup = () => {
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onScroll);
+      if (iv) clearInterval(iv);
+      if (raf) cancelAnimationFrame(raf);
+    };
+    const check = () => {
+      const n = ref.current; if (!n || done) return;
+      const r = n.getBoundingClientRect();
+      const vh = window.innerHeight || 800;
+      if (r.top < vh * 1.6 && r.bottom > -vh * 0.6) { done = true; setNear(true); cleanup(); }
+    };
+    const onScroll = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = null; check(); }); };
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onScroll);
+    iv = setInterval(check, 350);
+    check();
+    return cleanup;
+  }, [near]);
+  return near;
+}
+
+// One device frame in a chosen theme. Dark applies the scoped .memox-dark token block.
+function Frame({ theme, children }) {
+  const dark = theme === 'dark';
+  return (
+    <div className={'frame-wrap' + (dark ? ' memox-dark' : '')}>
+      <div className="phone">{children}</div>
+      <div className="theme-label">
+        <span className="theme-dot" style={{ background: dark ? '#8B9AFF' : '#5265F5' }}></span>
+        {dark ? 'Dark · Tokyo Nebula' : 'Light · Tokyo Pure'}
+      </div>
+    </div>);
+}
+
+// A screen shown as a light+dark pair with a state stepper. Both frames share one state index.
+function ScreenRow({ group, view, num }) {
+  const [i, setI] = React.useState(0);
+  const ref = React.useRef(null);
+  const near = useNear(ref);
+  const total = group.states.length;
+  const cur = group.states[i % total];
+  const single = total <= 1;
+  const make = () => {
+    const props = group.prop ? { go: noop, [group.prop]: cur[0] } : { go: noop };
+    // Key by the current state value so screens that take the state only as a
+    // useState initializer (Recall, Fill) remount and re-init when the stepper
+    // changes states — otherwise both states render identically. Single-state
+    // screens keep a constant key, so their interactivity is preserved.
+    return React.createElement(group.Comp, { key: 'st-' + String(cur[0]), ...props });
+  };
+  const showLight = view !== 'dark';
+  const showDark = view !== 'light';
+  return (
+    <div className="row" ref={ref}>
+      <div className="row-head">
+        <span className="row-num">{num}</span>
+        <span className="row-title">{group.title}</span>
+        {!single &&
+          <div className="stepper" role="group" aria-label={group.title + ' states'}>
+            <button onClick={() => setI((i - 1 + total) % total)} aria-label="Previous state" title="Previous state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span className="st-label">{cur[1]} · {(i % total) + 1}/{total}</span>
+            <button onClick={() => setI((i + 1) % total)} aria-label="Next state" title="Next state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>}
+        {single && <span className="st-label st-single">Single state</span>}
+      </div>
+      {near ?
+        <div className="pair">
+          {showLight ? <Frame theme="light">{make()}</Frame> : null}
+          {showDark ? <Frame theme="dark">{make()}</Frame> : null}
+        </div> :
+        <div className="row-placeholder"></div>}
+    </div>);
+}
+
+const S = (v, l) => [v, l];
+const GROUPS = [
+  { section: '1 · First run', num: '01', title: 'Onboarding', Comp: OnboardingScreen, prop: 'state', states: [S('welcome','Welcome'),S('zero','Zero state'),S('createDeck','Create deck'),S('createForImp','Deck for import'),S('signingIn','Signing in'),S('restorePrompt','Restore prompt'),S('restoring','Restoring'),S('restoreFailed','Restore failed'),S('importHandoff','Import handoff')] },
+  { section: '2 · Home', num: '02', title: 'Dashboard', Comp: DashboardScreen, prop: 'state', states: [S('loaded','Loaded'),S('loading','Loading'),S('onboarding','Onboarding'),S('goalOff','Goal off'),S('resumeOnly','Resume only'),S('streakBroken','Streak broken'),S('error','Error'),S('offline','Offline'),S('multiResume','Multi resume')] },
+  { section: '3 · Library', num: '03', title: 'Library overview', Comp: LibraryOverviewScreen, prop: 'state', states: [S('loaded','Loaded'),S('loading','Loading'),S('empty','Empty'),S('error','Error'),S('search','Search'),S('overflow','Overflow sheet'),S('createFolder','Create folder'),S('renameFolder','Rename folder'),S('moveFolder','Move folder'),S('archiveFolder','Archive folder'),S('deleteFolder','Delete folder')] },
+  { num: '04', title: 'Folder detail', Comp: FolderDetailScreen, prop: 'state', states: [S('decks','Decks'),S('subfolders','Subfolders'),S('unlocked','Unlocked'),S('searchEmpty','Search empty'),S('loading','Loading'),S('error','Error'),S('delConfirm','Delete'),S('moveSheet','Move sheet')] },
+  { num: '05', title: 'Library search', Comp: LibrarySearchScreen, prop: 'state', states: [S('emptyQuery','Empty'),S('loading','Loading'),S('results','Results'),S('noResults','No results'),S('error','Error')] },
+  { section: '4 · Deck & cards', num: '06', title: 'Flashcard list', Comp: FlashcardListScreen, prop: 'state', states: [S('loaded','Loaded'),S('empty','Empty'),S('searchEmpty','Search empty'),S('loading','Loading'),S('error','Error'),S('delCard','Delete card'),S('delDeck','Delete deck'),S('reorder','Reorder')] },
+  { num: '07', title: 'Flashcard create', Comp: FlashcardCreateScreen, prop: 'state', states: [S('emptyForm','Empty'),S('valid','Valid'),S('details','Details open'),S('validationErr','Validation'),S('saving','Saving'),S('saveFailed','Save failed')] },
+  { num: '08', title: 'Flashcard edit', Comp: FlashcardEditScreen, prop: 'state', states: [S('loaded','Loaded'),S('loading','Loading'),S('loadError','Load error'),S('validationErr','Validation'),S('dirtySaving','Saving'),S('saveFailed','Save failed'),S('delConfirm','Delete')] },
+  { num: '09', title: 'Flashcard history', Comp: FlashcardHistoryScreen, prop: 'state', states: [S('loaded','Loaded'),S('empty','Empty'),S('loading','Loading'),S('error','Error'),S('partial','Partial')] },
+  { num: '10', title: 'Deck import', Comp: DeckImportScreen, prop: 'state', states: [S('empty','Empty'),S('fileSelected','File selected'),S('parsing','Parsing'),S('previewAll','Preview all'),S('previewMix','Preview mixed'),S('importing','Importing'),S('success','Success'),S('partial','Partial'),S('failed','Failed')] },
+  { num: '11', title: 'Tag management', Comp: TagManagementScreen, prop: 'state', states: [S('loaded','Loaded'),S('loading','Loading'),S('empty','Empty'),S('searchEmpty','Search empty'),S('sheet','Action sheet'),S('rename','Rename'),S('renameMerge','Rename to merge'),S('merge','Merge sheet'),S('del','Delete'),S('busy','Busy row'),S('opError','Op error')] },
+  { section: '5 · Study', num: '12', title: 'Study · Review', Comp: StudyScreen, prop: null, states: [S(null,'Default')] },
+  { num: '13', title: 'Study · Match', Comp: MatchScreen, prop: null, states: [S(null,'Default')] },
+  { num: '14', title: 'Study · Guess', Comp: GuessScreen, prop: null, states: [S(null,'Default')] },
+  { num: '15', title: 'Study · Recall', Comp: RecallScreen, prop: 'initialRevealed', states: [S(false,'Hidden'),S(true,'Revealed')] },
+  { num: '16', title: 'Study · Fill', Comp: FillScreen, prop: 'initialState', states: [S('input','Input'),S('wrong','Wrong')] },
+  { num: '17', title: 'Study result', Comp: StudyResultScreen, prop: 'state', states: [S('loaded','Loaded'),S('loading','Loading'),S('goalOff','Goal off'),S('finFailed','Save failed'),S('defensive','Defensive'),S('toughEmpty','Tough empty')] },
+  { section: '6 · Insights', num: '18', title: 'Stats', Comp: StatsScreen, prop: null, states: [S(null,'Default')] },
+  { num: '19', title: 'Progress', Comp: ProgressScreen, prop: 'state', states: [S('loaded','Week'),S('month','Month'),S('loading','Loading'),S('empty','Empty'),S('insufficient','Insufficient'),S('partial','Partial'),S('error','Error')] },
+  { section: '7 · Settings', num: '20', title: 'Settings', Comp: SettingsScreen, prop: 'state', states: [S('populated','Populated'),S('loading','Loading'),S('signedOut','Signed out'),S('signingIn','Signing in'),S('syncError','Sync error')] },
+  { num: '21', title: 'Account sync', Comp: AccountSyncScreen, prop: 'state', states: [S('signedOut','Signed out'),S('signingIn','Signing in'),S('signInFailed','Sign-in failed'),S('noBackup','No backup'),S('ready','Ready'),S('uploading','Uploading'),S('restoreWarn','Restore warn'),S('restoring','Restoring'),S('tokenExpired','Token expired')] },
+  { num: '22', title: 'Learning settings', Comp: LearningSettingsScreen, prop: 'state', states: [S('goalOn','Goal on'),S('goalOff','Goal off'),S('reminderOn','Reminder on'),S('permDenied','Perm denied'),S('saving','Saving')] },
+  { num: '23', title: 'Audio & speech', Comp: AudioSpeechScreen, prop: 'state', states: [S('loaded','Korean'),S('english','English'),S('loading','Loading'),S('empty','No voices'),S('engineErr','Engine error'),S('playing','Playing'),S('saving','Saving')] },
+  { num: '24', title: 'Appearance', Comp: AppearanceScreen, prop: 'state', states: [S('system','System'),S('light','Light'),S('dark','Dark')] },
+  { num: '25', title: 'Language', Comp: LanguageScreen, prop: 'state', states: [S('default','English'),S('searching','Searching'),S('changed','Switched')] }
+];
+
+/* ════════════════════════════════════════════════════════════════════════
+   FOUNDATIONS — Design-token reference (Flutter handoff)
+   Mirrors lib/core/theme/tokens/** and color_schemes/** from the MemoX repo.
+   Every token shows its LIGHT (Tokyo Pure) + DARK (Tokyo Nebula) value and
+   the Dart symbol a Flutter dev resolves it through. Source of truth values
+   match ../../colors_and_type.css exactly.
+   ════════════════════════════════════════════════════════════════════════ */
+
+// luminance check so the inline hex label stays legible on its own swatch
+function isDarkHex(hex) {
+  if (!hex || hex[0] !== '#') return false;
+  const h = hex.length === 4
+    ? hex.slice(1).split('').map((c) => parseInt(c + c, 16))
+    : [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+  return (0.299 * h[0] + 0.587 * h[1] + 0.114 * h[2]) < 150;
+}
+
+// one color token = a card with a Light chip + Dark chip, role + Dart symbol
+function ColorToken({ role, dart, light, dark, tags }) {
+  const chip = (hex, isDark) => (
+    <div className="chip" style={{ background: hex || (isDark ? '#0A0E27' : '#F7F9FE') }}>
+      {hex
+        ? <span className={isDarkHex(hex) ? 'is-dark' : ''}>{hex}</span>
+        : <span className={isDark ? 'is-dark' : ''} style={{ opacity: 0.5 }}>inherits</span>}
+    </div>);
+  return (
+    <div className="tok-color">
+      <div className="chips">{chip(light, false)}{chip(dark, true)}</div>
+      <div className="meta">
+        <div className="role">{role}</div>
+        <div className="dart">{dart}</div>
+      </div>
+      {tags && tags.length
+        ? <div className="tok-corner-tags">{tags.map((t) => <em key={t}>{t}</em>)}</div>
+        : null}
+    </div>);
+}
+
+const COLOR_GROUPS = [
+  { n: 'A', title: 'Brand & core roles', dart: 'ColorScheme · seed #5265F5', note: 'The 16 standard brand/error roles. Light is the seeded scheme; Dark = Tokyo Nebula (primary lifts for AA on navy). tertiary IS the violet accent — customColors.accent is now only an alias of it, so it is no longer listed separately.', items: [
+    { role: 'primary', dart: 'colorScheme.primary', light: '#5265F5', dark: '#8B9AFF' },
+    { role: 'onPrimary', dart: 'colorScheme.onPrimary', light: '#FFFFFF', dark: '#11173A' },
+    { role: 'primaryContainer', dart: 'colorScheme.primaryContainer', light: '#E0E5FE', dark: '#2D346A' },
+    { role: 'onPrimaryContainer', dart: 'colorScheme.onPrimaryContainer', light: '#1A2580', dark: '#D9DFFF' },
+    { role: 'secondary', dart: 'colorScheme.secondary', light: '#6E7CD9', dark: '#9DA8E8' },
+    { role: 'onSecondary', dart: 'colorScheme.onSecondary', light: '#FFFFFF', dark: '#1A2150' },
+    { role: 'secondaryContainer', dart: 'colorScheme.secondaryContainer', light: '#E3E6F7', dark: '#343C78' },
+    { role: 'onSecondaryContainer', dart: 'colorScheme.onSecondaryContainer', light: '#262E6E', dark: '#DDE2FB' },
+    { role: 'tertiary', dart: 'colorScheme.tertiary', light: '#8B6FF5', dark: '#B5A0FF', tags: ['violet · signature'] },
+    { role: 'onTertiary', dart: 'colorScheme.onTertiary', light: '#FFFFFF', dark: '#240B63' },
+    { role: 'tertiaryContainer', dart: 'colorScheme.tertiaryContainer', light: '#EBE3FE', dark: '#443078' },
+    { role: 'onTertiaryContainer', dart: 'colorScheme.onTertiaryContainer', light: '#33177E', dark: '#E6DCFF' },
+    { role: 'error', dart: 'colorScheme.error', light: '#DC2D4E', dark: '#FF8FA3' },
+    { role: 'onError', dart: 'colorScheme.onError', light: '#FFFFFF', dark: '#52061B' },
+    { role: 'errorContainer', dart: 'colorScheme.errorContainer', light: '#FBDDE3', dark: '#7A2036' },
+    { role: 'onErrorContainer', dart: 'colorScheme.onErrorContainer', light: '#7A0A23', dark: '#FFD9DF' },
+  ] },
+  { n: 'B', title: 'Surface ladder', dart: 'ColorScheme · surface*', note: '6-step cool-blue stack. Elevation is carried by these tiers, not shadows.', items: [
+    { role: 'surface (page)', dart: 'colorScheme.surface', light: '#F7F9FE', dark: '#0A0E27' },
+    { role: 'surfaceBright', dart: 'colorScheme.surfaceBright', light: '#FFFFFF', dark: '#232B5A' },
+    { role: 'surfaceDim', dart: 'colorScheme.surfaceDim', light: '#DAE0EF', dark: '#060925' },
+    { role: 'surfaceContainerLowest', dart: 'surfaceContainerLowest', light: '#FFFFFF', dark: '#131A3A', tags: ['card bg'] },
+    { role: 'surfaceContainerLow', dart: 'surfaceContainerLow', light: '#F1F4FB', dark: '#1B2249' },
+    { role: 'surfaceContainer', dart: 'surfaceContainer', light: '#E9EDF7', dark: '#232B5A' },
+    { role: 'surfaceContainerHigh', dart: 'surfaceContainerHigh', light: '#E2E7F3', dark: '#2C356E' },
+    { role: 'surfaceContainerHighest', dart: 'surfaceContainerHighest', light: '#DAE0EF', dark: '#353D7E' },
+  ] },
+  { n: 'C', title: 'Text & outline', dart: 'ColorScheme · onSurface / outline', note: 'Outlines lean cool indigo — never warm gray. That is the signature.', items: [
+    { role: 'onSurface', dart: 'colorScheme.onSurface', light: '#0F1638', dark: '#E4E8FA', tags: ['body text'] },
+    { role: 'onSurfaceVariant', dart: 'colorScheme.onSurfaceVariant', light: '#4A5278', dark: '#A4ACD0', tags: ['muted'] },
+    { role: 'outline', dart: 'colorScheme.outline', light: '#7C85AB', dark: '#5A6BAE' },
+    { role: 'outlineVariant', dart: 'colorScheme.outlineVariant', light: '#C5CBE3', dark: '#2A3267', tags: ['ghost border'] },
+  ] },
+  { n: 'D', title: 'Semantic', dart: 'CustomColors', note: 'Green is reserved for the specific feeling of mastery.', items: [
+    { role: 'success / easy', dart: 'customColors.success', light: '#2BA88B', dark: '#6FE0BD' },
+    { role: 'warning', dart: 'customColors.warning', light: '#F59E0B', dark: '#FFC658' },
+    { role: 'mastery', dart: 'customColors.mastery', light: '#1F8A5B', dark: '#6FE0BD' },
+    { role: 'masteryFixed', dart: 'customColors.masteryFixed', light: '#C7F2D8', dark: '#1F4A37' },
+    { role: 'onMasteryFixed', dart: 'customColors.onMasteryFixed', light: '#04331A', dark: '#C7F2D8' },
+    { role: 'streak', dart: 'customColors.streak', light: '#F97316', dark: '#FFAE6E', tags: ['flame'] },
+  ] },
+  { n: 'E', title: 'Card status', dart: 'CustomColors.status*', note: 'A card moves new → learning → reviewing → mastered.', items: [
+    { role: 'statusNew', dart: 'status.new', light: '#8C95B8', dark: '#6B75A3' },
+    { role: 'statusLearning', dart: 'status.learning', light: '#F59E0B', dark: '#FFC658' },
+    { role: 'statusReviewing', dart: 'status.reviewing', light: '#5265F5', dark: '#8B9AFF' },
+    { role: 'statusMastered', dart: 'status.mastered', light: '#1F8A5B', dark: '#6FE0BD' },
+  ] },
+  { n: 'F', title: 'Review ratings', dart: 'CustomColors.rating*', note: 'SRS recall buttons in Review mode.', items: [
+    { role: 'ratingAgain', dart: 'rating.again', light: '#E57373', dark: '#FF8FA3' },
+    { role: 'ratingHard', dart: 'rating.hard', light: '#F59E0B', dark: '#FFC658' },
+    { role: 'ratingGood', dart: 'rating.good', light: '#5265F5', dark: '#8B9AFF' },
+    { role: 'ratingEasy', dart: 'rating.easy', light: '#2BA88B', dark: '#6FE0BD' },
+  ] },
+  { n: 'G', title: 'Recall self-assessment', dart: 'CustomColors.self*', note: 'Self-score after write-from-memory. Dark inherits the light value.', items: [
+    { role: 'selfMissed', dart: 'self.missed', light: '#E57373', dark: null },
+    { role: 'selfPartial', dart: 'self.partial', light: '#FFB74D', dark: null },
+    { role: 'selfGotit', dart: 'self.gotit', light: '#4DB6AC', dark: null },
+  ] },
+  { n: 'H', title: 'Mastery gradient', dart: 'CustomColors.mastery{Low,Mid,High}', note: 'The only gradient in the system — coral → amber → green, left to right as learning deepens.', items: [
+    { role: 'masteryLow', dart: 'masteryLow', light: '#E57373', dark: '#8B4F66' },
+    { role: 'masteryMid', dart: 'masteryMid', light: '#F59E0B', dark: '#8B7338' },
+    { role: 'masteryHigh', dart: 'masteryHigh', light: '#1F8A5B', dark: '#3F8070' },
+  ] },
+  { n: 'I', title: 'Seeds (Settings)', dart: 'ColorScheme.fromSeed(seed)', note: 'User-pickable seeds. The whole scheme regenerates from the chosen seed.', items: [
+    { role: 'indigo (default)', dart: 'seed.indigo', light: '#5265F5', dark: '#5265F5' },
+    { role: 'violet', dart: 'seed.violet', light: '#A78BFA', dark: '#A78BFA' },
+    { role: 'teal', dart: 'seed.teal', light: '#4DB6AC', dark: '#4DB6AC' },
+    { role: 'rose', dart: 'seed.rose', light: '#E57373', dark: '#E57373' },
+    { role: 'amber', dart: 'seed.amber', light: '#FFB74D', dark: '#FFB74D' },
+    { role: 'sage', dart: 'seed.sage', light: '#81C784', dark: '#81C784' },
+  ] },
+  { n: 'J', title: 'Inverse, effects & fixed', dart: 'ColorScheme · inverse* / shadow / *Fixed', note: 'inverseSurface deliberately does NOT flip with the theme — snackbars are a fixed dark slate with light text in both themes. The 12 Fixed roles are invariant by definition: declared once, never overridden in the dark scope.', items: [
+    { role: 'inverseSurface', dart: 'colorScheme.inverseSurface', light: '#34395D', dark: '#34395D', tags: ['invariant · toast'] },
+    { role: 'onInverseSurface', dart: 'colorScheme.onInverseSurface', light: '#E8EAFC', dark: '#E8EAFC', tags: ['invariant'] },
+    { role: 'inversePrimary', dart: 'colorScheme.inversePrimary', light: '#8B9AFF', dark: '#5265F5' },
+    { role: 'shadow', dart: 'colorScheme.shadow', light: '#0F1638', dark: '#000000' },
+    { role: 'scrim', dart: 'colorScheme.scrim', light: '#0A0E27', dark: '#000000' },
+    { role: 'primaryFixed', dart: 'colorScheme.primaryFixed', light: '#E0E5FE', dark: '#E0E5FE' },
+    { role: 'primaryFixedDim', dart: 'colorScheme.primaryFixedDim', light: '#C2CBFD', dark: '#C2CBFD' },
+    { role: 'onPrimaryFixed', dart: 'colorScheme.onPrimaryFixed', light: '#0B1252', dark: '#0B1252' },
+    { role: 'onPrimaryFixedVariant', dart: 'onPrimaryFixedVariant', light: '#2B3AB8', dark: '#2B3AB8' },
+    { role: 'secondaryFixed', dart: 'colorScheme.secondaryFixed', light: '#E3E6F7', dark: '#E3E6F7' },
+    { role: 'secondaryFixedDim', dart: 'colorScheme.secondaryFixedDim', light: '#C8CEF0', dark: '#C8CEF0' },
+    { role: 'onSecondaryFixed', dart: 'colorScheme.onSecondaryFixed', light: '#131A4E', dark: '#131A4E' },
+    { role: 'onSecondaryFixedVariant', dart: 'onSecondaryFixedVariant', light: '#4453A8', dark: '#4453A8' },
+    { role: 'tertiaryFixed', dart: 'colorScheme.tertiaryFixed', light: '#EBE3FE', dark: '#EBE3FE' },
+    { role: 'tertiaryFixedDim', dart: 'colorScheme.tertiaryFixedDim', light: '#D7C8FD', dark: '#D7C8FD' },
+    { role: 'onTertiaryFixed', dart: 'colorScheme.onTertiaryFixed', light: '#1D0A57', dark: '#1D0A57' },
+    { role: 'onTertiaryFixedVariant', dart: 'onTertiaryFixedVariant', light: '#6A4AD4', dark: '#6A4AD4' },
+  ] },
+];
+
+// ── Generic spec table ──────────────────────────────────────────────────
+function SpecBlock({ n, title, dart, note, head, rows }) {
+  return (
+    <div className="tok-block">
+      <div className="tok-block-head">
+        <span className="n">{n}</span>
+        <h3>{title}</h3>
+        {dart ? <span className="dart">{dart}</span> : null}
+        {note ? <span className="note">{note}</span> : null}
+      </div>
+      <div className="tok-table-wrap"><table className="tok-table">
+        <thead><tr>{head.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
+        <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody>
+      </table></div>
+    </div>);
+}
+
+const M = (v) => <span className="mono">{v}</span>;
+const V = (v) => <span className="val">{v}</span>;
+
+function TypographyBlock() {
+  const rows = [
+    ['fs-stat', 'customTextStyles.statDisplay', '40', '600 SemiBold', '1.1', '-0.64', 'tabular nums'],
+    ['fs-display', 'textTheme.displaySmall', '32', '700 Bold', '1.2', '-0.64', 'screen titles'],
+    ['fs-headline', 'textTheme.headlineSmall', '24', '600 SemiBold', '1.2', '-0.64', 'section headers'],
+    ['fs-title', 'textTheme.titleLarge', '20', '600 SemiBold', '1.2', '0', 'card titles'],
+    ['fs-body-lg', 'bodyLarge · titleMedium', '16', '400 / 500', '1.5', '0', 'body copy'],
+    ['fs-body', 'bodyMedium · labelLarge · titleSmall', '14', '400 / 500', '1.5', '0 / +0.72', 'secondary, buttons'],
+    ['fs-caption', 'bodySmall · labelMedium', '12', '500 / 700', '1.4', '+0.72 / +1.2', 'micro, ALL CAPS'],
+  ];
+  return (
+    <div className="tok-block">
+      <div className="tok-block-head">
+        <span className="n">K</span>
+        <h3>Typography</h3>
+        <span className="dart">TypographyTokens · AppTextTheme</span>
+        <span className="note">One family: Plus Jakarta Sans (400/500/600/700/800). Seven steps, one distinct size each — never in between. The Dart column is the M3 TextTheme entry that shares the value, so one token fills several entries. Three deliberate gaps vs M3: displaySmall 36→32, titleLarge 22→20, labelSmall 11→12 (4dp grid + a 12px legibility floor).</span>
+      </div>
+      <div className="tok-table-wrap"><table className="tok-table">
+        <thead><tr><th>Role</th><th>Dart</th><th>Size</th><th>Weight</th><th>Line h.</th><th>Letter sp.</th><th>Sample</th></tr></thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i}>
+              <td style={{ fontWeight: 600, fontFamily: 'var(--tok-mono)', fontSize: 12 }}>{r[0]}</td>
+              <td>{M(r[1])}</td>
+              <td>{V(r[2] + 'px')}</td>
+              <td className="muted">{r[3]}</td>
+              <td className="muted">{r[4]}</td>
+              <td className="muted">{r[5]}</td>
+              <td style={{ fontSize: Math.min(parseInt(r[2], 10), 26) + 'px', fontWeight: r[0].includes('Display') ? 700 : 600, letterSpacing: parseFloat(r[5]) < 0 ? '-0.4px' : 'normal', whiteSpace: 'nowrap' }}>Aa Bb 24</td>
+            </tr>
+          ))}
+        </tbody>
+      </table></div>
+    </div>);
+}
+
+function TokenReference() {
+  return (
+    <div className="tokens-doc">
+      <div className="tok-intro">
+        <h2>Design tokens — Flutter handoff</h2>
+        <p>
+          The complete token set MemoX renders from, mirrored 1:1 from <code>lib/core/theme/tokens/**</code> and
+          <code>color_schemes/**</code>. Every value below matches <code>colors_and_type.css</code>. Tokens are law: no raw
+          hex, no raw sizes — resolve everything through these Dart symbols.
+        </p>
+        <div className="tok-legend">
+          <span><b>Light</b> = Tokyo Pure&nbsp;&nbsp;·&nbsp;&nbsp;left swatch</span>
+          <span><b>Dark</b> = Tokyo Nebula&nbsp;&nbsp;·&nbsp;&nbsp;right swatch</span>
+          <span><b>mono blue</b> = Dart symbol to resolve the token</span>
+        </div>
+      </div>
+
+      {COLOR_GROUPS.map((g) => (
+        <div className="tok-block" key={g.n}>
+          <div className="tok-block-head">
+            <span className="n">{g.n}</span>
+            <h3>{g.title}</h3>
+            <span className="dart">{g.dart}</span>
+            {g.note ? <span className="note">{g.note}</span> : null}
+          </div>
+          <div className="tok-cgrid">
+            {g.items.map((it) => <ColorToken key={it.role} {...it} />)}
+          </div>
+        </div>
+      ))}
+
+      <TypographyBlock />
+
+      <SpecBlock
+        n="L" title="Spacing" dart="SpacingTokens" note="4dp grid. Three semantic aliases (card/screen/section) at the bottom."
+        head={['Token', 'Dart', 'Value', 'Scale']}
+        rows={[
+          ['xxs', M('spacing.xxs'), V('2px'), <span className="tok-swrap"><span className="tok-bar" style={{ width: 2 }} /></span>],
+          ['xs', M('spacing.xs'), V('4px'), <span className="tok-swrap"><span className="tok-bar" style={{ width: 4 }} /></span>],
+          ['sm', M('spacing.sm'), V('8px'), <span className="tok-swrap"><span className="tok-bar" style={{ width: 8 }} /></span>],
+          ['md', M('spacing.md'), V('12px'), <span className="tok-swrap"><span className="tok-bar" style={{ width: 12 }} /></span>],
+          ['lg', M('spacing.lg'), V('16px'), <span className="tok-swrap"><span className="tok-bar" style={{ width: 16 }} /></span>],
+          ['xl', M('spacing.xl'), V('24px'), <span className="tok-swrap"><span className="tok-bar" style={{ width: 24 }} /></span>],
+          ['xxl', M('spacing.xxl'), V('32px'), <span className="tok-swrap"><span className="tok-bar" style={{ width: 32 }} /></span>],
+          ['xxxl', M('spacing.xxxl'), V('48px'), <span className="tok-swrap"><span className="tok-bar" style={{ width: 48 }} /></span>],
+          ['cardPadding', M('spacing.cardPadding'), V('20px'), <span className="muted">card interior</span>],
+          ['screenPadding', M('spacing.screenPadding'), V('16px'), <span className="muted">horizontal screen edge</span>],
+          ['sectionGap', M('spacing.sectionGap'), V('32px'), <span className="muted">between sections</span>],
+        ]}
+      />
+
+      <SpecBlock
+        n="M" title="Radii" dart="RadiusTokens" note="Values below are what the primitives actually render. Cards = 20 (the flatter-card pass, not lg 16). Buttons/inputs = md 12. FAB = lg 16, not xxl 28. Chips/avatars = full."
+        head={['Token', 'Dart', 'Value', 'Corner']}
+        rows={[
+          ['xs', M('radius.xs'), V('4px'), <span className="tok-radius-demo" style={{ display: 'inline-block', width: 30, height: 22, borderRadius: 4 }} />],
+          ['sm', M('radius.sm'), V('8px'), <span className="tok-radius-demo" style={{ display: 'inline-block', width: 30, height: 22, borderRadius: 8 }} />],
+          ['md (button/input)', M('radius.md'), V('12px'), <span className="tok-radius-demo" style={{ display: 'inline-block', width: 30, height: 22, borderRadius: 12 }} />],
+          ['lg (FAB / dialog / sheet)', M('radius.lg'), V('16px'), <span className="tok-radius-demo" style={{ display: 'inline-block', width: 30, height: 22, borderRadius: 16 }} />],
+          ['card', M('radius.card'), V('20px'), <span className="tok-radius-demo" style={{ display: 'inline-block', width: 30, height: 22, borderRadius: 20 }} />],
+          ['xl', M('radius.xl'), V('24px'), <span className="tok-radius-demo" style={{ display: 'inline-block', width: 36, height: 26, borderRadius: 24 }} />],
+          ['xxl', M('radius.xxl'), V('28px'), <span className="tok-radius-demo" style={{ display: 'inline-block', width: 40, height: 28, borderRadius: 28 }} />],
+          ['full (chip/avatar)', M('radius.full'), V('999px'), <span className="tok-radius-demo" style={{ display: 'inline-block', width: 40, height: 22, borderRadius: 999 }} />],
+        ]}
+      />
+
+      <SpecBlock
+        n="N" title="Sizes" dart="SizeTokens" note="Values below are what the primitives actually render. Touch target 48dp is the ::after expander, not the ink box — .icon-btn paints 36. Icons at 20 (inline) and 24 (standard)."
+        head={['Token', 'Dart', 'Value', 'Group']}
+        rows={[
+          ['touch', M('size.touch'), V('48px'), <span className="muted">hit target · ::after expander</span>],
+          ['iconBtn', M('size.iconBtn'), V('36px'), <span className="muted">.icon-btn ink box</span>],
+          ['statusbar', M('size.statusbar'), V('44px'), <span className="muted">status bar</span>],
+          ['iconXs / Sm / Md / Lg / Xl', M('size.icon*'), V('16 / 20 / 24 / 32 / 64'), <span className="muted">glyph sizes</span>],
+          ['button / sm / lg', M('size.button*'), V('48 / 36 / 52'), <span className="muted">button heights</span>],
+          ['input', M('size.input'), V('52px'), <span className="muted">text field height</span>],
+          ['chip / chipSm', M('size.chip*'), V('32 / 24'), <span className="muted">chip heights</span>],
+          ['appbar', M('size.appbar'), V('56px'), <span className="muted">app bar · .appbar-lg also 56</span>],
+          ['bottomNav / bottomBar', M('size.bottomNav'), V('80 / 64'), <span className="muted">wrap block / bar drawn</span>],
+          ['fab', M('size.fab'), V('52px'), <span className="muted">extended FAB (--fab-h)</span>],
+        ]}
+      />
+
+      <SpecBlock
+        n="O" title="Borders" dart="BorderTokens" note="The 'ghost border' (primary @14%) replaces shadows on every card."
+        head={['Token', 'Dart', 'Value', 'Use']}
+        rows={[
+          ['borderWidth', M('border.width'), V('1px'), <span className="muted">default hairline</span>],
+          ['borderWidthThick', M('border.widthThick'), V('4px'), <span className="muted">accent edge</span>],
+          ['ghost border', M('border.ghost'), V('1px primary @14%'), <span style={{ display: 'inline-block', width: 60, height: 22, borderRadius: 8, border: '1px solid', borderColor: 'color-mix(in srgb, var(--memox-primary) 14%, transparent)' }} />],
+          ['strong border', M('border.strong'), V('1px outlineVariant'), <span style={{ display: 'inline-block', width: 60, height: 22, borderRadius: 8, border: '1px solid var(--memox-outline-variant)' }} />],
+          ['accent border (left)', M('border.accent'), V('4px solid primary'), <span style={{ display: 'inline-block', width: 60, height: 22, borderRadius: 4, borderLeft: '4px solid var(--memox-primary)', background: 'color-mix(in srgb, var(--memox-primary) 6%, transparent)' }} />],
+          ['focus ring', M('.focus-ring :focus-visible'), V('2px primary, offset 2'), <span style={{ display: 'inline-block', width: 56, height: 20, borderRadius: 4, outline: '2px solid var(--memox-primary)', outlineOffset: 2 }} />],
+        ]}
+      />
+
+      <SpecBlock
+        n="P" title="Opacity / state layers" dart="OpacityTokens" note="Hover/focus/press tints, disabled, scrim, glass."
+        head={['Token', 'Dart', 'Value', 'Demo']}
+        rows={[
+          ['softTint', M('opacity.softTint'), V('0.05'), null],
+          ['hover', M('opacity.hover'), V('0.08'), <span style={{ display: 'inline-block', width: 40, height: 18, borderRadius: 4, background: 'color-mix(in srgb, var(--memox-primary) 8%, transparent)' }} />],
+          ['focus / press', M('opacity.focus'), V('0.12'), <span style={{ display: 'inline-block', width: 40, height: 18, borderRadius: 4, background: 'color-mix(in srgb, var(--memox-primary) 12%, transparent)' }} />],
+          ['drag', M('opacity.drag'), V('0.16'), null],
+          ['selected', M('opacity.selected'), V('0.18'), null],
+          ['disabled', M('opacity.disabled'), V('0.38'), <span style={{ opacity: 0.38, fontWeight: 600 }}>Aa</span>],
+          ['hint', M('opacity.hint'), V('0.50'), <span style={{ opacity: 0.5, fontWeight: 600 }}>Aa</span>],
+          ['divider', M('opacity.divider'), V('0.12'), null],
+          ['outline', M('opacity.outline'), V('0.08'), null],
+          ['borderSubtle', M('opacity.borderSubtle'), V('0.15'), null],
+          ['scrim', M('opacity.scrim'), V('0.32'), <span style={{ display: 'inline-block', width: 40, height: 18, borderRadius: 4, background: 'rgba(0,0,0,0.32)' }} />],
+          ['glass', M('opacity.glass'), V('0.84'), <span className="muted">chrome blur</span>],
+          ['fadeOut', M('opacity.fadeOut'), V('0.40'), <span className="muted">wrong-answer fade</span>],
+        ]}
+      />
+
+      <SpecBlock
+        n="Q" title="Elevation & shadows" dart="ElevationTokens" note="M3 tonal — shadows cap at 6% opacity. Cards are flat; FAB = level2; dialogs = level2–3."
+        head={['Level', 'Dart', 'Shadow', 'Demo']}
+        rows={[
+          ['level0', M('elevation.level0'), V('none'), <span style={{ display: 'inline-block', width: 44, height: 28, borderRadius: 8, background: '#fff', border: '1px solid rgba(20,24,48,0.08)' }} />],
+          ['level1 (card light)', M('elevation.level1'), V('0 1px 2px'), <span style={{ display: 'inline-block', width: 44, height: 28, borderRadius: 8, background: '#fff', boxShadow: '0 1px 2px rgba(25,28,30,0.06)' }} />],
+          ['level2 (FAB)', M('elevation.level2'), V('0 4px 12px'), <span style={{ display: 'inline-block', width: 44, height: 28, borderRadius: 8, background: '#fff', boxShadow: '0 4px 12px rgba(25,28,30,0.10)' }} />],
+          ['level3 (dialog)', M('elevation.level3'), V('0 12px 32px'), <span style={{ display: 'inline-block', width: 44, height: 28, borderRadius: 8, background: '#fff', boxShadow: '0 12px 32px rgba(25,28,30,0.12)' }} />],
+          ['level5 (max)', M('elevation.level5'), V('0 24px 48px'), <span style={{ display: 'inline-block', width: 44, height: 28, borderRadius: 8, background: '#fff', boxShadow: '0 24px 48px rgba(25,28,30,0.14)' }} />],
+        ]}
+      />
+
+      <SpecBlock
+        n="R" title="Motion — duration" dart="DurationTokens" note="elasticOut is an anti-pattern — never bounce."
+        head={['Token', 'Dart', 'Value', 'Used for']}
+        rows={[
+          ['instant', M('duration.instant'), V('50ms'), <span className="muted">tap acks</span>],
+          ['fast / stateChange', M('duration.fast'), V('100ms'), <span className="muted">color flips</span>],
+          ['normal / contentSwitch', M('duration.normal'), V('200ms'), <span className="muted">fades</span>],
+          ['slow / pageTransition', M('duration.slow'), V('300ms'), <span className="muted">route changes</span>],
+          ['slower', M('duration.slower'), V('500ms'), <span className="muted">large reveals</span>],
+          ['cardFlip', M('duration.cardFlip'), V('350ms'), <span className="muted">Review flip</span>],
+          ['countUp', M('duration.countUp'), V('400ms'), <span className="muted">stat tick</span>],
+          ['chartDraw', M('duration.chartDraw'), V('600ms'), <span className="muted">stats chart</span>],
+        ]}
+      />
+
+      <SpecBlock
+        n="S" title="Motion — easing" dart="EasingTokens" note="M3 curves."
+        head={['Token', 'Dart', 'cubic-bezier', 'Used for']}
+        rows={[
+          ['standard', M('easing.standard'), V('0.2, 0, 0, 1'), <span className="muted">most UI (easeInOut)</span>],
+          ['emphasized', M('easing.emphasized'), V('0.05, 0.7, 0.1, 1'), <span className="muted">large transitions</span>],
+          ['enter', M('easing.enter'), V('0, 0, 0.2, 1'), <span className="muted">elements arriving</span>],
+          ['exit', M('easing.exit'), V('0.4, 0, 1, 1'), <span className="muted">elements leaving</span>],
+        ]}
+      />
+
+      <SpecBlock
+        n="T" title="Chrome & layout" dart="OpacityTokens (glass) + kit conventions" note="Glass is the only place blur is used. Rows tagged 'convention' are layout rules used by the screens, not enumerated tokens."
+        head={['Token', 'Dart', 'Value', 'Note']}
+        rows={[
+          ['chromeGlass', M('chrome.glass'), V('surface @ 84%'), <span className="muted">token · app bar / nav</span>],
+          ['chromeBlur', M('chrome.blur'), V('saturate(180%) blur(18px)'), <span className="muted">token · backdrop-filter</span>],
+          ['maxBodyWidth', <span className="muted">—</span>, V('720px'), <span className="muted">convention · readable width</span>],
+          ['statusDot / legendDot', <span className="muted">—</span>, V('8 / 12'), <span className="muted">convention · status & chart dots</span>],
+          ['masteryRing', <span className="muted">—</span>, V('40 × 3px'), <span className="muted">convention · list-tile ring</span>],
+        ]}
+      />
+    </div>);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   COMPONENTS — Shared-widget library (Flutter handoff)
+   Every reusable widget the 23 screens compose from, rendered as a real
+   LIGHT + DARK specimen using live MemoX tokens, with its Flutter widget
+   mapping and the variants/props a dev must implement. Nothing here is a
+   mock-up: specimens use the same classes/tokens the screens do.
+   ════════════════════════════════════════════════════════════════════════ */
+
+// One widget card: header (name + Flutter map + desc), a dual-theme specimen
+// stage (light + dark panes sharing one render fn, STACKED so each is full
+// width), and variant chips. Which panes show follows the toolbar View toggle
+// (light / dark / both) via WidgetViewCtx — so a single theme reads big & clean.
+const WidgetViewCtx = React.createContext('both');
+/* Slug must match the one flutter-prompts.json was generated with. */
+const wslug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const { Scrim, Dialog, BottomSheet, Skeleton, Spinner, IconTile, ListRow, EmptyState, ErrorState, Toggle, TextField, StatusBadge } = window;
+
+function WidgetCard({ nm, fl, ds, render, variants, span2 }) {
+  const view = React.useContext(WidgetViewCtx);
+  const showL = view !== 'dark';
+  const showD = view !== 'light';
+  return (
+    <div className={'wid-card' + (span2 ? ' span2' : '')}>
+      <div className="wid-head">
+        <div className="nm">{nm}
+          <a className="pmt" href={'flutter-prompt.html#' + wslug(nm)}>Flutter spec &rarr;</a>
+        </div>
+        <span className="fl">{fl}</span>
+        {ds ? <div className="ds">{ds}</div> : null}
+      </div>
+      <div className="wid-stage">
+        {showL ? <div className="wid-pane l"><span className="lab">Light</span>{render()}</div> : null}
+        {showD ? <div className="wid-pane d memox-dark"><span className="lab">Dark</span>{render()}</div> : null}
+      </div>
+      {variants && variants.length
+        ? <div className="wid-foot">{variants.map((v, i) => <span className="vt" key={i}>{v}</span>)}</div>
+        : null}
+    </div>);
+}
+const VT = (label, val) => <React.Fragment><b>{label}</b>{val ? ' ' + val : ''}</React.Fragment>;
+
+// small reusable specimen helpers (real MemoX classes/tokens) ----------------
+const ddot = (c, s = 8) => <span className="status-dot" style={{ background: c, width: s, height: s }} />;
+function MasteryRing({ pct = 0.62, size = 44 }) {
+  const col = pct < 0.34 ? 'var(--memox-status-learning)' : pct < 0.67 ? 'var(--memox-status-reviewing)' : 'var(--memox-status-mastered)';
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', background: `conic-gradient(${col} ${pct * 360}deg, var(--memox-surface-container) 0deg)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: size - 6, height: size - 6, borderRadius: '50%', background: 'var(--memox-surface-container-lowest)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--memox-text-primary)' }}>{Math.round(pct * 100)}</div>
+    </div>);
+}
+
+function WidgetSection({ n, title, note, children }) {
+  return (
+    <div className="tok-block">
+      <div className="tok-block-head">
+        <span className="n">{n}</span>
+        <h3>{title}</h3>
+        {note ? <span className="note">{note}</span> : null}
+      </div>
+      <div className="wid-grid">{children}</div>
+    </div>);
+}
+
+function WidgetGallery({ view = 'both' }) {
+  return (
+    <WidgetViewCtx.Provider value={view}>
+    <div className="wid-doc">
+      <div className="tok-intro">
+        <h2>Shared widgets — Flutter handoff</h2>
+        <p>
+          The reusable component layer every screen composes from. Each widget is a live specimen on
+          <code>Light (Tokyo Pure)</code> and <code>Dark (Tokyo Nebula)</code> surfaces, paired with the Flutter widget
+          it maps to and the variants/props to implement. Build these as a <code>lib/shared/widgets/**</code> kit before the screens.
+          Every card carries a <b>Flutter spec</b> link: it opens <a href="flutter-prompt.html">the handoff screen</a> at that
+          widget, where the extracted design specification — both themes, geometry classes, state matrix — is ready to copy into a coding agent.
+        </p>
+        <div className="tok-legend">
+          <span>Stacked <b>Light</b> + <b>Dark</b> specimens — switch the <b>View</b> toggle above to show a single theme full-width</span>
+          <span><b>mono blue</b> = Flutter widget / class to build</span>
+          <span><b>chips</b> = variants &amp; key props</span>
+        </div>
+      </div>
+
+      {/* ── A · Chrome & navigation ─────────────────────────────────────── */}
+      <WidgetSection n="A" title="Chrome & navigation" note="Frame furniture shared by every screen.">
+        <WidgetCard nm="StatusBar" fl="(OS — SafeArea top inset)" span2
+          ds="Faux iOS status bar baked into the device frame. In Flutter this is the system inset; reserve it with SafeArea."
+          render={() => <div style={{ alignSelf: 'stretch' }}><StatusBar /></div>}
+          variants={[VT('time + battery'), VT('SafeArea', 'top')]} />
+
+        <WidgetCard nm="AppBar" fl="AppBar / SliverAppBar.large" span2
+          ds="Back/close leading, flexible title, trailing icon actions. Large (56) and compact (48) heights."
+          render={() => (
+            <div style={{ alignSelf: 'stretch', background: 'var(--memox-surface)', borderRadius: 12, border: 'var(--memox-border-ghost)', overflow: 'hidden' }}>
+              <div className="appbar appbar-lg">
+                <button className="icon-btn"><Ic name="arrow-left" /></button>
+                <span className="title">Korean · TOPIK I</span>
+                <button className="icon-btn"><Ic name="search" /></button>
+                <button className="icon-btn"><Ic name="more-vertical" /></button>
+              </div>
+            </div>)}
+          variants={[VT('leading', 'back / close / menu'), VT('height', '48 / 56'), VT('actions', 'IconButton[]')]} />
+
+        <WidgetCard nm="NavigationBar" fl="NavigationBar (M3)" span2
+          ds="Glass bottom nav, 4 destinations, active pill behind the icon. backdrop-filter blur on a translucent surface."
+          render={() => (
+            <div style={{ alignSelf: 'stretch' }}>
+              <div className="bottom-nav">
+                {[['home','Home',true],['layers','Library',false],['bar-chart-2','Progress',false],['settings','Settings',false]].map(([ic,lb,act]) => (
+                  <div key={lb} className={'bn-item' + (act ? ' active' : '')}>
+                    <span className="bn-pill"><Ic name={ic} /></span>
+                    <span>{lb}</span>
+                  </div>))}
+              </div>
+            </div>)}
+          variants={[VT('items', '4 fixed'), VT('active', 'pill + primary'), VT('chrome', 'glass + blur')]} />
+
+        <WidgetCard nm="Breadcrumb" fl="Wrap + InkWell chips" span2
+          ds="Folder ▸ deck ▸ card path. Horizontally scrollable; last segment is current and non-tappable."
+          render={() => <div style={{ alignSelf: 'stretch' }}><Breadcrumb segments={['Library', 'Korean', 'TOPIK I']} /></div>}
+          variants={[VT('scroll', 'horizontal'), VT('last', 'current / bold')]} />
+
+        <WidgetCard nm="StudyTopBar" fl="custom — AppBar + LinearProgress" span2
+          ds="Study-session chrome: close, mode badge, thin progress track, n/total counter. Accent recolors per mode."
+          render={() => <div style={{ alignSelf: 'stretch', background: 'var(--memox-surface)', borderRadius: 12, border: 'var(--memox-border-ghost)', overflow: 'hidden', paddingBottom: 8 }}><StudyTopBar mode="Review" current={7} total={20} /></div>}
+          variants={[VT('accent', 'per study mode'), VT('progress', 'current/total')]} />
+      </WidgetSection>
+
+      {/* ── B · Buttons & actions ───────────────────────────────────────── */}
+      <WidgetSection n="B" title="Buttons & actions" note="Heights 40–48 (pill) / 36 (icon). Min touch target 48dp.">
+        <WidgetCard nm="FilledButton" fl="FilledButton" ds="Primary CTA — one per view."
+          render={() => <button className="pill-btn primary"><Ic name="play" size="xs" color="#fff" />Start studying</button>}
+          variants={[VT('state', 'enabled/pressed/disabled'), VT('icon', 'leading')]} />
+        <WidgetCard nm="TonalButton" fl="FilledButton.tonal" ds="Secondary — sits on surface."
+          render={() => <button className="pill-btn secondary">Edit deck</button>}
+          variants={[VT('container', 'surfaceContainer')]} />
+        <WidgetCard nm="OutlinedButton" fl="OutlinedButton" ds="Low-emphasis / cancel."
+          render={() => <button className="pill-btn outline">Cancel</button>}
+          variants={[VT('border', 'outlineVariant')]} />
+        <WidgetCard nm="IconButton" fl="IconButton" ds="36×36 ink box with an 8% hover layer, expanded to a 48dp hit target via ::after. The glyph inside is icon-sm 20."
+          render={() => <div style={{ display: 'flex', gap: 8 }}><button className="icon-btn"><Ic name="search" /></button><button className="icon-btn"><Ic name="more-vertical" /></button><button className="icon-btn"><Ic name="bookmark" /></button></div>}
+          variants={[VT('hover', '8% layer'), VT('ink box', '36'), VT('hit target', '48'), VT('glyph', '20 · icon-sm')]} />
+        <WidgetCard nm="FloatingActionButton" fl="FloatingActionButton[.extended]"
+          ds="Extended FAB — 52dp tall, radius-lg 16, pinned bottom-right above the safe area (or above the bottom nav via .fab-above-nav). The kit has no circular variant."
+          render={() => <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ height: 52, padding: '0 20px 0 16px', borderRadius: 'var(--memox-radius-lg)', background: 'var(--memox-primary)', color: 'var(--memox-on-primary)', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, boxShadow: 'var(--memox-shadow-fab)' }}><Ic name="plus" size="sm" color="var(--memox-on-primary)" />New card</div>
+          </div>}
+          variants={[VT('height', '52 · --fab-h'), VT('radius', '16 · radius-lg'), VT('placement', 'bottom-right / above nav')]} />
+        <WidgetCard nm="TextButton" fl="TextButton" ds="Inline link-style action."
+          render={() => <div style={{ display: 'flex', gap: 16 }}><button style={{ border: 'none', background: 'none', color: 'var(--memox-primary)', fontSize: 14, fontWeight: 700 }}>See all</button><button style={{ border: 'none', background: 'none', color: 'var(--memox-error)', fontSize: 14, fontWeight: 700 }}>Delete</button></div>}
+          variants={[VT('tone', 'primary / error')]} />
+      </WidgetSection>
+
+      {/* ── C · Surfaces & cards ────────────────────────────────────────── */}
+      <WidgetSection n="C" title="Surfaces, cards & list items" note="Card is radius 20 — soft shadow in light, ghost border in dark. Tiles radius md(12).">
+        <WidgetCard nm="Card" fl="Card (elevation 0 + border)" ds="Base container — surfaceContainerLowest + 1px ghost border, no shadow."
+          render={() => <div className="card" style={{ alignSelf: 'stretch' }}>
+            <div className="ov" style={{ marginBottom: 4 }}>Daily goal</div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>18 / 30 cards</div>
+          </div>}
+          variants={[VT('border', 'ghost 15%'), VT('radius', 'lg / md')]} />
+        <WidgetCard nm="IconTile" fl="Container + Icon" ds="Tinted square holding a leading glyph for list rows."
+          render={() => <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <IconTile icon="folder" size="lg" />
+            <IconTile icon="layers" size="md" />
+            <IconTile icon="tag" size="sm" />
+            <IconTile icon="flag" size="lg" seed="var(--memox-accent)" />
+          </div>}
+          variants={[VT('size', 'sm 28 / md 36 / lg 44'), VT('tint', 'primary 10% · seed 12%')]} />
+        <WidgetCard nm="ListTile · deck row" fl="ListTile / InkWell row" span2
+          ds="Leading icon-tile, title + meta subtitle, trailing mastery ring or chevron. The backbone of Library."
+          render={() => <div className="card" style={{ alignSelf: 'stretch', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <IconTile icon="layers" size="lg" />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.2px' }}>TOPIK I · Vocabulary</div>
+              <div style={{ fontSize: 12, color: 'var(--memox-text-secondary)', marginTop: 2 }}>240 cards · 62% mastered</div>
+            </div>
+            <MasteryRing pct={0.62} size={40} />
+          </div>}
+          variants={[VT('trailing', 'ring / chevron / kebab'), VT('leading', 'icon-tile')]} />
+        <WidgetCard nm="ListRow" fl="ListTile / InkWell row" span2
+          ds="The generic row behind search results, tags and voices: leading tile, title + optional subtitle, trailing slot, hairline divider except on the last. Both text lines truncate to one line."
+          render={() => <div style={{ alignSelf: 'stretch', background: 'var(--memox-surface-container-lowest)', border: 'var(--memox-border-ghost)', borderRadius: 12, overflow: 'hidden' }}>
+            <ListRow icon="folder" seed="var(--memox-primary)" title="Korean" sub="8 decks · 412 cards" trailing={<Badge tone="primary">23 due</Badge>} />
+            <ListRow icon="layers" seed="var(--memox-accent)" title="TOPIK II — Vocab" sub="142 cards" trailing={<Ic name="chevron-right" size="xs" color="var(--memox-on-surface-variant)" />} />
+            <ListRow icon="tag" seed="var(--memox-streak)" title="noun" sub="24 cards" last />
+          </div>}
+          variants={[VT('leading', 'icon tile / custom / none'), VT('trailing', 'badge / chevron / control'), VT('divider', 'last = none')]} />
+        <WidgetCard nm="SectionHeader" fl="Text (labelSmall, caps)" ds="Overline label above a group."
+          render={() => <div style={{ alignSelf: 'stretch' }}><div className="ov">Continue studying</div></div>}
+          variants={[VT('style', 'overline +1.2'), VT('caps')]} />
+        <WidgetCard nm="Divider" fl="Divider" ds="Hairline at 12% with optional indent."
+          render={() => <div style={{ alignSelf: 'stretch' }}>
+            <div style={{ fontSize: 12, color: 'var(--memox-text-primary)' }}>Row one</div>
+            <div style={{ height: 1, background: 'var(--memox-outline-variant)', margin: '8px 0' }} />
+            <div style={{ fontSize: 12, color: 'var(--memox-text-primary)', marginLeft: 24 }}>Indented row</div>
+          </div>}
+          variants={[VT('indent', '0 / 56'), VT('opacity', '12%')]} />
+        <WidgetCard nm="SettingsTile" fl="ListTile / SwitchListTile" span2
+          ds="Backbone of every Settings screen: leading icon, title + subtitle, trailing switch OR value+chevron."
+          render={() => <div style={{ alignSelf: 'stretch', background: 'var(--memox-surface-container-lowest)', border: 'var(--memox-border-ghost)', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 12px' }}>
+              <Ic name="bell" size="sm" color="var(--memox-text-secondary)" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--memox-text-primary)' }}>Daily reminder</div>
+                <div style={{ fontSize: 12, color: 'var(--memox-text-secondary)', marginTop: 1 }}>Every day at 8:00</div>
+              </div>
+              <div style={{ width: 44, height: 26, borderRadius: 999, background: 'var(--memox-primary)', position: 'relative', flexShrink: 0 }}><div style={{ position: 'absolute', right: 3, top: 3, width: 20, height: 20, borderRadius: '50%', background: '#fff' }} /></div>
+            </div>
+            <div style={{ height: 1, background: 'var(--memox-outline-variant)', marginLeft: 44 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 12px' }}>
+              <Ic name="globe" size="sm" color="var(--memox-text-secondary)" />
+              <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: 'var(--memox-text-primary)' }}>App language</div>
+              <span style={{ fontSize: 12, color: 'var(--memox-text-secondary)' }}>English</span>
+              <Ic name="chevron-right" size="sm" color="var(--memox-text-secondary)" />
+            </div>
+          </div>}
+          variants={[VT('trailing', 'switch / value+chevron / radio'), VT('leading', 'icon optional'), VT('subtitle', 'optional')]} />
+        <WidgetCard nm="Avatar" fl="CircleAvatar" ds="Account identity — image or initials fallback."
+          render={() => <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--memox-primary)', color: 'var(--memox-on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700 }}>MX</div>
+            <div style={{ width: 40, height: 'var(--memox-size-button)', borderRadius: '50%', background: 'color-mix(in srgb, var(--memox-accent) 18%, transparent)', color: 'var(--memox-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700 }}>NT</div>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--memox-surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Ic name="user" size="xs" color="var(--memox-text-secondary)" /></div>
+          </div>}
+          variants={[VT('initials / image / placeholder'), VT('size', '32 / 40 / 48')]} />
+      </WidgetSection>
+      <WidgetSection n="D" title="Inputs & forms" note="Field height 52, radius md(12). Focus = 1px primary border.">
+        <WidgetCard nm="TextField" fl="TextField (OutlineInputBorder)" span2
+          ds="Filled surface + ghost border, 52dp (--memox-size-input), radius-input. Focus = 1px primary + caret; error = 1px error + message below. multiline drops to a 40dp minimum."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <TextField placeholder="Front (term)" />
+            <TextField value="공부하다" focused />
+            <TextField value="공부" error="Meaning is required" />
+            <TextField placeholder="Example sentence" multiline />
+          </div>}
+          variants={[VT('state', 'rest / focus / error / disabled'), VT('multiline'), VT('leading / trailing', 'optional')]} />
+        <WidgetCard nm="SearchField" fl="SearchBar" span2
+          ds="Filled field, 52dp (--memox-size-input), leading search glyph, trailing clear when filled / voice when empty. Focus = 1px primary border."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <SearchField value="한국어" />
+            <SearchField placeholder="Search decks, cards, tags" />
+          </div>}
+          variants={[VT('height', '52 · --memox-size-input'), VT('leading', 'search'), VT('trailing', 'clear when filled / voice when empty')]} />
+        <WidgetCard nm="Switch" fl="Switch (M3)" ds="On/off setting toggle."
+          render={() => <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <Toggle on /><Toggle /><Toggle on disabled />
+          </div>}
+          variants={[VT('track', '44×26'), VT('thumb', '20'), VT('on'), VT('off'), VT('disabled')]} />
+        <WidgetCard nm="SegmentedButton" fl="SegmentedButton" ds="2–3 exclusive choices."
+          render={() => <div style={{ display: 'inline-flex', padding: 4, borderRadius: 999, background: 'var(--memox-surface-container)' }}>
+            {['Decks','Cards','Tags'].map((t,i) => <span key={t} style={{ padding: '4px 16px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: i === 0 ? 'var(--memox-surface-container-lowest)' : 'transparent', color: i === 0 ? 'var(--memox-primary)' : 'var(--memox-text-secondary)' }}>{t}</span>)}
+          </div>}
+          variants={[VT('count', '2–3'), VT('selected')]} />
+        <WidgetCard nm="Chip" fl="FilterChip / ChoiceChip" ds="Selectable tag/filter, full radius."
+          render={() => <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <span style={{ height: 32, padding: '0 16px', borderRadius: 999, background: 'color-mix(in srgb, var(--memox-primary) 14%, transparent)', color: 'var(--memox-primary)', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Ic name="check" size="xs" color="var(--memox-primary)" />noun</span>
+            <span style={{ height: 32, padding: '0 16px', borderRadius: 999, background: 'var(--memox-surface-container)', color: 'var(--memox-text-secondary)', fontSize: 12, fontWeight: 600, border: 'var(--memox-border-ghost)', display: 'inline-flex', alignItems: 'center' }}>verb</span>
+          </div>}
+          variants={[VT('selected'), VT('unselected'), VT('size', '32 / 24')]} />
+        <WidgetCard nm="Slider" fl="Slider" ds="Daily-goal / speech-rate scrubber."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', alignItems: 'center', gap: 0 }}>
+            <div style={{ flex: 1, height: 4, borderRadius: 999, background: 'var(--memox-surface-container-highest)', position: 'relative' }}>
+              <div style={{ position: 'absolute', left: 0, top: 0, height: 4, width: '55%', borderRadius: 999, background: 'var(--memox-primary)' }} />
+              <div style={{ position: 'absolute', left: '55%', top: '50%', transform: 'translate(-50%,-50%)', width: 18, height: 18, borderRadius: '50%', background: 'var(--memox-primary)' }} />
+            </div>
+          </div>}
+          variants={[VT('track', 'active/inactive'), VT('thumb')]} />
+      </WidgetSection>
+
+      {/* ── E · Status & data viz ───────────────────────────────────────── */}
+      <WidgetSection n="E" title="Status & data viz" note="Cool-blue status family; green reserved for mastery. Tabular nums for stats.">
+        <WidgetCard nm="StatusBadge" fl="custom — dot + label pill" span2
+          ds="Card lifecycle: new ▸ learning ▸ reviewing ▸ mastered. Dot + label, status* token."
+          render={() => <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+            {['new', 'learning', 'reviewing', 'mastered'].map((s) => <StatusBadge key={s} status={s} />)}
+            {['new', 'learning', 'reviewing', 'mastered'].map((s) => <StatusBadge key={s + '-d'} status={s} dot />)}
+          </div>}
+          variants={[VT('states', '4'), VT('token', 'status*'), VT('form', 'pill / bare dot')]} />
+        <WidgetCard nm="MasteryRing" fl="CustomPaint (arc)" ds="40×3px ring; color steps with %."
+          render={() => <div style={{ display: 'flex', gap: 16 }}><MasteryRing pct={0.22} /><MasteryRing pct={0.55} /><MasteryRing pct={0.9} /></div>}
+          variants={[VT('thresholds', '<34 / <67 / ≥67'), VT('size', '40')]} />
+        <WidgetCard nm="LinearProgress" fl="LinearProgressIndicator" ds="Goal / session progress track."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ height: 8, borderRadius: 999, background: 'var(--memox-surface-container-highest)', overflow: 'hidden' }}><div style={{ height: '100%', width: '62%', background: 'var(--memox-primary)', borderRadius: 999 }} /></div>
+            <div style={{ height: 8, borderRadius: 999, background: 'var(--memox-surface-container-highest)', overflow: 'hidden' }}><div style={{ height: '100%', width: '88%', background: 'var(--memox-status-mastered)', borderRadius: 999 }} /></div>
+          </div>}
+          variants={[VT('tone', 'primary / mastery'), VT('height', '4 / 8')]} />
+        <WidgetCard nm="StatDisplay" fl="Text (stat 40)" ds="Big tabular metric + caption. 40px — the stat step, deliberately not snapped to a spacing value."
+          render={() => <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 40, fontWeight: 600, letterSpacing: '-0.64px', lineHeight: 1, fontVariantNumeric: 'tabular-nums', color: 'var(--memox-text-primary)' }}>1,284</div>
+            <div className="ov" style={{ marginTop: 4 }}>cards reviewed</div>
+          </div>}
+          variants={[VT('numerals', 'tabular'), VT('size', '40 · fs-stat')]} />
+        <WidgetCard nm="StreakChip" fl="custom — flame chip" ds="Streak count, streak token (orange)."
+          render={() => <Badge tone="streak" style={{ height: 28, fontSize: 14, padding: '0 12px' }}><Ic name="flame" size="xs" color="var(--memox-streak)" />14-day streak</Badge>}
+          variants={[VT('token', 'streak'), VT('icon', 'flame')]} />
+        <WidgetCard nm="BarChart" fl="CustomPaint / fl_chart" span2
+          ds="7-day activity. Bars use primary; today highlighted. chartDraw 600ms entrance."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', alignItems: 'flex-end', gap: 8, height: 70 }}>
+            {[[3,'M'],[5,'T'],[8,'W'],[4,'T'],[9,'F'],[6,'S'],[11,'S']].map(([v,d],i) => (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: '100%', height: v * 5, borderRadius: 4, background: i === 6 ? 'var(--memox-primary)' : 'var(--memox-surface-container-highest)' }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--memox-text-secondary)' }}>{d}</span>
+              </div>))}
+          </div>}
+          variants={[VT('highlight', 'today'), VT('entrance', 'chartDraw')]} />
+      </WidgetSection>
+
+      {/* ── F · Study-mode widgets ──────────────────────────────────────── */}
+      <WidgetSection n="F" title="Study-mode widgets" note="The 5 study modes (Study · Match · Guess · Recall · Fill) compose from these.">
+        <WidgetCard nm="Flashcard" fl="custom — flip Card (350ms)" span2
+          ds="Front (term) / back (meaning + example). cardFlip 350ms, never a bounce curve."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, minHeight: 76, borderRadius: 16, border: 'var(--memox-border-ghost)', background: 'var(--memox-surface-container-lowest)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, color: 'var(--memox-text-primary)' }}>공부하다</div>
+            <div style={{ flex: 1, minHeight: 76, borderRadius: 16, border: '1px solid var(--memox-primary)', background: 'color-mix(in srgb, var(--memox-primary) 6%, transparent)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: 8 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--memox-primary)' }}>to study</div>
+              <div style={{ fontSize: 14, color: 'var(--memox-text-secondary)', textAlign: 'center' }}>매일 한국어를 공부해요</div>
+            </div>
+          </div>}
+          variants={[VT('face', 'front / back'), VT('flip', '350ms')]} />
+        <WidgetCard nm="RatingBar" fl="Row<FilledButton>" span2
+          ds="SRS recall buttons in Review — Again / Hard / Good / Easy, rating* tokens."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', gap: 4 }}>
+            {[['Again','var(--memox-rating-again)'],['Hard','var(--memox-status-learning)'],['Good','var(--memox-status-reviewing)'],['Easy','var(--memox-status-mastered)']].map(([l,c]) => (
+              <div key={l} style={{ flex: 1, height: 44, borderRadius: 'var(--memox-radius-md)', background: c, color: 'var(--memox-on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{l}</div>))}
+          </div>}
+          variants={[VT('options', '4'), VT('token', 'rating*')]} />
+        <WidgetCard nm="SelfAssessment" fl="Row<ChoiceChip>" span2
+          ds="Self-score after write-from-memory: Missed / Partial / Got it. self* tokens (light only)."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', gap: 4 }}>
+            {[['Missed','#E57373'],['Partial','#FFB74D'],['Got it','#4DB6AC']].map(([l,c]) => (
+              <div key={l} style={{ flex: 1, height: 'var(--memox-size-button)', borderRadius: 'var(--memox-radius-md)', border: `1px solid ${c}`, color: c, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{l}</div>))}
+          </div>}
+          variants={[VT('options', '3'), VT('token', 'self*')]} />
+        <WidgetCard nm="ChoiceOption" fl="custom — answer row" span2
+          ds="Multiple-choice option (Guess). Idle → correct (green) / wrong (rose) on select."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ height: 'var(--memox-size-button)', borderRadius: 'var(--memox-radius-md)', border: '1px solid var(--memox-outline-variant)', display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: 12, fontWeight: 600, color: 'var(--memox-text-primary)' }}>도서관 · library</div>
+            <div style={{ height: 'var(--memox-size-button)', borderRadius: 'var(--memox-radius-md)', border: '1px solid rgba(31,138,91,0.45)', background: 'rgba(31,138,91,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px', fontSize: 12, fontWeight: 700, color: 'var(--memox-mastery)' }}>학교 · school<Ic name="check" size="xs" color="var(--memox-mastery)" /></div>
+          </div>}
+          variants={[VT('state', 'idle/correct/wrong'), VT('auto-advance')]} />
+        <WidgetCard nm="MatchTile" fl="custom — grid tile" span2
+          ds="Match-pairs tile: idle / selected (filled primary) / matched (green outline)."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4 }}>
+            <div style={{ height: 42, borderRadius: 'var(--memox-radius-md)', border: 'var(--memox-border-ghost)', background: 'var(--memox-surface-container-lowest)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--memox-text-primary)' }}>학교</div>
+            <div style={{ height: 42, borderRadius: 'var(--memox-radius-md)', background: 'var(--memox-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff' }}>library</div>
+            <div style={{ height: 42, borderRadius: 'var(--memox-radius-md)', border: '1px solid var(--memox-mastery)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: 'var(--memox-mastery)' }}><Ic name="check" size="xs" color="var(--memox-mastery)" />책</div>
+          </div>}
+          variants={[VT('state', 'idle/selected/matched')]} />
+      </WidgetSection>
+
+      {/* ── G · Feedback & overlays ─────────────────────────────────────── */}
+      <WidgetSection n="G" title="Feedback & overlays" note="Scrim 45%. Sheets/dialogs radius 20 on surfaceContainerHigh; shadow-chrome / shadow-card.">
+        <WidgetCard nm="OfflineBanner" fl="MaterialBanner" span2
+          ds="Connectivity-stream inline banner. Non-blocking, dismiss-on-reconnect."
+          render={() => <div style={{ alignSelf: 'stretch' }}><OfflineBanner /></div>}
+          variants={[VT('trigger', 'connectivity'), VT('non-blocking')]} />
+        <WidgetCard nm="Banner / Callout" fl="Container + Row (tone)" span2
+          ds="Inline contextual message with 4 tones — info (primary) / warning (streak) / danger (error) / ok (mastery). Tinted bg + matching border + leading icon."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '8px 12px', borderRadius: 'var(--memox-radius-md)', background: 'color-mix(in srgb, var(--memox-primary) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--memox-primary) 20%, transparent)' }}>
+              <Ic name="info" size="xs" color="var(--memox-primary)" />
+              <div style={{ flex: 1, fontSize: 12, lineHeight: 1.4, color: 'var(--memox-text-primary)' }}>Cards sync automatically when you're online.</div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '8px 12px', borderRadius: 'var(--memox-radius-md)', background: 'rgba(220,72,72,0.08)', border: '1px solid rgba(220,72,72,0.22)' }}>
+              <Ic name="alert-triangle" size="xs" color="var(--memox-error)" />
+              <div style={{ flex: 1, fontSize: 12, lineHeight: 1.4, color: 'var(--memox-text-primary)' }}>This permanently deletes 240 cards.</div>
+            </div>
+          </div>}
+          variants={[VT('tone', 'info / warning / danger / ok'), VT('icon', 'leading'), VT('action', 'optional')]} />
+        <WidgetCard nm="Snackbar" fl="SnackBar" span2
+          ds="Transient confirmation with optional action. Bottom-anchored, auto-dismiss."
+          render={() => <div style={{ alignSelf: 'stretch', height: 48, borderRadius: 12, background: 'var(--memox-surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.18)' }}>
+            <span style={{ fontSize: 12, color: 'var(--memox-text-primary)' }}>Card deleted</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--memox-primary)' }}>Undo</span>
+          </div>}
+          variants={[VT('action', 'optional'), VT('auto-dismiss')]} />
+        <WidgetCard nm="BottomSheet" fl="showModalBottomSheet" span2
+          ds="Bottom-anchored modal: 36×4 grabber, surfaceContainerHigh, top radius 20, shadow-chrome, caps at 85% and scrolls inside. Scrim behind."
+          render={() => <div style={{ alignSelf: 'stretch', position: 'relative', height: 150, borderRadius: 12, overflow: 'hidden', background: 'var(--memox-surface-container-lowest)' }}>
+            <BottomSheet scrim={false} maxHeight="none">
+              <div style={{ padding: '4px 16px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0', fontSize: 14, fontWeight: 600 }}><Ic name="pencil" size="sm" color="var(--memox-on-surface-variant)" />Rename</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0', fontSize: 14, fontWeight: 600, color: 'var(--memox-error)' }}><Ic name="trash-2" size="sm" color="var(--memox-error)" />Delete</div>
+              </div>
+            </BottomSheet>
+          </div>}
+          variants={[VT('grabber', 'on / off'), VT('maxHeight', '85% default'), VT('scrim', 'own / external')]} />
+        <WidgetCard nm="Dialog" fl="AlertDialog" span2
+          ds="Centred modal on its own scrim: surfaceContainerHigh, radius 20, shadow-card, 200ms scale-in. Widths sm 300 / md 320 / lg 340."
+          render={() => <div style={{ alignSelf: 'stretch', position: 'relative', height: 190, borderRadius: 12, overflow: 'hidden', background: 'var(--memox-surface-container-lowest)' }}>
+            <Dialog>
+              <div style={{ padding: '20px 20px 4px' }}>
+                <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.2px', marginBottom: 4 }}>Delete deck?</div>
+                <div style={{ fontSize: 14, color: 'var(--memox-on-surface-variant)', lineHeight: 1.55 }}>240 cards will be permanently removed.</div>
+              </div>
+              <div style={{ padding: 16, display: 'flex', gap: 8 }}>
+                <button className="pill-btn outline" style={{ flex: 1, fontSize: 14 }}>Cancel</button>
+                <button className="pill-btn" style={{ flex: 1.2, fontSize: 14, background: 'var(--memox-error-fill)', color: 'var(--memox-on-error-fill)' }}>Delete</button>
+              </div>
+            </Dialog>
+          </div>}
+          variants={[VT('size', 'sm 300 / md 320 / lg 340'), VT('scrim', 'own / external'), VT('confirm / destructive')]} />
+        <WidgetCard nm="EmptyState" fl="custom — Column" span2
+          ds="Action-led zero state on a card: 64 tinted tile (radius 20), 20px headline, body, CTA, optional footnote. compact drops to 52/radius 16/16px headline."
+          render={() => <div style={{ alignSelf: 'stretch' }}>
+            <EmptyState icon="folder-plus" title="Start your library"
+              body="Folders keep related decks together — by language, course, or topic."
+              action={<button className="pill-btn primary" style={{ fontSize: 14 }}><Ic name="folder-plus" size="xs" color="var(--memox-on-primary)" />Create folder</button>}
+              style={{ marginTop: 0 }} />
+          </div>}
+          variants={[VT('size', 'default 64 / compact 52'), VT('CTA', 'optional'), VT('footnote', 'optional')]} />
+        <WidgetCard nm="ErrorState" fl="custom — Column (error tone)" span2
+          ds="Inline load failure: 52 danger-tinted tile (radius 16), 16px headline, reassurance copy, Retry. Local-first voice — say nothing was lost before offering the retry."
+          render={() => <div style={{ alignSelf: 'stretch' }}>
+            <ErrorState title="Couldn't load your library" body="Your data is safe on this device. Try again in a moment." style={{ marginTop: 0 }} />
+          </div>}
+          variants={[VT('action', 'Retry by default'), VT('icon', 'cloud-off / alert')]} />
+        <WidgetCard nm="Skeleton" fl="pulsing placeholder Container" span2
+          ds="One placeholder shape — surfaceContainerHigh at 50%, 1.4s pulse (reduced-motion safe). Defaults h 12 / r 6; shape='circle' for avatar and dot placeholders."
+          render={() => <div style={{ alignSelf: 'stretch', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Skeleton w={44} h={44} r={12} />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Skeleton w="70%" />
+              <Skeleton w="45%" op={0.35} />
+            </div>
+            <Skeleton w={24} h={24} shape="circle" />
+          </div>}
+          variants={[VT('shape', 'block / circle'), VT('h', '12 default'), VT('r', '6 default'), VT('op', '0.5 default')]} />
+        <WidgetCard nm="Spinner" fl="CircularProgressIndicator"
+          ds="Indeterminate 2px ring, 0.8s linear. Sized off the icon scale; white on filled CTAs, primary on surfaces."
+          render={() => <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <Spinner size="xs" /><Spinner size="sm" /><Spinner size="lg" />
+          </div>}
+          variants={[VT('size', 'icon scale xs–xl'), VT('color', 'primary / on-primary')]} />
+        <WidgetCard nm="Scrim" fl="barrierColor"
+          ds="Modal backdrop — scrim token at 45%, 220ms fade. Dialog and BottomSheet draw their own; pass scrim={false} when a screen already renders one."
+          render={() => <div style={{ position: 'relative', width: 120, height: 72, borderRadius: 12, overflow: 'hidden', background: 'var(--memox-surface-container-lowest)', border: 'var(--memox-border-ghost)' }}>
+            <div style={{ padding: 10, fontSize: 12, fontWeight: 700 }}>Behind</div>
+            <Scrim />
+          </div>}
+          variants={[VT('opacity', '45% default'), VT('owner', 'dialog / sheet / external')]} />
+      </WidgetSection>
+    </div>
+    </WidgetViewCtx.Provider>);
+}
+
+function App() {
+  const [view, setView] = React.useState('both');
+  React.useEffect(() => { document.body.classList.toggle('stage-dark', view === 'dark'); }, [view]);
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  return (
+    <>
+      <div className="controls">
+        <div className="brandblock">
+          <span className="brand">MemoX · Components &amp; Foundations</span>
+          <span className="sub">Design tokens + shared widget library · light + dark · the layer every screen composes from</span>
+        </div>
+        <a className="kitlink" href="index.html">All 23 screens →</a>
+        <div className="ctl">
+          <span className="seg-label">View</span>
+          <div className="seg">
+            {['both','light','dark'].map((v) => <button key={v} className={view === v ? 'active' : ''} onClick={() => setView(v)}>{cap(v)}</button>)}
+          </div>
+        </div>
+      </div>
+      <div className="gallery">
+        <div className="section-head">0 · Foundations · Design tokens</div>
+        <TokenReference />
+        <div className="section-head">0 · Foundations · Shared widgets</div>
+        <WidgetGallery view={view} />
+      </div>
+    </>);
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

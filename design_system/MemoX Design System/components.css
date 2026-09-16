@@ -1,0 +1,107 @@
+/* ============================================================
+   MemoX — shared component contracts.
+
+   These rules WERE inline in ui_kits/mobile/index.html, where the
+   components/Mx*.jsx layer could not reach them — so every Mx component
+   rendered unstyled while the mobile kit rendered correctly. Lifted here
+   verbatim (values unchanged) and imported from styles.css, so the kit and
+   the design-system components now paint from one source.
+
+   Frame-only CSS (.phone, .app, .scroll, clearance vars, gallery chrome)
+   deliberately stays in index.html — it is the preview harness, not a
+   component contract.
+
+   Where a rule reads a layout var owned by .app, a fallback is supplied so
+   the component also renders correctly standalone (design-system cards).
+   ============================================================ */
+
+/* ── Overline / section label ── */
+.ov { font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--memox-text-secondary); }
+
+/* ── Card — flat surface, no border, whisper shadow, roomy radius.
+      Dark swaps the shadow for a ghost edge: the dark surface ladder is too
+      near-adjacent for a shadow alone to separate a card from the page. ── */
+.card { background: var(--memox-surface-raised); border: none; border-radius: 20px; padding: 20px; box-shadow: var(--memox-shadow-soft); }
+.memox-dark .card { box-shadow: var(--memox-shadow-none); border: var(--memox-border-ghost); }
+
+/* ── Buttons ── */
+button { font-family: inherit; cursor: pointer; }
+.pill-btn {
+  height: var(--memox-size-button); padding: 0 var(--memox-space-lg); border-radius: var(--memox-radius-button); border: none;
+  font-size: var(--memox-fs-body); font-weight: 600; letter-spacing: 0.1px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+}
+.pill-btn.primary { background: var(--memox-primary); color: var(--memox-on-primary); }
+.pill-btn.secondary { background: var(--memox-surface-container); color: var(--memox-text-primary); }
+.pill-btn.outline { background: transparent; color: var(--memox-primary); border: 1px solid var(--memox-outline-variant); }
+
+/* ── Icon button — 36px ink box, 48dp hit target (expander below) ── */
+.icon-btn { width: 36px; height: 36px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 0; color: var(--memox-text-primary); cursor: pointer; position: relative; }
+.icon-btn:hover { background: color-mix(in srgb, var(--memox-primary) 8%, transparent); }
+.memox-dark .icon-btn:hover { background: color-mix(in srgb, var(--memox-primary) 14%, transparent); }
+.icon-btn svg { width: 20px; height: 20px; }
+/* Expand the tap target to 48dp without changing the visual circle.
+   Covers buttons that inline-shrink the ink box (e.g. 24px dismiss). */
+.icon-btn::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: var(--memox-size-touch); height: var(--memox-size-touch); transform: translate(-50%, -50%);
+}
+
+/* ── Extended FAB — pinned chrome. Offsets are token-derived so it clears the
+      safe area (and the bottom nav, via .fab-above-nav) on every screen. ── */
+.fab {
+  position: absolute; right: 16px;
+  bottom: calc(var(--fab-inset, var(--memox-space-xl)) + var(--safe-bottom, 0px));
+  width: var(--fab-h, 52px); height: var(--fab-h, 52px); padding: 0; border-radius: var(--memox-radius-lg);
+  background: var(--memox-primary); color: var(--memox-on-primary); border: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
+  box-shadow: var(--memox-shadow-fab);
+  z-index: 30;
+}
+.fab.fab-above-nav { bottom: calc(var(--memox-size-bottom-nav) + var(--fab-nav-gap, 4px) + var(--safe-bottom, 0px)); }
+.fab svg { width: var(--memox-size-icon-sm); height: var(--memox-size-icon-sm); }
+
+/* ── App bar ── */
+.appbar { height: var(--memox-size-appbar); display: flex; align-items: center; padding: 0 8px; gap: 4px; }
+.appbar .title { font-size: var(--memox-fs-body-lg); font-weight: 700; letter-spacing: -0.3px; flex: 1; }
+.appbar-lg { height: 56px; padding: 0 16px; }
+
+/* ── Bottom navigation — in-flow chrome. Bottom padding carries the device
+      safe-area inset so the bar clears the home indicator. ── */
+.bottom-nav-wrap { padding: 4px 8px calc(12px + env(safe-area-inset-bottom, 0px)); }
+.bottom-nav {
+  height: 64px;
+  background: var(--memox-chrome);
+  backdrop-filter: var(--memox-chrome-blur);
+  -webkit-backdrop-filter: var(--memox-chrome-blur);
+  border: var(--memox-border-ghost);
+  border-radius: var(--memox-radius-lg);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+}
+.bn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--memox-text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; background: none; border: none; }
+.bn-item svg { width: 20px; height: 20px; }
+.bn-item.active { color: var(--memox-primary); }
+/* Dark: lift the active label/icon to the AA-safe indigo (brand #5265F5 text fails AA on navy) */
+.memox-dark .bn-item.active { color: var(--memox-primary-bright); }
+.bn-item.active .bn-pill { background: color-mix(in srgb, var(--memox-primary) 14%, transparent); padding: 4px 16px; border-radius: 999px; }
+.memox-dark .bn-item.active .bn-pill { background: color-mix(in srgb, var(--memox-primary) 20%, transparent); }
+
+/* ── Small marks ── */
+.status-dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
+.icon-tile { background: color-mix(in srgb, var(--memox-primary) 10%, transparent); color: var(--memox-primary); }
+.memox-dark .icon-tile { background: color-mix(in srgb, var(--memox-primary) 16%, transparent); color: var(--memox-primary); }
+
+/* ── Motion used by the shared primitives (Scrim, Dialog, BottomSheet,
+      Spinner, Skeleton, SearchField caret). Declared once, here. ── */
+@keyframes memoxBlink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+@keyframes memoxScrimIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes memoxDialogIn { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes memoxSheetIn { from { transform: translateY(20%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes memoxSpin { to { transform: rotate(360deg); } }
+@keyframes memoxSkelPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.75; } }
+@media (prefers-reduced-motion: reduce) {
+  .card, .pill-btn, .icon-btn, .fab, .bn-item { transition: none !important; }
+}

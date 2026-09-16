@@ -1,0 +1,372 @@
+<!doctype html>
+<!-- @dsCard group="UI Kit — Mobile" name="Screens v2 · product truth" subtitle="Screens rebuilt from PRODUCT_CONTEXT + FEATURE_SCREEN_REQUIREMENTS — deck tree, study, progress, settings, every applicable state, EN/VI" viewport="1800x900" -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MemoX — Screens v2</title>
+<link rel="stylesheet" href="../../../styles.css" />
+<link rel="stylesheet" href="theme-scope.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+/* ── Gallery chrome (not the product) ─────────────────────────────── */
+:root{--doc-ink:#1b1f3a;--doc-ink-2:#5a5f72;--doc-ink-3:#7a7f92;--doc-surface:#fff;--doc-stage:#e6e8ea;--doc-bezel:#1a1a1a}
+body.stage-dark{--doc-ink:#E4E8FA;--doc-ink-2:#b8bdd2;--doc-ink-3:#8b91a8;--doc-surface:#131A3A;--doc-stage:#0d0d0f;--doc-bezel:#2a2a2c}
+body{margin:0;background:var(--doc-stage);font-family:var(--memox-font-sans)}
+.controls{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:10px 20px;background:rgba(230,232,234,.9);backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid rgba(20,24,48,.08)}
+body.stage-dark .controls{background:rgba(13,13,15,.9);border-bottom-color:rgba(255,255,255,.08)}
+.brandblock{display:flex;flex-direction:column;margin-right:auto;gap:2px}
+.brand{font-size:15px;font-weight:800;letter-spacing:-.3px;color:var(--doc-ink)}
+.sub{font-size:12px;color:var(--doc-ink-2);max-width:620px}
+.ctl{display:inline-flex;align-items:center;gap:8px}
+.seg-label{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--doc-ink-2)}
+.seg{display:inline-flex;gap:2px;padding:4px;border-radius:999px;background:rgba(20,24,48,.06)}
+body.stage-dark .seg{background:rgba(255,255,255,.07)}
+.seg button{border:none;background:transparent;border-radius:999px;height:30px;min-width:44px;padding:0 14px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--doc-ink-2)}
+.seg button.active{background:var(--doc-surface);color:var(--doc-ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+body.stage-dark .seg button.active{background:#353A52;color:#fff}
+.gallery{padding:8px 28px 96px}
+.section-head{padding:40px 4px 8px;font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--doc-ink-2)}
+.row{padding:12px 0 8px}
+.row-head{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.row-num{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--doc-ink-3)}
+.row-title{font-size:16px;font-weight:700;letter-spacing:-.2px;color:var(--doc-ink)}
+.row-note{font-size:12px;color:var(--doc-ink-2);max-width:520px}
+.stepper{display:inline-flex;align-items:center;gap:4px;padding:4px;border-radius:999px;background:rgba(20,24,48,.05)}
+body.stage-dark .stepper{background:rgba(255,255,255,.06)}
+.stepper button{width:32px;height:32px;border:none;border-radius:999px;background:var(--doc-surface);color:var(--doc-ink-2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.stepper svg{width:16px;height:16px}
+.st-label{min-width:170px;text-align:center;font-size:12px;font-weight:600;color:var(--doc-ink-2)}
+.st-single{min-width:0;opacity:.6}
+.pair{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.frame-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.theme-label{display:inline-flex;align-items:center;gap:8px;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--doc-ink-3)}
+.theme-dot{width:8px;height:8px;border-radius:999px}
+.phone{width:390px;height:780px;background:var(--memox-bg);border-radius:44px;border:8px solid var(--doc-bezel);overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 24px 60px rgba(25,28,30,.12)}
+.memox-dark .phone{box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.row-placeholder{height:822px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--doc-ink-3);border:1px dashed rgba(20,24,48,.14);border-radius:24px}
+/* Gallery-only performance guard: the product's chrome glass (backdrop-filter
+   blur) is authored in components.css, but 40 blurred layers on one page make
+   the whole wall crawl. Inside a frame the nav always sits on the page
+   surface, so a flat fill is visually equivalent here. */
+.phone .bottom-nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--memox-surface)}
+/* ── Screen shell (mirrors ui_kits/mobile: Scaffold → column) ────── */
+.app{height:100%;width:100%;display:flex;flex-direction:column;background:var(--memox-bg);color:var(--memox-text-primary);position:relative;overflow:hidden;--screen-gutter:16px;--safe-bottom:env(safe-area-inset-bottom,0px);--fab-h:52px;--fab-inset:var(--memox-space-xl);--fab-nav-gap:4px;--clear-comfort:var(--memox-space-xl);--clear-base:calc(var(--clear-comfort) + var(--safe-bottom));--clear-fab:calc(var(--fab-inset) + var(--fab-h) + var(--clear-comfort) + var(--safe-bottom));--clear-fab-nav:calc(var(--fab-nav-gap) + var(--fab-h) + var(--clear-comfort) + var(--safe-bottom))}
+.statusbar{height:44px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;font-size:14px;font-weight:600;flex-shrink:0}
+.scroll{flex:1;overflow-y:auto;padding:0 var(--screen-gutter) var(--clear-base);scrollbar-width:none;-ms-overflow-style:none}
+.scroll.scroll-fab{padding-bottom:var(--clear-fab)}
+.scroll.scroll-fab-nav{padding-bottom:var(--clear-fab-nav)}
+.scroll::-webkit-scrollbar{display:none}
+.scroll-x{overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.scroll-x::-webkit-scrollbar{display:none}
+.hide-scroll{overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none}
+.hide-scroll::-webkit-scrollbar{display:none}
+.app .pill-btn:not(.fab){position:relative}
+.app .pill-btn:not(.fab)::after{content:'';position:absolute;top:50%;left:50%;width:100%;height:var(--memox-size-touch);min-width:var(--memox-size-touch);transform:translate(-50%,-50%)}
+.app .scroll-x .pill-btn::after{width:100%;height:100%;min-width:0}
+.bn-item{background:none;border:none;width:100%;padding:8px 0;font-family:inherit}
+.icon-btn{position:relative}
+.icon-btn::after{content:'';position:absolute;top:50%;left:50%;width:var(--memox-size-touch);height:var(--memox-size-touch);transform:translate(-50%,-50%)}
+.app button:focus-visible,.icon-btn:focus-visible,.pill-btn:focus-visible,.bn-item:focus-visible,[role="switch"]:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--memox-primary);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}}
+@media (max-width:760px){.gallery{padding:4px 12px 72px}.pair{flex-direction:column;align-items:center}.stepper{width:100%;justify-content:space-between}.st-label{min-width:0;flex:1}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="../screens/_shared.jsx"></script>
+<script type="text/babel" src="_kit.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="screens/LibraryDeckList.jsx"></script>
+<script type="text/babel" src="screens/StudyHome.jsx"></script>
+<script type="text/babel" src="screens/StudyEntry.jsx"></script>
+<script type="text/babel" src="screens/StudyOptions.jsx"></script>
+<script type="text/babel" src="screens/CardList.jsx"></script>
+<script type="text/babel" src="screens/CardEditor.jsx"></script>
+<script type="text/babel" src="screens/CardDetail.jsx"></script>
+<script type="text/babel" src="screens/StudySession.jsx"></script>
+<script type="text/babel" src="screens/SessionSummary.jsx"></script>
+<script type="text/babel" src="screens/DeckOps.jsx"></script>
+<script type="text/babel" src="screens/ReviewSchedule.jsx"></script>
+<script type="text/babel" src="screens/StarterLibrary.jsx"></script>
+<script type="text/babel" src="screens/LibrarySearch.jsx"></script>
+<script type="text/babel" src="screens/CardImport.jsx"></script>
+<script type="text/babel" src="screens/CardExport.jsx"></script>
+<script type="text/babel" src="screens/TagCatalog.jsx"></script>
+<script type="text/babel" src="screens/Trash.jsx"></script>
+<script type="text/babel" src="screens/Progress.jsx"></script>
+<script type="text/babel" src="screens/Settings.jsx"></script>
+
+<script type="text/babel">
+const { LangProvider } = window;
+
+/* Rows mount as they come near the viewport: a wall of 40 phone frames is too
+   heavy to mount at once (the page stops responding). The gate listens to
+   scroll/resize, an IntersectionObserver and a timer, because different
+   webviews suspend different ones of those while the page is offscreen. */
+function useNear(ref) {
+  const [near, setNear] = React.useState(false);
+  React.useEffect(() => {
+    if (near) return;
+    let raf = null, iv = null, io = null, done = false;
+    const check = () => {
+      const n = ref.current; if (!n || done) return;
+      const r = n.getBoundingClientRect(), vh = window.innerHeight || 800;
+      if (r.top < vh * 0.9 && r.bottom > -vh * 0.5) { done = true; setNear(true); cleanup(); }
+    };
+    const onScroll = () => { check(); };
+    const cleanup = () => {
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onScroll);
+      if (io) io.disconnect();
+      if (iv) clearInterval(iv); if (raf) cancelAnimationFrame(raf);
+    };
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onScroll);
+    if (window.IntersectionObserver && ref.current) {
+      io = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) check(); }, { rootMargin: '30% 0px' });
+      io.observe(ref.current);
+    }
+    iv = setInterval(check, 300); check();
+    return cleanup;
+  }, [near]);
+  /* Anything that interacts with the row (its stepper) mounts it at once. */
+  return [near, () => setNear(true)];
+}
+
+function Frame({ theme, lang, children }) {
+  const dark = theme === 'dark';
+  return (
+    <div className={'frame-wrap' + (dark ? ' memox-dark' : '')}>
+      <div className="phone"><LangProvider lang={lang}>{children}</LangProvider></div>
+      <div className="theme-label">
+        <span className="theme-dot" style={{ background: dark ? '#8B9AFF' : '#5265F5' }}></span>
+        {dark ? 'Dark · Tokyo Nebula' : 'Light · Tokyo Pure'}
+      </div>
+    </div>);
+}
+
+function ScreenRow({ group, view, lang }) {
+  const [i, setI] = React.useState(0);
+  const ref = React.useRef(null);
+  const [near, forceNear] = useNear(ref);
+  const total = group.states.length;
+  const cur = group.states[i % total];
+  const single = total <= 1;
+  const step = (d) => { forceNear(); setI((i + d + total) % total); };
+  const make = () => React.createElement(group.Comp, { key: 'st-' + String(cur[0]) + lang, state: cur[0] });
+  return (
+    <div className="row" ref={ref} onPointerDown={forceNear} onFocus={forceNear}>
+      <div className="row-head">
+        <span className="row-num">{group.num}</span>
+        <span className="row-title">{group.title}</span>
+        {group.note ? <span className="row-note">{group.note}</span> : null}
+        {!single ?
+          <div className="stepper" role="group" aria-label={group.title + ' states'}>
+            <button onClick={() => step(-1)} aria-label="Previous state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span className="st-label">{cur[1]} · {(i % total) + 1}/{total}</span>
+            <button onClick={() => step(1)} aria-label="Next state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div> :
+          <span className="st-label st-single">Single state</span>}
+      </div>
+      {near ?
+        <div className="pair">
+          {view !== 'dark' ? <Frame theme="light" lang={lang}>{make()}</Frame> : null}
+          {view !== 'light' ? <Frame theme="dark" lang={lang}>{make()}</Frame> : null}
+        </div> :
+        <div className="row-placeholder">Scroll here to load these frames</div>}    </div>);
+}
+
+const S = (v, l) => [v, l];
+const GROUPS = [
+  { section: 'Library', num: 'A1', title: 'Deck tree', Comp: window.LibraryDeckList,
+    note: 'One level at a time · new and due never merged',
+    states: [
+      S('topLevel', 'Top level'), S('loading', 'Loading'), S('topEmpty', 'First launch'),
+      S('inside', 'Inside a deck'), S('insideEmpty', 'Empty sub-deck'), S('allZero', 'Zero workload'),
+      S('dueFilterEmpty', 'Due filter · no match'), S('deep', 'Level 10'), S('deckMenu', 'Deck actions'),
+      S('sortSheet', 'Sort & filter'), S('notFound', 'Deck not found'), S('error', 'Read error')
+    ] },
+  { num: 'A2–A4', title: 'Deck create, rename, move, delete', Comp: window.DeckOps,
+    note: 'Overlays on the level being viewed · every refusal states its reason',
+    states: [
+      S('createRoot', 'New deck'), S('algoMissing', 'Schedule not chosen'), S('nameEmpty', 'Name empty'),
+      S('nameTooLong', 'Name too long'), S('submitting', 'Creating'), S('createSub', 'New sub-deck'),
+      S('parentHoldsCards', 'Parent holds cards'), S('maxDepth', 'At level 10'), S('rename', 'Rename'),
+      S('move', 'Move · targets'), S('moveRefused', 'Move refused'), S('moveNone', 'Root · no targets'),
+      S('reorder', 'Reorder'), S('delete', 'Delete impact'), S('deleting', 'Deleting'),
+      S('deletedUndo', 'Moved to Trash · undo'), S('undoRefused', 'Undo refused')
+    ] },
+  { num: 'A5', title: 'Review schedule + reset', Comp: window.ReviewSchedule,
+    note: 'Switch only while unlocked · reset states what is kept and lost',
+    states: [
+      S('locked', 'Locked'), S('unlocked', 'Unlocked'), S('switching', 'Switching'), S('switched', 'Switched'),
+      S('refused', 'Just locked'), S('writeFailed', 'Switch failed'), S('resetConfirm', 'Reset confirm'),
+      S('applying', 'Resetting'), S('applied', 'Reset done'), S('resetNothing', 'Nothing to lose')
+    ] },
+  { num: 'A6', title: 'Starter decks', Comp: window.StarterLibrary,
+    note: 'Fixture notice first · a copy is an ordinary deck',
+    states: [
+      S('list', 'Templates'), S('addSheet', 'Choose schedule'), S('adding', 'Adding'), S('added', 'Added'),
+      S('secondCopy', 'Second copy'), S('alreadyPresent', 'Already present'), S('addFailed', 'Add failed'),
+      S('loading', 'Loading'), S('noTemplates', 'None in this build'), S('loadFailed', 'Load failed')
+    ] },
+  { num: 'A7', title: 'Library search', Comp: window.LibrarySearch,
+    note: 'Four fields only · decks before cards · accents matter',
+    states: [
+      S('results', 'Results'), S('initial', 'Nothing typed'), S('debouncing', 'Waiting for typing'),
+      S('searching', 'Searching'), S('noResults', 'No results · accents'), S('loadingMore', 'Loading more'),
+      S('loadMoreFailed', 'Load more failed'), S('searchFailed', 'Search failed')
+    ] },
+  { section: 'Study', num: 'A15', title: 'Study home', Comp: window.StudyHome,
+    note: 'Root decks by workload · resume · nothing here starts a session',
+    states: [
+      S('loaded', 'Workload'), S('resume', 'Session to resume'), S('allClear', 'Nothing due'),
+      S('loading', 'Loading'), S('noDecks', 'No decks'), S('noCards', 'Decks without cards'), S('error', 'Read error')
+    ] },
+  { num: 'A16', title: 'Study entry for a deck', Comp: window.StudyEntry,
+    note: 'Learn and review are separate offers; review needs something due',
+    states: [
+      S('sm2', 'SM-2 · new + due'), S('eightBox', 'Eight boxes · mode choice'), S('onlyNew', 'Only new'),
+      S('nothing', 'Nothing to do'), S('resume', 'Open session today'), S('starting', 'Starting'),
+      S('refused', 'No longer due'), S('startFailed', 'Start failed'), S('loading', 'Loading')
+    ] },
+  { num: 'A17', title: 'Study options', Comp: window.StudyOptions,
+    note: 'Lives on the root deck · future sessions only',
+    states: [S('override', 'Deck override'), S('defaults', 'Following app defaults'), S('invalid', 'Invalid limit'), S('saving', 'Saving'), S('saved', 'Saved'), S('writeFailed', 'Save failed'), S('loading', 'Loading')] },
+  { section: 'Cards', num: 'A8', title: 'Card list of a deck', Comp: window.CardList,
+    note: 'Filter counts on the chips · select-all covers the whole matching set',
+    states: [
+      S('loaded', 'Loaded'), S('loading', 'Loading'), S('empty', 'Deck has no cards'), S('search', 'Searching'),
+      S('noMatch', 'No match'), S('loadingMore', 'Loading more'), S('selection', 'Selection active'),
+      S('bulkRunning', 'Bulk action running'), S('bulkFailed', 'Bulk failed · selection kept'), S('bulkDone', 'Bulk done'),
+      S('trashedUndo', 'Card trashed · undo'), S('cardMenu', 'Card actions'), S('deckMenu', 'Deck actions'),
+      S('moveNone', 'No move target'), S('notFound', 'Deck not found'), S('error', 'Read error')
+    ] },
+  { num: 'A9', title: 'Card editor', Comp: window.CardEditor,
+    note: 'Front and back first; details, tags and flag fold away',
+    states: [
+      S('new', 'New · empty'), S('valid', 'Ready to save'), S('details', 'Details open'), S('edit', 'Editing a card'),
+      S('errFront', 'Front too long'), S('errBack', 'Back empty'), S('tagLimit', '10 tags reached'),
+      S('saving', 'Saving'), S('saved', 'Saved'), S('writeFailed', 'Save failed'), S('deckRejects', 'Deck rejects cards'),
+      S('discard', 'Discard changes'), S('gone', 'Card gone'), S('loading', 'Loading')
+    ] },
+  { num: 'A10', title: 'Card detail + history', Comp: window.CardDetail,
+    note: 'Read-only · generations separated in words · no accuracy or score',
+    states: [S('loaded', 'Loaded'), S('allLoaded', 'All history loaded'), S('noHistory', 'No history yet'), S('loadingMore', 'Loading more'), S('loadMoreFailed', 'Load more failed'), S('loading', 'Loading'), S('notFound', 'Card not found')] },
+  { section: 'Study session', num: 'A18', title: 'Session · six question formats', Comp: window.StudySession,
+    note: 'Answer saved before any result · wrong cards return in later rounds',
+    states: [
+      S('browse', 'Browse · learning stage 1'), S('selfAssessPrompt', 'Self-assess · prompt'), S('selfAssessRevealed', 'Self-assess · revealed'),
+      S('saving', 'Answer saving'), S('saveFailed', 'Save failed · retry'),
+      S('match', 'Match · board'), S('matchWrong', 'Match · wrong pair'),
+      S('guess', 'Guess · 5 options'), S('guessAnswered', 'Guess · answered'),
+      S('recallCounting', 'Recall · counting down'), S('recallRevealed', 'Recall · self-check'), S('recallTimeout', 'Recall · timed out'),
+      S('fillTyping', 'Fill · typing'), S('fillHint', 'Fill · hint used'), S('fillWrong', 'Fill · wrong'),
+      S('starting', 'Starting'), S('invalidated', 'Ended by a reset')
+    ] },
+  { num: 'A19', title: 'Session summary', Comp: window.SessionSummary,
+    note: 'Factual, never celebratory · says what was kept',
+    states: [
+      S('completedReview', 'Review finished'), S('completedLearning', 'Learning finished'), S('largeReview', '200-card session'),
+      S('leftEarly', 'Left early'), S('interrupted', 'Interrupted'), S('reset', 'Ended by reset'),
+      S('schedulerChanged', 'Schedule changed'), S('contentDeleted', 'Content trashed'), S('saveError', 'Save error'), S('loading', 'Loading')
+    ] },
+  { section: 'Data in and out', num: 'A11', title: 'Card import', Comp: window.CardImport,
+    note: 'Every row’s fate visible before anything is written · all or nothing',
+    states: [
+      S('source', 'Pick a source'), S('parsing', 'Reading the file'), S('encoding', 'Not UTF-8'),
+      S('unsupported', 'Unsupported file'), S('emptySheet', 'Empty sheet'), S('mapping', 'Columns mapped'),
+      S('mappingIncomplete', 'Back not mapped'), S('preview', 'Preview · duplicates in'),
+      S('previewSkipDupes', 'Preview · duplicates skipped'), S('submitting', 'Importing'),
+      S('completed', 'Imported'), S('completedWithSkips', 'Imported with skips'), S('noCardsAdded', 'Nothing added'),
+      S('commitFailure', 'Import failed'), S('targetRejects', 'Deck rejects cards')
+    ] },
+  { num: 'A12', title: 'Card export', Comp: window.CardExport,
+    note: 'Handed to the system, never “saved” · six columns, content only',
+    states: [
+      S('choosing', 'Whole deck'), S('selection', 'Selection'), S('generating', 'Preparing'),
+      S('shared', 'Handed over'), S('dismissed', 'Share closed'), S('failed', 'Failed'),
+      S('unavailable', 'No share target'), S('stale', 'Stale selection'), S('empty', 'Nothing to export')
+    ] },
+  { num: 'A13', title: 'Tag catalog', Comp: window.TagCatalog,
+    note: 'Library-wide · rename can merge · delete never loses a card',
+    states: [
+      S('list', 'Catalog'), S('sheet', 'Tag actions'), S('rename', 'Rename'), S('renameMerge', 'Rename → merge'),
+      S('renameInvalid', 'Name too long'), S('deleteConfirm', 'Delete tag'), S('deleted', 'Deleted'),
+      S('merged', 'Merged'), S('busy', 'Row busy'), S('opFailed', 'Rename failed'), S('gone', 'Tag gone'),
+      S('searchEmpty', 'No match'), S('empty', 'No tags'), S('loading', 'Loading'), S('loadFailed', 'Read error')
+    ] },
+  { num: 'A14', title: 'Trash', Comp: window.Trash,
+    note: '30 days · restore always asks where · only permanent delete is destructive',
+    states: [
+      S('list', 'All entries'), S('noDecks', 'Cards only'), S('onlyDecks', 'Decks only'),
+      S('selectionCards', 'Selection · cards'), S('restoreTargets', 'Choose a target'), S('noValidTarget', 'No valid target'),
+      S('restoring', 'Restoring'), S('restored', 'Restored'), S('refused', 'Undo refused'),
+      S('permDeleteConfirm', 'Delete for good'), S('permDeleting', 'Deleting'), S('permDeleted', 'Deleted for good'),
+      S('purgeBlocked', 'Contains a younger entry'), S('empty', 'Trash empty'), S('loading', 'Loading'), S('loadFailed', 'Read error')
+    ] },
+  { section: 'Progress and settings', num: 'A20–A21', title: 'Progress', Comp: window.Progress,
+    note: 'Effort only · card-days · two ranges · no accuracy, goals or celebration',
+    states: [
+      S('loaded', 'Studied today'), S('month', '30 days'), S('deckScope', 'Inside a deck'),
+      S('heldStreak', 'Streak held'), S('lostStreak', 'Streak lost'), S('rangeNoActivity', 'No activity in range'),
+      S('never', 'Never studied'), S('loading', 'Loading'), S('error', 'Read error')
+    ] },
+  { num: 'A22', title: 'Settings', Comp: window.Settings,
+    note: 'Each option saves alone · app options are not learning progress',
+    states: [
+      S('loaded', 'Loaded'), S('savingOne', 'Saving one option'), S('saved', 'Saved'),
+      S('invalidLimit', 'Invalid limit'), S('saveFailed', 'Save failed'), S('resetConfirm', 'Reset options'),
+      S('resetDone', 'Options reset'), S('loading', 'Loading')
+    ] },
+  { num: 'A23', title: 'Daily reminder', Comp: window.Reminder,
+    note: 'Permission only after the user turns it on · never card content',
+    states: [
+      S('off', 'Off'), S('turningOn', 'Asking permission'), S('on', 'On · 20:00'), S('turnedOn', 'Turned on'),
+      S('changingTime', 'Changing time'), S('permissionDenied', 'Permission denied'), S('scheduleFailed', 'Could not schedule'),
+      S('offButMayShow', 'Off · one may still show'), S('unavailable', 'Unavailable here'), S('loading', 'Loading')
+    ] }
+];
+
+function App() {
+  const [view, setView] = React.useState('both');
+  const [lang, setLang] = React.useState('en');
+  const [stageDark, setStageDark] = React.useState(false);
+  React.useEffect(() => { document.body.classList.toggle('stage-dark', stageDark); }, [stageDark]);
+  React.useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
+  const seg = (val, set, opts) =>
+    <div className="seg">{opts.map((o) =>
+      <button key={o[0]} className={val === o[0] ? 'active' : ''} onClick={() => set(o[0])}>{o[1]}</button>)}</div>;
+  return (
+    <>
+      <div className="controls">
+        <div className="brandblock">
+          <span className="brand">MemoX · Screens v2</span>
+          <span className="sub">Rebuilt from the product-truth handoff. Functional constraints from PRODUCT_CONTEXT / FEATURE_SCREEN_REQUIREMENTS; visual language from the existing MemoX kit.</span>
+        </div>
+        <div className="ctl"><span className="seg-label">Theme</span>{seg(view, setView, [['light', 'Light'], ['dark', 'Dark'], ['both', 'Both']])}</div>
+        <div className="ctl"><span className="seg-label">Copy</span>{seg(lang, setLang, [['en', 'EN'], ['vi', 'VI']])}</div>
+        <div className="ctl"><span className="seg-label">Stage</span>{seg(stageDark ? 'd' : 'l', (v) => setStageDark(v === 'd'), [['l', 'Light'], ['d', 'Dark']])}</div>
+      </div>
+      <div className="gallery">
+        {GROUPS.map((g) =>
+          <React.Fragment key={g.num}>
+            {g.section ? <div className="section-head">{g.section}</div> : null}
+            <ScreenRow group={g} view={view} lang={lang} />
+          </React.Fragment>)}
+      </div>
+    </>);
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

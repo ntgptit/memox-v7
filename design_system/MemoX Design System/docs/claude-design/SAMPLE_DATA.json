@@ -1,0 +1,4760 @@
+{
+  "_meta": {
+    "description": "Synthetic sample data for the MemoX redesign. No real person's data. Shaped like API_CONTRACT.md.",
+    "baseCommit": "de1e862c",
+    "clock": {
+      "now": "2026-09-16T02:30:00Z",
+      "utcOffset": "+07:00",
+      "localNow": "2026-09-16T09:30:00+07:00",
+      "startOfLocalToday": "2026-09-15T17:00:00Z",
+      "startOfLocalTomorrow": "2026-09-16T17:00:00Z"
+    },
+    "conventions": [
+      "Each area is a list of samples. A sample has 'scenario' (what it illustrates), 'contract' (name in API_CONTRACT.md), 'input', and either 'output' or 'failure'.",
+      "Inside 'output', field names are the contract's field names.",
+      "An object named 'derived' groups values the contract computes from its sibling fields; they are not stored.",
+      "Instants are UTC ISO-8601. Due times fall on local midnight, which is 17:00Z at +07:00.",
+      "Enum values use the canonical spelling in API_CONTRACT.md §1. CardState 'new' is 'isNew' in source, and the distribution count keeps the source field name 'isNew'.",
+      "A union variant without data is a string (\"wholeDeck\", \"topLevel\"); a variant with data is an object with one key naming it ({\"selection\": {...}}, {\"deck\": {...}}).",
+      "'failure' shows the family and reason from API_CONTRACT.md §2.",
+      "Ids are synthetic UUIDs; the first character hints the kind: d deck, c card, e tag, f session, b trash entry, a history event.",
+      "Import 'records' and some 'input' fields are described in words where the real value is an internal structure.",
+      "Lists may be abridged: a study session's 'cards' shows 2 of 30; a card list shows representative cards, not the whole deck."
+    ],
+    "coverage": [
+      "Korean, Vietnamese and English content, mixed scripts in one field",
+      "Text at or near every length limit: deck name 197/200, card front 57/60, back and optional fields near 240, tag 50/50, 10 tags on one card",
+      "Very short content: a one-character front, a two-letter deck name",
+      "Zero counts, empty lists and empty states in every area",
+      "Large counts: a 10,000-card deck, 1,500-card import, 200-card session, 412-day streak",
+      "Nullable fields both present and null",
+      "Every CardState, DeckScheduleStatus, content type, algorithm, study mode, answer kind, session status × end reason pair, import row status, export result, trash item type",
+      "Dates from minutes ago to 11 months ago, due times in the past (30 days overdue), today and future",
+      "A deck tree at the maximum depth of 10 levels",
+      "Algorithm locked and unlocked; generation 1 and 2; history across a reset that changed algorithm"
+    ]
+  },
+  "library": [
+    {
+      "scenario": "Top level: six root decks covering overdue, due today, only new, empty, fully mastered and a 10,000-card deck",
+      "contract": "WatchDeckList",
+      "input": {
+        "parentDeckId": null
+      },
+      "output": {
+        "parent": null,
+        "decks": [
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000001",
+              "name": "한국어 TOPIK I · Từ vựng",
+              "parentDeckId": null,
+              "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+              "contentType": "deck",
+              "schedulerType": "sm2",
+              "schedulerGeneration": 1,
+              "firstAnsweredAt": "2025-10-15T13:15:00Z",
+              "createdAt": "2025-10-12T12:00:00Z",
+              "updatedAt": "2026-09-15T14:20:00Z",
+              "derived": {
+                "isRoot": true
+              }
+            },
+            "totalCardCount": 1248,
+            "newCardCount": 312,
+            "dueCardCount": 86,
+            "overdueCardCount": 41,
+            "overdueDayCount": 3,
+            "learnedCardCount": 204,
+            "subDeckCount": 4,
+            "schedulerType": "sm2",
+            "derived": {
+              "learnedFraction": 0.1635,
+              "isFullyLearned": false,
+              "hasNewCards": true,
+              "dueTodayCardCount": 45,
+              "scheduledCardCount": 850,
+              "hasDueCards": true,
+              "scheduleStatus": "overdue",
+              "hasStudyableCards": true
+            }
+          },
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000002",
+              "name": "Tiếng Anh giao tiếp hằng ngày",
+              "parentDeckId": null,
+              "rootDeckId": "d0000000-0000-4000-8000-000000000002",
+              "contentType": "deck",
+              "schedulerType": "eight_box",
+              "schedulerGeneration": 2,
+              "firstAnsweredAt": "2026-08-20T01:10:00Z",
+              "createdAt": "2026-03-04T08:30:00Z",
+              "updatedAt": "2026-08-19T15:02:00Z",
+              "derived": {
+                "isRoot": true
+              }
+            },
+            "totalCardCount": 64,
+            "newCardCount": 0,
+            "dueCardCount": 12,
+            "overdueCardCount": 0,
+            "overdueDayCount": 0,
+            "learnedCardCount": 0,
+            "subDeckCount": 3,
+            "schedulerType": "eight_box",
+            "derived": {
+              "learnedFraction": 0.0,
+              "isFullyLearned": false,
+              "hasNewCards": false,
+              "dueTodayCardCount": 12,
+              "scheduledCardCount": 52,
+              "hasDueCards": true,
+              "scheduleStatus": "dueToday",
+              "hasStudyableCards": true
+            }
+          },
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000006",
+              "name": "IELTS Academic Word List",
+              "parentDeckId": null,
+              "rootDeckId": "d0000000-0000-4000-8000-000000000006",
+              "contentType": "deck",
+              "schedulerType": "eight_box",
+              "schedulerGeneration": 1,
+              "firstAnsweredAt": "2025-11-03T13:30:00Z",
+              "createdAt": "2025-11-02T07:00:00Z",
+              "updatedAt": "2026-09-10T11:00:00Z",
+              "derived": {
+                "isRoot": true
+              }
+            },
+            "totalCardCount": 10000,
+            "newCardCount": 7400,
+            "dueCardCount": 1260,
+            "overdueCardCount": 1100,
+            "overdueDayCount": 47,
+            "learnedCardCount": 350,
+            "subDeckCount": 12,
+            "schedulerType": "eight_box",
+            "derived": {
+              "learnedFraction": 0.035,
+              "isFullyLearned": false,
+              "hasNewCards": true,
+              "dueTodayCardCount": 160,
+              "scheduledCardCount": 1340,
+              "hasDueCards": true,
+              "scheduleStatus": "overdue",
+              "hasStudyableCards": true
+            }
+          },
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000005",
+              "name": "Korean Basics",
+              "parentDeckId": null,
+              "rootDeckId": "d0000000-0000-4000-8000-000000000005",
+              "contentType": "deck",
+              "schedulerType": "sm2",
+              "schedulerGeneration": 2,
+              "firstAnsweredAt": "2026-01-06T12:00:00Z",
+              "createdAt": "2025-12-01T10:00:00Z",
+              "updatedAt": "2026-01-05T09:12:00Z",
+              "derived": {
+                "isRoot": true
+              }
+            },
+            "totalCardCount": 10,
+            "newCardCount": 0,
+            "dueCardCount": 0,
+            "overdueCardCount": 0,
+            "overdueDayCount": 0,
+            "learnedCardCount": 10,
+            "subDeckCount": 2,
+            "schedulerType": "sm2",
+            "derived": {
+              "learnedFraction": 1.0,
+              "isFullyLearned": true,
+              "hasNewCards": false,
+              "dueTodayCardCount": 0,
+              "scheduledCardCount": 10,
+              "hasDueCards": false,
+              "scheduleStatus": "notDue",
+              "hasStudyableCards": false
+            }
+          },
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000003",
+              "name": "IT",
+              "parentDeckId": null,
+              "rootDeckId": "d0000000-0000-4000-8000-000000000003",
+              "contentType": "deck",
+              "schedulerType": "eight_box",
+              "schedulerGeneration": 1,
+              "firstAnsweredAt": null,
+              "createdAt": "2026-09-15T23:50:00Z",
+              "updatedAt": "2026-09-16T00:05:00Z",
+              "derived": {
+                "isRoot": true
+              }
+            },
+            "totalCardCount": 5,
+            "newCardCount": 5,
+            "dueCardCount": 0,
+            "overdueCardCount": 0,
+            "overdueDayCount": 0,
+            "learnedCardCount": 0,
+            "subDeckCount": 1,
+            "schedulerType": "eight_box",
+            "derived": {
+              "learnedFraction": 0.0,
+              "isFullyLearned": false,
+              "hasNewCards": true,
+              "dueTodayCardCount": 0,
+              "scheduledCardCount": 0,
+              "hasDueCards": false,
+              "scheduleStatus": "notDue",
+              "hasStudyableCards": true
+            }
+          },
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000004",
+              "name": "Thuật ngữ Kinh tế – Tài chính – Ngân hàng cho kỳ thi chứng chỉ quốc tế: kế toán, kiểm toán, thị trường chứng khoán, bảo hiểm và cụm từ thường gặp trong báo cáo thường niên của doanh nghiệp niêm yết",
+              "parentDeckId": null,
+              "rootDeckId": "d0000000-0000-4000-8000-000000000004",
+              "contentType": "deck",
+              "schedulerType": "sm2",
+              "schedulerGeneration": 1,
+              "firstAnsweredAt": null,
+              "createdAt": "2026-09-01T03:00:00Z",
+              "updatedAt": "2026-09-01T03:00:00Z",
+              "derived": {
+                "isRoot": true
+              }
+            },
+            "totalCardCount": 0,
+            "newCardCount": 0,
+            "dueCardCount": 0,
+            "overdueCardCount": 0,
+            "overdueDayCount": 0,
+            "learnedCardCount": 0,
+            "subDeckCount": 0,
+            "schedulerType": "sm2",
+            "derived": {
+              "learnedFraction": 0.0,
+              "isFullyLearned": false,
+              "hasNewCards": false,
+              "dueTodayCardCount": 0,
+              "scheduledCardCount": 0,
+              "hasDueCards": false,
+              "scheduleStatus": "notDue",
+              "hasStudyableCards": false
+            }
+          }
+        ],
+        "ancestors": [],
+        "nextDueAt": "2026-09-16T17:00:00Z",
+        "nextOverdueTickAt": "2026-09-16T17:00:00Z",
+        "derived": {
+          "isRootLevel": true,
+          "levelNewCardCount": 7717,
+          "levelDueCardCount": 1358,
+          "levelOverdueCardCount": 1141,
+          "levelDueTodayCardCount": 217,
+          "levelScheduledCardCount": 2252,
+          "levelOverdueDayCount": 47,
+          "levelScheduleStatus": "overdue"
+        }
+      }
+    },
+    {
+      "scenario": "Inside a root deck: sub-decks holding cards, holding sub-decks, and one still empty (unset)",
+      "contract": "WatchDeckList",
+      "input": {
+        "parentDeckId": "d0000000-0000-4000-8000-000000000001"
+      },
+      "output": {
+        "parent": {
+          "id": "d0000000-0000-4000-8000-000000000001",
+          "name": "한국어 TOPIK I · Từ vựng",
+          "parentDeckId": null,
+          "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+          "contentType": "deck",
+          "schedulerType": "sm2",
+          "schedulerGeneration": 1,
+          "firstAnsweredAt": "2025-10-15T13:15:00Z",
+          "createdAt": "2025-10-12T12:00:00Z",
+          "updatedAt": "2026-09-15T14:20:00Z",
+          "derived": {
+            "isRoot": true
+          }
+        },
+        "decks": [
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000011",
+              "name": "Động từ · 동사",
+              "parentDeckId": "d0000000-0000-4000-8000-000000000001",
+              "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+              "contentType": "card",
+              "schedulerType": null,
+              "schedulerGeneration": null,
+              "firstAnsweredAt": null,
+              "createdAt": "2025-10-12T12:05:00Z",
+              "updatedAt": "2026-09-14T13:05:00Z",
+              "derived": {
+                "isRoot": false
+              }
+            },
+            "totalCardCount": 420,
+            "newCardCount": 100,
+            "dueCardCount": 40,
+            "overdueCardCount": 20,
+            "overdueDayCount": 3,
+            "learnedCardCount": 80,
+            "subDeckCount": 0,
+            "schedulerType": "sm2",
+            "derived": {
+              "learnedFraction": 0.1905,
+              "isFullyLearned": false,
+              "hasNewCards": true,
+              "dueTodayCardCount": 20,
+              "scheduledCardCount": 280,
+              "hasDueCards": true,
+              "scheduleStatus": "overdue",
+              "hasStudyableCards": true
+            }
+          },
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000012",
+              "name": "Danh từ · 명사",
+              "parentDeckId": "d0000000-0000-4000-8000-000000000001",
+              "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+              "contentType": "deck",
+              "schedulerType": null,
+              "schedulerGeneration": null,
+              "firstAnsweredAt": null,
+              "createdAt": "2025-10-12T12:06:00Z",
+              "updatedAt": "2026-08-30T02:00:00Z",
+              "derived": {
+                "isRoot": false
+              }
+            },
+            "totalCardCount": 800,
+            "newCardCount": 200,
+            "dueCardCount": 46,
+            "overdueCardCount": 21,
+            "overdueDayCount": 2,
+            "learnedCardCount": 124,
+            "subDeckCount": 4,
+            "schedulerType": "sm2",
+            "derived": {
+              "learnedFraction": 0.155,
+              "isFullyLearned": false,
+              "hasNewCards": true,
+              "dueTodayCardCount": 25,
+              "scheduledCardCount": 554,
+              "hasDueCards": true,
+              "scheduleStatus": "overdue",
+              "hasStudyableCards": true
+            }
+          },
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000013",
+              "name": "Tính từ · 형용사",
+              "parentDeckId": "d0000000-0000-4000-8000-000000000001",
+              "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+              "contentType": "unset",
+              "schedulerType": null,
+              "schedulerGeneration": null,
+              "firstAnsweredAt": null,
+              "createdAt": "2026-09-10T04:00:00Z",
+              "updatedAt": "2026-09-12T09:30:00Z",
+              "derived": {
+                "isRoot": false
+              }
+            },
+            "totalCardCount": 0,
+            "newCardCount": 0,
+            "dueCardCount": 0,
+            "overdueCardCount": 0,
+            "overdueDayCount": 0,
+            "learnedCardCount": 0,
+            "subDeckCount": 0,
+            "schedulerType": "sm2",
+            "derived": {
+              "learnedFraction": 0.0,
+              "isFullyLearned": false,
+              "hasNewCards": false,
+              "dueTodayCardCount": 0,
+              "scheduledCardCount": 0,
+              "hasDueCards": false,
+              "scheduleStatus": "notDue",
+              "hasStudyableCards": false
+            }
+          },
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000014",
+              "name": "Trạng từ · 부사",
+              "parentDeckId": "d0000000-0000-4000-8000-000000000001",
+              "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+              "contentType": "card",
+              "schedulerType": null,
+              "schedulerGeneration": null,
+              "firstAnsweredAt": null,
+              "createdAt": "2026-02-11T03:00:00Z",
+              "updatedAt": "2026-05-02T10:00:00Z",
+              "derived": {
+                "isRoot": false
+              }
+            },
+            "totalCardCount": 28,
+            "newCardCount": 12,
+            "dueCardCount": 0,
+            "overdueCardCount": 0,
+            "overdueDayCount": 0,
+            "learnedCardCount": 0,
+            "subDeckCount": 0,
+            "schedulerType": "sm2",
+            "derived": {
+              "learnedFraction": 0.0,
+              "isFullyLearned": false,
+              "hasNewCards": true,
+              "dueTodayCardCount": 0,
+              "scheduledCardCount": 16,
+              "hasDueCards": false,
+              "scheduleStatus": "notDue",
+              "hasStudyableCards": true
+            }
+          }
+        ],
+        "ancestors": [],
+        "nextDueAt": "2026-09-16T17:00:00Z",
+        "nextOverdueTickAt": "2026-09-16T17:00:00Z",
+        "derived": {
+          "isRootLevel": false,
+          "levelNewCardCount": 312,
+          "levelDueCardCount": 86,
+          "levelOverdueCardCount": 41,
+          "levelDueTodayCardCount": 45,
+          "levelScheduledCardCount": 850,
+          "levelOverdueDayCount": 3,
+          "levelScheduleStatus": "overdue"
+        }
+      }
+    },
+    {
+      "scenario": "Level 10, the deepest allowed: eight ancestors above a level-9 parent",
+      "contract": "WatchDeckList",
+      "input": {
+        "parentDeckId": "d0000000-0000-4000-8000-000000000068"
+      },
+      "output": {
+        "parent": {
+          "id": "d0000000-0000-4000-8000-000000000068",
+          "name": "Đề 2024",
+          "parentDeckId": "d0000000-0000-4000-8000-000000000067",
+          "rootDeckId": "d0000000-0000-4000-8000-000000000006",
+          "contentType": "deck",
+          "schedulerType": null,
+          "schedulerGeneration": null,
+          "firstAnsweredAt": null,
+          "createdAt": "2026-02-20T01:00:00Z",
+          "updatedAt": "2026-02-20T01:00:00Z",
+          "derived": {
+            "isRoot": false
+          }
+        },
+        "decks": [
+          {
+            "deck": {
+              "id": "d0000000-0000-4000-8000-000000000069",
+              "name": "Bài 7 – Từ nối chỉ nguyên nhân (because of, owing to, due to)",
+              "parentDeckId": "d0000000-0000-4000-8000-000000000068",
+              "rootDeckId": "d0000000-0000-4000-8000-000000000006",
+              "contentType": "card",
+              "schedulerType": null,
+              "schedulerGeneration": null,
+              "firstAnsweredAt": null,
+              "createdAt": "2026-02-20T01:05:00Z",
+              "updatedAt": "2026-09-09T12:00:00Z",
+              "derived": {
+                "isRoot": false
+              }
+            },
+            "totalCardCount": 14,
+            "newCardCount": 3,
+            "dueCardCount": 2,
+            "overdueCardCount": 0,
+            "overdueDayCount": 0,
+            "learnedCardCount": 1,
+            "subDeckCount": 0,
+            "schedulerType": "eight_box",
+            "derived": {
+              "learnedFraction": 0.0714,
+              "isFullyLearned": false,
+              "hasNewCards": true,
+              "dueTodayCardCount": 2,
+              "scheduledCardCount": 9,
+              "hasDueCards": true,
+              "scheduleStatus": "dueToday",
+              "hasStudyableCards": true
+            }
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "d0000000-0000-4000-8000-000000000006",
+            "name": "IELTS Academic Word List"
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000061",
+            "name": "Academic Writing"
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000062",
+            "name": "Task 2"
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000063",
+            "name": "Chủ đề Môi trường"
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000064",
+            "name": "Nguyên nhân – Kết quả"
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000065",
+            "name": "Từ nối"
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000066",
+            "name": "Mức B2"
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000067",
+            "name": "Đã gặp trong đề thật"
+          }
+        ],
+        "nextDueAt": "2026-09-18T17:00:00Z",
+        "nextOverdueTickAt": "2026-09-16T17:00:00Z",
+        "derived": {
+          "isRootLevel": false,
+          "levelNewCardCount": 3,
+          "levelDueCardCount": 2,
+          "levelOverdueCardCount": 0,
+          "levelDueTodayCardCount": 2,
+          "levelScheduledCardCount": 9,
+          "levelOverdueDayCount": 0,
+          "levelScheduleStatus": "dueToday"
+        }
+      }
+    },
+    {
+      "scenario": "First launch: no decks at all",
+      "contract": "WatchDeckList",
+      "input": {
+        "parentDeckId": null
+      },
+      "output": {
+        "parent": null,
+        "decks": [],
+        "ancestors": [],
+        "nextDueAt": null,
+        "nextOverdueTickAt": null,
+        "derived": {
+          "isRootLevel": true,
+          "levelNewCardCount": 0,
+          "levelDueCardCount": 0,
+          "levelOverdueCardCount": 0,
+          "levelDueTodayCardCount": 0,
+          "levelScheduledCardCount": 0,
+          "levelOverdueDayCount": 0,
+          "levelScheduleStatus": "notDue"
+        }
+      }
+    },
+    {
+      "scenario": "Move targets for a sub-deck that has children: every rejection reason plus eligible targets",
+      "contract": "WatchDeckMoveTargets",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000012"
+      },
+      "output": [
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000001",
+            "name": "한국어 TOPIK I · Từ vựng",
+            "parentDeckId": null,
+            "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+            "contentType": "deck",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 1,
+            "firstAnsweredAt": "2025-10-15T13:15:00Z",
+            "createdAt": "2025-10-12T12:00:00Z",
+            "updatedAt": "2026-09-15T14:20:00Z",
+            "derived": {
+              "isRoot": true
+            }
+          },
+          "depth": 1,
+          "rejection": "alreadyParent",
+          "derived": {
+            "isEligible": false
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000011",
+            "name": "Động từ · 동사",
+            "parentDeckId": "d0000000-0000-4000-8000-000000000001",
+            "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+            "contentType": "card",
+            "schedulerType": null,
+            "schedulerGeneration": null,
+            "firstAnsweredAt": null,
+            "createdAt": "2025-10-12T12:05:00Z",
+            "updatedAt": "2026-09-14T13:05:00Z",
+            "derived": {
+              "isRoot": false
+            }
+          },
+          "depth": 2,
+          "rejection": "holdsCards",
+          "derived": {
+            "isEligible": false
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000012",
+            "name": "Danh từ · 명사",
+            "parentDeckId": "d0000000-0000-4000-8000-000000000001",
+            "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+            "contentType": "deck",
+            "schedulerType": null,
+            "schedulerGeneration": null,
+            "firstAnsweredAt": null,
+            "createdAt": "2025-10-12T12:06:00Z",
+            "updatedAt": "2026-08-30T02:00:00Z",
+            "derived": {
+              "isRoot": false
+            }
+          },
+          "depth": 2,
+          "rejection": "itself",
+          "derived": {
+            "isEligible": false
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000121",
+            "name": "Danh từ chỉ người · 사람",
+            "parentDeckId": "d0000000-0000-4000-8000-000000000012",
+            "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+            "contentType": "card",
+            "schedulerType": null,
+            "schedulerGeneration": null,
+            "firstAnsweredAt": null,
+            "createdAt": "2025-10-13T01:00:00Z",
+            "updatedAt": "2026-09-01T01:00:00Z",
+            "derived": {
+              "isRoot": false
+            }
+          },
+          "depth": 3,
+          "rejection": "ownDescendant",
+          "derived": {
+            "isEligible": false
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000014",
+            "name": "Trạng từ · 부사",
+            "parentDeckId": "d0000000-0000-4000-8000-000000000001",
+            "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+            "contentType": "card",
+            "schedulerType": null,
+            "schedulerGeneration": null,
+            "firstAnsweredAt": null,
+            "createdAt": "2026-02-11T03:00:00Z",
+            "updatedAt": "2026-05-02T10:00:00Z",
+            "derived": {
+              "isRoot": false
+            }
+          },
+          "depth": 2,
+          "rejection": "holdsCards",
+          "derived": {
+            "isEligible": false
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000190",
+            "name": "Thành ngữ ít gặp",
+            "parentDeckId": "d0000000-0000-4000-8000-000000000189",
+            "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+            "contentType": "deck",
+            "schedulerType": null,
+            "schedulerGeneration": null,
+            "firstAnsweredAt": null,
+            "createdAt": "2026-04-02T02:00:00Z",
+            "updatedAt": "2026-04-02T02:00:00Z",
+            "derived": {
+              "isRoot": false
+            }
+          },
+          "depth": 9,
+          "rejection": "tooDeep",
+          "derived": {
+            "isEligible": false
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000013",
+            "name": "Tính từ · 형용사",
+            "parentDeckId": "d0000000-0000-4000-8000-000000000001",
+            "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+            "contentType": "unset",
+            "schedulerType": null,
+            "schedulerGeneration": null,
+            "firstAnsweredAt": null,
+            "createdAt": "2026-09-10T04:00:00Z",
+            "updatedAt": "2026-09-12T09:30:00Z",
+            "derived": {
+              "isRoot": false
+            }
+          },
+          "depth": 2,
+          "rejection": null,
+          "derived": {
+            "isEligible": true
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000002",
+            "name": "Tiếng Anh giao tiếp hằng ngày",
+            "parentDeckId": null,
+            "rootDeckId": "d0000000-0000-4000-8000-000000000002",
+            "contentType": "deck",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "firstAnsweredAt": "2026-08-20T01:10:00Z",
+            "createdAt": "2026-03-04T08:30:00Z",
+            "updatedAt": "2026-08-19T15:02:00Z",
+            "derived": {
+              "isRoot": true
+            }
+          },
+          "depth": 1,
+          "rejection": "differentScheduler",
+          "derived": {
+            "isEligible": false
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000004",
+            "name": "Thuật ngữ Kinh tế – Tài chính – Ngân hàng cho kỳ thi chứng chỉ quốc tế: kế toán, kiểm toán, thị trường chứng khoán, bảo hiểm và cụm từ thường gặp trong báo cáo thường niên của doanh nghiệp niêm yết",
+            "parentDeckId": null,
+            "rootDeckId": "d0000000-0000-4000-8000-000000000004",
+            "contentType": "deck",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 1,
+            "firstAnsweredAt": null,
+            "createdAt": "2026-09-01T03:00:00Z",
+            "updatedAt": "2026-09-01T03:00:00Z",
+            "derived": {
+              "isRoot": true
+            }
+          },
+          "depth": 1,
+          "rejection": null,
+          "derived": {
+            "isEligible": true
+          }
+        },
+        {
+          "deck": {
+            "id": "d0000000-0000-4000-8000-000000000005",
+            "name": "Korean Basics",
+            "parentDeckId": null,
+            "rootDeckId": "d0000000-0000-4000-8000-000000000005",
+            "contentType": "deck",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 2,
+            "firstAnsweredAt": "2026-01-06T12:00:00Z",
+            "createdAt": "2025-12-01T10:00:00Z",
+            "updatedAt": "2026-01-05T09:12:00Z",
+            "derived": {
+              "isRoot": true
+            }
+          },
+          "depth": 1,
+          "rejection": "differentGeneration",
+          "derived": {
+            "isEligible": false
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "Move targets for a root deck are always empty",
+      "contract": "WatchDeckMoveTargets",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000002"
+      },
+      "output": []
+    },
+    {
+      "scenario": "Deleting a sub-deck with nested content",
+      "contract": "GetDeckDeletionImpact",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000012"
+      },
+      "output": {
+        "descendantDeckCount": 6,
+        "cardCount": 800
+      }
+    },
+    {
+      "scenario": "Deleting an empty deck",
+      "contract": "GetDeckDeletionImpact",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000013"
+      },
+      "output": {
+        "descendantDeckCount": 0,
+        "cardCount": 0
+      }
+    },
+    {
+      "scenario": "Deleting a deck returns the Trash entry id used by undo",
+      "contract": "DeleteDeck",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000013"
+      },
+      "output": {
+        "batchId": "b0000000-0000-4000-8000-000000000009"
+      }
+    },
+    {
+      "scenario": "Root deck without an algorithm",
+      "contract": "CreateRootDeck",
+      "input": {
+        "name": "Tiếng Trung HSK 3",
+        "schedulerType": null
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "schedulerMissing"
+        ]
+      }
+    },
+    {
+      "scenario": "Name only spaces",
+      "contract": "CreateRootDeck",
+      "input": {
+        "name": "   ",
+        "schedulerType": "sm2"
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "nameEmpty"
+        ]
+      }
+    },
+    {
+      "scenario": "Sub-deck under a deck that holds cards",
+      "contract": "CreateSubDeck",
+      "input": {
+        "parentDeckId": "d0000000-0000-4000-8000-000000000011",
+        "name": "Động từ bất quy tắc"
+      },
+      "failure": {
+        "family": "conflict",
+        "reason": "parentHoldsCards"
+      }
+    },
+    {
+      "scenario": "Sub-deck under a level-10 deck",
+      "contract": "CreateSubDeck",
+      "input": {
+        "parentDeckId": "d0000000-0000-4000-8000-000000000069",
+        "name": "Thêm một cấp"
+      },
+      "failure": {
+        "family": "conflict",
+        "reason": "parentAtMaxDepth"
+      }
+    },
+    {
+      "scenario": "Changing the algorithm of a locked deck",
+      "contract": "ChangeUnlockedScheduler",
+      "input": {
+        "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+        "schedulerType": "eight_box"
+      },
+      "failure": {
+        "family": "conflict",
+        "reason": "schedulerLocked"
+      }
+    },
+    {
+      "scenario": "Reset, switching to the other algorithm",
+      "contract": "ResetLearningProgress",
+      "input": {
+        "rootDeckId": "d0000000-0000-4000-8000-000000000002",
+        "schedulerType": "sm2"
+      },
+      "output": null
+    },
+    {
+      "scenario": "Reorder a deck before a sibling",
+      "contract": "ReorderDeck",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000014",
+        "targetSiblingDeckId": "d0000000-0000-4000-8000-000000000012",
+        "placement": "before"
+      },
+      "output": null
+    }
+  ],
+  "starterLibrary": [
+    {
+      "scenario": "The two templates shipped today (development fixtures)",
+      "contract": "LoadStarterTemplates",
+      "input": {},
+      "output": [
+        {
+          "templateId": "fixture.eight_box.everyday_english",
+          "version": 1,
+          "locale": "en",
+          "title": "Everyday English",
+          "contentSource": "memox-fixture",
+          "defaultSchedulerType": "eight_box",
+          "children": [
+            {
+              "name": "Around the house",
+              "children": [
+                {
+                  "name": "Kitchen",
+                  "children": [],
+                  "cards": [
+                    {
+                      "front": "kettle",
+                      "back": "ấm đun nước",
+                      "example": "The kettle is boiling."
+                    },
+                    {
+                      "front": "cupboard",
+                      "back": "tủ bát đĩa",
+                      "example": null
+                    },
+                    {
+                      "front": "sink",
+                      "back": "bồn rửa",
+                      "example": null
+                    },
+                    {
+                      "front": "tray",
+                      "back": "cái khay",
+                      "example": null
+                    }
+                  ]
+                },
+                {
+                  "name": "Living room",
+                  "children": [],
+                  "cards": [
+                    {
+                      "front": "curtain",
+                      "back": "rèm cửa",
+                      "example": null
+                    },
+                    {
+                      "front": "shelf",
+                      "back": "kệ, giá sách",
+                      "example": null
+                    },
+                    {
+                      "front": "cushion",
+                      "back": "gối tựa",
+                      "example": null
+                    }
+                  ]
+                }
+              ],
+              "cards": []
+            },
+            {
+              "name": "Getting around",
+              "children": [
+                {
+                  "name": "On the street",
+                  "children": [],
+                  "cards": [
+                    {
+                      "front": "pavement",
+                      "back": "vỉa hè",
+                      "example": "Wait on the pavement."
+                    },
+                    {
+                      "front": "crossing",
+                      "back": "chỗ sang đường",
+                      "example": null
+                    },
+                    {
+                      "front": "roundabout",
+                      "back": "vòng xuyến",
+                      "example": null
+                    }
+                  ]
+                }
+              ],
+              "cards": []
+            }
+          ],
+          "derived": {
+            "cardCount": 10
+          }
+        },
+        {
+          "templateId": "fixture.sm2.korean_basics",
+          "version": 1,
+          "locale": "ko",
+          "title": "Korean Basics",
+          "contentSource": "memox-fixture",
+          "defaultSchedulerType": "sm2",
+          "children": [
+            {
+              "name": "Hangul",
+              "children": [
+                {
+                  "name": "Vowels",
+                  "children": [],
+                  "cards": [
+                    {
+                      "front": "아",
+                      "back": "a",
+                      "example": null
+                    },
+                    {
+                      "front": "어",
+                      "back": "eo",
+                      "example": null
+                    },
+                    {
+                      "front": "오",
+                      "back": "o",
+                      "example": null
+                    },
+                    {
+                      "front": "우",
+                      "back": "u",
+                      "example": null
+                    }
+                  ]
+                },
+                {
+                  "name": "Consonants",
+                  "children": [],
+                  "cards": [
+                    {
+                      "front": "ㄱ",
+                      "back": "g / k",
+                      "example": null
+                    },
+                    {
+                      "front": "ㄴ",
+                      "back": "n",
+                      "example": null
+                    },
+                    {
+                      "front": "ㄷ",
+                      "back": "d / t",
+                      "example": null
+                    }
+                  ]
+                }
+              ],
+              "cards": []
+            },
+            {
+              "name": "First words",
+              "children": [
+                {
+                  "name": "Greetings",
+                  "children": [],
+                  "cards": [
+                    {
+                      "front": "안녕하세요",
+                      "back": "xin chào",
+                      "example": "안녕하세요, 반갑습니다."
+                    },
+                    {
+                      "front": "감사합니다",
+                      "back": "cảm ơn",
+                      "example": null
+                    },
+                    {
+                      "front": "죄송합니다",
+                      "back": "xin lỗi",
+                      "example": null
+                    }
+                  ]
+                }
+              ],
+              "cards": []
+            }
+          ],
+          "derived": {
+            "cardCount": 10
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "One template already in the library",
+      "contract": "GetInstalledTemplateKeys",
+      "input": {},
+      "output": [
+        {
+          "templateId": "fixture.sm2.korean_basics",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "scenario": "Adding a template with its suggested algorithm",
+      "contract": "InstallDeckTemplate",
+      "input": {
+        "templateId": "fixture.eight_box.everyday_english",
+        "schedulerType": null,
+        "allowDuplicate": false
+      },
+      "output": "installed"
+    },
+    {
+      "scenario": "Adding the same template again without confirming a second copy",
+      "contract": "InstallDeckTemplate",
+      "input": {
+        "templateId": "fixture.sm2.korean_basics",
+        "schedulerType": "sm2",
+        "allowDuplicate": false
+      },
+      "output": "alreadyPresent"
+    },
+    {
+      "scenario": "No templates in this build",
+      "contract": "LoadStarterTemplates",
+      "input": {},
+      "output": []
+    }
+  ],
+  "search": [
+    {
+      "scenario": "Query 'học' matching deck names, card backs and a tag",
+      "contract": "SearchLibrary",
+      "input": {
+        "query": "học",
+        "pageSize": 20
+      },
+      "output": {
+        "decks": [
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000024",
+            "name": "Học qua phim",
+            "deckPath": [
+              "Tiếng Anh giao tiếp hằng ngày"
+            ],
+            "rank": "prefix",
+            "isCardDeck": true
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000032",
+            "name": "Từ vựng học thuật",
+            "deckPath": [
+              "IELTS Academic Word List"
+            ],
+            "rank": "contains",
+            "isCardDeck": false
+          }
+        ],
+        "cards": [
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000012",
+            "deckId": "d0000000-0000-4000-8000-000000000024",
+            "front": "homework",
+            "back": "bài tập về nhà",
+            "deckPath": [
+              "Tiếng Anh giao tiếp hằng ngày",
+              "Học qua phim"
+            ],
+            "rank": "exact",
+            "matchedTagName": "Học"
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000010",
+            "deckId": "d0000000-0000-4000-8000-000000000121",
+            "front": "학생",
+            "back": "học sinh",
+            "deckPath": [
+              "한국어 TOPIK I · Từ vựng",
+              "Danh từ · 명사",
+              "Danh từ chỉ người · 사람"
+            ],
+            "rank": "prefix",
+            "matchedTagName": null
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000003",
+            "deckId": "d0000000-0000-4000-8000-000000000011",
+            "front": "공부하다",
+            "back": "học, học tập",
+            "deckPath": [
+              "한국어 TOPIK I · Từ vựng",
+              "Động từ · 동사"
+            ],
+            "rank": "prefix",
+            "matchedTagName": null
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000011",
+            "deckId": "d0000000-0000-4000-8000-000000000122",
+            "front": "대학교",
+            "back": "trường đại học",
+            "deckPath": [
+              "한국어 TOPIK I · Từ vựng",
+              "Danh từ · 명사",
+              "Nơi chốn · 장소"
+            ],
+            "rank": "contains",
+            "matchedTagName": null
+          }
+        ],
+        "derived": {
+          "hasMore": true,
+          "isEmpty": false
+        }
+      }
+    },
+    {
+      "scenario": "Accent-sensitive: 'hoc' finds nothing",
+      "contract": "SearchLibrary",
+      "input": {
+        "query": "hoc",
+        "pageSize": 20
+      },
+      "output": {
+        "decks": [],
+        "cards": [],
+        "derived": {
+          "hasMore": false,
+          "isEmpty": true
+        }
+      }
+    },
+    {
+      "scenario": "Empty query shows the initial state without searching",
+      "contract": "SearchLibrary",
+      "input": {
+        "query": "   ",
+        "pageSize": 20
+      },
+      "output": {
+        "decks": [],
+        "cards": [],
+        "derived": {
+          "hasMore": false,
+          "isEmpty": true
+        }
+      }
+    }
+  ],
+  "cards": [
+    {
+      "scenario": "Cards of a sm2 deck: new, beginning (due today), reviewing (flagged, all optional fields), max-length text with 10 tags overdue 30 days, a one-character new card auto-flagged",
+      "contract": "WatchCardListItems",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "filter": "all",
+        "sort": "newest",
+        "searchTerm": null,
+        "tagIds": [],
+        "limit": 50
+      },
+      "output": [
+        {
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000009",
+            "deckId": "d0000000-0000-4000-8000-000000000011",
+            "front": "물",
+            "back": "nước",
+            "isFlagged": true,
+            "example": null,
+            "hint": null,
+            "pronunciation": null,
+            "createdAt": "2026-09-15T12:00:00Z",
+            "updatedAt": "2026-09-15T12:00:00Z"
+          },
+          "studyState": {
+            "cardId": "c0000000-0000-4000-8000-000000000009",
+            "schedulerType": "sm2",
+            "schedulerVersion": 1,
+            "schedulerGeneration": 1,
+            "learnedAt": null,
+            "dueAt": null,
+            "lastAnsweredAt": null,
+            "answerCount": 0,
+            "lapseCount": 0,
+            "currentBox": null,
+            "easeFactor": 2.5,
+            "intervalDays": 0,
+            "repetitions": 0
+          },
+          "tagNames": [],
+          "derived": {
+            "state": "new",
+            "dueAt": null,
+            "dueBadge": "notScheduled"
+          }
+        },
+        {
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000001",
+            "deckId": "d0000000-0000-4000-8000-000000000011",
+            "front": "가다",
+            "back": "đi",
+            "isFlagged": false,
+            "example": "주말에 부산에 가요.",
+            "hint": null,
+            "pronunciation": "ga-da",
+            "createdAt": "2026-09-14T13:05:00Z",
+            "updatedAt": "2026-09-14T13:05:00Z"
+          },
+          "studyState": {
+            "cardId": "c0000000-0000-4000-8000-000000000001",
+            "schedulerType": "sm2",
+            "schedulerVersion": 1,
+            "schedulerGeneration": 1,
+            "learnedAt": null,
+            "dueAt": null,
+            "lastAnsweredAt": null,
+            "answerCount": 0,
+            "lapseCount": 0,
+            "currentBox": null,
+            "easeFactor": 2.5,
+            "intervalDays": 0,
+            "repetitions": 0
+          },
+          "tagNames": [
+            "TOPIK I",
+            "động từ"
+          ],
+          "derived": {
+            "state": "new",
+            "dueAt": null,
+            "dueBadge": "notScheduled"
+          }
+        },
+        {
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000002",
+            "deckId": "d0000000-0000-4000-8000-000000000011",
+            "front": "먹다",
+            "back": "ăn",
+            "isFlagged": false,
+            "example": null,
+            "hint": null,
+            "pronunciation": null,
+            "createdAt": "2026-09-01T12:00:00Z",
+            "updatedAt": "2026-09-01T12:00:00Z"
+          },
+          "studyState": {
+            "cardId": "c0000000-0000-4000-8000-000000000002",
+            "schedulerType": "sm2",
+            "schedulerVersion": 1,
+            "schedulerGeneration": 1,
+            "learnedAt": "2026-09-08T12:30:00Z",
+            "dueAt": "2026-09-15T17:00:00Z",
+            "lastAnsweredAt": "2026-09-10T11:20:00Z",
+            "answerCount": 2,
+            "lapseCount": 0,
+            "currentBox": null,
+            "easeFactor": 2.5,
+            "intervalDays": 6,
+            "repetitions": 2
+          },
+          "tagNames": [],
+          "derived": {
+            "state": "beginning",
+            "dueAt": "2026-09-15T17:00:00Z",
+            "dueBadge": "dueNow"
+          }
+        },
+        {
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000005",
+            "deckId": "d0000000-0000-4000-8000-000000000011",
+            "front": "-(으)ㄹ 뿐만 아니라: không những … mà còn … (ngữ pháp trung cấp)",
+            "back": "Nối hai mệnh đề, nhấn mạnh rằng ngoài điều thứ nhất còn có thêm điều thứ hai. Gắn sau động từ hoặc tính từ; với danh từ dùng 뿐만 아니라 trực tiếp. Vế sau thường đi với 도 hoặc 까지. Tương đương “not only … but also”.",
+            "isFlagged": true,
+            "example": "그 식당은 음식이 맛있을 뿐만 아니라 가격도 싸서 점심시간마다 사람이 많아요. / Nhà hàng đó không những đồ ăn ngon mà giá còn rẻ nên trưa nào cũng đông người.",
+            "hint": "Đừng nhầm với -(으)ㄹ 뿐이다 (chỉ … mà thôi). Nếu vế trước là quá khứ, dùng -았/었을 뿐만 아니라. Mẹo nhớ: 뿐 = chỉ, 아니라 = không phải, ghép lại thành “không chỉ”.",
+            "pronunciation": "[을 뿐마나니라] – nối âm: ㄴ của 뿐 nối sang 만, ㅁ nối với 아 thành 마; đọc liền một hơi.",
+            "createdAt": "2026-07-18T02:00:00Z",
+            "updatedAt": "2026-08-01T09:45:00Z"
+          },
+          "studyState": {
+            "cardId": "c0000000-0000-4000-8000-000000000005",
+            "schedulerType": "sm2",
+            "schedulerVersion": 1,
+            "schedulerGeneration": 1,
+            "learnedAt": "2026-07-20T12:00:00Z",
+            "dueAt": "2026-08-16T17:00:00Z",
+            "lastAnsweredAt": "2026-08-09T13:00:00Z",
+            "answerCount": 6,
+            "lapseCount": 4,
+            "currentBox": null,
+            "easeFactor": 1.3,
+            "intervalDays": 8,
+            "repetitions": 2
+          },
+          "tagNames": [
+            "bài 12",
+            "Cấu trúc thường gặp trong đề thi TOPIK II phần đọc",
+            "cần ôn lại",
+            "hay nhầm",
+            "liên kết câu",
+            "ngữ pháp",
+            "nói",
+            "TOPIK II",
+            "trung cấp",
+            "viết"
+          ],
+          "derived": {
+            "state": "reviewing",
+            "dueAt": "2026-08-16T17:00:00Z",
+            "dueBadge": "dueNow"
+          }
+        },
+        {
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000003",
+            "deckId": "d0000000-0000-4000-8000-000000000011",
+            "front": "공부하다",
+            "back": "học, học tập",
+            "isFlagged": true,
+            "example": "도서관에서 친구와 같이 한국어를 공부해요.",
+            "hint": "Hán Việt: 工夫 – công phu",
+            "pronunciation": "[공부하다] gong-bu-ha-da",
+            "createdAt": "2026-06-20T10:00:00Z",
+            "updatedAt": "2026-09-02T08:12:00Z"
+          },
+          "studyState": {
+            "cardId": "c0000000-0000-4000-8000-000000000003",
+            "schedulerType": "sm2",
+            "schedulerVersion": 1,
+            "schedulerGeneration": 1,
+            "learnedAt": "2026-07-02T13:15:00Z",
+            "dueAt": "2026-10-03T17:00:00Z",
+            "lastAnsweredAt": "2026-09-06T14:00:00Z",
+            "answerCount": 7,
+            "lapseCount": 1,
+            "currentBox": null,
+            "easeFactor": 2.18,
+            "intervalDays": 28,
+            "repetitions": 4
+          },
+          "tagNames": [
+            "hay nhầm",
+            "TOPIK I",
+            "động từ"
+          ],
+          "derived": {
+            "state": "reviewing",
+            "dueAt": "2026-10-03T17:00:00Z",
+            "dueBadge": "inDays(17)"
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "Cards of an eight_box deck after a reset (generation 2)",
+      "contract": "WatchCardListItems",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000021",
+        "filter": "due",
+        "sort": "dueFirst",
+        "searchTerm": null,
+        "tagIds": [],
+        "limit": 50
+      },
+      "output": [
+        {
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000006",
+            "deckId": "d0000000-0000-4000-8000-000000000021",
+            "front": "bill",
+            "back": "hoá đơn",
+            "isFlagged": false,
+            "example": "Could we have the bill, please?",
+            "hint": null,
+            "pronunciation": "/bɪl/",
+            "createdAt": "2026-03-04T09:00:00Z",
+            "updatedAt": "2026-03-04T09:00:00Z"
+          },
+          "studyState": {
+            "cardId": "c0000000-0000-4000-8000-000000000006",
+            "schedulerType": "eight_box",
+            "schedulerVersion": 1,
+            "schedulerGeneration": 2,
+            "learnedAt": "2026-09-12T13:00:00Z",
+            "dueAt": "2026-09-15T17:00:00Z",
+            "lastAnsweredAt": "2026-09-14T12:30:00Z",
+            "answerCount": 1,
+            "lapseCount": 0,
+            "currentBox": 2,
+            "easeFactor": null,
+            "intervalDays": null,
+            "repetitions": null
+          },
+          "tagNames": [
+            "restaurant"
+          ],
+          "derived": {
+            "state": "beginning",
+            "dueAt": "2026-09-15T17:00:00Z",
+            "dueBadge": "dueNow"
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "Mastered but overdue eight_box card",
+      "contract": "WatchCardListItems",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000031",
+        "filter": "all",
+        "sort": "newest",
+        "searchTerm": "analy",
+        "tagIds": [],
+        "limit": 50
+      },
+      "output": [
+        {
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000008",
+            "deckId": "d0000000-0000-4000-8000-000000000031",
+            "front": "analyse",
+            "back": "phân tích",
+            "isFlagged": false,
+            "example": null,
+            "hint": null,
+            "pronunciation": "/ˈæn.əl.aɪz/",
+            "createdAt": "2025-11-02T07:30:00Z",
+            "updatedAt": "2025-11-02T07:30:00Z"
+          },
+          "studyState": {
+            "cardId": "c0000000-0000-4000-8000-000000000008",
+            "schedulerType": "eight_box",
+            "schedulerVersion": 1,
+            "schedulerGeneration": 1,
+            "learnedAt": "2025-11-03T13:30:00Z",
+            "dueAt": "2026-09-14T17:00:00Z",
+            "lastAnsweredAt": "2026-05-10T13:00:00Z",
+            "answerCount": 8,
+            "lapseCount": 0,
+            "currentBox": 8,
+            "easeFactor": null,
+            "intervalDays": null,
+            "repetitions": null
+          },
+          "tagNames": [
+            "AWL sublist 1",
+            "verb"
+          ],
+          "derived": {
+            "state": "mastered",
+            "dueAt": "2026-09-14T17:00:00Z",
+            "dueBadge": "dueNow"
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "Search inside a deck with no match",
+      "contract": "WatchCardListItems",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "filter": "all",
+        "sort": "newest",
+        "searchTerm": "cong",
+        "tagIds": [],
+        "limit": 50
+      },
+      "output": []
+    },
+    {
+      "scenario": "Count behind the Due filter",
+      "contract": "WatchCardCount",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "filter": "due",
+        "searchTerm": null,
+        "tagIds": []
+      },
+      "output": 40
+    },
+    {
+      "scenario": "Count behind the Flagged filter",
+      "contract": "WatchCardCount",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "filter": "flagged",
+        "searchTerm": null,
+        "tagIds": []
+      },
+      "output": 17
+    },
+    {
+      "scenario": "Select all with a tag filter",
+      "contract": "ReadCardIdsMatching",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "filter": "all",
+        "searchTerm": null,
+        "tagIds": [
+          "e0000000-0000-4000-8000-000000000003"
+        ]
+      },
+      "output": [
+        "c0000000-0000-4000-8000-000000000003",
+        "c0000000-0000-4000-8000-000000000005"
+      ]
+    },
+    {
+      "scenario": "State distribution of a deck",
+      "contract": "WatchCardStateDistribution",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011"
+      },
+      "output": {
+        "total": 420,
+        "isNew": 100,
+        "beginning": 150,
+        "reviewing": 90,
+        "mastered": 80
+      }
+    },
+    {
+      "scenario": "Empty deck",
+      "contract": "WatchCardStateDistribution",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000013"
+      },
+      "output": {
+        "total": 0,
+        "isNew": 0,
+        "beginning": 0,
+        "reviewing": 0,
+        "mastered": 0
+      }
+    },
+    {
+      "scenario": "Deck path for a card list",
+      "contract": "WatchDeckContext",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000121"
+      },
+      "output": {
+        "deckName": "Danh từ chỉ người · 사람",
+        "ancestors": [
+          {
+            "id": "d0000000-0000-4000-8000-000000000001",
+            "name": "한국어 TOPIK I · Từ vựng"
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000012",
+            "name": "Danh từ · 명사"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "Where cards of one deck can move: same root, card-holding or empty, not the source",
+      "contract": "WatchCardMoveTargets",
+      "input": {
+        "sourceDeckId": "d0000000-0000-4000-8000-000000000011"
+      },
+      "output": [
+        {
+          "deckId": "d0000000-0000-4000-8000-000000000121",
+          "name": "Danh từ chỉ người · 사람",
+          "parentName": "Danh từ · 명사"
+        },
+        {
+          "deckId": "d0000000-0000-4000-8000-000000000013",
+          "name": "Tính từ · 형용사",
+          "parentName": "한국어 TOPIK I · Từ vựng"
+        },
+        {
+          "deckId": "d0000000-0000-4000-8000-000000000014",
+          "name": "Trạng từ · 부사",
+          "parentName": "한국어 TOPIK I · Từ vựng"
+        }
+      ]
+    },
+    {
+      "scenario": "No eligible move target",
+      "contract": "WatchCardMoveTargets",
+      "input": {
+        "sourceDeckId": "d0000000-0000-4000-8000-000000000031"
+      },
+      "output": []
+    },
+    {
+      "scenario": "Tags of one card",
+      "contract": "WatchCardTags",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000007"
+      },
+      "output": [
+        {
+          "id": "e0000000-0000-4000-8000-000000000013",
+          "name": "restaurant"
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000014",
+          "name": "travel"
+        }
+      ]
+    },
+    {
+      "scenario": "Front too long and back empty",
+      "contract": "CreateCard",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "front": "-기 때문에 / -아서/어서 / -(으)니까: ba cách nói “vì … nên” khác nhau về sắc thái",
+        "back": "  ",
+        "example": null,
+        "hint": null,
+        "pronunciation": null
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "frontTooLong",
+          "backEmpty"
+        ]
+      }
+    },
+    {
+      "scenario": "Creating a card in a root deck",
+      "contract": "CreateCard",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000001",
+        "front": "오다",
+        "back": "đến",
+        "example": null,
+        "hint": null,
+        "pronunciation": null
+      },
+      "failure": {
+        "family": "conflict",
+        "reason": "parentIsRoot"
+      }
+    },
+    {
+      "scenario": "An 11th tag",
+      "contract": "AddCardTag",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000005",
+        "name": "ôn thi"
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "tooManyTags"
+        ]
+      }
+    },
+    {
+      "scenario": "Moving cards to another tree",
+      "contract": "MoveCards",
+      "input": {
+        "cardIds": [
+          "c0000000-0000-4000-8000-000000000001",
+          "c0000000-0000-4000-8000-000000000002"
+        ],
+        "targetDeckId": "d0000000-0000-4000-8000-000000000021"
+      },
+      "failure": {
+        "family": "conflict",
+        "reason": "moveCrossRoot"
+      }
+    },
+    {
+      "scenario": "Deleting one card returns the Trash entry id used by undo",
+      "contract": "DeleteCard",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000001"
+      },
+      "output": {
+        "batchId": "b0000000-0000-4000-8000-000000000010"
+      }
+    },
+    {
+      "scenario": "Card edited from another area meanwhile deleted",
+      "contract": "UpdateCard",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000001",
+        "front": "가다",
+        "back": "đi, đi đến",
+        "example": null,
+        "hint": null,
+        "pronunciation": null
+      },
+      "failure": {
+        "family": "notFound",
+        "reason": "cardGone"
+      }
+    }
+  ],
+  "cardDetail": [
+    {
+      "scenario": "Card detail after a reset that also switched algorithm (sm2 generation 1 → eight_box generation 2)",
+      "contract": "WatchCardDetail",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000007"
+      },
+      "output": {
+        "card": {
+          "id": "c0000000-0000-4000-8000-000000000007",
+          "deckId": "d0000000-0000-4000-8000-000000000021",
+          "front": "reservation",
+          "back": "sự đặt chỗ trước",
+          "isFlagged": false,
+          "example": "I'd like to make a reservation for two at seven.",
+          "hint": "Đồng nghĩa: booking",
+          "pronunciation": "/ˌrez.əˈveɪ.ʃən/",
+          "createdAt": "2026-03-05T09:00:00Z",
+          "updatedAt": "2026-03-05T09:00:00Z"
+        },
+        "studyState": {
+          "cardId": "c0000000-0000-4000-8000-000000000007",
+          "schedulerType": "eight_box",
+          "schedulerVersion": 1,
+          "schedulerGeneration": 2,
+          "learnedAt": "2026-08-20T01:10:00Z",
+          "dueAt": "2026-09-19T17:00:00Z",
+          "lastAnsweredAt": "2026-09-04T12:00:00Z",
+          "answerCount": 4,
+          "lapseCount": 0,
+          "currentBox": 5,
+          "easeFactor": null,
+          "intervalDays": null,
+          "repetitions": null
+        },
+        "tagNames": [
+          "restaurant",
+          "travel"
+        ],
+        "derived": {
+          "state": "reviewing"
+        }
+      }
+    },
+    {
+      "scenario": "Full history of that card: learning turns with a timeout and repeats, scheduled turns, and the older generation",
+      "contract": "LoadCardHistoryPage",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000007",
+        "after": null
+      },
+      "output": {
+        "events": [
+          {
+            "id": "a0000000-0000-4000-8000-000000000001",
+            "answeredAt": "2026-09-04T12:00:00Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "scheduled",
+            "mode": "recall",
+            "action": "remembered",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": "2026-09-19T17:00:00Z",
+            "previousBox": 4,
+            "nextBox": 5,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": true
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000002",
+            "answeredAt": "2026-08-27T13:10:00Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "scheduled",
+            "mode": "fill",
+            "action": "remembered",
+            "outcomeReason": null,
+            "usedHint": true,
+            "nextDueAt": "2026-09-03T17:00:00Z",
+            "previousBox": 3,
+            "nextBox": 4,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": true
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000003",
+            "answeredAt": "2026-08-23T11:00:00Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "scheduled",
+            "mode": "guess",
+            "action": "remembered",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": "2026-08-26T17:00:00Z",
+            "previousBox": 2,
+            "nextBox": 3,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": true
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000004",
+            "answeredAt": "2026-08-21T12:40:00Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "scheduled",
+            "mode": "match",
+            "action": "remembered",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": "2026-08-22T17:00:00Z",
+            "previousBox": 1,
+            "nextBox": 2,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": true
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000005",
+            "answeredAt": "2026-08-20T01:09:30Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "learning",
+            "mode": "fill",
+            "action": "remembered",
+            "outcomeReason": null,
+            "usedHint": false,
+            "nextDueAt": null,
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": false
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000006",
+            "answeredAt": "2026-08-20T01:08:10Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "relearning",
+            "mode": "recall",
+            "action": "remembered",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": null,
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": false
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000007",
+            "answeredAt": "2026-08-20T01:07:00Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "learning",
+            "mode": "recall",
+            "action": "forgotten",
+            "outcomeReason": "timeout",
+            "usedHint": null,
+            "nextDueAt": null,
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": false
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000008",
+            "answeredAt": "2026-08-20T01:05:20Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "learning",
+            "mode": "guess",
+            "action": "remembered",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": null,
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": false
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000009",
+            "answeredAt": "2026-08-20T01:04:30Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "relearning",
+            "mode": "match",
+            "action": "remembered",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": null,
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": false
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000010",
+            "answeredAt": "2026-08-20T01:04:00Z",
+            "schedulerType": "eight_box",
+            "schedulerGeneration": 2,
+            "kind": "learning",
+            "mode": "match",
+            "action": "forgotten",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": null,
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": false
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000011",
+            "answeredAt": "2026-06-14T09:00:00Z",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 1,
+            "kind": "scheduled",
+            "mode": "self_assess",
+            "action": "good",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": "2026-06-28T17:00:00Z",
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": 2.5,
+            "nextEaseFactor": 2.5,
+            "previousIntervalDays": 6,
+            "nextIntervalDays": 15,
+            "derived": {
+              "hasScheduleChange": true
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000012",
+            "answeredAt": "2026-06-08T11:00:00Z",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 1,
+            "kind": "scheduled",
+            "mode": "self_assess",
+            "action": "good",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": "2026-06-13T17:00:00Z",
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": 2.5,
+            "nextEaseFactor": 2.5,
+            "previousIntervalDays": 1,
+            "nextIntervalDays": 6,
+            "derived": {
+              "hasScheduleChange": true
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000013",
+            "answeredAt": "2026-06-07T12:00:00Z",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 1,
+            "kind": "scheduled",
+            "mode": "self_assess",
+            "action": "good",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": "2026-06-07T17:00:00Z",
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": 2.5,
+            "nextEaseFactor": 2.5,
+            "previousIntervalDays": 1,
+            "nextIntervalDays": 1,
+            "derived": {
+              "hasScheduleChange": true
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000014",
+            "answeredAt": "2026-06-06T13:31:00Z",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 1,
+            "kind": "relearning",
+            "mode": "self_assess",
+            "action": "good",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": null,
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": false
+            }
+          },
+          {
+            "id": "a0000000-0000-4000-8000-000000000015",
+            "answeredAt": "2026-06-06T13:30:00Z",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 1,
+            "kind": "learning",
+            "mode": "self_assess",
+            "action": "again",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": null,
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": null,
+            "nextEaseFactor": null,
+            "previousIntervalDays": null,
+            "nextIntervalDays": null,
+            "derived": {
+              "hasScheduleChange": false
+            }
+          }
+        ],
+        "hasMore": false,
+        "nextCursor": null
+      }
+    },
+    {
+      "scenario": "A page with more to load",
+      "contract": "LoadCardHistoryPage",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000005",
+        "after": null
+      },
+      "output": {
+        "events": [
+          {
+            "id": "a0000000-0000-4000-8000-000000000020",
+            "answeredAt": "2026-08-09T13:00:00Z",
+            "schedulerType": "sm2",
+            "schedulerGeneration": 1,
+            "kind": "scheduled",
+            "mode": "self_assess",
+            "action": "hard",
+            "outcomeReason": null,
+            "usedHint": null,
+            "nextDueAt": "2026-08-16T17:00:00Z",
+            "previousBox": null,
+            "nextBox": null,
+            "previousEaseFactor": 1.3,
+            "nextEaseFactor": 1.3,
+            "previousIntervalDays": 6,
+            "nextIntervalDays": 8,
+            "derived": {
+              "hasScheduleChange": true
+            }
+          }
+        ],
+        "hasMore": true,
+        "nextCursor": {
+          "answeredAt": "2026-08-09T13:00:00Z",
+          "id": "a0000000-0000-4000-8000-000000000020"
+        }
+      }
+    },
+    {
+      "scenario": "A new card has no history (valid, not an error)",
+      "contract": "LoadCardHistoryPage",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000001",
+        "after": null
+      },
+      "output": {
+        "events": [],
+        "hasMore": false,
+        "nextCursor": null
+      }
+    },
+    {
+      "scenario": "Card deleted from another area while open",
+      "contract": "WatchCardDetail",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000099"
+      },
+      "failure": {
+        "family": "notFound",
+        "reason": "cardGone"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "scenario": "Library-wide catalog, including a tag used only by cards in Trash and an unused tag",
+      "contract": "WatchTagCatalog",
+      "input": {
+        "searchTerm": null
+      },
+      "output": [
+        {
+          "id": "e0000000-0000-4000-8000-000000000015",
+          "name": "AWL sublist 1",
+          "cardCount": 60,
+          "linkedCardCount": 60
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000009",
+          "name": "bài 12",
+          "cardCount": 18,
+          "linkedCardCount": 18
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000012",
+          "name": "Cấu trúc thường gặp trong đề thi TOPIK II phần đọc",
+          "cardCount": 5,
+          "linkedCardCount": 5
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000008",
+          "name": "cần ôn lại",
+          "cardCount": 23,
+          "linkedCardCount": 23
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000003",
+          "name": "hay nhầm",
+          "cardCount": 2,
+          "linkedCardCount": 2
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000017",
+          "name": "Học",
+          "cardCount": 41,
+          "linkedCardCount": 41
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000007",
+          "name": "liên kết câu",
+          "cardCount": 12,
+          "linkedCardCount": 12
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000004",
+          "name": "ngữ pháp",
+          "cardCount": 64,
+          "linkedCardCount": 64
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000010",
+          "name": "nói",
+          "cardCount": 9,
+          "linkedCardCount": 9
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000013",
+          "name": "restaurant",
+          "cardCount": 22,
+          "linkedCardCount": 22
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000001",
+          "name": "TOPIK I",
+          "cardCount": 1248,
+          "linkedCardCount": 1250
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000005",
+          "name": "TOPIK II",
+          "cardCount": 64,
+          "linkedCardCount": 64
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000014",
+          "name": "travel",
+          "cardCount": 30,
+          "linkedCardCount": 30
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000006",
+          "name": "trung cấp",
+          "cardCount": 64,
+          "linkedCardCount": 64
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000018",
+          "name": "tạm hoãn",
+          "cardCount": 0,
+          "linkedCardCount": 3
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000019",
+          "name": "từ lóng",
+          "cardCount": 0,
+          "linkedCardCount": 0
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000016",
+          "name": "verb",
+          "cardCount": 2140,
+          "linkedCardCount": 2141
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000011",
+          "name": "viết",
+          "cardCount": 7,
+          "linkedCardCount": 7
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000002",
+          "name": "động từ",
+          "cardCount": 420,
+          "linkedCardCount": 421
+        }
+      ]
+    },
+    {
+      "scenario": "Catalog search",
+      "contract": "WatchTagCatalog",
+      "input": {
+        "searchTerm": "topik"
+      },
+      "output": [
+        {
+          "id": "e0000000-0000-4000-8000-000000000012",
+          "name": "Cấu trúc thường gặp trong đề thi TOPIK II phần đọc",
+          "cardCount": 5,
+          "linkedCardCount": 5
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000001",
+          "name": "TOPIK I",
+          "cardCount": 1248,
+          "linkedCardCount": 1250
+        },
+        {
+          "id": "e0000000-0000-4000-8000-000000000005",
+          "name": "TOPIK II",
+          "cardCount": 64,
+          "linkedCardCount": 64
+        }
+      ]
+    },
+    {
+      "scenario": "No tag matches",
+      "contract": "WatchTagCatalog",
+      "input": {
+        "searchTerm": "hsk"
+      },
+      "output": []
+    },
+    {
+      "scenario": "Changing only the letter case",
+      "contract": "RenameTag",
+      "input": {
+        "tagId": "e0000000-0000-4000-8000-000000000003",
+        "name": "Hay nhầm"
+      },
+      "output": "renamed"
+    },
+    {
+      "scenario": "Renaming onto another tag's name merges them",
+      "contract": "RenameTag",
+      "input": {
+        "tagId": "e0000000-0000-4000-8000-000000000019",
+        "name": "topik i"
+      },
+      "output": "merged"
+    },
+    {
+      "scenario": "Tag name with a line break",
+      "contract": "RenameTag",
+      "input": {
+        "tagId": "e0000000-0000-4000-8000-000000000010",
+        "name": "nói\nviết"
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "nameHasControlCharacter"
+        ]
+      }
+    }
+  ],
+  "import": [
+    {
+      "scenario": "Header 'term, meaning, sentence, labels' auto-mapped; every row status appears once",
+      "contract": "BuildCardImportPreview",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "mapping": {
+          "0": "front",
+          "1": "back",
+          "2": "example",
+          "3": "tags"
+        },
+        "hasHeaderRow": true
+      },
+      "output": {
+        "rows": [
+          {
+            "sourceRowNumber": 2,
+            "status": "ready",
+            "front": "학교",
+            "back": "trường học",
+            "cardProblems": [],
+            "tagProblems": []
+          },
+          {
+            "sourceRowNumber": 3,
+            "status": "duplicateExisting",
+            "front": "가다",
+            "back": "đi",
+            "cardProblems": [],
+            "tagProblems": []
+          },
+          {
+            "sourceRowNumber": 4,
+            "status": "invalid",
+            "front": "",
+            "back": "không có mặt trước",
+            "cardProblems": [
+              "frontEmpty"
+            ],
+            "tagProblems": []
+          },
+          {
+            "sourceRowNumber": 5,
+            "status": "duplicateInFile",
+            "front": "학교",
+            "back": "Trường học",
+            "cardProblems": [],
+            "tagProblems": []
+          },
+          {
+            "sourceRowNumber": 6,
+            "status": "blank",
+            "front": "",
+            "back": "",
+            "cardProblems": [],
+            "tagProblems": []
+          },
+          {
+            "sourceRowNumber": 7,
+            "status": "invalid",
+            "front": "-기 때문에 / -아서/어서 / -(으)니까: ba cách nói “vì … nên” khác nhau về sắc thái",
+            "back": "vì … nên",
+            "cardProblems": [
+              "frontTooLong"
+            ],
+            "tagProblems": []
+          },
+          {
+            "sourceRowNumber": 8,
+            "status": "invalid",
+            "front": "읽다",
+            "back": "đọc",
+            "cardProblems": [],
+            "tagProblems": [
+              "tooManyTags"
+            ]
+          },
+          {
+            "sourceRowNumber": 9,
+            "status": "ready",
+            "front": "쓰다",
+            "back": "viết; dùng; đội (mũ)",
+            "cardProblems": [],
+            "tagProblems": []
+          }
+        ],
+        "totalRows": 8,
+        "readyCount": 2,
+        "duplicateCount": 2,
+        "invalidCount": 3,
+        "blankCount": 1
+      }
+    },
+    {
+      "scenario": "Import skipping duplicates",
+      "contract": "CommitCardImport",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "plan": {
+          "records": "2 ready rows",
+          "shouldIncludeDuplicates": false
+        }
+      },
+      "output": {
+        "imported": 2,
+        "duplicatesSkipped": 2
+      }
+    },
+    {
+      "scenario": "Large clean import",
+      "contract": "CommitCardImport",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000014",
+        "plan": {
+          "records": "1,500 ready rows",
+          "shouldIncludeDuplicates": false
+        }
+      },
+      "output": {
+        "imported": 1500,
+        "duplicatesSkipped": 0
+      }
+    },
+    {
+      "scenario": "Everything already in the deck",
+      "contract": "CommitCardImport",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "plan": {
+          "records": "5 duplicate rows",
+          "shouldIncludeDuplicates": false
+        }
+      },
+      "output": {
+        "imported": 0,
+        "duplicatesSkipped": 5
+      }
+    },
+    {
+      "scenario": "File saved as UTF-16",
+      "contract": "ParseCardTransfer",
+      "input": {
+        "source": "file"
+      },
+      "failure": {
+        "family": "transfer",
+        "problem": "invalidEncoding"
+      }
+    },
+    {
+      "scenario": "Spreadsheet with an empty first sheet",
+      "contract": "ParseCardTransfer",
+      "input": {
+        "source": "file"
+      },
+      "failure": {
+        "family": "transfer",
+        "problem": "emptySheet"
+      }
+    },
+    {
+      "scenario": "Target became a deck holding sub-decks between preview and import",
+      "contract": "CommitCardImport",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000013",
+        "plan": {
+          "records": "3 ready rows",
+          "shouldIncludeDuplicates": false
+        }
+      },
+      "failure": {
+        "family": "conflict",
+        "reason": "deckHoldsDecks"
+      }
+    }
+  ],
+  "export": [
+    {
+      "scenario": "Whole deck as CSV, handed to the system",
+      "contract": "ExportCards",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "scope": "wholeDeck",
+        "format": "csv"
+      },
+      "output": "shared"
+    },
+    {
+      "scenario": "Selection as XLSX, share closed without choosing",
+      "contract": "ExportCards",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "scope": {
+          "selection": {
+            "cardIds": [
+              "c0000000-0000-4000-8000-000000000003",
+              "c0000000-0000-4000-8000-000000000005"
+            ]
+          }
+        },
+        "format": "xlsx"
+      },
+      "output": "dismissed"
+    },
+    {
+      "scenario": "A selected card was deleted meanwhile",
+      "contract": "ExportCards",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "scope": {
+          "selection": {
+            "cardIds": [
+              "c0000000-0000-4000-8000-000000000003",
+              "c0000000-0000-4000-8000-000000000001"
+            ]
+          }
+        },
+        "format": "tsv"
+      },
+      "failure": {
+        "family": "export",
+        "problem": "staleSelection"
+      }
+    },
+    {
+      "scenario": "Deck without cards",
+      "contract": "ExportCards",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000013",
+        "scope": "wholeDeck",
+        "format": "csv"
+      },
+      "failure": {
+        "family": "export",
+        "problem": "emptyScope"
+      }
+    },
+    {
+      "scenario": "Device without any share target",
+      "contract": "ExportCards",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000014",
+        "scope": "wholeDeck",
+        "format": "csv"
+      },
+      "failure": {
+        "family": "export",
+        "problem": "shareUnavailable"
+      }
+    }
+  ],
+  "trash": [
+    {
+      "scenario": "Trash with a card deleted minutes ago, a root deck, a sub-deck with contents expiring in 2 days, a card expiring within the hour",
+      "contract": "WatchTrashBatches",
+      "input": {},
+      "output": [
+        {
+          "batchId": "b0000000-0000-4000-8000-000000000001",
+          "itemType": "card",
+          "itemName": "비싸다",
+          "deletedAt": "2026-09-16T01:55:00Z",
+          "originDeckId": "d0000000-0000-4000-8000-000000000011",
+          "originDeckName": "Động từ · 동사",
+          "originPath": [
+            {
+              "deckId": "d0000000-0000-4000-8000-000000000001",
+              "name": "한국어 TOPIK I · Từ vựng"
+            }
+          ],
+          "deckCount": 0,
+          "cardCount": 1,
+          "derived": {
+            "isRootDeck": false,
+            "expiresAt": "2026-10-16T01:55:00Z",
+            "daysLeft": 30
+          }
+        },
+        {
+          "batchId": "b0000000-0000-4000-8000-000000000003",
+          "itemType": "deck",
+          "itemName": "Tiếng Nhật N5 (thử)",
+          "deletedAt": "2026-09-01T08:00:00Z",
+          "originDeckId": null,
+          "originDeckName": null,
+          "originPath": [],
+          "deckCount": 5,
+          "cardCount": 312,
+          "derived": {
+            "isRootDeck": true,
+            "expiresAt": "2026-10-01T08:00:00Z",
+            "daysLeft": 16
+          }
+        },
+        {
+          "batchId": "b0000000-0000-4000-8000-000000000002",
+          "itemType": "deck",
+          "itemName": "Phrasal verbs",
+          "deletedAt": "2026-08-18T10:00:00Z",
+          "originDeckId": "d0000000-0000-4000-8000-000000000002",
+          "originDeckName": "Tiếng Anh giao tiếp hằng ngày",
+          "originPath": [],
+          "deckCount": 3,
+          "cardCount": 57,
+          "derived": {
+            "isRootDeck": false,
+            "expiresAt": "2026-09-17T10:00:00Z",
+            "daysLeft": 2
+          }
+        },
+        {
+          "batchId": "b0000000-0000-4000-8000-000000000004",
+          "itemType": "card",
+          "itemName": "은행",
+          "deletedAt": "2026-08-17T03:00:00Z",
+          "originDeckId": "d0000000-0000-4000-8000-000000000122",
+          "originDeckName": "Nơi chốn · 장소",
+          "originPath": [
+            {
+              "deckId": "d0000000-0000-4000-8000-000000000001",
+              "name": "한국어 TOPIK I · Từ vựng"
+            },
+            {
+              "deckId": "d0000000-0000-4000-8000-000000000012",
+              "name": "Danh từ · 명사"
+            }
+          ],
+          "deckCount": 0,
+          "cardCount": 1,
+          "derived": {
+            "isRootDeck": false,
+            "expiresAt": "2026-09-16T03:00:00Z",
+            "daysLeft": 1
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "Empty Trash",
+      "contract": "WatchTrashBatches",
+      "input": {},
+      "output": []
+    },
+    {
+      "scenario": "Restore targets for a card",
+      "contract": "WatchTrashRestoreTargets",
+      "input": {
+        "batchId": "b0000000-0000-4000-8000-000000000001"
+      },
+      "output": [
+        {
+          "deck": {
+            "deckId": "d0000000-0000-4000-8000-000000000011",
+            "name": "Động từ · 동사",
+            "parentName": "한국어 TOPIK I · Từ vựng"
+          }
+        },
+        {
+          "deck": {
+            "deckId": "d0000000-0000-4000-8000-000000000013",
+            "name": "Tính từ · 형용사",
+            "parentName": "한국어 TOPIK I · Từ vựng"
+          }
+        },
+        {
+          "deck": {
+            "deckId": "d0000000-0000-4000-8000-000000000014",
+            "name": "Trạng từ · 부사",
+            "parentName": "한국어 TOPIK I · Từ vựng"
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "A root deck can only go back to the top level",
+      "contract": "WatchTrashRestoreTargets",
+      "input": {
+        "batchId": "b0000000-0000-4000-8000-000000000003"
+      },
+      "output": [
+        "topLevel"
+      ]
+    },
+    {
+      "scenario": "A card whose tree no longer has any deck that can hold cards: nowhere valid to restore right now",
+      "contract": "WatchTrashRestoreTargets",
+      "input": {
+        "batchId": "b0000000-0000-4000-8000-000000000005"
+      },
+      "output": []
+    },
+    {
+      "scenario": "Undo right after deleting a card whose deck was then deleted too",
+      "contract": "UndoDelete",
+      "input": {
+        "batchId": "b0000000-0000-4000-8000-000000000011"
+      },
+      "failure": {
+        "family": "conflict",
+        "reason": "undoOriginUnavailable"
+      }
+    },
+    {
+      "scenario": "Purging a deck entry that still contains a younger entry",
+      "contract": "PurgeTrashBatches",
+      "input": {
+        "batchIds": [
+          "b0000000-0000-4000-8000-000000000012"
+        ]
+      },
+      "failure": {
+        "family": "conflict",
+        "reason": "purgeWouldTakeAnotherBatch"
+      }
+    }
+  ],
+  "studyHome": [
+    {
+      "scenario": "Workload across root decks, with a session from today to resume",
+      "contract": "WatchStudyHome",
+      "input": {},
+      "output": {
+        "resume": {
+          "sessionId": "f0000000-0000-4000-8000-000000000001",
+          "deckId": "d0000000-0000-4000-8000-000000000011",
+          "deckName": "Động từ · 동사",
+          "kind": "reviewing",
+          "currentMode": "self_assess"
+        },
+        "decks": [
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000006",
+            "deckName": "IELTS Academic Word List",
+            "schedulerType": "eight_box",
+            "totalCardCount": 10000,
+            "overdueCount": 1100,
+            "dueTodayCount": 160,
+            "newCount": 7400,
+            "derived": {
+              "dueCount": 1260,
+              "hasWorkload": true,
+              "isStudiable": true
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000001",
+            "deckName": "한국어 TOPIK I · Từ vựng",
+            "schedulerType": "sm2",
+            "totalCardCount": 1248,
+            "overdueCount": 41,
+            "dueTodayCount": 45,
+            "newCount": 312,
+            "derived": {
+              "dueCount": 86,
+              "hasWorkload": true,
+              "isStudiable": true
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000002",
+            "deckName": "Tiếng Anh giao tiếp hằng ngày",
+            "schedulerType": "eight_box",
+            "totalCardCount": 64,
+            "overdueCount": 0,
+            "dueTodayCount": 12,
+            "newCount": 0,
+            "derived": {
+              "dueCount": 12,
+              "hasWorkload": true,
+              "isStudiable": true
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000003",
+            "deckName": "IT",
+            "schedulerType": "eight_box",
+            "totalCardCount": 5,
+            "overdueCount": 0,
+            "dueTodayCount": 0,
+            "newCount": 5,
+            "derived": {
+              "dueCount": 0,
+              "hasWorkload": true,
+              "isStudiable": true
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000005",
+            "deckName": "Korean Basics",
+            "schedulerType": "sm2",
+            "totalCardCount": 10,
+            "overdueCount": 0,
+            "dueTodayCount": 0,
+            "newCount": 0,
+            "derived": {
+              "dueCount": 0,
+              "hasWorkload": false,
+              "isStudiable": true
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000004",
+            "deckName": "Thuật ngữ Kinh tế – Tài chính – Ngân hàng cho kỳ thi chứng chỉ quốc tế: kế toán, kiểm toán, thị trường chứng khoán, bảo hiểm và cụm từ thường gặp trong báo cáo thường niên của doanh nghiệp niêm yết",
+            "schedulerType": "sm2",
+            "totalCardCount": 0,
+            "overdueCount": 0,
+            "dueTodayCount": 0,
+            "newCount": 0,
+            "derived": {
+              "dueCount": 0,
+              "hasWorkload": false,
+              "isStudiable": false
+            }
+          }
+        ],
+        "nextDueAt": "2026-09-16T17:00:00Z",
+        "nextOverdueTickAt": "2026-09-16T17:00:00Z",
+        "derived": {
+          "isLibraryEmpty": false,
+          "hasNoCards": false,
+          "studiableDeckIds": [
+            "d0000000-0000-4000-8000-000000000006",
+            "d0000000-0000-4000-8000-000000000001",
+            "d0000000-0000-4000-8000-000000000002",
+            "d0000000-0000-4000-8000-000000000003",
+            "d0000000-0000-4000-8000-000000000005"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "No root decks yet",
+      "contract": "WatchStudyHome",
+      "input": {},
+      "output": {
+        "resume": null,
+        "decks": [],
+        "nextDueAt": null,
+        "nextOverdueTickAt": null,
+        "derived": {
+          "isLibraryEmpty": true,
+          "hasNoCards": false,
+          "studiableDeckIds": []
+        }
+      }
+    },
+    {
+      "scenario": "Root decks exist but none has a card",
+      "contract": "WatchStudyHome",
+      "input": {},
+      "output": {
+        "resume": null,
+        "decks": [
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000004",
+            "deckName": "Thuật ngữ Kinh tế – Tài chính – Ngân hàng cho kỳ thi chứng chỉ quốc tế: kế toán, kiểm toán, thị trường chứng khoán, bảo hiểm và cụm từ thường gặp trong báo cáo thường niên của doanh nghiệp niêm yết",
+            "schedulerType": "sm2",
+            "totalCardCount": 0,
+            "overdueCount": 0,
+            "dueTodayCount": 0,
+            "newCount": 0,
+            "derived": {
+              "dueCount": 0,
+              "hasWorkload": false,
+              "isStudiable": false
+            }
+          }
+        ],
+        "nextDueAt": null,
+        "nextOverdueTickAt": null,
+        "derived": {
+          "isLibraryEmpty": false,
+          "hasNoCards": true,
+          "studiableDeckIds": []
+        }
+      }
+    }
+  ],
+  "studyEntry": [
+    {
+      "scenario": "sm2 deck context",
+      "contract": "GetStudyDeckContext",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011"
+      },
+      "output": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "deckName": "Động từ · 동사",
+        "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+        "schedulerType": "sm2",
+        "schedulerGeneration": 1
+      }
+    },
+    {
+      "scenario": "sm2 deck with new and due cards",
+      "contract": "WatchStudyEntry",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011"
+      },
+      "output": {
+        "newCount": 100,
+        "dueCount": 40,
+        "fillableCount": 12,
+        "distinctMeanings": 38
+      }
+    },
+    {
+      "scenario": "sm2 review: one mode, so no mode choice; a direction is required",
+      "contract": "GetReviewOptions",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011"
+      },
+      "output": {
+        "modes": [
+          "self_assess"
+        ],
+        "schedulerType": "sm2",
+        "derived": {
+          "capacityByMode": {
+            "self_assess": 40
+          },
+          "isDirectionChoiceRequiredFor": {
+            "self_assess": true
+          }
+        }
+      }
+    },
+    {
+      "scenario": "eight_box deck context",
+      "contract": "GetStudyDeckContext",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000021"
+      },
+      "output": {
+        "deckId": "d0000000-0000-4000-8000-000000000021",
+        "deckName": "Ở nhà hàng",
+        "rootDeckId": "d0000000-0000-4000-8000-000000000002",
+        "schedulerType": "eight_box",
+        "schedulerGeneration": 2
+      }
+    },
+    {
+      "scenario": "eight_box deck, only due cards; only 4 distinct meanings and 3 cards with an example",
+      "contract": "WatchStudyEntry",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000021"
+      },
+      "output": {
+        "newCount": 0,
+        "dueCount": 12,
+        "fillableCount": 3,
+        "distinctMeanings": 4
+      }
+    },
+    {
+      "scenario": "eight_box review modes: guess unavailable (needs five meanings), fill limited to 3",
+      "contract": "GetReviewOptions",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000021"
+      },
+      "output": {
+        "modes": [
+          "match",
+          "guess",
+          "recall",
+          "fill"
+        ],
+        "schedulerType": "eight_box",
+        "derived": {
+          "capacityByMode": {
+            "match": 12,
+            "guess": 0,
+            "recall": 12,
+            "fill": 3
+          },
+          "isDirectionChoiceRequiredFor": {
+            "match": false,
+            "guess": false,
+            "recall": false,
+            "fill": false
+          }
+        }
+      }
+    },
+    {
+      "scenario": "Nothing to learn and nothing due (normal state)",
+      "contract": "WatchStudyEntry",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000005"
+      },
+      "output": {
+        "newCount": 0,
+        "dueCount": 0,
+        "fillableCount": 0,
+        "distinctMeanings": 0
+      }
+    },
+    {
+      "scenario": "Trying to review with nothing due",
+      "contract": "OpenStudySession",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000005",
+        "kind": "reviewing",
+        "reviewMode": "self_assess",
+        "direction": "korean_to_meaning",
+        "resumeSessionId": null
+      },
+      "failure": {
+        "family": "studyRefusal",
+        "reason": "nothingDueToReview"
+      }
+    },
+    {
+      "scenario": "sm2 review without a direction",
+      "contract": "OpenStudySession",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "kind": "reviewing",
+        "reviewMode": "self_assess",
+        "direction": null,
+        "resumeSessionId": null
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "direction required"
+        ]
+      }
+    },
+    {
+      "scenario": "Today's open session for the deck",
+      "contract": "ResumeStudyDay",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011"
+      },
+      "output": {
+        "id": "f0000000-0000-4000-8000-000000000001",
+        "status": "in_progress",
+        "kind": "reviewing",
+        "currentMode": "self_assess"
+      }
+    }
+  ],
+  "studyOptions": [
+    {
+      "scenario": "Root deck with its own options",
+      "contract": "GetStudyOptions",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000001"
+      },
+      "output": {
+        "cardLimit": 30,
+        "newCardOrder": "random",
+        "isRootOverride": true
+      }
+    },
+    {
+      "scenario": "Deck following app defaults",
+      "contract": "GetStudyOptions",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000002"
+      },
+      "output": {
+        "cardLimit": 20,
+        "newCardOrder": "created",
+        "isRootOverride": false
+      }
+    },
+    {
+      "scenario": "Card limit above the maximum",
+      "contract": "SaveStudyOptions",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000001",
+        "cardLimit": "500",
+        "newCardOrder": "random"
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "tooLarge"
+        ]
+      }
+    },
+    {
+      "scenario": "Card limit not a number",
+      "contract": "SaveStudyOptions",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000001",
+        "cardLimit": "hai mươi",
+        "newCardOrder": "created"
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "notANumber"
+        ]
+      }
+    }
+  ],
+  "studySession": [
+    {
+      "scenario": "Opening an sm2 review in mixed direction (2 of the session's 30 cards shown)",
+      "contract": "OpenStudySession",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000011",
+        "kind": "reviewing",
+        "reviewMode": "self_assess",
+        "direction": "mixed",
+        "resumeSessionId": null
+      },
+      "output": {
+        "session": {
+          "id": "f0000000-0000-4000-8000-000000000001",
+          "deckId": "d0000000-0000-4000-8000-000000000011",
+          "rootDeckId": "d0000000-0000-4000-8000-000000000001",
+          "schedulerGeneration": 1,
+          "kind": "reviewing",
+          "currentMode": "self_assess",
+          "status": "in_progress",
+          "endReason": null,
+          "cursor": 7,
+          "cardLimit": 30,
+          "direction": "mixed",
+          "startedAt": "2026-09-16T01:50:00Z",
+          "endedAt": null,
+          "derived": {
+            "isOpen": true
+          }
+        },
+        "deckName": "Động từ · 동사",
+        "schedulerType": "sm2",
+        "actions": [
+          "again",
+          "hard",
+          "good",
+          "easy"
+        ],
+        "cards": [
+          {
+            "id": "c0000000-0000-4000-8000-000000000002",
+            "front": "먹다",
+            "back": "ăn",
+            "example": null,
+            "hint": null,
+            "pronunciation": null,
+            "frontFolded": "먹다",
+            "backFolded": "ăn"
+          },
+          {
+            "id": "c0000000-0000-4000-8000-000000000003",
+            "front": "공부하다",
+            "back": "học, học tập",
+            "example": "도서관에서 친구와 같이 한국어를 공부해요.",
+            "hint": "Hán Việt: 工夫 – công phu",
+            "pronunciation": "[공부하다] gong-bu-ha-da",
+            "frontFolded": "공부하다",
+            "backFolded": "học, học tập"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "self_assess turn asked meaning-first, before reveal",
+      "contract": "GetNextStageTurn",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000001"
+      },
+      "output": {
+        "mode": "self_assess",
+        "turn": {
+          "item": {
+            "sessionId": "f0000000-0000-4000-8000-000000000001",
+            "mode": "self_assess",
+            "round": 1,
+            "cardId": "c0000000-0000-4000-8000-000000000002",
+            "position": 8,
+            "status": "pending",
+            "availableAt": 0,
+            "answersInSession": 0,
+            "remainingMs": null,
+            "isRevealed": false,
+            "direction": "meaning_to_korean"
+          },
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000002",
+            "front": "먹다",
+            "back": "ăn",
+            "example": null,
+            "hint": null,
+            "pronunciation": null,
+            "frontFolded": "먹다",
+            "backFolded": "ăn"
+          },
+          "progress": {
+            "round": 1,
+            "done": 7,
+            "total": 30,
+            "completedCardIds": [
+              "c0000000-0000-4000-8000-000000000900",
+              "c0000000-0000-4000-8000-000000000901",
+              "c0000000-0000-4000-8000-000000000902",
+              "c0000000-0000-4000-8000-000000000903",
+              "c0000000-0000-4000-8000-000000000904",
+              "c0000000-0000-4000-8000-000000000905",
+              "c0000000-0000-4000-8000-000000000906"
+            ],
+            "roundCardIds": [],
+            "derived": {
+              "fraction": 0.2333,
+              "remaining": 23
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario": "recall turn in round 2, resumed with 12.4 s left",
+      "contract": "GetNextStageTurn",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000002"
+      },
+      "output": {
+        "mode": "recall",
+        "turn": {
+          "item": {
+            "sessionId": "f0000000-0000-4000-8000-000000000002",
+            "mode": "recall",
+            "round": 2,
+            "cardId": "c0000000-0000-4000-8000-000000000006",
+            "position": 1,
+            "status": "pending",
+            "availableAt": 0,
+            "answersInSession": 1,
+            "remainingMs": 12400,
+            "isRevealed": false,
+            "direction": null
+          },
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000006",
+            "front": "bill",
+            "back": "hoá đơn",
+            "example": "Could we have the bill, please?",
+            "hint": null,
+            "pronunciation": "/bɪl/",
+            "frontFolded": "bill",
+            "backFolded": "hoá đơn"
+          },
+          "progress": {
+            "round": 2,
+            "done": 1,
+            "total": 4,
+            "completedCardIds": [
+              "c0000000-0000-4000-8000-000000000912"
+            ],
+            "roundCardIds": [
+              "c0000000-0000-4000-8000-000000000006",
+              "c0000000-0000-4000-8000-000000000910",
+              "c0000000-0000-4000-8000-000000000911",
+              "c0000000-0000-4000-8000-000000000912"
+            ],
+            "derived": {
+              "fraction": 0.25,
+              "remaining": 3
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario": "Learning session moved on to the guess stage",
+      "contract": "GetNextStageTurn",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000003"
+      },
+      "output": {
+        "mode": "guess",
+        "turn": {
+          "item": {
+            "sessionId": "f0000000-0000-4000-8000-000000000003",
+            "mode": "guess",
+            "round": 1,
+            "cardId": "c0000000-0000-4000-8000-000000000008",
+            "position": 3,
+            "status": "pending",
+            "availableAt": 0,
+            "answersInSession": 0,
+            "remainingMs": null,
+            "isRevealed": false,
+            "direction": null
+          },
+          "card": {
+            "id": "c0000000-0000-4000-8000-000000000008",
+            "front": "analyse",
+            "back": "phân tích",
+            "example": null,
+            "hint": null,
+            "pronunciation": "/ˈæn.əl.aɪz/",
+            "frontFolded": "analyse",
+            "backFolded": "phân tích"
+          },
+          "progress": {
+            "round": 1,
+            "done": 2,
+            "total": 20,
+            "completedCardIds": [
+              "c0000000-0000-4000-8000-000000000930",
+              "c0000000-0000-4000-8000-000000000931"
+            ],
+            "roundCardIds": [],
+            "derived": {
+              "fraction": 0.1,
+              "remaining": 18
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario": "Session finished: no next stage",
+      "contract": "GetNextStageTurn",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000009"
+      },
+      "output": {
+        "mode": null,
+        "turn": null
+      }
+    },
+    {
+      "scenario": "guess question: exactly five meanings",
+      "contract": "GuessQuestion (built from the turn)",
+      "input": {},
+      "output": {
+        "term": {
+          "id": "c0000000-0000-4000-8000-000000000008",
+          "front": "analyse",
+          "back": "phân tích",
+          "example": null,
+          "hint": null,
+          "pronunciation": "/ˈæn.əl.aɪz/",
+          "frontFolded": "analyse",
+          "backFolded": "phân tích"
+        },
+        "options": [
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000920",
+            "text": "đánh giá"
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000921",
+            "text": "giả định"
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000008",
+            "text": "phân tích"
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000922",
+            "text": "thiết lập"
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000923",
+            "text": "chiếm được"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "Last match board of a round holding three pairs",
+      "contract": "MatchBoard (built from the turn)",
+      "input": {},
+      "output": {
+        "terms": [
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000930",
+            "text": "approach",
+            "isTerm": true
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000931",
+            "text": "concept",
+            "isTerm": true
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000008",
+            "text": "analyse",
+            "isTerm": true
+          }
+        ],
+        "meanings": [
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000931",
+            "text": "khái niệm",
+            "isTerm": false
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000008",
+            "text": "phân tích",
+            "isTerm": false
+          },
+          {
+            "cardId": "c0000000-0000-4000-8000-000000000930",
+            "text": "cách tiếp cận",
+            "isTerm": false
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "fill answered wrong after using the hint",
+      "contract": "FillOutcome",
+      "input": {},
+      "output": {
+        "isCorrect": false,
+        "comparisonVersion": 2,
+        "hasUsedHint": true
+      }
+    },
+    {
+      "scenario": "Answer saved and the card cleared",
+      "contract": "SubmitStudyAnswer",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000002",
+        "mode": "self_assess",
+        "action": "good",
+        "outcomeReason": null
+      },
+      "output": {
+        "cardId": "c0000000-0000-4000-8000-000000000002",
+        "round": 1,
+        "currentItemStatus": "completed",
+        "derived": {
+          "isCleared": true
+        }
+      }
+    },
+    {
+      "scenario": "Answered again: the card comes back after three others",
+      "contract": "SubmitStudyAnswer",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000009",
+        "mode": "self_assess",
+        "action": "again",
+        "outcomeReason": null
+      },
+      "output": {
+        "cardId": "c0000000-0000-4000-8000-000000000009",
+        "round": 1,
+        "currentItemStatus": "pending",
+        "derived": {
+          "isCleared": false
+        }
+      }
+    },
+    {
+      "scenario": "recall ran out of time",
+      "contract": "SubmitStudyAnswer",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000006",
+        "mode": "recall",
+        "action": "forgotten",
+        "outcomeReason": "timeout"
+      },
+      "output": {
+        "cardId": "c0000000-0000-4000-8000-000000000006",
+        "round": 2,
+        "currentItemStatus": "pending",
+        "derived": {
+          "isCleared": false
+        }
+      }
+    },
+    {
+      "scenario": "Answer from a session opened before a reset",
+      "contract": "SubmitStudyAnswer",
+      "input": {
+        "cardId": "c0000000-0000-4000-8000-000000000007",
+        "mode": "match",
+        "action": "remembered",
+        "outcomeReason": null
+      },
+      "failure": {
+        "family": "studyRefusal",
+        "reason": "staleGeneration"
+      }
+    }
+  ],
+  "sessionSummary": [
+    {
+      "scenario": "Learning session finished (eight_box, four graded stages)",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000003"
+      },
+      "output": {
+        "kind": "learning",
+        "status": "completed",
+        "endReason": null,
+        "finishedCards": 20,
+        "answeredCards": 20,
+        "wrongTurns": 7,
+        "totalTurns": 87,
+        "derived": {
+          "hasCompleted": true
+        }
+      }
+    },
+    {
+      "scenario": "Review session finished",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000001"
+      },
+      "output": {
+        "kind": "reviewing",
+        "status": "completed",
+        "endReason": null,
+        "finishedCards": 30,
+        "answeredCards": 30,
+        "wrongTurns": 4,
+        "totalTurns": 34,
+        "derived": {
+          "hasCompleted": true
+        }
+      }
+    },
+    {
+      "scenario": "Maximum-size review session",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000010"
+      },
+      "output": {
+        "kind": "reviewing",
+        "status": "completed",
+        "endReason": null,
+        "finishedCards": 200,
+        "answeredCards": 200,
+        "wrongTurns": 57,
+        "totalTurns": 257,
+        "derived": {
+          "hasCompleted": true
+        }
+      }
+    },
+    {
+      "scenario": "User left early",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000011"
+      },
+      "output": {
+        "kind": "reviewing",
+        "status": "abandoned",
+        "endReason": "user_exit",
+        "finishedCards": 6,
+        "answeredCards": 8,
+        "wrongTurns": 3,
+        "totalTurns": 11,
+        "derived": {
+          "hasCompleted": false
+        }
+      }
+    },
+    {
+      "scenario": "App closed by the OS and not resumed the same day",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000012"
+      },
+      "output": {
+        "kind": "learning",
+        "status": "abandoned",
+        "endReason": "interrupted",
+        "finishedCards": 0,
+        "answeredCards": 12,
+        "wrongTurns": 2,
+        "totalTurns": 26,
+        "derived": {
+          "hasCompleted": false
+        }
+      }
+    },
+    {
+      "scenario": "Deck reset while the session was open",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000013"
+      },
+      "output": {
+        "kind": "reviewing",
+        "status": "invalidated",
+        "endReason": "scheduler_reset",
+        "finishedCards": 2,
+        "answeredCards": 2,
+        "wrongTurns": 0,
+        "totalTurns": 2,
+        "derived": {
+          "hasCompleted": false
+        }
+      }
+    },
+    {
+      "scenario": "Algorithm changed while the session was open",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000014"
+      },
+      "output": {
+        "kind": "learning",
+        "status": "invalidated",
+        "endReason": "scheduler_changed",
+        "finishedCards": 0,
+        "answeredCards": 3,
+        "wrongTurns": 0,
+        "totalTurns": 3,
+        "derived": {
+          "hasCompleted": false
+        }
+      }
+    },
+    {
+      "scenario": "Session tried to write after a reset elsewhere",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000015"
+      },
+      "output": {
+        "kind": "reviewing",
+        "status": "invalidated",
+        "endReason": "stale_generation",
+        "finishedCards": 5,
+        "answeredCards": 5,
+        "wrongTurns": 1,
+        "totalTurns": 6,
+        "derived": {
+          "hasCompleted": false
+        }
+      }
+    },
+    {
+      "scenario": "Studied content moved to Trash",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000016"
+      },
+      "output": {
+        "kind": "learning",
+        "status": "invalidated",
+        "endReason": "content_deleted",
+        "finishedCards": 0,
+        "answeredCards": 5,
+        "wrongTurns": 1,
+        "totalTurns": 6,
+        "derived": {
+          "hasCompleted": false
+        }
+      }
+    },
+    {
+      "scenario": "An answer could not be saved",
+      "contract": "GetSessionSummary",
+      "input": {
+        "sessionId": "f0000000-0000-4000-8000-000000000017"
+      },
+      "output": {
+        "kind": "reviewing",
+        "status": "failed",
+        "endReason": "persistence_error",
+        "finishedCards": 11,
+        "answeredCards": 12,
+        "wrongTurns": 1,
+        "totalTurns": 13,
+        "derived": {
+          "hasCompleted": false
+        }
+      }
+    }
+  ],
+  "progress": [
+    {
+      "scenario": "Active learner: studied today, 5-day streak, one empty day in the window",
+      "contract": "WatchProgressOverview",
+      "input": {},
+      "output": {
+        "lastSevenDays": [
+          {
+            "localDate": "2026-09-10",
+            "totalCards": 34,
+            "learningCards": 20,
+            "derived": {
+              "reviewingCards": 14,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-11",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          {
+            "localDate": "2026-09-12",
+            "totalCards": 58,
+            "learningCards": 12,
+            "derived": {
+              "reviewingCards": 46,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-13",
+            "totalCards": 41,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 41,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-14",
+            "totalCards": 26,
+            "learningCards": 5,
+            "derived": {
+              "reviewingCards": 21,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-15",
+            "totalCards": 73,
+            "learningCards": 30,
+            "derived": {
+              "reviewingCards": 43,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-16",
+            "totalCards": 18,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 18,
+              "isActive": true
+            }
+          }
+        ],
+        "currentStreakDays": 5,
+        "hasLifetimeActivity": true,
+        "nextLocalMidnight": "2026-09-16T17:00:00Z",
+        "derived": {
+          "today": {
+            "localDate": "2026-09-16",
+            "totalCards": 18,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 18,
+              "isActive": true
+            }
+          },
+          "isStreakHeldFromYesterday": false
+        }
+      }
+    },
+    {
+      "scenario": "Nothing yet today: streak held from yesterday",
+      "contract": "WatchProgressOverview",
+      "input": {},
+      "output": {
+        "lastSevenDays": [
+          {
+            "localDate": "2026-09-10",
+            "totalCards": 34,
+            "learningCards": 20,
+            "derived": {
+              "reviewingCards": 14,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-11",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          {
+            "localDate": "2026-09-12",
+            "totalCards": 58,
+            "learningCards": 12,
+            "derived": {
+              "reviewingCards": 46,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-13",
+            "totalCards": 41,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 41,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-14",
+            "totalCards": 26,
+            "learningCards": 5,
+            "derived": {
+              "reviewingCards": 21,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-15",
+            "totalCards": 73,
+            "learningCards": 30,
+            "derived": {
+              "reviewingCards": 43,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-16",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          }
+        ],
+        "currentStreakDays": 4,
+        "hasLifetimeActivity": true,
+        "nextLocalMidnight": "2026-09-16T17:00:00Z",
+        "derived": {
+          "today": {
+            "localDate": "2026-09-16",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          "isStreakHeldFromYesterday": true
+        }
+      }
+    },
+    {
+      "scenario": "Brand-new user",
+      "contract": "WatchProgressOverview",
+      "input": {},
+      "output": {
+        "lastSevenDays": [
+          {
+            "localDate": "2026-09-10",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          {
+            "localDate": "2026-09-11",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          {
+            "localDate": "2026-09-12",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          {
+            "localDate": "2026-09-13",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          {
+            "localDate": "2026-09-14",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          {
+            "localDate": "2026-09-15",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          {
+            "localDate": "2026-09-16",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          }
+        ],
+        "currentStreakDays": 0,
+        "hasLifetimeActivity": false,
+        "nextLocalMidnight": "2026-09-16T17:00:00Z",
+        "derived": {
+          "today": {
+            "localDate": "2026-09-16",
+            "totalCards": 0,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 0,
+              "isActive": false
+            }
+          },
+          "isStreakHeldFromYesterday": false
+        }
+      }
+    },
+    {
+      "scenario": "Long streak",
+      "contract": "WatchProgressOverview",
+      "input": {},
+      "output": {
+        "lastSevenDays": [
+          {
+            "localDate": "2026-09-10",
+            "totalCards": 12,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 12,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-11",
+            "totalCards": 30,
+            "learningCards": 4,
+            "derived": {
+              "reviewingCards": 26,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-12",
+            "totalCards": 25,
+            "learningCards": 10,
+            "derived": {
+              "reviewingCards": 15,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-13",
+            "totalCards": 8,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 8,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-14",
+            "totalCards": 40,
+            "learningCards": 16,
+            "derived": {
+              "reviewingCards": 24,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-15",
+            "totalCards": 22,
+            "learningCards": 2,
+            "derived": {
+              "reviewingCards": 20,
+              "isActive": true
+            }
+          },
+          {
+            "localDate": "2026-09-16",
+            "totalCards": 15,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 15,
+              "isActive": true
+            }
+          }
+        ],
+        "currentStreakDays": 412,
+        "hasLifetimeActivity": true,
+        "nextLocalMidnight": "2026-09-16T17:00:00Z",
+        "derived": {
+          "today": {
+            "localDate": "2026-09-16",
+            "totalCards": 15,
+            "learningCards": 0,
+            "derived": {
+              "reviewingCards": 15,
+              "isActive": true
+            }
+          },
+          "isStreakHeldFromYesterday": false
+        }
+      }
+    },
+    {
+      "scenario": "Library level, sorted for the 7-day range; decks without activity stay last",
+      "contract": "WatchDeckActivity",
+      "input": {
+        "deckId": null
+      },
+      "output": {
+        "scopeDeckId": null,
+        "scopeName": null,
+        "scopePath": [],
+        "decks": [
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000001",
+            "name": "한국어 TOPIK I · Từ vựng",
+            "path": [],
+            "last7Days": {
+              "activeCardCount": 142,
+              "activeDayCount": 6,
+              "learningCardDayCount": 40,
+              "reviewingCardDayCount": 120,
+              "derived": {
+                "cardDayCount": 160,
+                "hasActivity": true
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 388,
+              "activeDayCount": 24,
+              "learningCardDayCount": 210,
+              "reviewingCardDayCount": 602,
+              "derived": {
+                "cardDayCount": 812,
+                "hasActivity": true
+              }
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000006",
+            "name": "IELTS Academic Word List",
+            "path": [],
+            "last7Days": {
+              "activeCardCount": 51,
+              "activeDayCount": 3,
+              "learningCardDayCount": 27,
+              "reviewingCardDayCount": 49,
+              "derived": {
+                "cardDayCount": 76,
+                "hasActivity": true
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 170,
+              "activeDayCount": 11,
+              "learningCardDayCount": 150,
+              "reviewingCardDayCount": 95,
+              "derived": {
+                "cardDayCount": 245,
+                "hasActivity": true
+              }
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000002",
+            "name": "Tiếng Anh giao tiếp hằng ngày",
+            "path": [],
+            "last7Days": {
+              "activeCardCount": 12,
+              "activeDayCount": 2,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 14,
+              "derived": {
+                "cardDayCount": 14,
+                "hasActivity": true
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 64,
+              "activeDayCount": 9,
+              "learningCardDayCount": 64,
+              "reviewingCardDayCount": 88,
+              "derived": {
+                "cardDayCount": 152,
+                "hasActivity": true
+              }
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000003",
+            "name": "IT",
+            "path": [],
+            "last7Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000005",
+            "name": "Korean Basics",
+            "path": [],
+            "last7Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000004",
+            "name": "Thuật ngữ Kinh tế – Tài chính – Ngân hàng cho kỳ thi chứng chỉ quốc tế: kế toán, kiểm toán, thị trường chứng khoán, bảo hiểm và cụm từ thường gặp trong báo cáo thường niên của doanh nghiệp niêm yết",
+            "path": [],
+            "last7Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            }
+          }
+        ],
+        "scopeLast7Days": {
+          "activeCardCount": 205,
+          "activeDayCount": 6,
+          "learningCardDayCount": 67,
+          "reviewingCardDayCount": 183,
+          "derived": {
+            "cardDayCount": 250,
+            "hasActivity": true
+          }
+        },
+        "scopeLast30Days": {
+          "activeCardCount": 622,
+          "activeDayCount": 26,
+          "learningCardDayCount": 424,
+          "reviewingCardDayCount": 785,
+          "derived": {
+            "cardDayCount": 1209,
+            "hasActivity": true
+          }
+        },
+        "nextDayBoundaryAt": "2026-09-16T17:00:00Z",
+        "derived": {
+          "isTopLevel": true
+        }
+      }
+    },
+    {
+      "scenario": "Drill-down into a root deck",
+      "contract": "WatchDeckActivity",
+      "input": {
+        "deckId": "d0000000-0000-4000-8000-000000000001"
+      },
+      "output": {
+        "scopeDeckId": "d0000000-0000-4000-8000-000000000001",
+        "scopeName": "한국어 TOPIK I · Từ vựng",
+        "scopePath": [],
+        "decks": [
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000011",
+            "name": "Động từ · 동사",
+            "path": [
+              {
+                "id": "d0000000-0000-4000-8000-000000000001",
+                "name": "한국어 TOPIK I · Từ vựng"
+              }
+            ],
+            "last7Days": {
+              "activeCardCount": 90,
+              "activeDayCount": 6,
+              "learningCardDayCount": 25,
+              "reviewingCardDayCount": 80,
+              "derived": {
+                "cardDayCount": 105,
+                "hasActivity": true
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 230,
+              "activeDayCount": 22,
+              "learningCardDayCount": 130,
+              "reviewingCardDayCount": 360,
+              "derived": {
+                "cardDayCount": 490,
+                "hasActivity": true
+              }
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000012",
+            "name": "Danh từ · 명사",
+            "path": [
+              {
+                "id": "d0000000-0000-4000-8000-000000000001",
+                "name": "한국어 TOPIK I · Từ vựng"
+              }
+            ],
+            "last7Days": {
+              "activeCardCount": 52,
+              "activeDayCount": 4,
+              "learningCardDayCount": 15,
+              "reviewingCardDayCount": 40,
+              "derived": {
+                "cardDayCount": 55,
+                "hasActivity": true
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 158,
+              "activeDayCount": 15,
+              "learningCardDayCount": 80,
+              "reviewingCardDayCount": 242,
+              "derived": {
+                "cardDayCount": 322,
+                "hasActivity": true
+              }
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000014",
+            "name": "Trạng từ · 부사",
+            "path": [
+              {
+                "id": "d0000000-0000-4000-8000-000000000001",
+                "name": "한국어 TOPIK I · Từ vựng"
+              }
+            ],
+            "last7Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            }
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000013",
+            "name": "Tính từ · 형용사",
+            "path": [
+              {
+                "id": "d0000000-0000-4000-8000-000000000001",
+                "name": "한국어 TOPIK I · Từ vựng"
+              }
+            ],
+            "last7Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            },
+            "last30Days": {
+              "activeCardCount": 0,
+              "activeDayCount": 0,
+              "learningCardDayCount": 0,
+              "reviewingCardDayCount": 0,
+              "derived": {
+                "cardDayCount": 0,
+                "hasActivity": false
+              }
+            }
+          }
+        ],
+        "scopeLast7Days": {
+          "activeCardCount": 142,
+          "activeDayCount": 6,
+          "learningCardDayCount": 40,
+          "reviewingCardDayCount": 120,
+          "derived": {
+            "cardDayCount": 160,
+            "hasActivity": true
+          }
+        },
+        "scopeLast30Days": {
+          "activeCardCount": 388,
+          "activeDayCount": 24,
+          "learningCardDayCount": 210,
+          "reviewingCardDayCount": 602,
+          "derived": {
+            "cardDayCount": 812,
+            "hasActivity": true
+          }
+        },
+        "nextDayBoundaryAt": "2026-09-16T17:00:00Z",
+        "derived": {
+          "isTopLevel": false
+        }
+      }
+    }
+  ],
+  "settings": [
+    {
+      "scenario": "Defaults",
+      "contract": "WatchAppSettings",
+      "input": {},
+      "output": {
+        "cardLimit": 20,
+        "newCardOrder": "created",
+        "themeMode": "system",
+        "language": "system"
+      }
+    },
+    {
+      "scenario": "Customised",
+      "contract": "WatchAppSettings",
+      "input": {},
+      "output": {
+        "cardLimit": 50,
+        "newCardOrder": "random",
+        "themeMode": "dark",
+        "language": "vi"
+      }
+    },
+    {
+      "scenario": "Card limit below the minimum",
+      "contract": "SaveStudyDefaults",
+      "input": {
+        "cardLimit": "0",
+        "newCardOrder": "created"
+      },
+      "failure": {
+        "family": "validation",
+        "problems": [
+          "tooSmall"
+        ]
+      }
+    }
+  ],
+  "reminder": [
+    {
+      "scenario": "Default: off, suggested 20:00",
+      "contract": "WatchReminderOverview",
+      "input": {},
+      "output": {
+        "settings": {
+          "isEnabled": false,
+          "time": {
+            "minuteOfDay": 1200,
+            "derived": {
+              "hour": 20,
+              "minute": 0
+            }
+          },
+          "lastDeliveredAt": null
+        },
+        "capability": "supported",
+        "derived": {
+          "isChangeable": true
+        }
+      }
+    },
+    {
+      "scenario": "On at 07:30, delivered this morning",
+      "contract": "WatchReminderOverview",
+      "input": {},
+      "output": {
+        "settings": {
+          "isEnabled": true,
+          "time": {
+            "minuteOfDay": 450,
+            "derived": {
+              "hour": 7,
+              "minute": 30
+            }
+          },
+          "lastDeliveredAt": "2026-09-16T00:31:00Z"
+        },
+        "capability": "supported",
+        "derived": {
+          "isChangeable": true
+        }
+      }
+    },
+    {
+      "scenario": "Platform without reminders",
+      "contract": "WatchReminderOverview",
+      "input": {},
+      "output": {
+        "settings": {
+          "isEnabled": false,
+          "time": {
+            "minuteOfDay": 1200,
+            "derived": {
+              "hour": 20,
+              "minute": 0
+            }
+          },
+          "lastDeliveredAt": null
+        },
+        "capability": "unsupported",
+        "derived": {
+          "isChangeable": false
+        }
+      }
+    },
+    {
+      "scenario": "User refused the notification permission",
+      "contract": "EnableReminder",
+      "input": {
+        "time": {
+          "minuteOfDay": 1260
+        }
+      },
+      "failure": {
+        "family": "reminder",
+        "rejection": "permissionDenied"
+      }
+    },
+    {
+      "scenario": "Scheduling failed",
+      "contract": "EnableReminder",
+      "input": {
+        "time": {
+          "minuteOfDay": 1260
+        }
+      },
+      "failure": {
+        "family": "reminder",
+        "rejection": "scheduleFailed"
+      }
+    },
+    {
+      "scenario": "Turned off, but an earlier notification may still show",
+      "contract": "DisableReminder",
+      "input": {},
+      "failure": {
+        "family": "reminder",
+        "rejection": "cancelFailed"
+      }
+    },
+    {
+      "scenario": "Notification content: several decks due",
+      "contract": "ReminderSummary",
+      "input": {
+        "workloads": [
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000001",
+            "deckName": "한국어 TOPIK I · Từ vựng",
+            "overdueCount": 41,
+            "dueTodayCount": 45,
+            "overdueDayCount": 3
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000002",
+            "deckName": "Tiếng Anh giao tiếp hằng ngày",
+            "overdueCount": 0,
+            "dueTodayCount": 12,
+            "overdueDayCount": 0
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000006",
+            "deckName": "IELTS Academic Word List",
+            "overdueCount": 1100,
+            "dueTodayCount": 160,
+            "overdueDayCount": 47
+          },
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000005",
+            "deckName": "Korean Basics",
+            "overdueCount": 0,
+            "dueTodayCount": 0,
+            "overdueDayCount": 0
+          }
+        ]
+      },
+      "output": {
+        "totalDueCount": 1358,
+        "leadDeckName": "IELTS Academic Word List",
+        "otherDeckCount": 2
+      }
+    },
+    {
+      "scenario": "Notification content on a later day: one card due in one deck",
+      "contract": "ReminderSummary",
+      "input": {
+        "workloads": [
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000003",
+            "deckName": "IT",
+            "overdueCount": 0,
+            "dueTodayCount": 1,
+            "overdueDayCount": 0
+          }
+        ]
+      },
+      "output": {
+        "totalDueCount": 1,
+        "leadDeckName": "IT",
+        "otherDeckCount": 0
+      }
+    },
+    {
+      "scenario": "Nothing due at fire time: no notification",
+      "contract": "ReminderSummary",
+      "input": {
+        "workloads": [
+          {
+            "deckId": "d0000000-0000-4000-8000-000000000005",
+            "deckName": "Korean Basics",
+            "overdueCount": 0,
+            "dueTodayCount": 0,
+            "overdueDayCount": 0
+          }
+        ]
+      },
+      "output": null
+    }
+  ]
+}

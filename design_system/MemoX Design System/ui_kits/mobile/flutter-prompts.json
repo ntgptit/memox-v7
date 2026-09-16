@@ -1,0 +1,1516 @@
+[
+ {
+  "nm": "StatusBar",
+  "slug": "statusbar",
+  "fl": "(OS — SafeArea top inset)",
+  "ds": "Faux iOS status bar baked into the device frame. In Flutter this is the system inset; reserve it with SafeArea.",
+  "sec": "A · Chrome & navigation",
+  "vars": [
+   [
+    "time + battery",
+    "",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "SafeArea",
+    "top",
+    "SYSTEM-OWNED"
+   ]
+  ],
+  "kind": "preview-chrome",
+  "states": null,
+  "icons": []
+ },
+ {
+  "nm": "AppBar",
+  "slug": "appbar",
+  "fl": "AppBar / SliverAppBar.large",
+  "ds": "Back/close leading, flexible title, trailing icon actions. Large (56) and compact (48) heights.",
+  "sec": "A · Chrome & navigation",
+  "vars": [
+   [
+    "leading",
+    "back / close / menu",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "height",
+    "48 / 56",
+    "FIXED"
+   ],
+   [
+    "actions",
+    "IconButton[]",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": [
+   "arrow-left",
+   "search",
+   "more-vertical"
+  ]
+ },
+ {
+  "nm": "NavigationBar",
+  "slug": "navigationbar",
+  "fl": "NavigationBar (M3)",
+  "ds": "Glass bottom nav, 4 destinations, active pill behind the icon. backdrop-filter blur on a translucent surface.",
+  "sec": "A · Chrome & navigation",
+  "vars": [
+   [
+    "items",
+    "4 fixed",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "active",
+    "pill + primary",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "chrome",
+    "glass + blur",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "inactive",
+    "onSurfaceVariant glyph + label"
+   ],
+   [
+    "active",
+    "primary pill behind the glyph, primary label"
+   ],
+   [
+    "pressed",
+    "8% overlay [INFERRED]"
+   ]
+  ],
+  "icons": [
+   "home",
+   "layers",
+   "bar-chart-3",
+   "settings"
+  ]
+ },
+ {
+  "nm": "Breadcrumb",
+  "slug": "breadcrumb",
+  "fl": "Wrap + InkWell chips",
+  "ds": "Folder ▸ deck ▸ card path. Horizontally scrollable; last segment is current and non-tappable.",
+  "sec": "A · Chrome & navigation",
+  "vars": [
+   [
+    "scroll",
+    "horizontal",
+    "RESPONSIVE"
+   ],
+   [
+    "last",
+    "current / bold",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": [
+   "chevron-right"
+  ]
+ },
+ {
+  "nm": "StudyTopBar",
+  "slug": "studytopbar",
+  "fl": "custom — AppBar + LinearProgress",
+  "ds": "Study-session chrome: close, mode badge, thin progress track, n/total counter. Accent recolors per mode.",
+  "sec": "A · Chrome & navigation",
+  "vars": [
+   [
+    "accent",
+    "per study mode",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "progress",
+    "current/total",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": [
+   "x"
+  ]
+ },
+ {
+  "nm": "FilledButton",
+  "slug": "filledbutton",
+  "fl": "FilledButton",
+  "ds": "Primary CTA — one per view.",
+  "sec": "B · Buttons & actions",
+  "vars": [
+   [
+    "state",
+    "enabled/pressed/disabled",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "icon",
+    "leading",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "primary fill, onPrimary label"
+   ],
+   [
+    "pressed",
+    "8% onPrimary overlay [INFERRED]"
+   ],
+   [
+    "disabled",
+    "38% opacity on fill and label [INFERRED]"
+   ],
+   [
+    "loading",
+    "label swaps to a 16px onPrimary spinner, width held"
+   ]
+  ],
+  "icons": [
+   "play"
+  ]
+ },
+ {
+  "nm": "TonalButton",
+  "slug": "tonalbutton",
+  "fl": "FilledButton.tonal",
+  "ds": "Secondary — sits on surface.",
+  "sec": "B · Buttons & actions",
+  "vars": [
+   [
+    "container",
+    "surfaceContainer",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "secondaryContainer fill, onSecondaryContainer label"
+   ],
+   [
+    "pressed",
+    "8% onSecondaryContainer overlay [INFERRED]"
+   ],
+   [
+    "disabled",
+    "38% opacity [INFERRED]"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "OutlinedButton",
+  "slug": "outlinedbutton",
+  "fl": "OutlinedButton",
+  "ds": "Low-emphasis / cancel.",
+  "sec": "B · Buttons & actions",
+  "vars": [
+   [
+    "border",
+    "outlineVariant",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "transparent fill, outline border, primary label"
+   ],
+   [
+    "pressed",
+    "8% primary tint fill [INFERRED]"
+   ],
+   [
+    "disabled",
+    "outlineVariant border, 38% label [INFERRED]"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "IconButton",
+  "slug": "iconbutton",
+  "fl": "IconButton",
+  "ds": "36×36 ink box with an 8% hover layer, expanded to a 48dp hit target via ::after. The glyph inside is icon-sm 20.",
+  "sec": "B · Buttons & actions",
+  "vars": [
+   [
+    "hover",
+    "8% layer",
+    "FIXED"
+   ],
+   [
+    "ink box",
+    "36",
+    "FIXED"
+   ],
+   [
+    "hit target",
+    "48",
+    "MINIMUM"
+   ],
+   [
+    "glyph",
+    "20 · icon-sm",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "no fill, onSurfaceVariant glyph"
+   ],
+   [
+    "hover / pressed",
+    "8% primary tint circle behind the glyph (14% in dark)"
+   ],
+   [
+    "disabled",
+    "38% glyph [INFERRED]"
+   ]
+  ],
+  "icons": [
+   "search",
+   "more-vertical",
+   "bookmark"
+  ]
+ },
+ {
+  "nm": "FloatingActionButton",
+  "slug": "floatingactionbutton",
+  "fl": "FloatingActionButton[.extended]",
+  "ds": "Extended FAB — 52dp tall, radius-lg 16, pinned bottom-right above the safe area (or above the bottom nav via .fab-above-nav). The kit has no circular variant.",
+  "sec": "B · Buttons & actions",
+  "vars": [
+   [
+    "height",
+    "52 · --fab-h",
+    "FIXED"
+   ],
+   [
+    "radius",
+    "16 · radius-lg",
+    "FIXED"
+   ],
+   [
+    "placement",
+    "bottom-right / above nav",
+    "RESPONSIVE"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "primary fill, onPrimary label + glyph, shadow-fab"
+   ],
+   [
+    "pressed",
+    "shadow tightens, 8% onPrimary overlay [INFERRED]"
+   ]
+  ],
+  "icons": [
+   "plus"
+  ]
+ },
+ {
+  "nm": "TextButton",
+  "slug": "textbutton",
+  "fl": "TextButton",
+  "ds": "Inline link-style action.",
+  "sec": "B · Buttons & actions",
+  "vars": [
+   [
+    "tone",
+    "primary / error",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "no fill, primary label"
+   ],
+   [
+    "pressed",
+    "8% primary tint behind the label [INFERRED]"
+   ],
+   [
+    "disabled",
+    "38% label [INFERRED]"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "Card",
+  "slug": "card",
+  "fl": "Card (elevation 0 + border)",
+  "ds": "Base container — surfaceContainerLowest + 1px ghost border, no shadow.",
+  "sec": "C · Surfaces, cards & list items",
+  "vars": [
+   [
+    "border",
+    "ghost 15%",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "radius",
+    "lg / md",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "light",
+    "surface-raised fill (#FFFFFF), border: NONE, radius 20, padding space-card 20, shadow-soft 0 1px 2px rgba(15,22,56,0.04)"
+   ],
+   [
+    "dark",
+    "same fill role and radius, shadow removed (shadow-none) and replaced by a 1px border-ghost edge — the dark surface ladder is too near-adjacent for a shadow alone to separate the card"
+   ],
+   [
+    "pressed",
+    "primary 8% tint over the fill when the whole card is tappable [INFERRED — the mock draws no pressed card; 8% is the kit’s icon-button hover value]"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "IconTile",
+  "slug": "icontile",
+  "fl": "Container + Icon",
+  "ds": "Tinted square holding a leading glyph for list rows.",
+  "sec": "C · Surfaces, cards & list items",
+  "vars": [
+   [
+    "size",
+    "sm 28 / md 36 / lg 44",
+    "FIXED"
+   ],
+   [
+    "tint",
+    "primary 10% · seed 12%",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": [
+   "folder",
+   "layers",
+   "tag",
+   "flag"
+  ]
+ },
+ {
+  "nm": "ListTile · deck row",
+  "slug": "listtile-deck-row",
+  "fl": "ListTile / InkWell row",
+  "ds": "Leading icon-tile, title + meta subtitle, trailing mastery ring or chevron. The backbone of Library.",
+  "sec": "C · Surfaces, cards & list items",
+  "vars": [
+   [
+    "trailing",
+    "ring / chevron / kebab",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "leading",
+    "icon-tile",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "transparent on the card surface"
+   ],
+   [
+    "pressed",
+    "8% primary tint row [INFERRED]"
+   ],
+   [
+    "selected",
+    "primaryContainer row [INFERRED]"
+   ]
+  ],
+  "icons": [
+   "layers"
+  ]
+ },
+ {
+  "nm": "ListRow",
+  "slug": "listrow",
+  "fl": "ListTile / InkWell row",
+  "ds": "The generic row behind search results, tags and voices: leading tile, title + optional subtitle, trailing slot, hairline divider except on the last. Both text lines truncate to one line.",
+  "sec": "C · Surfaces, cards & list items",
+  "vars": [
+   [
+    "leading",
+    "icon tile / custom / none",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "trailing",
+    "badge / chevron / control",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "divider",
+    "last = none",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "transparent, 1px ghost divider below except on the last row"
+   ],
+   [
+    "pressed",
+    "primary 8% ink overlay — INFERRED from .icon-btn hover; the mock has no pressed row"
+   ]
+  ],
+  "icons": [
+   "chevron-right",
+   "folder",
+   "layers",
+   "tag"
+  ]
+ },
+ {
+  "nm": "SectionHeader",
+  "slug": "sectionheader",
+  "fl": "Text (labelSmall, caps)",
+  "ds": "Overline label above a group.",
+  "sec": "C · Surfaces, cards & list items",
+  "vars": [
+   [
+    "style",
+    "overline +1.2",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "caps",
+    "",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": []
+ },
+ {
+  "nm": "Divider",
+  "slug": "divider",
+  "fl": "Divider",
+  "ds": "Hairline at 12% with optional indent.",
+  "sec": "C · Surfaces, cards & list items",
+  "vars": [
+   [
+    "indent",
+    "0 / 56",
+    "FIXED"
+   ],
+   [
+    "opacity",
+    "12%",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": []
+ },
+ {
+  "nm": "SettingsTile",
+  "slug": "settingstile",
+  "fl": "ListTile / SwitchListTile",
+  "ds": "Backbone of every Settings screen: leading icon, title + subtitle, trailing switch OR value+chevron.",
+  "sec": "C · Surfaces, cards & list items",
+  "vars": [
+   [
+    "trailing",
+    "switch / value+chevron / radio",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "leading",
+    "icon optional",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "subtitle",
+    "optional",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "transparent row, onSurface title, onSurfaceVariant subtitle"
+   ],
+   [
+    "pressed",
+    "8% tint [INFERRED]"
+   ],
+   [
+    "disabled",
+    "38% on the whole row [INFERRED]"
+   ]
+  ],
+  "icons": [
+   "bell",
+   "globe",
+   "chevron-right"
+  ]
+ },
+ {
+  "nm": "Avatar",
+  "slug": "avatar",
+  "fl": "CircleAvatar",
+  "ds": "Account identity — image or initials fallback.",
+  "sec": "C · Surfaces, cards & list items",
+  "vars": [
+   [
+    "initials / image / placeholder",
+    "",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "size",
+    "32 / 40 / 48",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "initials on a seeded fill"
+   ],
+   [
+    "image",
+    "photo fills the circle"
+   ]
+  ],
+  "icons": [
+   "user"
+  ]
+ },
+ {
+  "nm": "TextField",
+  "slug": "textfield",
+  "fl": "TextField (OutlineInputBorder)",
+  "ds": "Filled surface + ghost border, 52dp (--memox-size-input), radius-input. Focus = 1px primary + caret; error = 1px error + message below. multiline drops to a 40dp minimum.",
+  "sec": "D · Inputs & forms",
+  "vars": [
+   [
+    "state",
+    "rest / focus / error / disabled",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "multiline",
+    "",
+    "MINIMUM"
+   ],
+   [
+    "leading / trailing",
+    "optional",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "surfaceContainerLowest fill, border-ghost 1px, radius-input 12, minHeight size-input 52, onSurfaceVariant placeholder"
+   ],
+   [
+    "focused",
+    "1px solid primary border (NOT 2px), same fill, blinking caret after the value [INFERRED — the mock animates a caret; real focus is platform-owned]"
+   ],
+   [
+    "error",
+    "1px solid error border, error-coloured message row below at caption size with a leading alert-circle glyph"
+   ],
+   [
+    "disabled",
+    "0.38 (--memox-op-disabled) on the whole field"
+   ],
+   [
+    "multiline",
+    "same shell, minHeight drops to 40 and padding becomes 8 vertical / 12 horizontal; text wraps instead of truncating"
+   ]
+  ],
+  "icons": [
+   "alert-circle"
+  ]
+ },
+ {
+  "nm": "SearchField",
+  "slug": "searchfield",
+  "fl": "SearchBar",
+  "ds": "Filled field, 52dp (--memox-size-input), leading search glyph, trailing clear when filled / voice when empty. Focus = 1px primary border.",
+  "sec": "D · Inputs & forms",
+  "vars": [
+   [
+    "height",
+    "52 · --memox-size-input",
+    "FIXED"
+   ],
+   [
+    "leading",
+    "search",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "trailing",
+    "clear when filled / voice when empty",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "empty",
+    "surfaceContainer fill, ghost border, radius-input, onSurfaceVariant placeholder, leading search glyph, trailing voice glyph"
+   ],
+   [
+    "filled",
+    "same shell, onSurface value text, trailing changes from voice to clear"
+   ],
+   [
+    "active",
+    "surfaceContainerLowest fill, 1px primary border, primary leading glyph, blinking caret [INFERRED — the mock animates a caret; real focus is platform-owned]"
+   ]
+  ],
+  "icons": [
+   "search",
+   "x",
+   "mic"
+  ]
+ },
+ {
+  "nm": "Switch",
+  "slug": "switch",
+  "fl": "Switch (M3)",
+  "ds": "On/off setting toggle.",
+  "sec": "D · Inputs & forms",
+  "vars": [
+   [
+    "track",
+    "44×26",
+    "FIXED"
+   ],
+   [
+    "thumb",
+    "20",
+    "FIXED"
+   ],
+   [
+    "on",
+    "",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "off",
+    "",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "disabled",
+    "",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "off",
+    "surfaceContainerHighest track, surfaceBright thumb at left inset 3, shadow-soft on the thumb"
+   ],
+   [
+    "on",
+    "primary track, same surfaceBright thumb slid to left 21; 160ms ease-standard on both track colour and thumb offset"
+   ],
+   [
+    "disabled",
+    "0.38 (--memox-op-disabled) on the whole control, pointer events off [INFERRED — the mock has no disabled switch on a real screen]"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "SegmentedButton",
+  "slug": "segmentedbutton",
+  "fl": "SegmentedButton",
+  "ds": "2–3 exclusive choices.",
+  "sec": "D · Inputs & forms",
+  "vars": [
+   [
+    "count",
+    "2–3",
+    "FIXED"
+   ],
+   [
+    "selected",
+    "",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "unselected",
+    "transparent segment on the surfaceContainer track, onSurfaceVariant label"
+   ],
+   [
+    "selected",
+    "surfaceContainerLowest fill + shadow-soft, onSurface label, full-radius pill"
+   ],
+   [
+    "pressed",
+    "8% overlay [INFERRED]"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "Chip",
+  "slug": "chip",
+  "fl": "FilterChip / ChoiceChip",
+  "ds": "Selectable tag/filter, full radius.",
+  "sec": "D · Inputs & forms",
+  "vars": [
+   [
+    "selected",
+    "",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "unselected",
+    "",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "size",
+    "32 / 24",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "unselected",
+    "surface-container fill, outlineVariant border, onSurfaceVariant label"
+   ],
+   [
+    "selected",
+    "primaryContainer fill, onPrimaryContainer label, no border"
+   ],
+   [
+    "pressed",
+    "8% overlay [INFERRED]"
+   ]
+  ],
+  "icons": [
+   "check"
+  ]
+ },
+ {
+  "nm": "Slider",
+  "slug": "slider",
+  "fl": "Slider",
+  "ds": "Daily-goal / speech-rate scrubber.",
+  "sec": "D · Inputs & forms",
+  "vars": [
+   [
+    "track",
+    "active/inactive",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "thumb",
+    "",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "primary active track, surfaceContainerHighest inactive"
+   ],
+   [
+    "dragging",
+    "thumb halo at 12% primary [INFERRED]"
+   ],
+   [
+    "disabled",
+    "38% both tracks [INFERRED]"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "StatusBadge",
+  "slug": "statusbadge",
+  "fl": "custom — dot + label pill",
+  "ds": "Card lifecycle: new ▸ learning ▸ reviewing ▸ mastered. Dot + label, status* token.",
+  "sec": "E · Status & data viz",
+  "vars": [
+   [
+    "states",
+    "4",
+    "FIXED"
+   ],
+   [
+    "token",
+    "status*",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "form",
+    "pill / bare dot",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": []
+ },
+ {
+  "nm": "MasteryRing",
+  "slug": "masteryring",
+  "fl": "CustomPaint (arc)",
+  "ds": "40×3px ring; color steps with %.",
+  "sec": "E · Status & data viz",
+  "vars": [
+   [
+    "thresholds",
+    "<34 / <67 / ≥67",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "size",
+    "40",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": []
+ },
+ {
+  "nm": "LinearProgress",
+  "slug": "linearprogress",
+  "fl": "LinearProgressIndicator",
+  "ds": "Goal / session progress track.",
+  "sec": "E · Status & data viz",
+  "vars": [
+   [
+    "tone",
+    "primary / mastery",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "height",
+    "4 / 8",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": []
+ },
+ {
+  "nm": "StatDisplay",
+  "slug": "statdisplay",
+  "fl": "Text (stat 40)",
+  "ds": "Big tabular metric + caption. 40px — the stat step, deliberately not snapped to a spacing value.",
+  "sec": "E · Status & data viz",
+  "vars": [
+   [
+    "numerals",
+    "tabular",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "size",
+    "40 · fs-stat",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": []
+ },
+ {
+  "nm": "StreakChip",
+  "slug": "streakchip",
+  "fl": "custom — flame chip",
+  "ds": "Streak count, streak token (orange).",
+  "sec": "E · Status & data viz",
+  "vars": [
+   [
+    "token",
+    "streak",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "icon",
+    "flame",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": [
+   "flame"
+  ]
+ },
+ {
+  "nm": "BarChart",
+  "slug": "barchart",
+  "fl": "CustomPaint / fl_chart",
+  "ds": "7-day activity. Bars use primary; today highlighted. chartDraw 600ms entrance.",
+  "sec": "E · Status & data viz",
+  "vars": [
+   [
+    "highlight",
+    "today",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "entrance",
+    "chartDraw",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": []
+ },
+ {
+  "nm": "Flashcard",
+  "slug": "flashcard",
+  "fl": "custom — flip Card (350ms)",
+  "ds": "Front (term) / back (meaning + example). cardFlip 350ms, never a bounce curve.",
+  "sec": "F · Study-mode widgets",
+  "vars": [
+   [
+    "face",
+    "front / back",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "flip",
+    "350ms",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "front",
+    "question face, surface fill"
+   ],
+   [
+    "flipping",
+    "350ms Y-axis flip"
+   ],
+   [
+    "back",
+    "answer face, same geometry"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "RatingBar",
+  "slug": "ratingbar",
+  "fl": "Row<FilledButton>",
+  "ds": "SRS recall buttons in Review — Again / Hard / Good / Easy, rating* tokens.",
+  "sec": "F · Study-mode widgets",
+  "vars": [
+   [
+    "options",
+    "4",
+    "FIXED"
+   ],
+   [
+    "token",
+    "rating*",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "four graded buttons, each its own semantic color"
+   ],
+   [
+    "pressed",
+    "8% overlay [INFERRED]"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "SelfAssessment",
+  "slug": "selfassessment",
+  "fl": "Row<ChoiceChip>",
+  "ds": "Self-score after write-from-memory: Missed / Partial / Got it. self* tokens (light only).",
+  "sec": "F · Study-mode widgets",
+  "vars": [
+   [
+    "options",
+    "3",
+    "FIXED"
+   ],
+   [
+    "token",
+    "self*",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "unselected",
+    "outlineVariant chip"
+   ],
+   [
+    "selected",
+    "the chip\\u2019s own semantic color fills it"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "ChoiceOption",
+  "slug": "choiceoption",
+  "fl": "custom — answer row",
+  "ds": "Multiple-choice option (Guess). Idle → correct (green) / wrong (rose) on select.",
+  "sec": "F · Study-mode widgets",
+  "vars": [
+   [
+    "state",
+    "idle/correct/wrong",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "auto-advance",
+    "",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "surfaceContainerLow row, outlineVariant border"
+   ],
+   [
+    "selected",
+    "primary border, primaryContainer fill"
+   ],
+   [
+    "correct",
+    "success border + tint"
+   ],
+   [
+    "wrong",
+    "error border + tint"
+   ]
+  ],
+  "icons": [
+   "check"
+  ]
+ },
+ {
+  "nm": "MatchTile",
+  "slug": "matchtile",
+  "fl": "custom — grid tile",
+  "ds": "Match-pairs tile: idle / selected (filled primary) / matched (green outline).",
+  "sec": "F · Study-mode widgets",
+  "vars": [
+   [
+    "state",
+    "idle/selected/matched",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "surfaceContainer tile"
+   ],
+   [
+    "selected",
+    "primary border"
+   ],
+   [
+    "matched",
+    "success tint, then fades out"
+   ],
+   [
+    "wrong",
+    "error tint, shakes [INFERRED]"
+   ]
+  ],
+  "icons": [
+   "check"
+  ]
+ },
+ {
+  "nm": "OfflineBanner",
+  "slug": "offlinebanner",
+  "fl": "MaterialBanner",
+  "ds": "Connectivity-stream inline banner. Non-blocking, dismiss-on-reconnect.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "trigger",
+    "connectivity",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "non-blocking",
+    "",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": [
+   "cloud-off"
+  ]
+ },
+ {
+  "nm": "Banner / Callout",
+  "slug": "banner-callout",
+  "fl": "Container + Row (tone)",
+  "ds": "Inline contextual message with 4 tones — info (primary) / warning (streak) / danger (error) / ok (mastery). Tinted bg + matching border + leading icon.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "tone",
+    "info / warning / danger / ok",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "icon",
+    "leading",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "action",
+    "optional",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": [
+   "info",
+   "alert-triangle"
+  ]
+ },
+ {
+  "nm": "Snackbar",
+  "slug": "snackbar",
+  "fl": "SnackBar",
+  "ds": "Transient confirmation with optional action. Bottom-anchored, auto-dismiss.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "action",
+    "optional",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "auto-dismiss",
+    "",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "inverseSurface slate, onInverseSurface label, optional action in inversePrimary"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "BottomSheet",
+  "slug": "bottomsheet",
+  "fl": "showModalBottomSheet",
+  "ds": "Bottom-anchored modal: 36×4 grabber, surfaceContainerHigh, top radius 20, shadow-chrome, caps at 85% and scrolls inside. Scrim behind.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "grabber",
+    "on / off",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "maxHeight",
+    "85% default",
+    "MAXIMUM"
+   ],
+   [
+    "scrim",
+    "own / external",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "surfaceContainerHigh fill, TOP corners radius 20 (not radius-xl 24), shadow-chrome, maxHeight 85% with the body scrolling inside, 36×4 outlineVariant grabber at the top"
+   ],
+   [
+    "entering",
+    "memoxSheetIn — translateY(20%) + fade over 260ms cubic-bezier(0.2,0,0,1)"
+   ],
+   [
+    "dragging",
+    "sheet follows the finger, scrim deepens [INFERRED — the static mock never drags]"
+   ]
+  ],
+  "icons": [
+   "pencil",
+   "trash-2"
+  ]
+ },
+ {
+  "nm": "Dialog",
+  "slug": "dialog",
+  "fl": "AlertDialog",
+  "ds": "Centred modal on its own scrim: surfaceContainerHigh, radius 20, shadow-card, 200ms scale-in. Widths sm 300 / md 320 / lg 340.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "size",
+    "sm 300 / md 320 / lg 340",
+    "MAXIMUM"
+   ],
+   [
+    "scrim",
+    "own / external",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "confirm / destructive",
+    "",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "default",
+    "surfaceContainerHigh fill, radius 20 (not radius-lg 16), shadow-card, maxWidth sm 300 / md 320 / lg 340, centred with a 24×20 inset from the frame"
+   ],
+   [
+    "entering",
+    "memoxDialogIn — scale 0.94 → 1 with fade over 200ms cubic-bezier(0.2,0,0,1)"
+   ],
+   [
+    "barrier",
+    "own Scrim at 45% of the scrim role unless the caller already renders one"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "EmptyState",
+  "slug": "emptystate",
+  "fl": "custom — Column",
+  "ds": "Action-led zero state on a card: 64 tinted tile (radius 20), 20px headline, body, CTA, optional footnote. compact drops to 52/radius 16/16px headline.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "size",
+    "default 64 / compact 52",
+    "FIXED"
+   ],
+   [
+    "CTA",
+    "optional",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "footnote",
+    "optional",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": null,
+  "icons": [
+   "folder-plus",
+   "inbox",
+   "info"
+  ]
+ },
+ {
+  "nm": "ErrorState",
+  "slug": "errorstate",
+  "fl": "custom — Column (error tone)",
+  "ds": "Inline load failure: 52 danger-tinted tile (radius 16), 16px headline, reassurance copy, Retry. Local-first voice — say nothing was lost before offering the retry.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "action",
+    "Retry by default",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "icon",
+    "cloud-off / alert",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "error",
+    "52 danger-tinted tile (danger 10%), error-coloured glyph, Retry primary button"
+   ]
+  ],
+  "icons": [
+   "cloud-off",
+   "refresh-cw"
+  ]
+ },
+ {
+  "nm": "Skeleton",
+  "slug": "skeleton",
+  "fl": "pulsing placeholder Container",
+  "ds": "One placeholder shape — surfaceContainerHigh at 50%, 1.4s pulse (reduced-motion safe). Defaults h 12 / r 6; shape='circle' for avatar and dot placeholders.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "shape",
+    "block / circle",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "h",
+    "12 default",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "r",
+    "6 default",
+    "CONTENT-DRIVEN"
+   ],
+   [
+    "op",
+    "0.5 default",
+    "FIXED"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "loading",
+    "surfaceContainerHigh at the given opacity, 1.4s opacity pulse 0.45 ↔ 0.75 (not a shimmer sweep)"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "Spinner",
+  "slug": "spinner",
+  "fl": "CircularProgressIndicator",
+  "ds": "Indeterminate 2px ring, 0.8s linear. Sized off the icon scale; white on filled CTAs, primary on surfaces.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "size",
+    "icon scale xs–xl",
+    "FIXED"
+   ],
+   [
+    "color",
+    "primary / on-primary",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "loading",
+    "2px ring, 0.8s linear rotation, top segment transparent"
+   ]
+  ],
+  "icons": []
+ },
+ {
+  "nm": "Scrim",
+  "slug": "scrim",
+  "fl": "barrierColor",
+  "ds": "Modal backdrop — scrim token at 45%, 220ms fade. Dialog and BottomSheet draw their own; pass scrim={false} when a screen already renders one.",
+  "sec": "G · Feedback & overlays",
+  "vars": [
+   [
+    "opacity",
+    "45% default",
+    "FIXED"
+   ],
+   [
+    "owner",
+    "dialog / sheet / external",
+    "CONTENT-DRIVEN"
+   ]
+  ],
+  "kind": "production",
+  "states": [
+   [
+    "visible",
+    "scrim token at 45%, 220ms fade-in"
+   ],
+   [
+    "dismiss",
+    "tap-to-dismiss when the owner passes onDismiss — INFERRED, the static mock never dismisses"
+   ]
+  ],
+  "icons": []
+ }
+]
