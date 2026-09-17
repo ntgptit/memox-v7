@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'app_decorations.dart';
 import 'app_stroke.dart';
 
 /// How far a surface sits above the one behind it.
@@ -58,23 +59,26 @@ abstract final class AppElevation {
 Color materialShadowColor(ColorScheme scheme) =>
     scheme.brightness == Brightness.dark ? Colors.transparent : scheme.shadow;
 
-/// The depth a [level] paints, in the mode's own idiom — the v3 shadow tiers
-/// declared as `--memox-shadow-soft` / `-card` / `-fab` in
-/// `design_system/MemoX Design System/colors_and_type.css` (owner decision 6,
-/// 2026-09-13; GC-6). `card` reads `soft`, `raised` reads `card`, `overlay`
-/// reads `fab` — see [_Shadow]. Dark still cannot use a shade (M100.35: the
-/// dark page sits at L\* 4.11 against a darkest ink of L\* 1.18, under three
-/// L\* of headroom), so it takes [_darkDepth] instead.
+/// The depth a [level] paints, in the mode's own idiom — [AppDecorations]'
+/// v3 shadow treatments, borrowed under **the level's mapping, not the
+/// treatment's name**: `card` wears `cardWhisperShadow`, `raised` wears
+/// `overlayShadow` and `overlay` wears `fabShadow` (owner decision 6,
+/// 2026-09-13; GC-6), because that is what this app already paints today —
+/// not because the names match. Whether `raised` should someday wear a
+/// treatment actually called "raised" is a component contract's decision,
+/// deferred; this function only names the values that call will choose
+/// between. Dark still cannot use a shade (M100.35: the dark page sits at
+/// L\* 4.11 against a darkest ink of L\* 1.18, under three L\* of headroom),
+/// so it takes [_darkDepth] instead.
 List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
   if (level <= AppElevation.none) return const <BoxShadow>[];
   if (scheme.brightness == Brightness.dark) return _darkDepth(level, scheme);
 
-  final _Shadow shade = switch (level) {
-    AppElevation.card => _Shadow.soft,
-    AppElevation.raised => _Shadow.card,
-    _ => _Shadow.floating,
+  return switch (level) {
+    AppElevation.card => AppDecorations.cardWhisperShadow(scheme),
+    AppElevation.raised => AppDecorations.overlayShadow(scheme),
+    _ => AppDecorations.fabShadow(scheme),
   };
-  return <BoxShadow>[shade.paint(scheme.shadow, isDark: false)];
 }
 
 /// Dark depth: the hairline rim at every level, and above `card` the v3
@@ -84,8 +88,8 @@ List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
 /// `BoxShadow` rather than a `Border` — the border box belongs to *state*
 /// (selection, option, focus), and a depth cue that shared it would make one
 /// channel carry two facts again (M100.33). `card` alone stays rim-only: the
-/// dark block's `--memox-shadow-soft` is `none`, so [_Shadow.soft] is never
-/// asked to paint dark.
+/// dark block's `--memox-shadow-soft` is `none`, so
+/// [AppDecorations.cardWhisperShadow] is never asked to paint dark here.
 List<BoxShadow> _darkDepth(double level, ColorScheme scheme) {
   final BoxShadow rim = BoxShadow(
     color: scheme.outlineVariant,
@@ -93,71 +97,8 @@ List<BoxShadow> _darkDepth(double level, ColorScheme scheme) {
   );
   if (level <= AppElevation.card) return <BoxShadow>[rim];
 
-  final _Shadow drop = level <= AppElevation.raised
-      ? _Shadow.card
-      : _Shadow.floating;
-  return <BoxShadow>[rim, drop.paint(scheme.shadow, isDark: true)];
-}
-
-/// One `--memox-shadow-*` pair per tier — its light rule and its dark-block
-/// rule, both read from `colors_and_type.css` (owner decision 6, 2026-09-13;
-/// GC-6). No spread on a drop; the rim in [_darkDepth] is the only shadow
-/// that carries one.
-enum _Shadow {
-  /// `--memox-shadow-soft` — the card level: `0 1px 2px rgba(15,22,56,.04)`
-  /// light, `none` dark.
-  soft(
-    lightY: 1,
-    lightBlur: 2,
-    lightAlpha: 0.04,
-    darkY: 0,
-    darkBlur: 0,
-    darkAlpha: 0,
-  ),
-
-  /// `--memox-shadow-card` — the raised level: `0 12px 32px
-  /// rgba(15,22,56,.10)` light, `0 16px 40px rgba(0,0,0,.42)` dark.
-  card(
-    lightY: 12,
-    lightBlur: 32,
-    lightAlpha: 0.10,
-    darkY: 16,
-    darkBlur: 40,
-    darkAlpha: 0.42,
-  ),
-
-  /// `--memox-shadow-fab` — the overlay level: `0 8px 24px
-  /// rgba(15,22,56,.12)` light, `0 10px 28px rgba(0,0,0,.5)` dark.
-  floating(
-    lightY: 8,
-    lightBlur: 24,
-    lightAlpha: 0.12,
-    darkY: 10,
-    darkBlur: 28,
-    darkAlpha: 0.5,
-  );
-
-  const _Shadow({
-    required this.lightY,
-    required this.lightBlur,
-    required this.lightAlpha,
-    required this.darkY,
-    required this.darkBlur,
-    required this.darkAlpha,
-  });
-
-  final double lightY;
-  final double lightBlur;
-  final double lightAlpha;
-  final double darkY;
-  final double darkBlur;
-  final double darkAlpha;
-
-  /// This tier's [BoxShadow] at [shadow], picking the light or dark offset,
-  /// blur and alpha for [isDark].
-  BoxShadow paint(Color shadow, {required bool isDark}) => BoxShadow(
-    color: shadow.withValues(alpha: isDark ? darkAlpha : lightAlpha),
-    blurRadius: isDark ? darkBlur : lightBlur,
-    offset: Offset(0, isDark ? darkY : lightY),
-  );
+  final BoxShadow drop = level <= AppElevation.raised
+      ? AppDecorations.overlayShadow(scheme).single
+      : AppDecorations.fabShadow(scheme).single;
+  return <BoxShadow>[rim, drop];
 }
