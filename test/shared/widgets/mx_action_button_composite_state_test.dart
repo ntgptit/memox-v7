@@ -69,6 +69,21 @@ void main() {
   /// change — the destructive press measured ΔE 11.7 before M100.36.
   const double overshoot = 12;
 
+  /// The v3 fill hex stays verbatim (owner decision 2, 2026-09-13); the
+  /// pressed state is Material's own state layer and it lightens that fill,
+  /// so on these four cells the composite label contrast sits under AA.
+  /// Pinned at what it measures (owner decision 5, 2026-09-13) rather than
+  /// forced back to 4.5 — the real fix, a pressed treatment that darkens
+  /// instead of lightening, or a fill tuned for it, belongs to the Button
+  /// component spec. Keyed per cell, not shared by value, so one cell
+  /// drifting cannot hide behind another cell's identical number.
+  const Map<String, double> acceptedSubAAPressedFloors = <String, double>{
+    'light primary': 3.77,
+    'light destructive': 4.00,
+    'high-contrast light primary': 3.77,
+    'high-contrast light destructive': 4.00,
+  };
+
   Future<ButtonStyle> effectiveStyle(
     WidgetTester tester,
     ThemeData theme,
@@ -207,10 +222,12 @@ void main() {
             'composite', (tester) async {
           final style = await effectiveStyle(tester, theme, variant);
           final Color label = style.foregroundColor!.resolve(pressed)!;
+          final double floor =
+              acceptedSubAAPressedFloors['$themeName $variantName'] ?? 4.5;
 
           expect(
             contrast(label, composite(style, pressed)),
-            greaterThanOrEqualTo(4.5),
+            greaterThanOrEqualTo(floor),
             reason: '$themeName $variantName: label under AA while pressed',
           );
         });
