@@ -115,10 +115,9 @@ void main() {
   }
 
   group('G1 — shared left/right edges', () {
-    // Narrow included since the body took its gutter from `mxScreenGutter`:
-    // below `AppBreakpoints.compact` the shell's subheader steps to `md`, and
-    // the list now steps with it instead of holding a fixed `lg` and standing
-    // 4dp outside the field — which is the width the claim matters at most.
+    // Narrow included since the body takes its gutter from `mxScreenGutter`,
+    // which is `lg` at every width now; kept in the sweep so a regression
+    // that reintroduced a compact-only step would fail here too.
     for (final size in <Size>[narrow, phone, wide]) {
       testWidgets('search field, progress panel and rows align at '
           '${size.width.toInt()}dp', (tester) async {
@@ -248,8 +247,8 @@ void main() {
       reason:
           'The screen carries a floating create action since SC-C4-05, so the '
           'shell helper mxScrollEndInsetOf answers the FAB clearance rather '
-          'than the bare lg end gap D21 settled on for a list with nothing '
-          'over it. Re-aimed rather than relaxed: what this test measures is '
+          'than the bare end gap D21 settled on for a list with nothing over '
+          'it. Re-aimed rather than relaxed: what this test measures is '
           "that the inset is still the shell's answer, and the shell's answer "
           'changed because the screen did. It read xxl once — double the lg it '
           'then wanted — which pinned a divergence instead of catching it '

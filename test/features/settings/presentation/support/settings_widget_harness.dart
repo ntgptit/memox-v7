@@ -38,10 +38,9 @@ Future<void> pumpSettings(
   addTearDown(() => tester.binding.setSurfaceSize(null));
   // **The view too, not only the surface.** `setSurfaceSize` resizes what the
   // tree is laid out into; it leaves `MediaQuery` reporting the test view's own
-  // 800x600. Everything that branches on width reads `MediaQuery` —
-  // `mxScreenGutter` and `CompactScaleWidget` both do — so without this a
-  // `320dp` case laid itself out 320 wide while every width decision inside it
-  // was still answering "roomy".
+  // 800x600. `CompactScaleWidget` still branches on width, reading it from
+  // `MediaQuery` — so without this a `320dp` case laid itself out 320 wide
+  // while the compact-scale decision inside it was still answering "roomy".
   tester.view.physicalSize = surface * tester.view.devicePixelRatio;
   addTearDown(tester.view.resetPhysicalSize);
 
@@ -67,10 +66,10 @@ Future<void> pumpSettings(
           ),
           // **The compact scale, because the real app applies it here too**
           // (`app.dart`'s `MaterialApp.builder`). Without it every `320dp`
-          // case in this suite rendered the roomy theme, so the tier those
-          // cases exist to exercise was the one thing they could not see —
-          // which is how a card kept a fixed 16dp inner gutter while the rows
-          // beside it stepped to 12.
+          // case in this suite rendered the roomy button padding and card-
+          // prompt size instead of the compact ones the real app shows there
+          // — the screen gutter no longer moves with this tier, but those two
+          // still do.
           child: CompactScaleWidget(child: child ?? const SizedBox.shrink()),
         ),
         home: const SettingsScreen(),

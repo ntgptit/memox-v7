@@ -66,14 +66,6 @@ ThemeData _buildCompactScale(ThemeData base) {
           ),
         ),
     ],
-    listTileTheme: base.listTileTheme.copyWith(
-      // Horizontal only. The vertical rhythm is what keeps a row tappable.
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-    ),
-
     // Buttons keep their height and lose horizontal padding, which is the
     // opposite of what "make the button smaller" would do and the only version
     // that helps.

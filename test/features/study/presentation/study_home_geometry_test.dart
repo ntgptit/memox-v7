@@ -62,7 +62,7 @@ void main() {
       expect(screen.right - row.right, AppSpacing.lg);
     });
 
-    testWidgets('at 320dp the gutter steps down with the breakpoint', (
+    testWidgets('at 320dp the gutter holds, same as every other width', (
       tester,
     ) async {
       await harness.pump(tester, surface: const Size(320, 568));
@@ -70,10 +70,10 @@ void main() {
       final screen = tester.getRect(find.byType(MaterialApp));
       final row = tester.getRect(find.byType(StudyHomeDeckItemWidget).first);
 
-      // `mxScreenGutter` drops below `AppBreakpoints.compact`, and the screen
-      // takes it from there rather than re-deriving the rule — a second copy is
-      // how the two drift apart below 360, where nobody looks.
-      expect(row.left - screen.left, AppSpacing.md);
+      // `mxScreenGutter` is `lg` at every width now, and the screen takes it
+      // from there rather than re-deriving the rule — a second copy is how
+      // the two drift apart below 360, where nobody looks.
+      expect(row.left - screen.left, AppSpacing.lg);
     });
 
     testWidgets('past the ceiling the column stops growing and centres', (

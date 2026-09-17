@@ -112,7 +112,7 @@ void main() {
           },
         ),
       );
-      expect(inShell, AppSpacing.lg);
+      expect(inShell, AppSpacing.xxxl);
 
       late double bare;
       await tester.pumpWidget(
@@ -123,7 +123,7 @@ void main() {
           },
         ),
       );
-      expect(bare, AppSpacing.lg);
+      expect(bare, AppSpacing.xxxl);
     });
   });
 

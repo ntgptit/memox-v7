@@ -63,55 +63,6 @@ void main() {
         roomy.textTheme.headlineMedium!.fontSize,
       );
     });
-
-    testWidgets('list rows lose horizontal padding, not vertical', (
-      tester,
-    ) async {
-      final compact = await themeAt(tester, small);
-      final roomy = await themeAt(tester, normal);
-
-      final compactPadding =
-          compact.listTileTheme.contentPadding! as EdgeInsets;
-      final roomyPadding = roomy.listTileTheme.contentPadding! as EdgeInsets;
-
-      expect(compactPadding.left, AppSpacing.md);
-      expect(roomyPadding.left, AppSpacing.lg);
-      // Vertical rhythm is what keeps a row tappable.
-      expect(compactPadding.vertical, roomyPadding.vertical);
-    });
-
-    testWidgets('screen padding drops from lg to md', (tester) async {
-      for (final entry in <Size, double>{
-        small: AppSpacing.md,
-        normal: AppSpacing.lg,
-      }.entries) {
-        tester.view.physicalSize = entry.key;
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
-
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: buildLightTheme(),
-            home: const CompactScaleWidget(
-              child: MxContentShell(body: Text('body')),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        final padding = tester.widget<Padding>(
-          find
-              .ancestor(of: find.text('body'), matching: find.byType(Padding))
-              .first,
-        );
-
-        expect(
-          (padding.padding as EdgeInsets).left,
-          entry.value,
-          reason: '${entry.key}',
-        );
-      }
-    });
   });
 
   group('buttons', () {
@@ -190,6 +141,57 @@ void main() {
   });
 
   group('what the compact scale must never change', () {
+    testWidgets('list rows keep their horizontal padding', (tester) async {
+      // Rows stay on the 16 gutter at every width (v3 Composition): the
+      // compact pass no longer touches `listTileTheme.contentPadding`, so a
+      // row's inset agrees with the screen gutter beside it instead of
+      // stepping to `md` on its own.
+      final compact = await themeAt(tester, small);
+      final roomy = await themeAt(tester, normal);
+
+      final compactPadding =
+          compact.listTileTheme.contentPadding! as EdgeInsets;
+      final roomyPadding = roomy.listTileTheme.contentPadding! as EdgeInsets;
+
+      expect(compactPadding.left, AppSpacing.lg);
+      expect(roomyPadding.left, AppSpacing.lg);
+      // Vertical rhythm is what keeps a row tappable.
+      expect(compactPadding.vertical, roomyPadding.vertical);
+    });
+
+    testWidgets('screen padding holds at lg, compact or not', (tester) async {
+      // `mxScreenGutter` is `lg` at every width (v3 Composition). Both sizes
+      // are still pumped so a regression that reintroduced a compact-only
+      // step would fail here instead of passing unnoticed.
+      for (final size in <Size>[small, normal]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: buildLightTheme(),
+            home: const CompactScaleWidget(
+              child: MxContentShell(body: Text('body')),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final padding = tester.widget<Padding>(
+          find
+              .ancestor(of: find.text('body'), matching: find.byType(Padding))
+              .first,
+        );
+
+        expect(
+          (padding.padding as EdgeInsets).left,
+          AppSpacing.lg,
+          reason: '$size',
+        );
+      }
+    });
+
     testWidgets('the text link keeps its zero padding', (tester) async {
       // The link has no horizontal padding to give back, and handing it the
       // buttons' compact padding would indent the one control whose whole

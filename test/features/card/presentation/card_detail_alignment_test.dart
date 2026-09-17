@@ -34,9 +34,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // `mxScreenGutter`: `md` below 360dp, `lg` at or above it — the same
-        // helper every other screen takes its gutter from.
-        final gutter = size.width < 360 ? AppSpacing.md : AppSpacing.lg;
+        // `mxScreenGutter`: `lg` at every width now — the same helper every
+        // other screen takes its gutter from.
+        const gutter = AppSpacing.lg;
         final hero = tester.getRect(heroCard());
         final panel = tester.getRect(progressPanel());
         expect(hero.left, gutter);

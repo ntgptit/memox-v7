@@ -26,15 +26,16 @@ class MxScrollEndInsetScope extends InheritedWidget {
 
 /// The inset a scrolling list leaves after its last row.
 ///
-/// Under a floating action it is the clearance the button needs plus the
-/// gesture inset — on a device with a home indicator the last row would
-/// otherwise end under it. Without one it is the ordinary end gap. Outside a
-/// shell there is no button to clear, so a body pumped on its own gets the
-/// ordinary gap too.
+/// Without a floating action it is [AppSpacing.xxxl] — the 48 every
+/// scrollable clears above pinned chrome at the tail (v3 Composition), so the
+/// last item is never trapped under the bottom nav. Under one it is
+/// [AppSpacing.fabScrollClearance] plus the gesture inset — on a device with a
+/// home indicator the last row would otherwise end under it. Outside a shell
+/// there is no button to clear, so a body pumped on its own gets the same 48.
 double mxScrollEndInsetOf(BuildContext context) {
   final scope = context
       .dependOnInheritedWidgetOfExactType<MxScrollEndInsetScope>();
-  if (scope == null || !scope.hasFloatingAction) return AppSpacing.lg;
+  if (scope == null || !scope.hasFloatingAction) return AppSpacing.xxxl;
   return AppSpacing.fabScrollClearance +
       MediaQuery.viewPaddingOf(context).bottom;
 }

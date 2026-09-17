@@ -23,10 +23,10 @@ import 'support/search_screen_harness.dart';
 /// one is an `EdgeInsets` on a `SliverPadding` rather than a separator — so the
 /// half of the finding a scan cannot reach is pinned here, by geometry.
 ///
-/// Both widths, for `library_search_review_test.dart`'s recorded reason: at
-/// 320dp `mxScreenGutter` steps to `md` and the horizontal edges move, but the
-/// vertical scale must not — a rhythm that changes with the gutter is the drift
-/// this screen has already had once.
+/// Both widths, for `library_search_review_test.dart`'s recorded reason: the
+/// vertical scale must hold regardless of what the horizontal gutter does at
+/// 320dp — a rhythm that changes with the gutter is the drift this screen has
+/// already had once.
 void main() {
   Finder groupHeader(SearchResultGroup group) => find.byWidgetPredicate(
     (Widget widget) =>

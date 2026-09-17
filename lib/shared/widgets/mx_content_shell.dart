@@ -113,8 +113,8 @@ class MxContentShell extends StatefulWidget {
   /// short and letting it ellipsize.
   final Widget? titleSubline;
 
-  /// Screen padding. `null` resolves to the scale for the current width:
-  /// [AppSpacing.lg], or [AppSpacing.md] below [AppBreakpoints.compact].
+  /// Screen padding. `null` resolves to [AppSpacing.lg] via [mxScreenGutter],
+  /// the same 16 at every width.
   final EdgeInsetsGeometry? padding;
 
   /// Opt-in: a body that already scrolls must not be nested inside another
@@ -462,17 +462,14 @@ class MxSubheaderBand extends StatelessWidget {
   }
 }
 
-/// The screen gutter: 16 normally, 12 below [AppBreakpoints.compact] — the
-/// design uses the same two numbers at the same breakpoint.
+/// The screen gutter: 16 at every width (v3 Composition — "Compact phone …
+/// gutter stays 16").
 ///
 /// Public because a screen that opts out of [MxContentShell.padding] to let one
 /// band bleed to the edge still has to line the *rest* of itself up with every
-/// other screen. Re-deriving the breakpoint rule at the call site is how the two
-/// drift apart, and the drift only shows below 360 where nobody looks.
-double mxScreenGutter(BuildContext context) {
-  final isCompact = AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width);
-  return isCompact ? AppSpacing.md : AppSpacing.lg;
-}
+/// other screen. Re-deriving the rule at the call site is how the two drift
+/// apart, so every screen reads it from here even though it no longer branches.
+double mxScreenGutter(BuildContext context) => AppSpacing.lg;
 
 EdgeInsets _defaultPadding(BuildContext context) =>
     EdgeInsets.all(mxScreenGutter(context));

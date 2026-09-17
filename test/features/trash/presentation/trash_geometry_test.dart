@@ -106,21 +106,19 @@ void main() {
   /// The page gutters every contract below is written against, and how much of
   /// the trailing side the overflow button's own inset cannot give back.
   ///
-  /// **Two surfaces, not one.** `mxScreenGutter` steps down to `md` under
-  /// `AppBreakpoints.compact`, so a shared-edge contract measured at a single
-  /// width cannot see the tier where the edges actually come apart — which is
-  /// how the selection bar held a literal 16 while everything above it went
-  /// to 12.
+  /// **Two surfaces, not one, even though `mxScreenGutter` is `lg` at every
+  /// width now.** Kept at two widths so a shared-edge contract measured at a
+  /// single one cannot go blind to a regression that reintroduces a tier where
+  /// the edges come apart — which is how the selection bar once held a literal
+  /// 16 while everything above it went to 12.
   ///
   /// The third figure is the trailing residue. The row buys its right edge by
   /// paying `xs` outside a button that centres a 24dp glyph in a 48dp box, so
-  /// 4 + 12 lands on 16 — exactly the gutter at regular width, and 4dp inside
-  /// it on the compact tier, where the button's half-box does not step down
-  /// with the gutter. `deck_tile_widget.dart:113-117` makes the same trade for
-  /// the same reason; buying the last 4dp would mean a zero trailing pad at
-  /// 320dp, which is a different decision from this one.
+  /// 4 + 12 lands on 16 — exactly the gutter at both widths now, so the
+  /// residue is zero at both. It used to be `xs` at 320dp, when the compact
+  /// gutter was `md` (12) and the button's fixed math still landed on 16.
   const List<(Size, double, double)> surfaces = <(Size, double, double)>[
-    (Size(320, 640), AppSpacing.md, AppSpacing.xs),
+    (Size(320, 640), AppSpacing.lg, 0),
     (Size(393, 852), AppSpacing.lg, 0),
   ];
 
@@ -236,7 +234,7 @@ void main() {
           reason:
               'G2: the row\'s trailing glyph sits on the same edge the chips, '
               'the notice and its own leading icon use, less the $residue the '
-              'button\'s half-box keeps on the compact tier',
+              'button\'s half-box always keeps back',
         );
       });
     }

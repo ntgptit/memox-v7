@@ -69,12 +69,14 @@ void main() {
     });
 
     test('the FAB clearance is derived from the FAB, not repeated', () {
-      // `AppSpacing.fabScrollClearance` is the button plus a gap on each side.
-      // Written as arithmetic over the token rather than as a fourth literal,
-      // so a FAB that ever changed size could not leave the clearance behind.
+      // `AppSpacing.fabScrollClearance` is the button, an `lg` gap above it,
+      // and the ordinary `xxxl` tail clearance below — the same 48 a list
+      // with no FAB clears. Written as arithmetic over the tokens rather than
+      // as a fourth literal, so a FAB that ever changed size could not leave
+      // the clearance behind.
       expect(
         AppSpacing.fabScrollClearance,
-        AppSizing.floatingAction + AppSpacing.lg + AppSpacing.lg,
+        AppSizing.floatingAction + AppSpacing.lg + AppSpacing.xxxl,
       );
     });
   });
