@@ -250,12 +250,12 @@ void main() {
       // pins it), so the ratio is the ring's, not a blurred approximation.
       // 6.0 was Tokyo's two-layer float+contact shade. The v3 tiers
       // (`--memox-shadow-soft`, `colors_and_type.css`) paint `card` at a
-      // single 4% layer, which measures 4.90 L* here; 4.5 keeps a floor below
-      // that without re-quoting a shape this recipe no longer paints.
+      // single 4% layer, which measures 4.898 L* here; the floor is that
+      // figure floored to two decimals (R12), so any further drop is caught.
       final lightLift = liftOf(themes['light']!);
       expect(
         lightLift,
-        greaterThanOrEqualTo(4.5),
+        greaterThanOrEqualTo(4.89),
         reason:
             'light: a card edge moves the page by only '
             '${lightLift.toStringAsFixed(2)} L*. Below this a card does not '
