@@ -31,7 +31,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// only what makes them themselves.
   factory AppTextStyles.from(TextTheme texts) {
     final promptBase = (texts.headlineMedium ?? const TextStyle()).copyWith(
-      fontFamily: AppTypography.displayFamily,
+      fontFamily: AppTypography.family,
       fontFamilyFallback: AppTypography.cjkFallback,
       fontSize: AppTypography.cardPromptSize,
       height: AppTypography.cardPromptHeight,
@@ -58,12 +58,12 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
         ),
         FontWeight.w600,
       ),
-      heroNumeral: AppTypography.withWeight(
-        (texts.headlineLarge ?? const TextStyle()).copyWith(
-          height: AppTypography.heroNumeralCapTrim,
-          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-        ),
-        AppTypography.heroNumeralWeight,
+      // The stat rung's own weight, not a restated one: a named style that
+      // re-set its weight would pin it against `applyBoldText`, which rebuilds
+      // these styles from already-emboldened rungs.
+      heroNumeral: (texts.displayLarge ?? const TextStyle()).copyWith(
+        height: AppTypography.heroNumeralCapTrim,
+        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
       ),
     );
   }
@@ -94,11 +94,11 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// `listHeadingTracking` and the weight raised to the emphatic 600.
   final TextStyle listHeading;
 
-  /// The one huge number a summary leads with: `headline-lg` at the app's
-  /// fourth weight, cap-trimmed and tabular. **Moving it here fixed the
-  /// twelfth instance of the weight-without-axis bug** — the style used to be
+  /// The one huge number a summary leads with: the stat rung (`displayLarge`,
+  /// 40/600), cap-trimmed and tabular. **Moving it here fixed the twelfth
+  /// instance of the weight-without-axis bug** — the style used to be
   /// assembled per-site with a bare `fontWeight: heroNumeralWeight`, which
-  /// declared the fourth weight and painted the rung's default.
+  /// declared the weight and painted the rung's default.
   final TextStyle heroNumeral;
 
   @override

@@ -114,8 +114,7 @@ class _HeroFigureLine extends StatelessWidget {
   ///
   /// Now the `heroNumeral` role: assembled per-site, its bare
   /// `fontWeight: heroNumeralWeight` was the twelfth instance of the
-  /// weight-without-axis bug — the fourth weight was declared and never
-  /// painted.
+  /// weight-without-axis bug — the weight was declared and never painted.
   TextStyle? _numeralStyle(BuildContext context) =>
       context.textStyles.heroNumeral;
 

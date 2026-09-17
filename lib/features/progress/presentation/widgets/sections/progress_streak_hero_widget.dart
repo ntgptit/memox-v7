@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
-import '../../../../../core/theme/typography/app_typography.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -100,23 +99,25 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                       // `headlineMedium`, not `displayLarge`: the hero led the
                       // first viewport at a size nothing else on the screen
                       // could balance against (implementation prompt, Why 1).
-                      // No text-scaler clamp is needed at this rung — measured
-                      // below, not assumed: at scale 2.0 "days" alone is 130dp
-                      // in English and 133dp in Vietnamese (28px vs the old
-                      // 57px rung, same font), well inside the 264dp compact
-                      // content column the old clamp was written for
+                      // No text-scaler clamp is needed at this rung — GC-4
+                      // took it from 28px to 24px with tighter tracking, so
+                      // the margin against the 264dp compact content column
+                      // only grew; re-measure at scale 2.0 if that ever looks
+                      // close again
                       // (`progress_screen_geometry_extremes_test.dart` pins
                       // the absence of clipping instead of a size cap).
                       // Explicit, not left to `Text`'s own default — the
                       // property the extremes test reads off the render
                       // object is only populated once something states it.
                       textScaler: MediaQuery.textScalerOf(context),
-                      // The one weight a feature adds, by its name: the hero
-                      // numeral's (A20.1 P1-10).
-                      style: AppTypography.withWeight(
-                        texts.headlineMedium!,
-                        AppTypography.heroNumeralWeight,
-                      ).inked(context, AppInk.stated),
+                      // The headline role at its own 700 (GC-4). It was this
+                      // rung re-weighted to the hero numeral's 700 while the
+                      // rung itself was lighter; restating a weight now would
+                      // only pin it against the OS bold-text setting.
+                      style: texts.headlineMedium!.inked(
+                        context,
+                        AppInk.stated,
+                      ),
                     ),
                   ),
                 ],

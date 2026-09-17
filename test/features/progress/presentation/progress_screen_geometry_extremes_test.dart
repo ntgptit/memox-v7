@@ -289,7 +289,7 @@ void main() {
     });
   });
 
-  testWidgets('a four-digit day pushes the bar column below its floor (X7)', (
+  testWidgets('a four-digit day pins the bar column against its floor (X7)', (
     tester,
   ) async {
     // The accepted limit, made into something that runs. The floor assertion in
@@ -314,8 +314,19 @@ void main() {
     final double content =
         rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
 
-    expect(bar.width, closeTo(63.8, 1));
-    expect(bar.width, lessThan(content / 4));
+    // Re-measured at 69.9 (was 63.8): the weekday label and the day count are
+    // both `bodyMedium` (`progress_week_widget.dart`), and GC-4 dropped its
+    // tracking (0.25 to 0) — both `IntrinsicColumnWidth` label columns got
+    // narrower, and the bar's `FlexColumnWidth` column took the difference.
+    expect(bar.width, closeTo(69.9, 1));
+    // `content / 4` is the self-declared floor this bar sat under before
+    // (63.8 < 66.0 — `docs/wireframes/m99-23-progress-overview.md` X7, M99.23
+    // deferred debt 5, still open). The same retune that moved the pin above
+    // also closed that gap for this one figure (69.9 > 66.0) — incidentally,
+    // not through the capped-column or `1.2k` fix the debt calls for, so this
+    // is flagged rather than marked resolved; a wider day count may still
+    // breach the floor.
+    expect(bar.width, greaterThan(content / 4));
     expect(tester.takeException(), isNull);
   });
 

@@ -327,7 +327,6 @@ void main() {
         final Rect empty = tester.getRect(find.byType(MxEmptyState));
         expect(empty.left, 0);
         expect(empty.right, surface.width);
-        expect(copyColumnOf(tester, MxEmptyState).left, AppSpacing.xl);
       });
 
       testWidgets('the error face keeps its own xl at $surface', (
@@ -349,6 +348,27 @@ void main() {
         expect(error.right, surface.width);
       });
     }
+
+    testWidgets('the empty copy starts at its own xl on the narrow tier', (
+      tester,
+    ) async {
+      // Asserted at 320 only: above it — and since GC-4 narrowed `titleMedium`
+      // (16/600/0.15 tracking to 16/500/0 tracking) — the empty column is
+      // narrower than the viewport at 393 too, and its own `Center` picks the
+      // left edge there, so the number would measure centring rather than
+      // padding. Same trap the error copy below was already written around.
+      await pumpProgressScreen(
+        tester,
+        repository: seeded(
+          totals: const <int>[0, 0, 0, 0, 0, 0, 0],
+          streak: 0,
+          hasLifetimeActivity: false,
+        ),
+        surface: const Size(320, 640),
+      );
+
+      expect(copyColumnOf(tester, MxEmptyState).left, AppSpacing.xl);
+    });
 
     testWidgets('the error copy starts at its own xl on the narrow tier', (
       tester,

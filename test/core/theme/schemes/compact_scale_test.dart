@@ -42,20 +42,6 @@ void main() {
   }
 
   group('what the compact scale changes', () {
-    testWidgets('the app bar title gets smaller', (tester) async {
-      final compact = await themeAt(tester, small);
-      final roomy = await themeAt(tester, normal);
-
-      // The sizes themselves (20 / 22) used to be pinned here. What this test
-      // is about is the compact pass, not the type scale: the claim worth
-      // holding is that compact is strictly smaller, at whatever sizes the
-      // scale settles on.
-      expect(
-        compact.textTheme.titleLarge!.fontSize,
-        lessThan(roomy.textTheme.titleLarge!.fontSize!),
-      );
-    });
-
     testWidgets('the study card prompt gets smaller', (tester) async {
       final compact = await themeAt(tester, small);
       final roomy = await themeAt(tester, normal);
@@ -225,10 +211,18 @@ void main() {
       // accessibility setting — and undoes it hardest for the people most likely
       // to need it, since large text is at least as common on a small cheap
       // phone as on a big one. Device width is not a proxy for eyesight.
+      //
+      // `titleLarge` joined this list when its own compact override was
+      // dropped: GC-4's title role is 20 at every width, so forcing 20 again
+      // here would have been a no-op pretending to be a feature.
       final compact = await themeAt(tester, small);
       final roomy = await themeAt(tester, normal);
 
       for (final entry in <String, (TextStyle?, TextStyle?)>{
+        'titleLarge': (
+          compact.textTheme.titleLarge,
+          roomy.textTheme.titleLarge,
+        ),
         'bodyLarge': (compact.textTheme.bodyLarge, roomy.textTheme.bodyLarge),
         'bodyMedium': (
           compact.textTheme.bodyMedium,

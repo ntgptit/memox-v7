@@ -527,7 +527,7 @@ class _RhythmRuler extends StatelessWidget {
         // harness default, which paints every glyph as a filled box — the
         // ruler's first two renders were unreadable for exactly that reason.
         style: TextStyle(
-          fontFamily: AppTypography.bodyFamily,
+          fontFamily: AppTypography.family,
           fontFamilyFallback: AppTypography.cjkFallback,
           color: _ink,
           fontSize: fontSize,

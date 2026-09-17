@@ -193,8 +193,8 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     // own Android answer.
     platform: TargetPlatform.android,
     // Anything that builds its own TextStyle without going through the text
-    // theme still lands on the body face rather than the platform default.
-    fontFamily: AppTypography.bodyFamily,
+    // theme still lands on the app's face rather than the platform default.
+    fontFamily: AppTypography.family,
   );
 
   // **Built once, then handed to every slot below.** Component themes took
