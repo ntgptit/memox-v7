@@ -207,14 +207,15 @@ double _inkBelowLabel = 0;
 /// `descent 3.19 + half the sort control's 48px target`.
 const double _minimumGroupingLead = AppSpacing.sm;
 
-/// Inter's cap height as a fraction of the em, for `YOUR DECKS`.
+/// Plus Jakarta Sans's cap height as a fraction of the em, for `YOUR DECKS`
+/// (OS/2 `sCapHeight` 745 over `unitsPerEm` 1000).
 ///
 /// **Pinned to the face, like [AppTypography.heroNumeralCapTrim].** Uppercase
 /// ink runs from the baseline to the cap, which is neither the font's ascent
-/// nor the line box — Inter's ascent leaves 4.09px above the caps at 12px, and
-/// counting that as ink puts every number here 4px out. If the body family
-/// changes, this changes with it.
-const double _interCapHeight = 0.727;
+/// nor the line box — the face's ascent leaves space above the caps, and
+/// counting that as ink puts every number here out by that space. If the
+/// family changes, this changes with it.
+const double _capHeight = 0.745;
 
 /// One thing the screen stacks, and the box it occupies.
 typedef _Band = ({String name, Rect rect, bool isInFlow});
@@ -308,10 +309,9 @@ List<_Band> _bandsOf(WidgetTester tester) {
 /// Where `YOUR DECKS` actually puts ink: cap to baseline, not the line box.
 ///
 /// Uppercase has no descender, so the bottom of the ink *is* the baseline. The
-/// top is the baseline less the cap height — [_interCapHeight] of the em — and
-/// not the ascent, which at this size sits 4.09px above the capitals. Taking
-/// the ascent for ink is the same class of error as taking it for leading, and
-/// it puts every number here 4px out.
+/// top is the baseline less the cap height — [_capHeight] of the em — and
+/// not the ascent, which sits above the capitals. Taking the ascent for ink is
+/// the same class of error as taking it for leading.
 Rect _labelInk(WidgetTester tester) {
   final label = find.descendant(
     of: find.byType(DeckListToolbarWidget),
@@ -329,7 +329,7 @@ Rect _labelInk(WidgetTester tester) {
 
   return Rect.fromLTRB(
     box.left,
-    baseline - style.fontSize! * _interCapHeight,
+    baseline - style.fontSize! * _capHeight,
     box.right,
     baseline,
   );
