@@ -216,13 +216,17 @@ void main() {
         // #433 F4: the border went red and the `+` beside it stayed grey,
         // because the themed `IconButtonTheme` answered before the M3 default
         // that carries the error branch.
+        //
+        // The glyph is read like the error text beside it, so it is the
+        // danger ink, not the fill (GC-3, 2026-09-17) — the border keeps
+        // `error`.
         expect(
           await suffixColorOf(
             tester,
             errorText: 'Already tagged',
             isDark: mode.$2,
           ),
-          theme.colorScheme.error,
+          semantic.dangerInk,
         );
         expect(
           await suffixColorOf(tester, isEnabled: false, isDark: mode.$2),

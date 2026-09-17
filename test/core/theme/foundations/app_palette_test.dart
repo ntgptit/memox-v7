@@ -224,6 +224,11 @@ void main() {
     // `_OutlinedButtonDefaultsM3.foregroundColor` already fills, so the pin
     // was holding a substitution in place: any agent restoring the canonical
     // role would have been failed by the suite for doing the right thing.
+    //
+    // **Since GC-3 (2026-09-17) the canonical answer is the brand's ink, not
+    // its fill** — v3's light `primary` fails 4.5:1 as bare text, so the label
+    // reads `accentInk` instead. `m3_role_bindings.dart` pins the same move at
+    // source level.
     test('is the canonical M3 role, not a substitute token', () {
       for (final entry in <String, ThemeData>{
         'light': light,
@@ -231,9 +236,8 @@ void main() {
       }.entries) {
         expect(
           outlinedButtonLabel(entry.value),
-          entry.value.colorScheme.primary,
-          reason:
-              '${entry.key}: _OutlinedButtonDefaultsM3 names `primary` here',
+          entry.value.extension<AppSemanticColors>()!.accentInk,
+          reason: '${entry.key}: the label is text, so it takes the ink',
         );
       }
     });

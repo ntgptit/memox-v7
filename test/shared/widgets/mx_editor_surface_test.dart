@@ -157,7 +157,9 @@ void main() {
       final BuildContext context = tester.element(find.byType(IconButton));
       expect(
         tester.widget<IconButton>(find.byType(IconButton)).color,
-        context.semanticColors.warning,
+        // The glyph stands in for a word, so it is the warning ink, not the
+        // fill (GC-3, 2026-09-17).
+        context.semanticColors.warningInk,
       );
     });
 

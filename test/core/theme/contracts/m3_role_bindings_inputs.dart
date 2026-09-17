@@ -175,11 +175,13 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
     slot: 'selectedColor',
     file: _listTile,
     scope: 'buildListTileTheme',
-    requires: <String>['primary'],
-    refuses: <String>['secondary', 'onSecondaryContainer'],
+    requires: <String>['onPrimaryContainer'],
+    refuses: <String>['primary', 'secondary', 'onSecondaryContainer'],
     because:
-        '_LisTileDefaultsM3.selectedColor is primary; the secondary accent '
-        'belongs to the card edge and the glyph (3:1 graphics), not to a row '
-        'label that needs 4.5:1.',
+        'A picked row sits on surfaceSelected — v3\'s primaryContainer — '
+        'where primary reads 3.70:1 as text and even accentInk falls short '
+        'at 4.48 (solved for neutral grounds, not this one); the label takes '
+        'the container\'s own ink, onPrimaryContainer, at 10.37:1 (GC-3, '
+        '2026-09-17).',
   ),
 ];

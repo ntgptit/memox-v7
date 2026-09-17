@@ -159,7 +159,9 @@ void main() {
         final foreground = entry.value.textButtonTheme.style!.foregroundColor!;
         final rest = foreground.resolve(resting);
 
-        expect(rest, entry.value.colorScheme.primary, reason: entry.key);
+        // The label is text, so it rests on the brand's ink, not its fill
+        // (GC-3, 2026-09-17).
+        expect(rest, semantic.accentInk, reason: entry.key);
         expect(
           foreground.resolve(hovered),
           isNot(rest),

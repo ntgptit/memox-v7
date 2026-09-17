@@ -159,8 +159,11 @@ void main() {
         );
         expect(
           title.text.style?.color,
+          // Selected sits on `surfaceSelected` (v3's `primaryContainer`), so
+          // the label takes the container's own ink, not the brand's plain
+          // ink (GC-3, 2026-09-17) — see `app_list_tile_theme.dart`.
           selected == true
-              ? theme.colorScheme.primary
+              ? theme.colorScheme.onPrimaryContainer
               : theme.colorScheme.onSurface,
           reason: 'selected=$selected: title ink',
         );

@@ -45,11 +45,13 @@ ListTileThemeData buildListTileTheme(
   leadingAndTrailingTextStyle: texts.bodyMedium!.copyWith(
     color: scheme.onSurfaceVariant,
   ),
-  // **`primary`, and the ground is what used to make that hard.** A
-  // selected row lands on `surfaceSelected`, not the page, and the old dark
-  // fill tone measured 2.45:1 there — under WCAG 1.4.11's 3:1 for a state
-  // and far under the 4.5:1 its label needs, which is why a second token
-  // stood here until M100.19. Tone 80 clears both grounds outright.
+  // **`onPrimaryContainer`, the selected fill's own ink** (GC-3, 2026-09-17).
+  // A picked row lands on `surfaceSelected`, which is v3's `primaryContainer`
+  // — where the brand reads 3.70:1 as text in light (below 4.5) and even
+  // `accentInk` falls short there at 4.48 (solved for the neutral text
+  // grounds, not this tinted one). The container's own ink clears it outright
+  // at 10.37:1 light / 8.81:1 dark, and it is the pair the kit already gives a
+  // selected chip or FAB.
   //
   // Not the `secondaryContainer` pair NavigationBar and the chips take,
   // though that would also pass: a row is a wide target, and a tinted fill
@@ -58,13 +60,13 @@ ListTileThemeData buildListTileTheme(
   // weight a row can carry. `ListTile` has no M3 selected-fill default to
   // depart from; `selectedTileColor` is null in Material and the choice is
   // the app's to make.
-  selectedColor: scheme.primary,
+  selectedColor: scheme.onPrimaryContainer,
   // **`surfaceSelected` — the one app-owned "picked" surface** (M100.36 4I,
   // #431 P1-4). It was `surfaceMuted`, a neutral grey, while `MxCard`'s tint
   // for the same meaning was `surfaceSelected`, an indigo tint; two fills for
   // one idea, argued in two files that never cited each other. `MxCard`
-  // keeps its own; this one now shares it. `primary` measures 5.4:1 light
-  // and 7.3:1 dark on it (`component_depth_and_state_test.dart`).
+  // keeps its own; this one now shares it. The label ink is measured on it in
+  // `component_depth_and_state_test.dart`.
   selectedTileColor: semantic.surfaceSelected,
   // **No `shape`: the row is the rectangle M3 draws it as** (M100.37, #431
   // P2-11). It carried `AppRadius.md` (12), and every row in the app sits

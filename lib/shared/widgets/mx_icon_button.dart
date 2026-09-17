@@ -18,8 +18,10 @@ enum MxIconButtonTone {
   standard,
 
   /// A state worth noticing, set by the user and reversible: the card editor's
-  /// raised flag. `AppSemanticColors.warning`, the same role the tone axis on
-  /// dialogs uses for the same meaning.
+  /// raised flag. `AppSemanticColors.warningInk` — a glyph standing in for a
+  /// word takes the warning ink rather than the fill, which fails 4.5:1 as a
+  /// word would (GC-3, 2026-09-17). The same family the tone axis on dialogs
+  /// uses for the same meaning.
   ///
   /// **It is never the only signal.** The glyph itself changes with the state —
   /// outlined to filled — so the flag reads as raised without colour vision,
@@ -138,7 +140,7 @@ class MxIconButton extends StatelessWidget {
       // the control can be pressed.
       color: switch (tone) {
         MxIconButtonTone.standard => null,
-        MxIconButtonTone.warning => context.semanticColors.warning,
+        MxIconButtonTone.warning => context.semanticColors.warningInk,
       },
       tooltip: tooltip ?? semanticLabel,
       constraints: isCompact
