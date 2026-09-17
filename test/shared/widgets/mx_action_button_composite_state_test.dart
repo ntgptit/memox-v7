@@ -203,8 +203,6 @@ void main() {
           }
         });
 
-        // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-        /*
         testWidgets('$variantName · the label still clears AA on the pressed '
             'composite', (tester) async {
           final style = await effectiveStyle(tester, theme, variant);
@@ -216,7 +214,6 @@ void main() {
             reason: '$themeName $variantName: label under AA while pressed',
           );
         });
-        */
       }
     });
   }

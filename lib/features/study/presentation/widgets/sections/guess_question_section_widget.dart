@@ -183,6 +183,7 @@ class _GuessQuestionSectionWidgetState
                 context,
                 option.text,
                 width: constraints.maxWidth,
+                state: _stateOf(option),
               ),
         );
     // **The gap below the card is subtracted here and drawn below, so the two
@@ -238,6 +239,7 @@ class _GuessQuestionSectionWidgetState
           context,
           option.text,
           width: constraints.maxWidth,
+          state: _stateOf(option),
         ),
     ];
 

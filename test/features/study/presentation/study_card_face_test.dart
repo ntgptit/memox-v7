@@ -147,7 +147,10 @@ void main() {
       expect(front.style?.fontSize, texts.titleLarge?.fontSize);
       expect(front.style?.fontWeight, FontWeight.w500);
       expect(back.style?.fontSize, texts.bodyLarge?.fontSize);
-      expect(back.style?.fontWeight, FontWeight.w400);
+      // v3's body-large rung is itself 500 (GC-4) — the back already renders
+      // `texts.bodyLarge` unmodified, so the weight below is that rung's own,
+      // not an emphasis this widget adds.
+      expect(back.style?.fontWeight, FontWeight.w500);
       expect(
         front.style?.fontSize,
         greaterThan(back.style!.fontSize!),
@@ -425,7 +428,11 @@ void main() {
     expect(find.byType(Divider), findsNothing);
     final card = tester.getRect(find.byType(MxCard));
     final front = tester.getRect(find.text('front-c1'));
-    expect(front.center.dy, closeTo(card.center.dy, 8));
+    // 9, not 8: `_CardHalf` centres the text in the space *below* its label,
+    // so the structural offset is exactly half the label's own height —
+    // v3's caption rung (12/600/1.4, GC-4) sets a hair taller than the rung it
+    // replaced, moving the measured offset from ~7.x to 8.5.
+    expect(front.center.dy, closeTo(card.center.dy, 9));
   });
 
   testWidgets('the last grade sits flush with the foot of the body', (

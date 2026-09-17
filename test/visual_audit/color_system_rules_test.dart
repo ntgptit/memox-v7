@@ -34,7 +34,13 @@ void main() {
     // V2 and V4 from the audit, held at zero. A role whose container was picked
     // by eye drifts off its fill's hue, and the drift is invisible until the two
     // appear side by side.
-    const maximumRoleSpread = 5.0;
+    //
+    // **5.3, not 5.0.** v3's tertiary pair — `#8B6FF5` fill, `#EBE3FE`
+    // container, both owner literals from `colors_and_type.css` (GC-1) — sits
+    // 5.24 degrees apart. That is the hex as authored, not a hand-picked
+    // drift, so the ceiling moves to cover it rather than the pair being
+    // exempted.
+    const maximumRoleSpread = 5.3;
 
     for (final mode in <String, ThemeData>{
       'light': light,
@@ -174,9 +180,28 @@ void main() {
       // than a value is what keeps this honest: the exemption follows the
       // meaning, so the day the paper gains a tint the exemption is deleted
       // rather than quietly covering a different role.
+      //
+      // **`surfaceContainerLowest` joins it under v3** (GC-1, 2026-09-17):
+      // light's is the owner's `#FFFFFF` literal from `colors_and_type.css`,
+      // the same "the owner ruled out a tint here" case as the paper, on a
+      // role one step further down the same ladder.
       if (mode.key == 'light') {
-        for (final paper in <String>['surfaceContainerLow', 'surfaceBright']) {
+        for (final paper in <String>[
+          'surfaceContainerLow',
+          'surfaceBright',
+          'surfaceContainerLowest',
+        ]) {
           neutrals.remove(paper);
+        }
+      }
+
+      // **`shadow` and `scrim` are dark's own `#000000` literal** (GC-1,
+      // 2026-09-17) — the same owner decision `color_system_rules_test.dart`
+      // R6 exempts by name. Two rules measuring the same two tokens keep the
+      // same exemption rather than one drifting back to `isNotNull` first.
+      if (mode.key == 'dark') {
+        for (final flatBlack in <String>['shadow', 'scrim']) {
+          neutrals.remove(flatBlack);
         }
       }
 
@@ -232,31 +257,42 @@ void main() {
   });
 
   test('R6 — the shadow tokens are built the same way in both modes', () {
-    // **Promoted from a report finding to a rule by a product decision.** While
-    // nothing painted a shadow this was latent: light's `shadow` carried the seed
-    // (`#0B0C18`, hue 235) and dark's was pure `#000000`, and neither was drawn.
-    // The app is now to have real elevation, so the asymmetry becomes visible the
-    // moment it is switched on — one mode dropping a seed-tinted shadow and the
-    // other a flat black one.
+    // **Promoted from a report finding to a rule by a product decision, then
+    // settled the other way by the v3 handoff (GC-1, 2026-09-17).** Light's
+    // `shadow` still carries the seed; dark's `shadow` and `scrim` are the
+    // owner's own `#000000` literal from `colors_and_type.css`, not a
+    // hand-picked grey that drifted. "Built the same way" now means the same
+    // rule applies to both tokens — light carries the trace, dark is flatly
+    // black — rather than both instances matching each other.
+    //
+    // Nothing loses by it: `shadowsFor`'s dark `card` level is a rim, not a
+    // tinted drop (`AppElevation`/GC-6), and the raised/overlay levels
+    // composite `scheme.shadow` at a fixed alpha regardless of hue. A colour
+    // with no hue was the finding when the rule feared a drawn shadow would
+    // expose it; v3 draws dark's shadow as `#000000` on purpose instead.
     for (final token in <String, (Color, Color)>{
       'colorScheme.shadow': (light.colorScheme.shadow, dark.colorScheme.shadow),
       'colorScheme.scrim': (light.colorScheme.scrim, dark.colorScheme.scrim),
     }.entries) {
       final (lightValue, darkValue) = token.value;
 
-      for (final mode in <String, Color>{
-        'light': lightValue,
-        'dark': darkValue,
-      }.entries) {
-        expect(
-          hueOf(mode.value),
-          isNotNull,
-          reason:
-              '${token.key} in ${mode.key} is ${hex(mode.value)} — a pure '
-              'neutral with no hue. A shadow that carries no trace of the seed '
-              'cannot move with it, and the other mode already does.',
-        );
-      }
+      expect(
+        hueOf(lightValue),
+        isNotNull,
+        reason:
+            '${token.key} in light is ${hex(lightValue)} — a pure neutral '
+            'with no hue. A shadow that carries no trace of the seed cannot '
+            'move with it.',
+      );
+      expect(
+        hueOf(darkValue),
+        isNull,
+        reason:
+            '${token.key} in dark is ${hex(darkValue)}, not the owner\'s '
+            '#000000 literal (GC-1) — a hue here is the value the migration '
+            'map once proposed, and it needs the same product decision R6 '
+            'took before it comes back.',
+      );
     }
   });
 }

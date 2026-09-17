@@ -3,9 +3,8 @@
 // **Measured through the real screen, not the section.** The defect was never
 // in `StudyEntrySectionWidget` — it was a second `EdgeInsets.all(AppSpacing.lg)`
 // wrapped around it inside a shell that had already applied the screen gutter,
-// so the content sat at 32 instead of 16 and *widened* to 28 at 320dp where
-// every other screen narrows to 12. A section-level test cannot see either
-// number, because the padding it is asking about is above it.
+// so the content sat at 32 instead of 16 at every width. A section-level test
+// cannot see that number, because the padding it is asking about is above it.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,11 +39,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  // The two widths the gutter rule is written against: `AppBreakpoints.compact`
-  // is 360, so one case is on each side of it.
+  // Two widths, one on each side of `AppBreakpoints.compact` (360) — not
+  // because the gutter still varies there, but to guard against a compact
+  // special case coming back. `mxScreenGutter` is `AppSpacing.lg` (16) at
+  // every width now (GC-7); 320dp's old 12 was the pre-v3 compact gutter.
   for (final surface in <({Size size, double gutter})>[
     (size: const Size(393, 852), gutter: 16),
-    (size: const Size(320, 640), gutter: 12),
+    (size: const Size(320, 640), gutter: 16),
   ]) {
     testWidgets(
       'the body sits at the screen gutter at ${surface.size.width.toInt()}dp',

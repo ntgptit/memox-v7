@@ -45,17 +45,18 @@ void main() {
       .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator));
 
   group('colour', () {
-    testWidgets('below 100% the fill is secondary, never the accent', (
-      tester,
-    ) async {
-      // The whole reason this is a component. A bar filled with `primary` sits
-      // beside a button filled with `primary` and neither reads as the pressable
-      // one.
+    testWidgets('below 100% the fill is progressFill, which v3 pins to '
+        'primary', (tester) async {
+      // **v3 fills progress with the accent** (`ui_kits/mobile/v3/screens/
+      // _shared.jsx:241`, `StudyTopBar`'s own default) — `progressFill =
+      // primary` (GC-2). The V1 "never the accent" rule this used to assert
+      // is retired; what stands is the component's identity check, that the
+      // widget paints `progressFill` and nothing it derived independently.
       await pumpApp(tester, const MxProgressBar(value: 0.62));
       await tester.pumpAndSettle();
 
       expect(indicatorOf(tester).color, semantic.progressFill);
-      expect(indicatorOf(tester).color, isNot(light.colorScheme.primary));
+      expect(indicatorOf(tester).color, light.colorScheme.primary);
     });
 
     testWidgets('at 100% the fill turns success', (tester) async {

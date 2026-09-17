@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-// ignore: unused_import
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/time/clock_provider.dart';
@@ -22,7 +21,6 @@ import 'package:memox/features/study/presentation/widgets/sections/study_card_fa
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
-// ignore: unused_import
 import '../../../support/color_math.dart';
 import '../domain/support/fake_study_repository.dart';
 import 'support/study_widget_harness.dart';
@@ -93,8 +91,6 @@ void main() {
   for (final brightness in Brightness.values) {
     final theme = brightness.name;
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     testWidgets('every colour the frame writes text in passes AA in $theme', (
       tester,
     ) async {
@@ -129,14 +125,15 @@ void main() {
         contrast(scheme.onSurface, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
-      // The mode pill: `primary` on `surfaceMuted`, and §7.8's whole argument
-      // is that this pair is the one the project already owns.
+      // The mode pill: `_Chip` paints its label in `AppInk.accent`, not raw
+      // `primary` — v3's light `primary` measures 3.95:1 on `surfaceMuted`
+      // (GC-3), which is exactly why the ink exists. `accentInk` is what
+      // reaches the canvas, so it is what this gate measures.
       expect(
-        contrast(scheme.primary, semantic.surfaceMuted),
+        contrast(semantic.accentInk, semantic.surfaceMuted),
         greaterThanOrEqualTo(_kAaBodyText),
       );
     });
-    */
 
     testWidgets('the ✕ and the four sm2 actions are reachable in $theme', (
       tester,
@@ -301,7 +298,6 @@ void main() {
 }
 
 /// WCAG 2.1 AA for body text.
-// ignore: unused_element
 const double _kAaBodyText = 4.5;
 
 /// Holds the session's first read open, so `isOpening` can be looked at.
