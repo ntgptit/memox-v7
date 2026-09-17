@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/core/theme/extensions/theme_context_extension.dart';
-import 'package:memox/core/theme/typography/app_text_styles.dart';
 import 'package:memox/features/card/domain/models/card_import_preview_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_section_label.dart';
 
 import 'support/card_import_wizard_harness.dart';
 
@@ -108,17 +107,17 @@ void main() {
             'heading, one place',
       );
 
-      // The standard section rung, whole — size, weight and tracking, not just
-      // the size. The old half of this assertion (`isNot(sectionLabelSmall)`)
-      // measured a distinction v3 retired: the scale floors at 12 (spec
-      // "12 is a hard floor"), so the in-panel face label is the same caption
-      // role and no longer quieter by size. Collapsing the two named styles is
-      // a typography follow-up, not something this screen can assert.
-      final AppTextStyles styles = tester.element(heading).textStyles;
-      final TextStyle? rendered = tester.widget<Text>(heading).style;
-      expect(rendered?.fontSize, styles.sectionLabel.fontSize);
-      expect(rendered?.fontWeight, styles.sectionLabel.fontWeight);
-      expect(rendered?.letterSpacing, styles.sectionLabel.letterSpacing);
+      // `sectionLabel` and `sectionLabelSmall` build to byte-identical
+      // `TextStyle`s under v3's 12px floor (spec "12 is a hard floor"), so a
+      // style comparison can no longer tell the two rungs apart — it would
+      // pass the same way no matter which one the widget rendered.
+      // Collapsing the two named styles is a typography follow-up; until
+      // then, the distinction survives only in the widget API, so assert the
+      // rung the heading was built at rather than the style it produces.
+      final MxSectionLabel widget = tester.widget<MxSectionLabel>(
+        find.ancestor(of: heading, matching: find.byType(MxSectionLabel)),
+      );
+      expect(widget.rung, MxSectionLabelRung.standard);
     });
   });
 

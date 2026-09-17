@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/core/theme/typography/app_typography.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
@@ -114,13 +115,14 @@ void main() {
   });
 
   group('the 4px grid (owner review, 2026-08-20)', () {
-    /// Every control height and inset on this screen is a multiple of four.
-    /// The rule is the owner's and it is worth a test rather than a comment:
-    /// the values that broke it — a 6px track, an 11/14 inset — each arrived
-    /// as a local optical fix, and a local fix is invisible to the next one.
-    testWidgets('the chip, the verb and the path line all land on it', (
-      tester,
-    ) async {
+    /// Every control height and inset on this screen is a multiple of four
+    /// — except the due chip, which is text-driven and is measured against
+    /// its own content box instead of the grid (see below). The rule is the
+    /// owner's and it is worth a test rather than a comment: the values that
+    /// broke it — a 6px track, an 11/14 inset — each arrived as a local
+    /// optical fix, and a local fix is invisible to the next one.
+    testWidgets('the verb and the path line land on the grid; the due chip is '
+        'measured against its own text-driven box', (tester) async {
       final english = AppLocalizationsEn();
       await pump(
         tester,
@@ -144,21 +146,34 @@ void main() {
                 .first,
           )
           .height;
-      // 24.8 rounded up: the v3 caption rung is 12 x 1.4, and 16.8 of line box
-      // inside 4 + 4 of padding is 24.8 — the one member of this row the grid
-      // no longer holds, because its height is text-driven. v3's own component
-      // table fixes a chip at 28, which is the Chip spec's to apply; until then
-      // the number is pinned so a drift still fails.
-      expect(chip, 25, reason: 'due chip: 8 across, a 12/1.4 caption box tall');
+      // Not a grid member: the due chip's height is text-driven, not a
+      // fixed control size. Its content box is the v3 caption line box
+      // (captionSize x captionHeight) plus its own top/bottom padding
+      // (`AppSpacing.xs` each), computed from the theme rather than
+      // hardcoded so the expectation moves with the tokens instead of
+      // pinning today's rounded pixel value. v3's own component table
+      // fixes a chip at 28 — applying that is the Chip spec's job, not
+      // this screen's.
+      const captionLineBox =
+          AppTypography.captionSize * AppTypography.captionHeight;
+      const expectedChipHeight = captionLineBox + (2 * AppSpacing.xs);
+      expect(
+        chip,
+        moreOrLessEquals(expectedChipHeight, epsilon: 0.5),
+        reason:
+            'due chip: a $captionLineBox caption line box inside '
+            '${AppSpacing.xs} + ${AppSpacing.xs} padding '
+            '($expectedChipHeight), not a grid value',
+      );
 
       // The painted button is 40; the hit area is the touch floor, which
-      // `MaterialTapTargetSize.padded` adds around it.
+      // `MaterialTapTargetSize.padded` adds around it. Both grid values.
       final study = tester.getSize(find.byType(DeckStudyButtonWidget));
       expect(study.height, AppSizing.touchTarget);
       expect(study.width, greaterThanOrEqualTo(80));
 
-      // The root header has no path — it states the level's figures — so the
-      // line itself is measured one level in, by `deck_path_test.dart`.
+      // The root header has no path — it states the level's figures — so
+      // the line itself is measured one level in, by `deck_path_test.dart`.
       expect(MxBreadcrumb.compactLineHeight, 32);
     });
   });
