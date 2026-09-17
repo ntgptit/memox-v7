@@ -58,19 +58,29 @@ void main() {
       // L\* window, which is a number that breaks on the next retune rather
       // than a margin.
       const minimumStep = <String, double>{'dark': 2.0, 'light': 2.0};
+      // v3 (colors_and_type.css, 2026-09-17) narrows `card` (surfaceContainerLow)
+      // and `page` (surface) to 1.76 L* apart — both are near-white neutrals
+      // by design, not a drifted pair. Per R12, a step the v3 hex narrows
+      // below the general floor is pinned at (just under) its measured
+      // figure rather than forced back up to it.
+      const minimumStepOverride = <String, double>{'light:card->page': 1.7};
       final ladders = <String, List<(String, Color)>>{
+        // No 'raised' rung here any more: v3 gives `surfaceBright` and
+        // `surfaceContainer` the same dark literal (`#232B5A`), so `tile`
+        // (surfaceMuted = surfaceContainer) has no fourth tier to step above
+        // — the ladder tops out at three in dark.
         'dark': <(String, Color)>[
           ('page', dark.scaffoldBackgroundColor),
           ('card', dark.colorScheme.surfaceContainerLow),
           ('tile', darkSemantic.surfaceMuted),
-          ('raised', dark.colorScheme.surfaceBright),
         ],
-        // Light inverts it: white is the ceiling, so the card is the top and
-        // the inset tile sits below the page rather than above it.
+        // v3 reorders this: `card` (surfaceContainerLow, #F1F4FB) is now
+        // dimmer than `page` (surface, #F7F9FE), not brighter — the opposite
+        // of the old palette, where the paper was pure white above the page.
         'light': <(String, Color)>[
           ('tile', lightSemantic.surfaceMuted),
-          ('page', light.scaffoldBackgroundColor),
           ('card', light.colorScheme.surfaceContainerLow),
+          ('page', light.scaffoldBackgroundColor),
         ],
       };
 
@@ -80,10 +90,13 @@ void main() {
         for (var i = 1; i < tiers.length; i++) {
           final step =
               lightnessStar(tiers[i].$2) - lightnessStar(tiers[i - 1].$2);
+          final stepKey = '${ladder.key}:${tiers[i - 1].$1}->${tiers[i].$1}';
+          final floor =
+              minimumStepOverride[stepKey] ?? minimumStep[ladder.key]!;
 
           expect(
             step,
-            greaterThanOrEqualTo(minimumStep[ladder.key]!),
+            greaterThanOrEqualTo(floor),
             reason:
                 '${ladder.key}: ${tiers[i - 1].$1} -> ${tiers[i].$1} is flat',
           );
@@ -321,11 +334,17 @@ void main() {
           );
         }
 
-        final names = hues.keys.toList();
-        for (var i = 0; i < names.length; i++) {
-          for (var j = i + 1; j < names.length; j++) {
-            final a = hue(hues[names[i]]!)!;
-            final b = hue(hues[names[j]]!)!;
+        // v3 (colors_and_type.css, 2026-09-17) redesigns danger/success/warning
+        // as one family and leaves `info` unchanged (owner answer A2) — it is
+        // not part of the v3 hue budget. `success`'s new teal sits only 29.5
+        // degrees from the preserved `info` cyan, so the minimum gap now holds
+        // within the v3 trio only; `info` still has to be a real, saturated
+        // hue (checked above), just not one a fixed distance from the others.
+        const v3Trio = <String>['danger', 'success', 'warning'];
+        for (var i = 0; i < v3Trio.length; i++) {
+          for (var j = i + 1; j < v3Trio.length; j++) {
+            final a = hue(hues[v3Trio[i]]!)!;
+            final b = hue(hues[v3Trio[j]]!)!;
             final raw = (a - b).abs();
             final gap = raw > 180 ? 360 - raw : raw;
 
@@ -333,7 +352,7 @@ void main() {
               gap,
               greaterThanOrEqualTo(minimumHueGap),
               reason:
-                  '${entry.key}: ${names[i]} and ${names[j]} are '
+                  '${entry.key}: ${v3Trio[i]} and ${v3Trio[j]} are '
                   '${gap.round()} degrees apart — two statuses in one hue',
             );
           }

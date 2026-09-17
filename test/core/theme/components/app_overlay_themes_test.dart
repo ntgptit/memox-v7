@@ -71,7 +71,7 @@ void main() {
   });
 
   group('the tooltip', () {
-    test('is legible, and inverts with the mode', () {
+    test('is legible in both modes', () {
       for (final entry in themes.entries) {
         final tooltip = entry.value.tooltipTheme;
         final decoration = tooltip.decoration! as BoxDecoration;
@@ -84,13 +84,13 @@ void main() {
         );
       }
 
-      // The two modes must not paint the same box: a tooltip that stayed dark in
-      // dark mode is a black square on a navy page.
+      // v3 (colors_and_type.css, 2026-09-17) gives `inverseSurface` the same
+      // literal (`#34395D`) in both modes — like a `*Fixed` role, it no longer
+      // inverts with brightness, so the box the tooltip paints is now the same
+      // one in light and dark. Legibility (above) is what still has to hold.
       expect(
         (themes['light']!.tooltipTheme.decoration! as BoxDecoration).color,
-        isNot(
-          (themes['dark']!.tooltipTheme.decoration! as BoxDecoration).color,
-        ),
+        (themes['dark']!.tooltipTheme.decoration! as BoxDecoration).color,
       );
     });
   });

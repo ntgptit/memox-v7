@@ -54,14 +54,42 @@ void main() {
   ];
 
   group('a control edge clears 3:1 on every ground it is drawn on', () {
+    // v3 (colors_and_type.css, 2026-09-17) pins `outline` and the
+    // surfaceContainer* tones on their own literals, and three cells this
+    // edge is drawn on land under the 3:1 floor as a consequence. R12 (the
+    // v3 plan's global constraints) is explicit about the interim answer: a
+    // non-text edge the v3 hex puts under 3:1 is pinned at its measured
+    // figure (owner decision 5) rather than forced to the floor — the gate
+    // itself returns in Tasks 8-9.
+    const belowFloor = <String, double>{
+      'light·surfaceContainerHigh': 2.92,
+      'dark·surfaceContainer': 2.65,
+      'dark·surfaceContainerHigh': 2.25,
+    };
+
     for (final entry in themes.entries) {
       final theme = entry.value;
       final semantic = semanticOf(theme);
 
       for (final ground in groundsOf(theme)) {
         test('${entry.key} · borderControl on ${ground.$1}', () {
+          final measured = contrast(semantic.borderControl, ground.$2);
+          final pinned = belowFloor['${entry.key}·${ground.$1}'];
+
+          if (pinned != null) {
+            expect(
+              measured,
+              closeTo(pinned, 0.01),
+              reason:
+                  '${entry.key}: borderControl on ${ground.$1} is pinned at '
+                  'its v3 figure (owner decision 5, R12) — under the 3:1 '
+                  'floor until the contrast gate returns in Tasks 8-9',
+            );
+            return;
+          }
+
           expect(
-            contrast(semantic.borderControl, ground.$2),
+            measured,
             greaterThanOrEqualTo(graphic),
             reason:
                 '${entry.key}: the outlined button and the text field both draw '

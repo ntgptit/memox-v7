@@ -85,13 +85,16 @@ void main() {
       // pins them to the formula rather than to a hex somebody typed. It is
       // also what keeps them honest if the surface or the ink moves: a solid
       // that no longer equals its own derivation is a colour nobody chose.
+      //
+      // v3 (GC-2, colors_and_type.css 2026-09-17) flattens over `surface`
+      // (the page), not the card: `AppSurfaceColors.page*`, not `paper*`.
       expect(
         light.disabledSurface.toARGB32(),
         Color.alphaBlend(
           AppColors.textPrimaryLight.withValues(
             alpha: AppStateOpacity.disabledSurfaceBlend,
           ),
-          AppSurfaceColors.paperLight,
+          AppSurfaceColors.pageLight,
         ).toARGB32(),
       );
       expect(
@@ -100,7 +103,7 @@ void main() {
           AppColors.textPrimaryDark.withValues(
             alpha: AppStateOpacity.disabledSurfaceBlend,
           ),
-          AppSurfaceColors.paperDark,
+          AppSurfaceColors.pageDark,
         ).toARGB32(),
       );
     });
