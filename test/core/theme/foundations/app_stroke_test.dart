@@ -30,4 +30,10 @@ void main() {
       expect(AppStroke.indicator, lessThan(4));
     },
   );
+
+  test('the focus ring is 2dp at offset 2', () {
+    // §8: one focus treatment for every control.
+    expect(AppStroke.focus, 2);
+    expect(AppStroke.focusRingOffset, 2);
+  });
 }
