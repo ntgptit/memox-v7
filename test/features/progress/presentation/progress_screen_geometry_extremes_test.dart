@@ -289,7 +289,7 @@ void main() {
     });
   });
 
-  testWidgets('a four-digit day pins the bar column against its floor (X7)', (
+  testWidgets('a five-digit day pins the bar column against its floor (X7)', (
     tester,
   ) async {
     // The accepted limit, made into something that runs. The floor assertion in
@@ -304,7 +304,7 @@ void main() {
     // fails and the divergence is closed on purpose rather than by drift.
     await pumpProgressScreen(
       tester,
-      repository: seeded(totals: const <int>[0, 0, 0, 0, 0, 0, 1234]),
+      repository: seeded(totals: const <int>[0, 0, 0, 0, 0, 0, 12345]),
       surface: const Size(320, 720),
       textScale: 2,
       locale: const Locale('vi'),
@@ -314,19 +314,13 @@ void main() {
     final double content =
         rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
 
-    // Re-measured at 69.9 (was 63.8): the weekday label and the day count are
-    // both `bodyMedium` (`progress_week_widget.dart`), and GC-4 dropped its
-    // tracking (0.25 to 0) — both `IntrinsicColumnWidth` label columns got
-    // narrower, and the bar's `FlexColumnWidth` column took the difference.
-    expect(bar.width, closeTo(69.9, 1));
-    // `content / 4` is the self-declared floor this bar sat under before
-    // (63.8 < 66.0 — `docs/wireframes/m99-23-progress-overview.md` X7, M99.23
-    // deferred debt 5, still open). The same retune that moved the pin above
-    // also closed that gap for this one figure (69.9 > 66.0) — incidentally,
-    // not through the capped-column or `1.2k` fix the debt calls for, so this
-    // is flagged rather than marked resolved; a wider day count may still
-    // breach the floor.
-    expect(bar.width, greaterThan(content / 4));
+    // The v3 type scale dropped `bodyMedium`'s tracking (0.25 to 0), and both
+    // `IntrinsicColumnWidth` label columns narrowed: 1234 cards now clears the
+    // floor (69.9dp), so the breach X7 records starts later. Five digits still
+    // breach it (52.7dp against 66.0) — M99.23 deferred debt 5 is open — so the
+    // pin follows the input that reproduces the debt, not one a retune fixed.
+    expect(bar.width, closeTo(52.7, 1));
+    expect(bar.width, lessThan(content / 4));
     expect(tester.takeException(), isNull);
   });
 
