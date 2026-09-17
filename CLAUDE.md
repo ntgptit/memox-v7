@@ -352,23 +352,33 @@ up-navigation grammars, a chip tier in five spellings and a switch with two
 state channels. Where M3 gives a choice, the repo's own tokens and
 `docs/design-system/` decide; where the repo is silent, M3 is the answer.
 
-**Design System V1 is frozen, and a feature task is not allowed to thaw it.**
-`docs/design-system/v1-freeze.md` names fourteen frozen contracts — the 45-role
+**Design System V1 is a historical baseline, not a frozen contract.**
+`docs/design-system/v1-freeze.md` records what V1 settled — the 45-role
 `ColorScheme` identity, the ThemeData mappings, the type scale and its
 variable-font weight contract, the spacing/radius/sizing/stroke/elevation
 foundations, the shared primitive APIs, the 48dp floor, high contrast, the card
 depth contract, `MxContentShell`'s chrome, the text-restyle policy, the raw
-Material ownership policy and Linux-only golden authoring. A feature task **MUST
-NOT** modify any of them; if it needs one changed it **MUST** stop and open a
-separate design-system task, which itself is only justified by one of the five
-reopen triggers in that file's §3. It may still compose shared widgets and lay
-them out — that was never the restriction.
+Material ownership policy and Linux-only golden authoring — and which guard rule
+or test holds each one today. It is the description of the system as built, and
+**a design-system task MAY change any of it.** There is no reopen trigger to
+satisfy and no permission to request: the unlock was the owner's decision, and
+V1's record exists so a change can be made knowingly, not to forbid one.
 
-**Read that file before assuming a UI change is ordinary feature work**, because
-the bypass is quiet: only five of the fourteen contracts are watched by a guard
-over `lib/features/`; the other nine are held by tests, and a test is a file in
-this repo that a feature branch can edit. Loosening the thing that watches a
-contract counts as changing the contract.
+**What did not change is scope discipline.** A design-system change is a
+design-system task — the same rule as "no drive-by refactors outside the stated
+scope" under **Commits**, and nothing more than that. A feature task that finds
+itself needing a token, a theme slot or a shared primitive changed **SHOULD**
+say so and let that land as its own change, because a palette edit buried in a
+deck-screen PR is a palette edit nobody reviewed. It was never a restriction on
+composing shared widgets and laying them out; it still is not.
+
+**Read that file before changing theme, token or shared-component code**, for
+what it is good for: it names, per contract, the guard rule or test that will go
+red, so a deliberate change knows what it has to update in the same commit. A
+test that pinned a V1 value and would now fail only because the value moved is
+that change's to relax — say so in the commit. A test that encodes something a
+redesign does not repeal — an ordering, a 4dp grid, a contrast ratio, a 48dp
+target, "use the token, not a literal" — stays.
 
 **State.** Immutable. Data and task-status are separate concerns — one
 `isLoading` boolean for every operation on a screen is a bug waiting to happen.
