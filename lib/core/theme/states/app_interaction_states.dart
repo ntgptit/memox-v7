@@ -94,8 +94,9 @@ abstract final class AppStateOpacity {
 /// The interaction states, resolved.
 ///
 /// One `WidgetStateProperty` per control shape, so a card hovered in one feature
-/// and a card hovered in another cannot land on different washes. The shapes are
-/// four because the design gives four weights — see [AppStateOpacity].
+/// and a card hovered in another cannot land on different washes. The shapes stay
+/// four so a caller still names its control; v3 gives all of them one hover and
+/// one pressed weight — see [AppStateOpacity].
 ///
 /// Focus resolves to a wash here and to a ring at the call site. Both are
 /// needed: the wash says *something* is focused, the ring says *which*, and only
