@@ -71,26 +71,62 @@ abstract final class AppColors {
   static const Color dangerLight = Color(0xFFDC2D4E);
   static const Color dangerDark = Color(0xFFFF8FA3);
 
+  // --- Text inks (GC-3, owner answer A1) --------------------------------------
+  //
+  // Same hue and saturation as the fill above; lightness moved to the first
+  // value that reads >= 4.5:1 on all five text grounds of its mode. A dark
+  // ink that already clears 4.5:1 as the fill derives from the fill constant
+  // instead of repeating the hex. `inversePrimaryInk` is invariant: its one
+  // ground, `inverseSurface`, does not change with theme.
+
+  /// From [primaryLight]/[primaryDark] (4.52 / 4.52).
+  static const Color accentInkLight = Color(0xFF3E53F4);
+  static const Color accentInkDark = Color(0xFF8D9CFF);
+
+  /// From [dangerLight]/[dangerDark] (4.52 / 5.27 as the fill).
+  static const Color dangerInkLight = Color(0xFFC82141);
+  static const Color dangerInkDark = dangerDark;
+
+  /// From [successLight]/[successDark] (4.56 / 7.10 as the fill).
+  static const Color successInkLight = Color(0xFF1E7460);
+  static const Color successInkDark = successDark;
+
+  /// v3's own `on-warning` in light (11.22); dark clears 4.5:1 as the fill
+  /// (7.32).
+  static const Color warningInkLight = Color(0xFF3A2A00);
+  static const Color warningInkDark = warningDark;
+
+  /// From `AppMaterialRoles.secondaryLight/Dark` (4.53 / 5.00 as the fill).
+  static const Color secondaryInkLight = Color(0xFF4B5CD0);
+  static const Color secondaryInkDark = AppMaterialRoles.secondaryDark;
+
+  /// From `AppMaterialRoles.tertiaryLight/Dark` (4.54 / 5.12 as the fill).
+  static const Color tertiaryInkLight = Color(0xFF6945F2);
+  static const Color tertiaryInkDark = AppMaterialRoles.tertiaryDark;
+
+  /// On `AppMaterialRoles.inverseSurfaceLight/Dark` (`#34395D`, invariant) —
+  /// 4.56 in both modes, so one constant serves both.
+  static const Color inversePrimaryInk = Color(0xFF919FFF);
+
   // --- Status containers ------------------------------------------------------
   //
   // success/warning containers are v3 `*-soft`: the fill at 10%/18% (success)
   // or 12%/18% (warning) flattened over `surfaceContainerLowest` (GC-2). Each
-  // `on*Container` is written as the literal `successInk`/`warningInk` value
-  // for now — Task 2 turns these into a derivation once those ink constants
-  // exist.
+  // `on*Container` derives from the matching ink (GC-2) rather than repeating
+  // the hex.
   //
   // `info`/`infoContainer`/`onInfoContainer` are unchanged (owner answer A2)
   // — outside the v3 palette.
 
   static const Color successContainerLight = Color(0xFFEAF6F3);
   static const Color successContainerDark = Color(0xFF243E52);
-  static const Color onSuccessContainerLight = Color(0xFF1E7460);
-  static const Color onSuccessContainerDark = Color(0xFF6FE0BD);
+  static const Color onSuccessContainerLight = successInkLight;
+  static const Color onSuccessContainerDark = successInkDark;
 
   static const Color warningContainerLight = Color(0xFFFEF3E2);
   static const Color warningContainerDark = Color(0xFF3D393F);
-  static const Color onWarningContainerLight = Color(0xFF3A2A00);
-  static const Color onWarningContainerDark = Color(0xFFFFC658);
+  static const Color onWarningContainerLight = warningInkLight;
+  static const Color onWarningContainerDark = warningInkDark;
 
   static const Color infoContainerLight = Color(0xFFDEE8EC);
   static const Color infoContainerDark = Color(0xFF153D4E);

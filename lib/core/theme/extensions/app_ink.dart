@@ -33,10 +33,9 @@ enum AppInk {
   /// exactly this.
   quiet,
 
-  /// `primary` — brand as *text*. It used to be a separate text-safe alias,
-  /// because the old dark fill tone measured 3.33:1 as bare text on the page;
-  /// since M100.18 inverted it to tone 80 the role itself reads at 11.36:1 and
-  /// the alias is gone.
+  /// `AppSemanticColors.accentInk` — brand as *text*. `primary` fails 4.5:1
+  /// on some text grounds in light (GC-3); the ink holds primary's hue and
+  /// moves lightness to the first value that clears the bar everywhere.
   accent,
 
   /// The verdict and status family.
@@ -45,18 +44,19 @@ enum AppInk {
   danger,
   info,
 
-  /// `scheme.error` — the error family's text on plain grounds.
+  /// `AppSemanticColors.dangerInk` — the error family's text on plain
+  /// grounds. Same ink as [danger] and [overdue]: this app spends one red.
   error,
 
-  /// `scheme.tertiary` — the steel-blue "same family as info, quieter job"
-  /// role; the import preview wears it for duplicates.
+  /// `AppSemanticColors.tertiaryInk` — the steel-blue "same family as info,
+  /// quieter job" role, as text; the import preview wears it for duplicates.
   tertiary,
 
-  /// `scheme.secondary` — the slate support role; the import preview's
-  /// "ready" rows wear it.
+  /// `AppSemanticColors.secondaryInk` — the slate support role, as text; the
+  /// import preview's "ready" rows wear it.
   secondary,
 
-  /// `semanticColors.overdue` — "this is late", distinct in name from
+  /// `AppSemanticColors.dangerInk` — "this is late", distinct in name from
   /// [danger]'s "this deletes".
   overdue,
 
@@ -89,15 +89,15 @@ enum AppInk {
     return switch (this) {
       AppInk.stated => colors.onSurface,
       AppInk.quiet => colors.onSurfaceVariant,
-      AppInk.accent => colors.primary,
-      AppInk.success => semantic.success,
-      AppInk.warning => semantic.warning,
-      AppInk.danger => semantic.danger,
+      AppInk.accent => semantic.accentInk,
+      AppInk.success => semantic.successInk,
+      AppInk.warning => semantic.warningInk,
+      AppInk.danger => semantic.dangerInk,
       AppInk.info => semantic.info,
-      AppInk.error => colors.error,
-      AppInk.tertiary => colors.tertiary,
-      AppInk.secondary => colors.secondary,
-      AppInk.overdue => semantic.overdue,
+      AppInk.error => semantic.dangerInk,
+      AppInk.tertiary => semantic.tertiaryInk,
+      AppInk.secondary => semantic.secondaryInk,
+      AppInk.overdue => semantic.dangerInk,
       AppInk.disabled => semantic.onDisabled,
       AppInk.onPrimary => colors.onPrimary,
       AppInk.onPrimaryContainer => colors.onPrimaryContainer,
