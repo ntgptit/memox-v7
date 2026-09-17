@@ -90,7 +90,8 @@ class MxTextButton extends StatefulWidget {
   /// with a ripple no other text button in the app has. `TextButton.style`
   /// merges; this goes through it, exactly as [isDestructive] does.
   ///
-  /// Null keeps `AppInk.accent`, which is `primary` and right on the page.
+  /// Null keeps `AppInk.accent`, which resolves to `accentInk` (GC-3) — not
+  /// `primary` itself — and clears AA as text on the page.
   ///
   /// **An `AppInk`, not a `Color`** (M100.5). Four features were each passing
   /// `context.colors.onErrorContainer` here by hand — the same value, four

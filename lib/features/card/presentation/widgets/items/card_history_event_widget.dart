@@ -318,8 +318,9 @@ TextStyle _scheduleLineStyle(
     return base.inked(context, AppInk.quiet);
   }
 
-  // 7.27:1 light and 5.51:1 dark on the event card — the accent as text, which
-  // `ColorScheme.primary` is not on a dark surface.
+  // The accent as text: `AppInk.accent` resolves to `accentInk` (GC-3), which
+  // holds `primary`'s hue at a lightness that clears AA as text — light and
+  // dark alike, not the raw `ColorScheme.primary` fill.
   return base.inked(context, AppInk.accent, isEmphasized: true);
 }
 

@@ -157,15 +157,10 @@ abstract final class AppInteractionStates {
   /// taken since is to move the palette, because a component belongs on the
   /// role M3 gives it.
   ///
-  /// | ground | `primary` dark, now |
-  /// |---|---|
-  /// | `background` | 11.36:1 |
-  /// | `surface` | 10.02:1 |
-  /// | `primaryContainer` | 7.37:1 |
-  /// | `secondaryContainer` | 7.31:1 |
-  ///
-  /// Light was never in question: 6.89 / 7.27 / 5.57 / 6.02. Pinned per ground,
-  /// in both modes, by `focus_ring_contrast_test.dart`.
+  /// `primary` clears the 3:1 floor on every ground a focus ring sits on — the
+  /// page, a card, its own container tones — in both light and dark.
+  /// `focus_ring_contrast_test.dart` pins the current numbers per ground; not
+  /// restated here, since the last palette move is what made the old ones stale.
   /// **Only for a slot Material 3 leaves empty.** M100.23 renamed this from
   /// `focusRing` because the old name invited exactly the misuse it was being
   /// put to: four components were resolving *their canonical border role* to

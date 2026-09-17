@@ -1061,7 +1061,8 @@ của M2.
     (spec → symbol Dart), bảng alias resolve về role có sẵn, đổi tên radius/icon
     CSS ↔ Dart, và bảng rulings R1–R13; `theme-architecture.md` §3 và
     `ad-14-color-and-depth.md` trỏ sang thay vì chép lại giá trị.
-  - Chín doc comment production nói sai theo giá trị v3 (liệt kê ở
+  - 19 doc comment production nói sai theo giá trị v3 (9 ở Task 10, 10 ở lượt rà
+    soát sau — cả hai liệt kê ở
     `.superpowers/sdd/2026-09-17-memox-v3-foundations/task-10-report.md`) — sửa
     câu chữ, không đổi giá trị nào.
   - `design_audit/*` (7 file) dựng lại bằng `flutter test test/design_audit`.
@@ -1084,7 +1085,8 @@ của M2.
   - [x] `v3-foundations.md` đủ header bảy dòng; đủ bốn mục (token map GC-1…GC-7,
         alias + R7, map radius/icon R8, bảng rulings R1–R13); không hex nào gõ
         lại từ trí nhớ — mọi giá trị chép từ GC hoặc từ spec.
-  - [x] Chín doc comment nói sai giá trị v3 đã sửa đúng, không đổi giá trị nào.
+  - [x] 19 doc comment nói sai giá trị v3 đã sửa đúng, không đổi giá trị nào (9
+        ở Task 10 + 10 ở lượt rà soát sau, xem task-10-report.md § Fix round 1).
   - [x] `design_audit/*` dựng lại và commit cùng lượt với docs.
   - [ ] Golden re-author trên Linux (`TZ=UTC`, danh sách file của
         `goldens (linux)` trong CI) — **hoãn cho controller**, phiên này chạy
