@@ -144,7 +144,12 @@ void main() {
                 .first,
           )
           .height;
-      expect(chip, 24, reason: 'due chip: 8 across, 24 tall');
+      // 24.8 rounded up: the v3 caption rung is 12 x 1.4, and 16.8 of line box
+      // inside 4 + 4 of padding is 24.8 — the one member of this row the grid
+      // no longer holds, because its height is text-driven. v3's own component
+      // table fixes a chip at 28, which is the Chip spec's to apply; until then
+      // the number is pinned so a drift still fails.
+      expect(chip, 25, reason: 'due chip: 8 across, a 12/1.4 caption box tall');
 
       // The painted button is 40; the hit area is the touch floor, which
       // `MaterialTapTargetSize.padded` adds around it.

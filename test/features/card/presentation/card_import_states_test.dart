@@ -108,13 +108,17 @@ void main() {
             'heading, one place',
       );
 
-      // Standard rung, not the in-panel one: `sectionLabelSmall` is a face
-      // label inside a card, and at 11px it would read no louder than the
-      // captions underneath it.
+      // The standard section rung, whole — size, weight and tracking, not just
+      // the size. The old half of this assertion (`isNot(sectionLabelSmall)`)
+      // measured a distinction v3 retired: the scale floors at 12 (spec
+      // "12 is a hard floor"), so the in-panel face label is the same caption
+      // role and no longer quieter by size. Collapsing the two named styles is
+      // a typography follow-up, not something this screen can assert.
       final AppTextStyles styles = tester.element(heading).textStyles;
-      final double? renderedSize = tester.widget<Text>(heading).style?.fontSize;
-      expect(renderedSize, styles.sectionLabel.fontSize);
-      expect(renderedSize, isNot(styles.sectionLabelSmall.fontSize));
+      final TextStyle? rendered = tester.widget<Text>(heading).style;
+      expect(rendered?.fontSize, styles.sectionLabel.fontSize);
+      expect(rendered?.fontWeight, styles.sectionLabel.fontWeight);
+      expect(rendered?.letterSpacing, styles.sectionLabel.letterSpacing);
     });
   });
 
