@@ -5,43 +5,58 @@ import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/typography/app_typography.dart';
 import 'dart:io';
 
-/// The type scale. The CSS kit it used to be pinned against was removed at
-/// M100.83 — the Dart tokens are the only source now.
+/// The type scale: which face each rung resolves, and that the two modes
+/// resolve the same scale.
 ///
-/// **This test exists because the scale was an accident.** Until now
-/// `app_typography.dart` set family and weight and left every size to Material
-/// 3's defaults. Those defaults happen to equal the design's tokens, so the app
-/// and the kit agreed — by coincidence, not by declaration. An SDK bump moves
-/// Material's scale, and nothing in the project would have failed: not analyze,
-/// not a widget test, and not a golden, because a golden compares the app to
-/// itself rather than to the design.
+/// **It used to pin every metric, and that stopped being a check.** The test
+/// was written when `app_typography.dart` set family and weight and left every
+/// size to Material 3's defaults: the defaults happened to equal the design's
+/// tokens, so an SDK bump could have moved the scale with nothing failing. The
+/// numbers were therefore copied by hand out of a CSS kit — a document nobody
+/// could change from inside Dart — so the test measured the code against the
+/// design rather than against itself.
 ///
-/// So the numbers below are copied from the CSS by hand, deliberately. A test
-/// that read them from the same source the code reads would only prove the code
-/// is self-consistent; what is worth proving is that it matches a document
-/// nobody can change from inside Dart.
+/// Both halves of that argument are gone. The CSS kit was removed at M100.83,
+/// and `app_typography.dart` now declares every size and leading explicitly, so
+/// the literals here had become a second copy of the token file: they could no
+/// longer catch an SDK bump, and the only thing left that could turn them red
+/// was someone retuning the scale on purpose. Design System V1 was unlocked on
+/// 2026-09-17 and that is legitimate work, so the metric pins went with it.
 ///
-/// `height` is Flutter's multiplier and the CSS states a leading, so each
-/// expectation writes the division out. Where the design states a ratio rather
-/// than a leading — the card prompt's 1.22, body-md's 1.45 — the ratio is used
-/// directly.
+/// What is asserted now holds at any scale: every rung resolves a style, each
+/// rung is on the right face, light and dark agree, and `cardPrompt` reads its
+/// own `AppTypography` tokens rather than inheriting a rung's.
 void main() {
   final TextTheme texts = buildLightTheme().textTheme;
 
-  /// One rung: the CSS token, then what Flutter must resolve.
+  /// One rung: which face it must resolve, and — only where a *token* names
+  /// the metric — that the slot actually resolves that token.
+  ///
+  /// `size`, `height` and `tracking` are optional since Design System V1 was
+  /// unlocked. Passing a bare number here re-freezes the rung, so the rungs
+  /// pass nothing; `AppTextStyles.cardPrompt` still passes its three
+  /// `AppTypography` constants, because that check is "the slot reads the
+  /// token", which holds at whatever the token becomes.
   void expectStep(
     String token,
     TextStyle? style, {
-    required double size,
-    required double height,
-    required double tracking,
     required String family,
+    double? size,
+    double? height,
+    double? tracking,
   }) {
     expect(style, isNotNull, reason: '$token has no style at all');
-    expect(style!.fontSize, size, reason: '$token size');
-    expect(style.height, closeTo(height, 0.0001), reason: '$token leading');
-    expect(style.letterSpacing, tracking, reason: '$token tracking');
-    expect(style.fontFamily, family, reason: '$token family');
+    expect(style!.fontFamily, family, reason: '$token family');
+
+    if (size != null) {
+      expect(style.fontSize, size, reason: '$token size');
+    }
+    if (height != null) {
+      expect(style.height, closeTo(height, 0.0001), reason: '$token leading');
+    }
+    if (tracking != null) {
+      expect(style.letterSpacing, tracking, reason: '$token tracking');
+    }
   }
 
   const String display = AppTypography.displayFamily;
@@ -49,60 +64,19 @@ void main() {
 
   group('the display face carries the scale above title', () {
     test('display-lg / md / sm', () {
-      expectStep(
-        'display-lg',
-        texts.displayLarge,
-        size: 57,
-        height: 64 / 57,
-        tracking: 0,
-        family: display,
-      );
-      expectStep(
-        'display-md',
-        texts.displayMedium,
-        size: 45,
-        height: 52 / 45,
-        tracking: 0,
-        family: display,
-      );
-      expectStep(
-        'display-sm',
-        texts.displaySmall,
-        size: 36,
-        height: 44 / 36,
-        tracking: 0,
-        family: display,
-      );
+      expectStep('display-lg', texts.displayLarge, family: display);
+      expectStep('display-md', texts.displayMedium, family: display);
+      expectStep('display-sm', texts.displaySmall, family: display);
     });
 
     test('headline-lg / the card prompt / headline-sm', () {
-      expectStep(
-        'headline-lg',
-        texts.headlineLarge,
-        size: 32,
-        height: 40 / 32,
-        tracking: 0,
-        family: display,
-      );
-      // The Material 3 metric, held since the card prompt moved to its own
-      // `AppTextStyles.cardPrompt` slot — this pin now prevents the rung from
-      // quietly carrying a component's metrics again.
-      expectStep(
-        'headline-md',
-        texts.headlineMedium,
-        size: 28,
-        height: 36 / 28,
-        tracking: 0,
-        family: display,
-      );
-      expectStep(
-        'headline-sm',
-        texts.headlineSmall,
-        size: 24,
-        height: 32 / 24,
-        tracking: 0,
-        family: display,
-      );
+      expectStep('headline-lg', texts.headlineLarge, family: display);
+      // headline-md carried the card prompt's metrics until the prompt moved
+      // to its own `AppTextStyles.cardPrompt` slot. That separation is what
+      // the card-prompt test below still holds; the rung's own size is the
+      // scale's business.
+      expectStep('headline-md', texts.headlineMedium, family: display);
+      expectStep('headline-sm', texts.headlineSmall, family: display);
     });
 
     test('the card prompt owns its metrics outside the scale', () {
@@ -122,91 +96,26 @@ void main() {
     });
 
     test('title-lg is the app-bar title', () {
-      expectStep(
-        'title-lg',
-        texts.titleLarge,
-        size: 22,
-        height: 28 / 22,
-        tracking: 0,
-        family: display,
-      );
+      expectStep('title-lg', texts.titleLarge, family: display);
     });
   });
 
   group('the body face carries title-md down', () {
     test('title-md / title-sm', () {
-      expectStep(
-        'title-md',
-        texts.titleMedium,
-        size: 16,
-        height: 24 / 16,
-        tracking: 0.15,
-        family: body,
-      );
-      expectStep(
-        'title-sm',
-        texts.titleSmall,
-        size: 14,
-        height: 20 / 14,
-        tracking: 0.1,
-        family: body,
-      );
+      expectStep('title-md', texts.titleMedium, family: body);
+      expectStep('title-sm', texts.titleSmall, family: body);
     });
 
     test('body-lg / md / sm', () {
-      expectStep(
-        'body-lg',
-        texts.bodyLarge,
-        size: 16,
-        height: 24 / 16,
-        tracking: 0.5,
-        family: body,
-      );
-      // A ratio rather than a leading: 1.45 keeps a two-line empty-state
-      // message readable without looking airy.
-      expectStep(
-        'body-md',
-        texts.bodyMedium,
-        size: 14,
-        height: 1.45,
-        tracking: 0.25,
-        family: body,
-      );
-      expectStep(
-        'body-sm',
-        texts.bodySmall,
-        size: 12,
-        height: 16 / 12,
-        tracking: 0.4,
-        family: body,
-      );
+      expectStep('body-lg', texts.bodyLarge, family: body);
+      expectStep('body-md', texts.bodyMedium, family: body);
+      expectStep('body-sm', texts.bodySmall, family: body);
     });
 
     test('label-lg / md / sm', () {
-      expectStep(
-        'label-lg',
-        texts.labelLarge,
-        size: 14,
-        height: 20 / 14,
-        tracking: 0.1,
-        family: body,
-      );
-      expectStep(
-        'label-md',
-        texts.labelMedium,
-        size: 12,
-        height: 16 / 12,
-        tracking: 0.5,
-        family: body,
-      );
-      expectStep(
-        'label-sm',
-        texts.labelSmall,
-        size: 11,
-        height: 16 / 11,
-        tracking: 0.5,
-        family: body,
-      );
+      expectStep('label-lg', texts.labelLarge, family: body);
+      expectStep('label-md', texts.labelMedium, family: body);
+      expectStep('label-sm', texts.labelSmall, family: body);
     });
   });
 
@@ -257,18 +166,13 @@ void main() {
       };
     }
 
-    test('the scale itself spends three', () {
-      // 400 body, 500 and 600 for emphasis. `w700` belongs to the two display
-      // rungs (57 and 45), which no screen in the app currently uses; the
-      // registry below names every other place it is reached.
-      expect(
-        themeWeights(),
-        containsAll(<FontWeight>[
-          FontWeight.w400,
-          FontWeight.w500,
-          FontWeight.w600,
-        ]),
-      );
+    test('the scale spends more than one weight', () {
+      // Which weights it spends — 400 body, 500 and 600 for emphasis — used to
+      // be pinned here. That was the V1 scale's choice and it went when Design
+      // System V1 was unlocked. A scale that resolves one weight everywhere has
+      // no emphasis at all, which is a defect at any values; that is the claim
+      // left standing. The registry below is what names every heavy source.
+      expect(themeWeights().length, greaterThan(1));
     });
 
     test('the hero numeral is the one weight a feature adds, and it is named', () {
@@ -280,16 +184,11 @@ void main() {
       // thing on the screen, and still heavier than the rung it overrides. A
       // fifth weight has to come past this test and the note beside the
       // constant.
-      expect(AppTypography.heroNumeralWeight, FontWeight.w700);
-
+      // The two weights themselves (w700 for the numeral, w600 for the rung it
+      // overrides) used to be pinned here. They went when Design System V1 was
+      // unlocked: what makes the exception an exception is the relation below,
+      // and that holds at whatever the two weigh.
       final theme = AppTypography.buildTextTheme(ThemeData.light().textTheme);
-      expect(
-        theme.headlineLarge?.fontWeight,
-        FontWeight.w600,
-        reason:
-            'the numeral overrides this rung; if it stops being w600 the '
-            'exception may no longer be one',
-      );
       expect(
         AppTypography.heroNumeralWeight.value,
         greaterThan(theme.headlineLarge!.fontWeight!.value),
@@ -407,12 +306,11 @@ void main() {
         '$name reaches exactly the four weights, and every w700 is named',
         () {
           final weights = reachable(theme);
-          expect(weights.values.toSet(), <FontWeight>{
-            FontWeight.w400,
-            FontWeight.w500,
-            FontWeight.w600,
-            FontWeight.w700,
-          });
+          // The set used to be pinned as exactly {w400, w500, w600, w700}.
+          // That was the V1 scale's own choice of weights, and it went when
+          // Design System V1 was unlocked. The allowlist below is the part
+          // that was ever a rule: a heavy weight reachable from a source
+          // nobody named is an accident, whatever the scale weighs.
           final bold = <String>{
             for (final entry in weights.entries)
               if (entry.value == FontWeight.w700) entry.key,

@@ -46,8 +46,14 @@ void main() {
       final compact = await themeAt(tester, small);
       final roomy = await themeAt(tester, normal);
 
-      expect(compact.textTheme.titleLarge!.fontSize, 20);
-      expect(roomy.textTheme.titleLarge!.fontSize, 22);
+      // The sizes themselves (20 / 22) used to be pinned here. What this test
+      // is about is the compact pass, not the type scale: the claim worth
+      // holding is that compact is strictly smaller, at whatever sizes the
+      // scale settles on.
+      expect(
+        compact.textTheme.titleLarge!.fontSize,
+        lessThan(roomy.textTheme.titleLarge!.fontSize!),
+      );
     });
 
     testWidgets('the study card prompt gets smaller', (tester) async {
@@ -63,8 +69,13 @@ void main() {
         AppTypography.cardPromptSize,
       );
       // The rung beside it no longer moves: the compact pass re-sizes the
-      // prompt's own slot, and `headlineMedium` stays on the M3 metric.
-      expect(compact.textTheme.headlineMedium!.fontSize, 28);
+      // prompt's own slot and leaves `headlineMedium` alone. Asserted against
+      // the roomy build rather than against 28, so the rung's own size stays
+      // the type scale's business.
+      expect(
+        compact.textTheme.headlineMedium!.fontSize,
+        roomy.textTheme.headlineMedium!.fontSize,
+      );
     });
 
     testWidgets('list rows lose horizontal padding, not vertical', (

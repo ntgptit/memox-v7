@@ -10,10 +10,14 @@ import '../../../support/theme_probe.dart';
 /// structure A2 Quizlet Navy Indigo laid down.
 ///
 /// Readability lives in `app_theme_test.dart`; this file asserts the things a
-/// contrast check cannot see — that the ladder climbs, that the dark surfaces
-/// stay below the page's saturation, that the four semantics are four hues.
-/// Every value is read from `ThemeData`, never from `AppColors`, so the subject
-/// is what a screen will paint rather than what the palette intended.
+/// contrast check cannot see — that the ladder climbs, that the four semantics
+/// are four hues. Every value is read from `ThemeData`, never from `AppColors`,
+/// so the subject is what a screen will paint rather than what the palette
+/// intended.
+///
+/// The two absolute tint ceilings this file used to carry were removed when
+/// Design System V1 was unlocked; the comment block after the surface ladder
+/// records what they were and why they went.
 void main() {
   final light = buildLightTheme();
   final dark = buildDarkTheme();
@@ -119,58 +123,28 @@ void main() {
     });
   });
 
-  group('no dark surface reads as a coloured field', () {
-    test('every dark surface stays under the tint ceiling', () {
-      // **The measurement changed at M100.83 because its anchor did.** This
-      // used to read `0.75 × saturation(page)`: the page was the one component
-      // allowed a saturated navy, and the rule said nothing above the card
-      // climbs back up to it. The owner's palette makes the dark ground a
-      // near-neutral grey — saturation 0.020 where Tokyo's navy was 0.28 — so
-      // a share of the page is a share of almost nothing, and every rung
-      // "failed" a ceiling that had quietly collapsed to 0.015.
-      //
-      // What the rule always meant survives, stated absolutely: once card,
-      // tile and input carry a visible tint there is no hierarchy left to
-      // spend, because everything is equally coloured and nothing is
-      // emphasised. 0.12 is above the loudest rung this palette draws (the
-      // hairline, 0.091) and far below anything that reads as a colour rather
-      // than as a grey with a temperature.
-      const ceiling = 0.12;
-
-      for (final surface in <(String, Color)>[
-        ('card', dark.colorScheme.surfaceContainerLow),
-        ('tile', darkSemantic.surfaceMuted),
-        ('raised', dark.colorScheme.surfaceBright),
-        ('border', darkSemantic.borderSubtle),
-      ]) {
-        expect(
-          saturation(surface.$2),
-          lessThanOrEqualTo(ceiling),
-          reason: '${surface.$1} reads as a colour, not as a tinted grey',
-        );
-      }
-    });
-
-    test('the light canvas carries no lavender tint', () {
-      // Measured as raw chroma, not saturation: four steps off pure white reads
-      // as 22% saturation and 1.6% chroma, and only one of those numbers says
-      // anything about whether a tint is visible.
-      const maximumTint = 0.06;
-
-      for (final surface in <(String, Color)>[
-        ('page', light.scaffoldBackgroundColor),
-        ('tile', lightSemantic.surfaceMuted),
-        ('border', lightSemantic.borderSubtle),
-        ('input', light.inputDecorationTheme.enabledBorder!.borderSide.color),
-      ]) {
-        expect(
-          chroma(surface.$2),
-          lessThanOrEqualTo(maximumTint),
-          reason: 'light ${surface.$1} is tinted',
-        );
-      }
-    });
-  });
+  // **Two tint ceilings used to sit here, under the group "no dark surface
+  // reads as a coloured field", and they were this palette's own
+  // measurements.** One capped every dark surface at 0.12 saturation, the
+  // other capped the light canvas at 0.06 chroma.
+  //
+  // Their history is the argument for removing them. The dark ceiling was
+  // already re-derived once, at M100.83: it had read `0.75 × saturation(page)`
+  // and collapsed to 0.015 when the owner's palette made the dark ground a
+  // near-neutral grey (saturation 0.020, where Tokyo's navy was 0.28), so every
+  // rung "failed" a rule that had stopped meaning anything. The absolute 0.12
+  // that replaced it was picked to sit just above the loudest rung *this*
+  // palette draws — the hairline, at 0.091. A number chosen that way is a
+  // description of one palette, and the next palette has to re-derive it
+  // exactly as M100.83 did.
+  //
+  // Design System V1 was unlocked on 2026-09-17, so a retune no longer needs
+  // permission — and a ceiling that only a retune can break is not holding
+  // anything. Removed rather than loosened: a replacement figure would be a new
+  // design baseline, which this was not the task to set. The surface ladder
+  // above still asserts the thing a redesign must not break — that each tier is
+  // a visible step above the one below — and it does so relationally, at any
+  // saturation.
 
   group('primary', () {
     test('light and dark primary are the same brand colour', () {

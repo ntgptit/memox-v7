@@ -1,14 +1,24 @@
-# Design System V1 — FROZEN
+# Design System V1 — baseline lịch sử
 
 | | |
 |---|---|
 | **Status** | active |
-| **Purpose** | Ghi nhận Design System V1 là baseline ổn định của repo: hợp đồng nào đóng băng, bằng chứng nào chứng minh, và điều kiện nào mở lại |
-| **Scope** | Foundation, theme mapping, shared primitive contract, a11y floor, golden authoring policy. Ngoài phạm vi: **composition của từng màn hình nghiệp vụ** (không đóng băng), giá trị token cụ thể (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
-| **Source of truth for** | Freeze record của V1 · danh sách hợp đồng đóng băng · reopen trigger · bản đồ enforcement cho từng hợp đồng · ràng buộc lên task feature |
+| **Purpose** | Ghi nhận Design System V1 như một **baseline lịch sử**: nó đã chốt những gì, bằng chứng nào đo được ở thời điểm đó, và hôm nay guard rule / test nào đang canh từng hợp đồng |
+| **Scope** | Foundation, theme mapping, shared primitive contract, a11y floor, golden authoring policy. Ngoài phạm vi: composition của từng màn hình nghiệp vụ, giá trị token cụ thể (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
+| **Source of truth for** | Bản ghi V1 · bản đồ enforcement cho từng hợp đồng · lịch sử reopen và lần mở khoá |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-15, AD-23) · `design-system/theme-architecture.md` · `reviews/a20-1-design-system-reconciliation.md` (bằng chứng lịch sử) |
-| **Updated by task** | M100.73 |
-| **Last updated** | 2026-09-10 |
+| **Updated by task** | unlock-design-system-v1 |
+| **Last updated** | 2026-09-17 |
+
+> **V1 KHÔNG còn là hợp đồng bất biến.** Tài liệu này từng đóng băng mười bốn
+> hợp đồng và đòi một trong sáu "reopen trigger" trước khi ai được sửa chúng.
+> Chủ dự án đã gỡ ràng buộc đó — xem [§3](#3-v1-đã-được-mở-khoá). Một task
+> design-system **MAY** đổi bất kỳ token, theme mapping hay component contract
+> nào ở đây mà không cần xin phép và không cần viện dẫn điều kiện nào.
+>
+> Toàn bộ nội dung bên dưới được **giữ nguyên làm lịch sử**: số đo ở §1 là số đo
+> của lần đóng V1, không phải cam kết cho hôm nay; bảng ở §2 vẫn hữu ích vì nó
+> chỉ đúng **cái gì sẽ đỏ** khi một hợp đồng đổi.
 
 ---
 
@@ -33,10 +43,15 @@ chạy.
 
 ---
 
-## 2. Hợp đồng đóng băng
+## 2. Hợp đồng của V1, và thứ đang canh chúng
 
-Mỗi dòng dưới đây là một hợp đồng của V1. Cột **Enforcement** là thứ làm nó đỏ
-khi bị phá — không phải prose, mà là một rule hoặc một test chạy trong CI.
+Mỗi dòng dưới đây là một hợp đồng V1 đã chốt. Cột **Enforcement** là thứ làm nó
+đỏ khi bị phá — không phải prose, mà là một rule hoặc một test chạy trong CI.
+
+**Bảng này nay là bản đồ, không phải rào chắn.** Nó không còn nói "MUST NOT đổi";
+nó nói **đổi dòng này thì cái gì sẽ đỏ**. Một task design-system đổi một hợp đồng
+ở đây đọc cột Enforcement để biết phải cập nhật những gì trong cùng commit, rồi
+cập nhật cả bảng.
 
 | # | Hợp đồng | Enforcement |
 |---|---|---|
@@ -55,30 +70,60 @@ khi bị phá — không phải prose, mà là một rule hoặc một test ch�
 | 13 | Chính sách sở hữu raw Material | guard `no_raw_button`, `no_raw_widget`, `no_raw_screen_chrome`, `no_raw_sheet_route`, `no_raw_loading_indicator`, `no_raw_choice_chip`; `raw_progress_exclusions_test` |
 | 14 | Golden chỉ được author trên Linux | policy ở `dart_test.yaml`; job `goldens (linux)` của `ci.yml` — một PNG vẽ trên Windows làm job đỏ |
 
-Mười bốn dòng trên là **hợp đồng đóng băng** của V1. Cụm từ "hợp đồng đóng
-băng" ở tài liệu này luôn có nghĩa là *cả mười bốn dòng*, không phải riêng
-những dòng có guard: chín dòng được giữ bằng test, và một test cũng là hợp
-đồng.
+Mười bốn dòng trên là các hợp đồng V1 đã chốt — chín dòng được giữ bằng test,
+năm dòng (2, 4, 5, 12, 13) có thêm guard rule quét `lib/features/`.
 
-**Guard rule ở các dòng 2, 4, 5, 12 và 13 nay cũng được canh.**
+**Lớp canh thứ hai đã được gỡ cùng lần mở khoá.** Trước đây
 `code-verification-guard-v2/tests/test_memox_v7_frozen_contract_enforcement.py`
-đọc mười lăm rule đó **đúng như guard resolve chúng** — `scopes` đã bung,
-`exclude` cấp rule đã gộp, `enabled` đã tính — rồi đòi mỗi rule còn phủ một file
-presentation của **mọi** feature trong `lib/features/`. Thêm `exclude`, đặt
-`enabled: false`, hay xoá hẳn rule đều làm nó đỏ. Ghi ở đây một lần thay vì lặp
-vào năm ô của bảng, theo `document-conventions.md` §5.
+đọc mười lăm guard rule của năm dòng đó **đúng như guard resolve chúng** —
+`scopes` đã bung, `exclude` cấp rule đã gộp, `enabled` đã tính — rồi đòi mỗi rule
+còn phủ một file presentation của **mọi** feature trong `lib/features/`. Nó tồn
+tại để không ai tắt được một hợp đồng đóng băng bằng cách sửa chính thứ đang canh
+nó. Khi V1 không còn bất biến thì đó đúng là thứ một task design-system **cần**
+làm được, nên probe đã bị xoá (§3). Guard rule thì **vẫn nguyên và vẫn chạy**:
+cái mất đi là lệnh cấm sửa chúng, không phải chúng.
 
-**Không đóng băng:** composition của màn hình nghiệp vụ. Một task feature **MAY**
+**Chưa bao giờ thuộc V1:** composition của màn hình nghiệp vụ. Một task feature **MAY**
 xếp đặt, thêm, bớt section, và **MAY** compose shared widget rồi layout chúng —
 primitive của framework và của layout vẫn dùng bình thường, và **MUST NOT** dựng
 wrapper chỉ để có wrapper.
 
 ---
 
-## 3. Điều kiện mở lại
+## 3. V1 đã được mở khoá
 
-V1 **MUST NOT** được mở lại, trừ bằng **một task design-system tường minh**; và
-task đó **MUST** được kích hoạt bởi ít nhất một trong năm điều kiện sau:
+**Chủ dự án gỡ trạng thái bất biến của V1 (2026-09-17).** Từ đây:
+
+- Một task design-system **MAY** đổi bất kỳ hợp đồng nào ở §2 — palette,
+  ColorScheme, mapping `ThemeData`, typography, spacing / radius / sizing /
+  stroke / elevation, public API của shared primitive, hợp đồng thị giác của
+  component. Không cần viện dẫn điều kiện nào, không cần xin mở lại.
+- Task đó **MUST** cập nhật guard rule và test ở cột Enforcement của §2 trong
+  **cùng commit** với thay đổi — không phải vì V1 cấm, mà vì một test ghim giá
+  trị cũ sẽ đỏ, và để nó đỏ rồi sửa sau là để CI nói dối trong khoảng giữa.
+- Task đó **SHOULD** ghi lại quyết định ở đây theo mẫu §3a / §3b: đổi gì, vì
+  sao, và cái gì **không** đổi.
+
+**Cái gì vẫn đứng.** Mở khoá V1 là gỡ tính bất biến của *quyết định thiết kế*,
+không phải gỡ kỷ luật chung của repo. Những thứ sau không thuộc V1 và không đổi
+theo: sàn accessibility (contrast, target ≥ 48dp), luật "dùng token chứ không
+dùng literal", lưới 4dp, thứ tự và tính đầy đủ của thang token, layering của
+`lib/core/theme/` (`theme-architecture.md`), l10n, và mọi gate architecture /
+domain / data / business-rule. Một redesign hợp lệ vẫn thoả tất cả những thứ đó.
+
+**Vì sao mở.** Không phải vì cơ chế đóng băng hỏng — nó chạy đúng như thiết kế.
+Mà vì cái giá của nó đã lộ ra: sáu mục `DESIGN_SYSTEM_BLOCKED` trong `wbs.md`
+là sáu defect UI đã chẩn đoán xong, có cách sửa, và nằm chờ một "điều kiện mở
+lại" thay vì chờ một quyết định. Một baseline mà mọi cải thiện đều phải xin phép
+sẽ tích nợ nhanh hơn tốc độ trả.
+
+### 3-bis. Điều kiện mở lại cũ — lịch sử, không còn hiệu lực
+
+Giữ nguyên ở đây vì §3a và §3b viện dẫn chúng, và vì `wbs.md` còn trỏ tới
+"Trigger 2 / Trigger 3". **Không mục nào dưới đây còn ràng buộc ai.**
+
+Bản cũ nói V1 MUST NOT được mở lại trừ bằng một task design-system tường minh,
+và task đó MUST được kích hoạt bởi ít nhất một trong sáu điều kiện:
 
 1. Nâng Flutter SDK làm đổi hành vi Material.
 2. Chủ đích thiết kế lại palette / theme.
@@ -88,29 +133,18 @@ task đó **MUST** được kích hoạt bởi ít nhất một trong năm đi�
 6. **Chủ dự án chỉ định một thay đổi hình thức cho component đã có**, kèm tham
    chiếu thị giác cụ thể (mockup, ảnh chụp, bản dựng) — xem §3a.
 
-Không điều kiện nào trong sáu điều kiện trên đúng, thì hợp đồng ở §2 **MUST NOT**
-bị sửa.
+Bản cũ cũng cấm task feature nới lỏng, thêm `exclude`, hay xoá rule guard và
+test ở cột Enforcement để code của nó đi qua — và ghi lại rằng lối vòng đó
+**từng mở**: tới trước M100.48, thêm một dòng `exclude` vào một rule ở §2 vẫn để
+guard, probe và CI xanh cùng lúc, đo được chứ không phải suy đoán. M100.48 bịt
+nó bằng `test_memox_v7_frozen_contract_enforcement.py`; lần mở khoá này xoá
+probe đó, vì nó chính là thứ chặn một task design-system sửa rule một cách có
+chủ đích.
 
-**Một task feature MUST NOT sửa bất kỳ hợp đồng đóng băng nào ở §2** — cả mười
-bốn dòng. Nếu công việc đòi hỏi một thay đổi như vậy, task feature **MUST** dừng
-lại và mở một task design-system riêng; nó **MUST NOT** tự sửa rồi ghi chú lại,
-và **MUST NOT** merge một phần thay đổi để "mở đường".
-
-**Sửa thứ đang canh hợp đồng cũng là sửa hợp đồng.** Một task feature **MUST
-NOT** nới lỏng, thêm exclude, hay xoá rule guard và test ở cột Enforcement của
-§2 để code của nó đi qua. Đây là lối vòng thật chứ không phải giả định, và nó
-**từng mở**: guard không đỏ khi chính nó bị sửa, nên tới trước M100.48, thêm một
-dòng `exclude` vào một rule ở §2 vẫn để guard, probe và CI xanh cùng lúc — đo
-được, không phải suy đoán. Mục 2 ở trên nói cái nay đóng đường đó cho năm dòng
-có guard canh.
-
-Chín dòng còn lại vẫn chỉ có test giữ, và test thì nằm trong repo và sửa được —
-kể cả chính probe vừa nói. Vòng này phải dừng ở đâu đó, và chỗ nó dừng là câu
-**MUST NOT** mở đầu đoạn này, không phải ở một lớp canh nữa.
-
-Ba câu trên có từ khoá là **cố ý**. Theo `document-conventions.md` §3, câu không
-mang MUST/SHOULD/MAY là *giải thích, không phải ràng buộc* — bản đầu của tài liệu
-này viết điều kiện mở lại thành prose trần, nên nó chưa từng ràng buộc ai.
+**Chỗ đó nay dựa vào review, không dựa vào một lớp canh.** Sửa một guard rule
+hay một test ở cột Enforcement là thay đổi nhìn thấy được trong diff, và nó
+**MUST** đứng riêng trong một task design-system chứ không đi ké một PR feature
+— cùng luật "no drive-by refactors outside the stated scope" ở `CLAUDE.md`.
 
 ---
 
@@ -155,7 +189,8 @@ vừa, vì cách thứ hai làm mọi điều kiện mất nghĩa.
 
 **Ràng buộc lên task feature không đổi.** M100.73 chỉ thêm variant vào primitive
 và **MUST NOT** dùng chúng ở đâu cả; task feature đi sau (M100.74) là nơi chúng
-có caller đầu tiên. Tách như vậy vì §3 cấm "merge một phần thay đổi để mở đường"
+có caller đầu tiên. Tách như vậy vì §3 khi đó (nay là §3-bis) cấm "merge một
+phần thay đổi để mở đường"
 — một PR vừa nới primitive vừa dùng nó là đúng thứ câu đó nói tới.
 
 ---

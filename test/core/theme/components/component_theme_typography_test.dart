@@ -79,23 +79,36 @@ void main() {
   /// once it is present — so a re-weight that moves only `fontWeight` reports the
   /// new value here and paints the old one on the device. Asserting the weight
   /// alone would pass on exactly the bug worth catching.
+  ///
+  /// [weight] is optional since Design System V1 was unlocked. Pass it only
+  /// when a *named constant* fixes the weight (`buttonLabelWeight`); a bare
+  /// `FontWeight.wNNN` here would re-freeze the component's weight, which is
+  /// the retune this file is no longer in the way of. Left out, the axis check
+  /// below runs against whatever weight the component declares — and that is
+  /// the load-bearing half, which never needed the literal.
   void expectRungReweighted(
     String slot,
     TextStyle? style,
-    TextStyle? rung,
-    FontWeight weight,
-  ) {
+    TextStyle? rung, [
+    FontWeight? weight,
+  ]) {
     expectAppStyle(slot, style);
     expect(style!.fontSize, rung?.fontSize, reason: '$slot size');
     expect(style.height, rung?.height, reason: '$slot leading');
     expect(style.letterSpacing, rung?.letterSpacing, reason: '$slot tracking');
-    expect(style.fontWeight, weight, reason: '$slot weight');
+
+    if (weight != null) {
+      expect(style.fontWeight, weight, reason: '$slot weight');
+    }
+
+    final FontWeight? declared = style.fontWeight;
+    expect(declared, isNotNull, reason: '$slot re-weights to nothing');
     expect(
       style.fontVariations,
-      <FontVariation>[FontVariation('wght', weight.value.toDouble())],
+      <FontVariation>[FontVariation('wght', declared!.value.toDouble())],
       reason:
-          '$slot says $weight and its variable-font axis says otherwise, so it '
-          'reports one weight and paints another',
+          '$slot says $declared and its variable-font axis says otherwise, so '
+          'it reports one weight and paints another',
     );
     expect(
       style.fontWeight,
@@ -117,14 +130,16 @@ void main() {
       final TextTheme texts = theme.textTheme;
 
       test('the pill label is label-lg, declared one weight lighter', () {
-        // 500 is Material's chip weight and `--weight-medium` in the kit. The
-        // rung stays 600 for the button it was raised for; only the chip parts
-        // from it, and `app_chip_theme.dart` holds the measurement that says why.
+        // Material's chip weight, and `--weight-medium` in the kit. The rung
+        // was raised for the button; only the chip parts from it, and
+        // `app_chip_theme.dart` holds the measurement that says why. Which
+        // weight it parts *to* is no longer pinned here — the claim is that it
+        // differs from the rung and that its variable-font axis agrees with
+        // what it declares, and both survive a retune.
         expectRungReweighted(
           'chipTheme.labelStyle',
           theme.chipTheme.labelStyle,
           texts.labelLarge,
-          FontWeight.w500,
         );
       });
 
@@ -180,7 +195,6 @@ void main() {
           'navigationBarTheme.labelTextStyle (selected)',
           label.resolve(const <WidgetState>{WidgetState.selected}),
           texts.labelMedium,
-          FontWeight.w600,
         );
       });
 
@@ -231,11 +245,10 @@ void main() {
           theme.dialogTheme.titleTextStyle,
           texts.titleMedium,
         );
-        expect(
-          theme.dialogTheme.titleTextStyle?.fontWeight,
-          FontWeight.w600,
-          reason: 'the dialog title is back on Material 3 title-md',
-        );
+        // The title's weight used to be pinned at w600 here, restating the
+        // rung it is already asserted to match. `expectSameRung` above is the
+        // claim — the dialog title is title-md and adds nothing of its own —
+        // and it holds at whatever the rung weighs.
         expectSameRung(
           'dialogTheme.contentTextStyle',
           theme.dialogTheme.contentTextStyle,

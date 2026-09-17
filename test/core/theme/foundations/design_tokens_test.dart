@@ -8,15 +8,17 @@ import 'package:memox/core/theme/foundations/app_icon_size.dart';
 import 'package:memox/core/theme/components/feedback/app_tooltip_theme.dart';
 import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
-import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/foundations/app_surface_colors.dart';
 import 'package:memox/core/theme/foundations/app_border_colors.dart';
 
 void main() {
   group('AppSpacing', () {
-    test('is exactly the 4/8/12/16/24/32 scale', () {
-      expect(AppSpacing.scale, <double>[4, 8, 12, 16, 24, 32]);
-    });
+    // The scale used to be pinned here as the literal list 4/8/12/16/24/32.
+    // Removed when Design System V1 was unlocked: it restated the token file
+    // and nothing else, so it could only ever fail because someone retuned the
+    // scale on purpose. What the scale actually has to be — strictly
+    // increasing, no duplicates, and the declared constants being exactly its
+    // members — is asserted by the two tests below, at any values.
 
     test('the scale is strictly increasing and has no duplicates', () {
       // A duplicated step means two names for one value, and the two drift
@@ -79,16 +81,13 @@ void main() {
     });
   });
 
-  group('AppStroke', () {
-    test('carries the three canonical widths', () {
-      // Named against the values rather than against each other: a stroke scale
-      // that only has to be *increasing* passes with 1 / 1.6 / 3, which is three
-      // numbers nobody chose.
-      expect(AppStroke.hairline, 1);
-      expect(AppStroke.control, 1.5);
-      expect(AppStroke.focus, 2);
-    });
-  });
+  // `AppStroke` used to pin its three widths here as 1 / 1.5 / 2, with the
+  // argument that a merely-increasing scale "passes with 1 / 1.6 / 3, which is
+  // three numbers nobody chose". That argument holds against drift and not
+  // against a deliberate retune, and since Design System V1 was unlocked the
+  // second is legitimate work. The ordering that survives any retune lives in
+  // `app_stroke_test.dart`, together with the wiring of each width to the
+  // component that spends it.
 
   test('a tooltip delay is not a motion duration', () {
     // Why `kTooltipWaitDuration` lives beside the tooltip theme instead of

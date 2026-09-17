@@ -45,11 +45,13 @@ void main() {
     test(
       'the reading row is above the touch floor, and the theme states it',
       () {
-        // 48 is a floor a finger needs; 56 is what a list the eye reads down
-        // wants (M100.36 4J). Owned here rather than left to Flutter's
-        // `_defaultTileHeight`, and put on the theme so every ListTile reads it.
+        // 48 is a floor a finger needs; a list the eye reads down wants more
+        // than that (M100.36 4J). Owned here rather than left to Flutter's
+        // `_defaultTileHeight`, and put on the theme so every ListTile reads
+        // it. The height itself used to be pinned at 56; that literal went
+        // when Design System V1 was unlocked — the floor and the wiring are
+        // what this test is for, and both hold at any row height.
         expect(AppSizing.rowMinHeight, greaterThan(AppSizing.touchTarget));
-        expect(AppSizing.rowMinHeight, 56);
         for (final build in <ThemeData Function()>[
           buildLightTheme,
           buildDarkTheme,

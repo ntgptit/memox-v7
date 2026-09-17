@@ -162,10 +162,14 @@ jobs:
           echo "Guard registry version: $(cat code-verification-guard-v2/VERSION)"
 
       # The guard's own probes, and they run BEFORE its verdict on purpose.
-      # A rule that has been excluded, disabled or deleted leaves the guard
-      # green -- it does not go red when the thing being edited is itself. So a
-      # green guard is evidence only once these have passed; without them the
-      # step below says "no violations found" about rules that stopped looking.
+      # A rule that has been deleted leaves the guard green -- it does not go
+      # red when the thing being edited is itself. So a green guard is evidence
+      # only once these have passed; without them the step below says "no
+      # violations found" about rules that stopped looking.
+      # `exclude` and `enabled: false` are deliberately NOT caught here any
+      # more. Narrowing a design-system rule's scope is how an intentional
+      # design-system task changes a contract, and the probe that forbade it
+      # was the Design System V1 freeze -- lifted with the freeze itself.
       # `working-directory` is load-bearing, not tidiness: one probe reads
       # `guard-manifest.yaml` by relative path, so the suite passes from the
       # guard directory and fails from the repo root. That is also the
