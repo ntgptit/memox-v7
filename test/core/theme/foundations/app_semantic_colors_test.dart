@@ -163,8 +163,6 @@ void main() {
       expect(dark.disabledSurface.a, 1);
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('onDisabled is the ink at 38%', () {
       // Compared as packed ARGB, which is the comparison that matters: the
       // constant is written as a literal because MX-VIS-002 R2 keeps colour
@@ -183,6 +181,5 @@ void main() {
             .toARGB32(),
       );
     });
-    */
   });
 }

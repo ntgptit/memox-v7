@@ -134,33 +134,26 @@ void main() {
     // two tokens are equal in light by construction, which is precisely why
     // reaching for the wrong one was invisible for so long — so the assertion
     // that carries weight is the dark one.
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
-    test(
-      'the brand mark is `primary`, and reads on the page in both modes',
-      () {
-        // **This used to assert that `primaryAccent` outranked `primary` in
-        // dark**, which was true while dark `primary` was a tone-40 fill that
-        // measured 3.33:1 as bare text. M100.18 inverted it to tone 80, so the
-        // brand hue reads as a mark on its own and the accent token is a
-        // derivation of it awaiting removal.
-        //
-        // What the milestone actually cared about survives, stated directly: a
-        // brand mark has to clear the text floor on the page it is inked on.
-        for (final entry in themes.entries) {
-          final theme = entry.value;
+    test('the brand mark is inked, and reads on the page in both modes', () {
+      // v3 (colors_and_type.css, 2026-09-17): light `primary` reads
+      // 4.39:1 as bare text on the page — under the 4.5:1 floor GC-3 sets.
+      // `MxIcon` already paints this mark `AppInk.accent`, which resolves to
+      // `accentInk` (mx_empty_state.dart), so the assertion follows the ink
+      // the mark actually renders with rather than the fill it used to
+      // coincide with.
+      for (final entry in themes.entries) {
+        final theme = entry.value;
+        final semantic = semanticOf(theme);
 
-          expect(
-            contrast(theme.colorScheme.primary, theme.scaffoldBackgroundColor),
-            greaterThanOrEqualTo(4.5),
-            reason:
-                '${entry.key}: the brand hue no longer reads as a label on the '
-                'page, so MxEmptyState and MxActionSheet lose their mark',
-          );
-        }
-      },
-    );
-    */
+        expect(
+          contrast(semantic.accentInk, theme.scaffoldBackgroundColor),
+          greaterThanOrEqualTo(4.5),
+          reason:
+              '${entry.key}: the brand ink no longer reads as a label on the '
+              'page, so MxEmptyState and MxActionSheet lose their mark',
+        );
+      }
+    });
 
     test('the accent resolves to primary in both modes', () {
       // The derivation, pinned while it lasts: removing the token in M100.19

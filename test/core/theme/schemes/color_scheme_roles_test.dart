@@ -103,8 +103,6 @@ void main() {
     expect(_roles(schemes['light']!).length, _materialColorRoleCount);
   });
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   test('no role strays outside a palette hue family', () {
     // Independent of the check above rather than implied by it: membership
     // says the value came from the palette, this says the palette itself has
@@ -120,7 +118,6 @@ void main() {
       });
     }
   });
-  */
 }
 
 /// The 45 Material 3 colour roles, every one of which the palette declares.
@@ -183,7 +180,6 @@ Map<String, Color> _roles(ColorScheme s) => <String, Color>{
 };
 
 /// Grey, navy/indigo/steel, or one of the three semantic hues.
-// ignore: unused_element
 bool _isInFamily(Color color) {
   const greyChroma = 0.06;
   if (chroma(color) <= greyChroma) return true;
@@ -191,25 +187,22 @@ bool _isInFamily(Color color) {
   final h = hue(color);
   if (h == null) return true;
 
-  // **Re-measured against the palette at M100.83, not widened to let something
-  // through.** A band describes the families the palette actually has; when
-  // the palette is replaced the bands are re-derived from it, or they stop
-  // describing anything. What each change admits:
+  // **Re-measured against the v3 palette (colors_and_type.css, 2026-09-17),
+  // not widened to let something through.** A band describes the families the
+  // palette actually has; when the palette is replaced the bands are
+  // re-derived from it, or they stop describing anything. What v3 changed:
   //
-  // - the brand band ends at 262 because the new `secondary` is a violet grey
-  //   at hue 259, where the old one was a blue grey at 230;
-  // - `tertiary` gets a band of its own at 330–350 rather than being folded
-  //   into danger, so the guard can still tell a mauve tertiary from a red
-  //   error — telling those apart is the reason this check exists (the A2
-  //   audit found a *pink* tertiary that `fromSeed` had invented);
-  // - danger wraps through 0 now, because the new `error` is a true red at
-  //   hue 3 where the old one was a crimson at 346. The old band simply could
-  //   not express a hue past 360.
+  // - `tertiary` moved into the brand's own indigo/violet arc (252–258, inside
+  //   the band below) rather than sitting apart at 330–350 the way the old
+  //   mauve tertiary did, so it no longer needs a band of its own;
+  // - `error`'s whole family sits at 343.4–350.5 (`onError` dark to
+  //   `onErrorContainer` dark, the widest spread) and, unlike the redesign
+  //   this replaced, never approaches 360 — one band replaces the old
+  //   three-piece "mauve / upper arc / wrapped past 360" split that a
+  //   near-360 red used to need.
   const families = <(double, double)>[
-    (195, 262), // navy, indigo, steel, violet — the brand and every surface
-    (330, 350), // tertiary — mauve
-    (355, 360), // danger, the upper arc
-    (0, 15), //    danger, wrapped past 360
+    (195, 262), // brand: navy, indigo, steel, violet, and v3's tertiary
+    (340, 351), // danger — v3's error family
     (145, 175), // success
     (25, 55), // warning
   ];
