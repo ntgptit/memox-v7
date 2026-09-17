@@ -112,8 +112,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the dial numbers read on the face, and on the hand', () {
       for (final entry in themes.entries) {
         final t = entry.value.timePickerTheme;
@@ -133,7 +131,6 @@ void main() {
         );
       }
     });
-    */
 
     test('the AM/PM edge is the 3:1 border, not the hairline', () {
       // The day period toggle is a pair of empty boxes: exactly the case

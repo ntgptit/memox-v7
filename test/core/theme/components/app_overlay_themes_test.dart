@@ -109,8 +109,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('a spinner reads against the surface it spins on', () {
       for (final entry in themes.entries) {
         final theme = entry.value;
@@ -127,6 +125,5 @@ void main() {
         );
       }
     });
-    */
   });
 }

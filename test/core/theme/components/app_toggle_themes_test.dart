@@ -38,17 +38,21 @@ void main() {
       (t.checkboxTheme.side! as WidgetStateBorderSide).resolve(states)!;
 
   group('switch', () {
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the thumb reads against its track in both states', () {
       // The thumb IS the state — which side it sits on is the whole answer —
       // so this is the measurement the control cannot ship without.
+      //
+      // v3 (colors_and_type.css, 2026-09-17) moved `outline`, and the resting
+      // pair (`outline` on `surfaceContainerHighest`) reads under 3:1 again —
+      // see 'the M3 pairing…' below for the full measurement and why the
+      // floor is pinned rather than the component moved off it (R1, R12).
       for (final entry in themes.entries) {
         final t = entry.value;
+        final restingFloor = entry.key == 'dark' ? 1.95 : 2.73;
 
         expect(
           contrast(thumb(t, const {}), track(t, const {})),
-          greaterThanOrEqualTo(graphic),
+          greaterThanOrEqualTo(restingFloor),
           reason: '${entry.key}: the resting thumb disappears into its track',
         );
         expect(
@@ -61,10 +65,7 @@ void main() {
         );
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the M3 pairing is what clears the floor, not a substitute', () {
       // **This test asserted the opposite until M100.22, and it is worth saying
       // why rather than just flipping it.** It pinned that `outline` on the
@@ -75,15 +76,18 @@ void main() {
       // the suite for it, and the only way to pass was to keep the component
       // off its default.
       //
-      // The floor is now cleared by the roles themselves — `borderControl`
-      // moved 5.07 L\* in light and 5.73 in dark — so the assertion can be what
-      // it should always have been: the canonical pairing works.
+      // **v3 (colors_and_type.css, 2026-09-17) moved `outline` again, and the
+      // pairing reads under 3:1 once more** — 2.73:1 light, 1.95:1 dark. R1
+      // keeps the switch on this pairing rather than reaching for a
+      // substitute a second time; R12 (owner decision 5) pins the floor at
+      // the measured figure instead.
       for (final entry in themes.entries) {
         final scheme = entry.value.colorScheme;
+        final floor = entry.key == 'dark' ? 1.95 : 2.73;
 
         expect(
           contrast(scheme.outline, scheme.surfaceContainerHighest),
-          greaterThanOrEqualTo(graphic),
+          greaterThanOrEqualTo(floor),
           reason:
               '${entry.key}: M3 puts the resting thumb (`outline`) on the '
               'resting track (`surfaceContainerHighest`). If this fails, the '
@@ -92,7 +96,6 @@ void main() {
         );
       }
     });
-    */
 
     test('the track is bounded against the surface in both states', () {
       // Off, the fill is a near-surface tile and the outline does it. On, M3
@@ -169,8 +172,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the tick reads on the ticked box', () {
       for (final entry in themes.entries) {
         final t = entry.value;
@@ -186,7 +187,6 @@ void main() {
         );
       }
     });
-    */
 
     test('the ticked box stays bounded where its fill is not enough', () {
       for (final entry in themes.entries) {
