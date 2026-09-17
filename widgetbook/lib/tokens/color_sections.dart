@@ -130,6 +130,13 @@ List<_ColorEntry> _semanticEntries(BuildContext context) {
     _ColorEntry('info', semantic.info),
     _ColorEntry('surfaceMuted', semantic.surfaceMuted),
     _ColorEntry('borderSubtle', semantic.borderSubtle),
+    _ColorEntry('mastery', semantic.mastery),
+    _ColorEntry('statusNew', semantic.statusNew),
+    _ColorEntry('statusLearning', semantic.statusLearning),
+    _ColorEntry('statusReviewing', semantic.statusReviewing),
+    _ColorEntry('statusMastered', semantic.statusMastered),
+    _ColorEntry('errorFill', semantic.errorFill),
+    _ColorEntry('onErrorFill', semantic.onErrorFill),
   ];
 }
 

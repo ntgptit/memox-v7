@@ -27,6 +27,10 @@ void main() {
     'lib/core/theme/app_theme.dart',
     'lib/core/theme/foundations/app_semantic_colors.dart',
     'lib/core/theme/components/actions/app_button_themes.dart',
+    // The seven v3 MEMOX_SEMANTIC_COLOR BIND_NOW literals — mastery, the four
+    // statuses, and the destructive-fill pair — that ColorScheme has no role
+    // to offer. M100.98 Theme Binding, Task 1.
+    'lib/core/theme/foundations/app_product_colors.dart',
   };
 
   /// The one literal outside those files that is allowed, with its reason.
