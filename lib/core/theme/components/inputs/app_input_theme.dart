@@ -88,6 +88,12 @@ InputDecorationTheme buildInputDecorationTheme(
           : scheme.onSurfaceVariant,
     ),
   ),
+  // **The error message is text, so it takes the danger ink, not `error`**
+  // (GC-3, 2026-09-17). `_InputDecoratorDefaultsM3.errorStyle` is
+  // `textTheme.bodySmall` in `colorScheme.error`; the rung is kept from
+  // [texts] and only the role moves — the border keeps `error`, where 3:1 is
+  // what a boundary owes.
+  errorStyle: texts.bodySmall!.copyWith(color: semantic.dangerInk),
   // **The suffix follows the field's error state** (#433 F4). `InputDecorator`
   // resolves the suffix colour as `decoration.suffixIconColor ??
   // iconButtonTheme.foregroundColor ?? defaults.suffixIconColor`

@@ -96,11 +96,15 @@ void main() {
       testWidgets('$label reads AppSemanticColors, never a literal', (
         tester,
       ) async {
+        // Each glyph is `MxIcon(tone.icon, ink: tone.ink)`, so it reads the
+        // ink `AppInk` resolves to, not the fill — unchanged for `info` (R4),
+        // moved to `successInk`/`warningInk`/`dangerInk` for the rest since
+        // GC-3 (2026-09-17).
         final expected = <MxDialogTone, Color>{
           MxDialogTone.info: semantic.info,
-          MxDialogTone.success: semantic.success,
-          MxDialogTone.warning: semantic.warning,
-          MxDialogTone.error: semantic.danger,
+          MxDialogTone.success: semantic.successInk,
+          MxDialogTone.warning: semantic.warningInk,
+          MxDialogTone.error: semantic.dangerInk,
         };
 
         for (final tone in MxDialogTone.values) {
@@ -118,7 +122,7 @@ void main() {
       await tester.pumpWidget(host(tone: MxDialogTone.error));
       final errorColor = tester.widget<Icon>(toneIcon()).color;
 
-      expect(errorColor, const AppSemanticColors.light().danger);
+      expect(errorColor, const AppSemanticColors.light().dangerInk);
     });
   });
 

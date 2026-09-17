@@ -144,7 +144,9 @@ void main() {
     );
 
     expect(icon.icon, Icons.error_outline);
-    expect(icon.color, const AppSemanticColors.light().danger);
+    // The glyph is `MxIcon(tone.icon, ink: tone.ink)` — `AppInk.danger`,
+    // which is `dangerInk` since GC-3 (2026-09-17), not the fill.
+    expect(icon.color, const AppSemanticColors.light().dangerInk);
   });
 
   testWidgets('a success alert is a different glyph and a different token', (
@@ -160,6 +162,7 @@ void main() {
     );
 
     expect(icon.icon, Icons.check_circle_outline);
-    expect(icon.color, const AppSemanticColors.light().success);
+    // `AppInk.success` is `successInk` since GC-3 (2026-09-17), not the fill.
+    expect(icon.color, const AppSemanticColors.light().successInk);
   });
 }

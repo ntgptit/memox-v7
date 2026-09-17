@@ -139,7 +139,9 @@ void main() {
     final theme = Theme.of(tester.element(find.text('Box 2 → 3')));
     expect(
       tester.widget<Text>(find.text('Box 2 → 3')).style!.color,
-      theme.colorScheme.primary,
+      // The accent as text — `AppInk.accent`, which is `accentInk` since
+      // GC-3 (2026-09-17).
+      theme.extension<AppSemanticColors>()!.accentInk,
     );
     expect(
       tester.widget<Text>(find.textContaining('Due')).style!.color,

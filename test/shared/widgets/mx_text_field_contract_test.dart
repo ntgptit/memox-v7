@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -228,6 +229,13 @@ void main() {
           ),
           semantic.dangerInk,
         );
+        // The message itself is text, so it takes the same ink as the glyph
+        // beside it (GC-3, 2026-09-17) — left to `errorStyle`'s M3 default it
+        // would have painted `colorScheme.error`, the fill.
+        final errorMessage = tester.renderObject<RenderParagraph>(
+          find.text('Already tagged'),
+        );
+        expect(errorMessage.text.style?.color, semantic.dangerInk);
         expect(
           await suffixColorOf(tester, isEnabled: false, isDark: mode.$2),
           semantic.onDisabled,

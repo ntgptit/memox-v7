@@ -132,6 +132,20 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
         'the stroke, per M100.36 4C.',
   ),
   RoleBinding(
+    component: 'TextField',
+    slot: 'errorStyle',
+    file: _inputs,
+    scope: 'buildInputDecorationTheme',
+    requires: <String>[],
+    requiresSemantic: <String>['dangerInk'],
+    refuses: <String>['error'],
+    because:
+        '_InputDecoratorDefaultsM3.errorStyle paints the message in '
+        '`colorScheme.error` — a fill that fails 4.5:1 as text. The message '
+        'is text, so it takes `dangerInk` (GC-3, 2026-09-17); the border '
+        'beside it keeps `error`, where 3:1 is what a boundary owes.',
+  ),
+  RoleBinding(
     component: 'ListTile',
     slot: 'titleTextStyle',
     file: _listTile,

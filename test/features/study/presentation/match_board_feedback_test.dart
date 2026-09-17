@@ -67,11 +67,13 @@ void main() {
       // sentence. The surface stays exactly what an idle tile has.
       for (final label in <String>['front-a', 'back-a']) {
         expect(_fill(tester, label), _idleFill(tester));
-        expect(_edge(tester, label).color, _semantic(tester).success);
+        // The edge and the label resolve through the same `AppInk.success`
+        // (`MatchTileWidget`), which is `successInk` since GC-3 (2026-09-17).
+        expect(_edge(tester, label).color, _semantic(tester).successInk);
         expect(_edge(tester, label).width, AppStroke.control);
         expect(
           tester.widget<Text>(find.text(label)).style?.color,
-          _semantic(tester).success,
+          _semantic(tester).successInk,
         );
       }
 
@@ -106,11 +108,13 @@ void main() {
       await _settleColour(tester);
       for (final label in <String>['front-a', 'back-b']) {
         expect(_fill(tester, label), _idleFill(tester));
-        expect(_edge(tester, label).color, _semantic(tester).danger);
+        // The edge and the label resolve through the same `AppInk.danger`
+        // (`MatchTileWidget`), which is `dangerInk` since GC-3 (2026-09-17).
+        expect(_edge(tester, label).color, _semantic(tester).dangerInk);
         expect(_edge(tester, label).width, AppStroke.control);
         expect(
           tester.widget<Text>(find.text(label)).style?.color,
-          _semantic(tester).danger,
+          _semantic(tester).dangerInk,
         );
       }
 
@@ -156,10 +160,12 @@ void main() {
 
       expect(find.byIcon(Icons.close), findsNothing);
 
-      // And the tap was a real selection, not just a dismissal.
+      // And the tap was a real selection, not just a dismissal. Selected
+      // resolves through `AppInk.accent` (`MatchTileWidget`), which is
+      // `accentInk` since GC-3 (2026-09-17).
       final ink = Theme.of(
         tester.element(find.text('front-b')),
-      ).colorScheme.primary;
+      ).extension<AppSemanticColors>()!.accentInk;
       expect(tester.widget<Text>(find.text('front-b')).style?.color, ink);
       expect(_edge(tester, 'front-b').color, ink);
 
