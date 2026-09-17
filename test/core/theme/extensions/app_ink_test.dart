@@ -209,14 +209,20 @@ void main() {
         ),
       );
 
-      expect(plain.fontWeight, isNot(FontWeight.w600));
-      expect(emphasized.fontWeight, FontWeight.w600);
+      // Which weight "emphasized" lands on used to be pinned at w600 on both
+      // sides. It went when Design System V1 was unlocked; the claim that
+      // matters is that emphasized differs from plain and that the axis agrees
+      // with it, and neither needs the number.
+      expect(emphasized.fontWeight, isNotNull);
+      expect(emphasized.fontWeight, isNot(plain.fontWeight));
       // The load-bearing half: on a variable font the renderer reads the axis
       // over fontWeight, so an API that set only the number would repeat the
       // bug it exists to end.
       expect(
         emphasized.fontVariations,
-        contains(const FontVariation('wght', 600)),
+        contains(
+          FontVariation('wght', emphasized.fontWeight!.value.toDouble()),
+        ),
       );
     });
 

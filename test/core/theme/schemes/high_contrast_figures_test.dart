@@ -104,7 +104,10 @@ void main() {
     });
   }
 
-  test('the alpha the trade is built on', () {
-    expect(highContrastDisabledAlpha, 0.62);
-  });
+  // The alpha the trade is built on used to be pinned here as a bare
+  // `expect(highContrastDisabledAlpha, 0.62)`. Removed when Design System V1
+  // was unlocked: it asserted one tuning number and nothing about the trade.
+  // What the trade actually has to satisfy is measured above and still is —
+  // `onDisabled` clears the 3:1 floor over its ground and stays below half the
+  // primary ink's contrast — and those hold at whatever alpha a retune picks.
 }

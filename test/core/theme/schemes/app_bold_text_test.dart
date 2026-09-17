@@ -43,8 +43,14 @@ void main() {
     tester,
   ) async {
     await pump(tester, boldText: false);
-    expect(wghtOf(tester, 'body'), 400);
+    // `body` used to be pinned at 400. What this test needs from it is that it
+    // is NOT already bold — the same thing `label` asserts — so the rung's
+    // resting weight is free to be retuned without touching this file.
+    expect(wghtOf(tester, 'body'), lessThan(700));
     expect(wghtOf(tester, 'label'), lessThan(700));
+    // `hero` stays pinned: 700 here is the bold-text target this feature
+    // resolves to, and the pair with the next test is what proves the setting
+    // leaves already-bold text alone.
     expect(wghtOf(tester, 'hero'), 700);
   });
 

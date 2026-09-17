@@ -23,9 +23,10 @@ void main() {
       expect(AppStroke.hairline, lessThan(AppStroke.control));
       expect(AppStroke.control, lessThan(AppStroke.focus));
       expect(AppStroke.selectionControl, AppStroke.focus);
-      // Material's 48 dp ring uses 4; the 16 dp spinner inside a button uses
-      // half of that, and the number is named rather than typed.
-      expect(AppStroke.indicator, 2);
+      // Material's 48 dp ring uses 4, and the 16 dp spinner inside a button
+      // must stay under it. The exact width the app picked (2) used to be
+      // pinned here as well; that literal went when Design System V1 was
+      // unlocked, because it could only fail on a deliberate retune.
       expect(AppStroke.indicator, lessThan(4));
     },
   );
