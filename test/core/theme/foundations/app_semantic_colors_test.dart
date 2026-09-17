@@ -20,6 +20,13 @@ void main() {
       expect(changed.success, base.success);
       expect(changed.warning, base.warning);
       expect(changed.info, base.info);
+      expect(changed.accentInk, base.accentInk);
+      expect(changed.dangerInk, base.dangerInk);
+      expect(changed.successInk, base.successInk);
+      expect(changed.warningInk, base.warningInk);
+      expect(changed.secondaryInk, base.secondaryInk);
+      expect(changed.tertiaryInk, base.tertiaryInk);
+      expect(changed.inversePrimaryInk, base.inversePrimaryInk);
       expect(changed.surfaceMuted, base.surfaceMuted);
       expect(changed.borderSubtle, base.borderSubtle);
       expect(changed.surfaceEmphasis, base.surfaceEmphasis);
@@ -39,6 +46,28 @@ void main() {
       expect(mid.warning, Color.lerp(light.warning, dark.warning, 0.5));
       expect(mid.danger, Color.lerp(light.danger, dark.danger, 0.5));
       expect(mid.info, Color.lerp(light.info, dark.info, 0.5));
+      expect(mid.accentInk, Color.lerp(light.accentInk, dark.accentInk, 0.5));
+      expect(mid.dangerInk, Color.lerp(light.dangerInk, dark.dangerInk, 0.5));
+      expect(
+        mid.successInk,
+        Color.lerp(light.successInk, dark.successInk, 0.5),
+      );
+      expect(
+        mid.warningInk,
+        Color.lerp(light.warningInk, dark.warningInk, 0.5),
+      );
+      expect(
+        mid.secondaryInk,
+        Color.lerp(light.secondaryInk, dark.secondaryInk, 0.5),
+      );
+      expect(
+        mid.tertiaryInk,
+        Color.lerp(light.tertiaryInk, dark.tertiaryInk, 0.5),
+      );
+      // inversePrimaryInk is not checked against light/dark here: GC-3 makes
+      // it identical in both modes, so Color.lerp(x, x, 0.5) and a field that
+      // snaps to `this` instead of interpolating are the same number — the
+      // dedicated test below forces two different values instead.
       expect(
         mid.surfaceMuted,
         Color.lerp(light.surfaceMuted, dark.surfaceMuted, 0.5),
@@ -58,6 +87,24 @@ void main() {
       expect(
         mid.onDisabled,
         Color.lerp(light.onDisabled, dark.onDisabled, 0.5),
+      );
+    });
+
+    test('lerp interpolates inversePrimaryInk, which is identical in both '
+        'modes', () {
+      // light and dark carry the same inversePrimaryInk value (GC-3: its
+      // one ground, inverseSurface, is theme-invariant too), so a
+      // light-to-dark lerp can't tell a real blend from a field that snaps
+      // to `this` — both read as the unchanged value. Force two instances
+      // that actually differ so the assertion can fail.
+      const light = AppSemanticColors.light();
+      final variant = light.copyWith(
+        inversePrimaryInk: const Color(0xFF000000),
+      );
+
+      expect(
+        light.lerp(variant, 0.5).inversePrimaryInk,
+        Color.lerp(light.inversePrimaryInk, variant.inversePrimaryInk, 0.5),
       );
     });
 
