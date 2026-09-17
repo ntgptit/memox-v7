@@ -21,16 +21,14 @@ import 'support/progress_screen_harness.dart';
 /// **The pair that carries meaning is fill-against-track**, not fill-against-
 /// page: the length of the filled part is read against the track behind it, and
 /// a fill that disappeared into its own track would leave the bar saying
-/// nothing. Measured at the time of writing: **3.34:1** in light
-/// (`progressFillLight` on `progressTrackLight`) and **4.08:1** in dark. Both
-/// clear the floor, and light clears it by 0.34 — which is the whole reason
+/// nothing. Measured on the v3 palette (2026-09-17): **3.74:1** in light
+/// (`progressFillLight` on `progressTrackLight`) and **4.43:1** in dark. Both
+/// clear the floor, and light clears it by 0.74 — which is the whole reason
 /// this is pinned rather than left to a future palette tweak to discover.
 void main() {
   /// WCAG 1.4.11 for a non-text graphic.
   const double graphicFloor = 3;
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   for (final (String mode, ThemeData Function() build)
       in <(String, ThemeData Function())>[
         ('light', buildLightTheme),
@@ -49,7 +47,6 @@ void main() {
       );
     });
   }
-  */
 
   test('the track is deliberately quiet, and the numbers carry the meaning', () {
     // **Recorded, not enforced at 3:1 — and the difference is the point.** The

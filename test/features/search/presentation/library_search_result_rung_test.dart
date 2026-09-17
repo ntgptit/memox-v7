@@ -64,9 +64,12 @@ void main() {
   });
 
   testWidgets('the rung swap moves no metric', (tester) async {
-    // Why nothing reflowed: the two rungs differ in weight and tracking only.
-    // Pinning that here means a future edit to the *scale* is what fails, at
-    // the place that explains the consequence, rather than four goldens.
+    // Why nothing reflowed: since GC-4/R5 (2026-09-17) `titleMedium` and
+    // `bodyLarge` are both the "body large" role — `AppTypography` builds
+    // both from the same `bodyLarge(slot)` helper, so they no longer differ
+    // in weight or tracking either. Pinning that here means a future edit
+    // that lets the two roles diverge again is what fails, at the place
+    // that explains the consequence, rather than four goldens.
     await pumpBothRows(tester);
 
     final TextTheme texts = Theme.of(
@@ -77,10 +80,10 @@ void main() {
     expect(texts.titleMedium!.height, texts.bodyLarge!.height);
     expect(
       texts.titleMedium!.letterSpacing,
-      lessThan(texts.bodyLarge!.letterSpacing!),
+      texts.bodyLarge!.letterSpacing,
       reason:
-          'tracking falls 0.5 -> 0.15, so the line gets narrower — the '
-          'direction that cannot introduce a wrap',
+          'both roles track at 0 now — equal, not merely close enough to '
+          'not wrap',
     );
   });
 

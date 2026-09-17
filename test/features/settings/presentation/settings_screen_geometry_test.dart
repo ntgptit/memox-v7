@@ -271,11 +271,17 @@ void main() {
       tester,
     ) async {
       // The compact half of the '390' claim above, and the tier that claim
-      // cannot see. Below 360dp the screen gutter steps to `md`, and the
-      // choice rows and the reminder row step with it — the Study defaults
-      // card took `MxCardPadding.standard`'s fixed 16 and did not, so four
-      // cards sharing their outer edges held their content at three different
-      // x positions (W5).
+      // cannot see. Below 360dp the screen gutter used to step to `md`, and
+      // the choice rows and the reminder row stepped with it — the Study
+      // defaults card took `MxCardPadding.standard`'s fixed 16 and did not,
+      // so four cards sharing their outer edges held their content at three
+      // different x positions (W5).
+      //
+      // **`md` is now `lg` (GC-7, 2026-09-17).** The screen gutter is `lg`
+      // at every width, and `applyCompactScale` no longer overrides
+      // `listTileTheme.contentPadding`, so the rows no longer step down
+      // below 360dp either — all four still agree, just one gutter step
+      // wider than before.
       await pumpSettings(
         tester,
         FakeAppSettingsRepository(),
@@ -284,7 +290,7 @@ void main() {
       );
 
       final cardLeft = cardRects(tester).first.left;
-      final content = cardLeft + AppSpacing.md;
+      final content = cardLeft + AppSpacing.lg;
 
       // Study defaults: the field is the card's own content edge, and its
       // `block`-shaped rows carry no gutter of their own, so both land on it.
@@ -297,7 +303,7 @@ void main() {
       // card pads vertically only and each `list` row supplies the gutter.
       expect(
         tester.getRect(find.byType(RadioListTile<AppThemeMode>).first).left +
-            AppSpacing.md,
+            AppSpacing.lg,
         content,
       );
       // The reminder row's gutter comes from `applyCompactScale`'s
@@ -316,6 +322,10 @@ void main() {
       // screen gutter, so below 360dp it was inset 4dp further than the thing
       // it was explaining — in the one state where the user is reading
       // carefully.
+      //
+      // Both now agree at `lg` (GC-7, 2026-09-17): the screen gutter no
+      // longer steps down below 360dp, so the band's own `lg` and the row's
+      // content edge land on the same x by construction rather than by luck.
       await pumpSettings(
         tester,
         FailingAppSettingsRepository(),
@@ -335,7 +345,7 @@ void main() {
 
       final rowContentLeft =
           tester.getRect(find.byType(RadioListTile<AppThemeMode>).first).left +
-          AppSpacing.md;
+          AppSpacing.lg;
 
       expect(tester.getRect(find.byType(MxFeedbackBand)).left, rowContentLeft);
     });
