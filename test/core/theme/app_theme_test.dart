@@ -248,10 +248,14 @@ void main() {
       // number and are instead each held to their own pair. The colour measured
       // here is painted solid by the rim's 1 px spread (`app_elevation_test`
       // pins it), so the ratio is the ring's, not a blurred approximation.
+      // 6.0 was Tokyo's two-layer float+contact shade. The v3 tiers
+      // (`--memox-shadow-soft`, `colors_and_type.css`) paint `card` at a
+      // single 4% layer, which measures 4.90 L* here; 4.5 keeps a floor below
+      // that without re-quoting a shape this recipe no longer paints.
       final lightLift = liftOf(themes['light']!);
       expect(
         lightLift,
-        greaterThanOrEqualTo(6.0),
+        greaterThanOrEqualTo(4.5),
         reason:
             'light: a card edge moves the page by only '
             '${lightLift.toStringAsFixed(2)} L*. Below this a card does not '
