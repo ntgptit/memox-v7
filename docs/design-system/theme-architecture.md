@@ -7,8 +7,8 @@
 | **Scope** | Cấu trúc thư mục, trách nhiệm từng tầng, public API của theme. Ngoài phạm vi: *giá trị* của token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" · ma trận dịch Tokyo → MemoX |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-23) |
-| **Updated by task** | M100.32 |
-| **Last updated** | 2026-09-03 |
+| **Updated by task** | M100.97 |
+| **Last updated** | 2026-09-18 |
 
 ---
 
@@ -104,10 +104,13 @@ Sửa ở M100.32 bằng cách dời hex qua thang, không đổi mapping compon
 
 | Vai trò thị giác | Role | light | dark |
 |---|---|---|---|
-| trang | `surface` | `#F2F5F9` | `#070C27` |
-| một bậc dưới giấy (recess) | `surfaceContainerLowest` | `#F9FAFB` | `#0D1335` |
-| **mặt giấy** — card, sheet, menu, pill | `surfaceContainerLow` | `#FFFFFF` | `#111633` |
-| inset / nhấn | `surfaceContainer` → `High` → `Highest` | 95.45 → 92.98 → 90.87 L\* | 13.72 → 16.97 → 21.62 L\* |
+| trang | `surface` | `#F7F9FE` | `#0A0E27` |
+| một bậc dưới giấy (recess) | `surfaceContainerLowest` | `#FFFFFF` | `#131A3A` |
+| **mặt giấy** — card, sheet, menu, pill | `surfaceContainerLow` | `#F1F4FB` | `#1B2249` |
+| inset / nhấn | `surfaceContainer` → `High` → `Highest` | `#E9EDF7` → `#E2E7F3` → `#DAE0EF` | `#232B5A` → `#2C356E` → `#353D7E` |
+
+Giá trị hiện hành của toàn bộ 45 role (v3 foundations, M100.97):
+[`v3-foundations.md`](v3-foundations.md) §1.1.
 
 MUST NOT: dựng một hệ "màu trang" song song nằm ngoài `ColorScheme`. Không
 component theme nào được nhận màu trang như một tham số — `scheme.surface` là

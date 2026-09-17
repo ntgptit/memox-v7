@@ -21,6 +21,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.warning,
     required this.danger,
     required this.info,
+    required this.accentInk,
+    required this.dangerInk,
+    required this.successInk,
+    required this.warningInk,
+    required this.secondaryInk,
+    required this.tertiaryInk,
+    required this.inversePrimaryInk,
     required this.successContainer,
     required this.onSuccessContainer,
     required this.warningContainer,
@@ -50,6 +57,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
+      accentInk = AppColors.accentInkLight,
+      dangerInk = AppColors.dangerInkLight,
+      successInk = AppColors.successInkLight,
+      warningInk = AppColors.warningInkLight,
+      secondaryInk = AppColors.secondaryInkLight,
+      tertiaryInk = AppColors.tertiaryInkLight,
+      inversePrimaryInk = AppColors.inversePrimaryInk,
       successContainer = AppColors.successContainerLight,
       onSuccessContainer = AppColors.onSuccessContainerLight,
       warningContainer = AppColors.warningContainerLight,
@@ -78,6 +92,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
+      accentInk = AppColors.accentInkDark,
+      dangerInk = AppColors.dangerInkDark,
+      successInk = AppColors.successInkDark,
+      warningInk = AppColors.warningInkDark,
+      secondaryInk = AppColors.secondaryInkDark,
+      tertiaryInk = AppColors.tertiaryInkDark,
+      inversePrimaryInk = AppColors.inversePrimaryInk,
       successContainer = AppColors.successContainerDark,
       onSuccessContainer = AppColors.onSuccessContainerDark,
       warningContainer = AppColors.warningContainerDark,
@@ -111,6 +132,18 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color warning;
   final Color danger;
   final Color info;
+
+  /// Text inks (GC-3, owner answer A1): same hue and saturation as the fill
+  /// above, lightness moved to the first value that clears 4.5:1 as text.
+  /// [inversePrimaryInk] is invariant — its one ground, `inverseSurface`,
+  /// does not change with theme.
+  final Color accentInk;
+  final Color dangerInk;
+  final Color successInk;
+  final Color warningInk;
+  final Color secondaryInk;
+  final Color tertiaryInk;
+  final Color inversePrimaryInk;
 
   /// The filled pill a status carries, and its label.
   ///
@@ -211,6 +244,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? warning,
     Color? danger,
     Color? info,
+    Color? accentInk,
+    Color? dangerInk,
+    Color? successInk,
+    Color? warningInk,
+    Color? secondaryInk,
+    Color? tertiaryInk,
+    Color? inversePrimaryInk,
     Color? successContainer,
     Color? onSuccessContainer,
     Color? warningContainer,
@@ -239,6 +279,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: warning ?? this.warning,
       danger: danger ?? this.danger,
       info: info ?? this.info,
+      accentInk: accentInk ?? this.accentInk,
+      dangerInk: dangerInk ?? this.dangerInk,
+      successInk: successInk ?? this.successInk,
+      warningInk: warningInk ?? this.warningInk,
+      secondaryInk: secondaryInk ?? this.secondaryInk,
+      tertiaryInk: tertiaryInk ?? this.tertiaryInk,
+      inversePrimaryInk: inversePrimaryInk ?? this.inversePrimaryInk,
       successContainer: successContainer ?? this.successContainer,
       onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
       warningContainer: warningContainer ?? this.warningContainer,
@@ -283,6 +330,17 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: Color.lerp(warning, other.warning, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       info: Color.lerp(info, other.info, t)!,
+      accentInk: Color.lerp(accentInk, other.accentInk, t)!,
+      dangerInk: Color.lerp(dangerInk, other.dangerInk, t)!,
+      successInk: Color.lerp(successInk, other.successInk, t)!,
+      warningInk: Color.lerp(warningInk, other.warningInk, t)!,
+      secondaryInk: Color.lerp(secondaryInk, other.secondaryInk, t)!,
+      tertiaryInk: Color.lerp(tertiaryInk, other.tertiaryInk, t)!,
+      inversePrimaryInk: Color.lerp(
+        inversePrimaryInk,
+        other.inversePrimaryInk,
+        t,
+      )!,
       successContainer: Color.lerp(
         successContainer,
         other.successContainer,

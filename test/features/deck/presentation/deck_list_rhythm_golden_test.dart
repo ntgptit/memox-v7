@@ -207,14 +207,15 @@ double _inkBelowLabel = 0;
 /// `descent 3.19 + half the sort control's 48px target`.
 const double _minimumGroupingLead = AppSpacing.sm;
 
-/// Inter's cap height as a fraction of the em, for `YOUR DECKS`.
+/// Plus Jakarta Sans's cap height as a fraction of the em, for `YOUR DECKS`
+/// (OS/2 `sCapHeight` 745 over `unitsPerEm` 1000).
 ///
 /// **Pinned to the face, like [AppTypography.heroNumeralCapTrim].** Uppercase
 /// ink runs from the baseline to the cap, which is neither the font's ascent
-/// nor the line box — Inter's ascent leaves 4.09px above the caps at 12px, and
-/// counting that as ink puts every number here 4px out. If the body family
-/// changes, this changes with it.
-const double _interCapHeight = 0.727;
+/// nor the line box — the face's ascent leaves space above the caps, and
+/// counting that as ink puts every number here out by that space. If the
+/// family changes, this changes with it.
+const double _capHeight = 0.745;
 
 /// One thing the screen stacks, and the box it occupies.
 typedef _Band = ({String name, Rect rect, bool isInFlow});
@@ -308,10 +309,9 @@ List<_Band> _bandsOf(WidgetTester tester) {
 /// Where `YOUR DECKS` actually puts ink: cap to baseline, not the line box.
 ///
 /// Uppercase has no descender, so the bottom of the ink *is* the baseline. The
-/// top is the baseline less the cap height — [_interCapHeight] of the em — and
-/// not the ascent, which at this size sits 4.09px above the capitals. Taking
-/// the ascent for ink is the same class of error as taking it for leading, and
-/// it puts every number here 4px out.
+/// top is the baseline less the cap height — [_capHeight] of the em — and
+/// not the ascent, which sits above the capitals. Taking the ascent for ink is
+/// the same class of error as taking it for leading.
 Rect _labelInk(WidgetTester tester) {
   final label = find.descendant(
     of: find.byType(DeckListToolbarWidget),
@@ -329,7 +329,7 @@ Rect _labelInk(WidgetTester tester) {
 
   return Rect.fromLTRB(
     box.left,
-    baseline - style.fontSize! * _interCapHeight,
+    baseline - style.fontSize! * _capHeight,
     box.right,
     baseline,
   );
@@ -405,7 +405,33 @@ String _report(List<_Band> bands) {
 /// else and an entry with a reason beats a threshold that quietly widens.
 /// Keyed by the pair, so an entry cannot cover a second gap that drifts to the
 /// same value elsewhere on the screen.
-const Map<String, String> _allowedOffScale = <String, String>{};
+///
+/// **Both entries are the same sum, read in opposite order.** The root
+/// subline (`DeckSubheaderWidget`) sits in a `SizedBox(height:
+/// MxBreadcrumb.compactLineHeight)` — 32, `AppSizing.controlDense` — and
+/// `Align` centres its 17.0-tall text line box inside it, splitting the
+/// 32 - 17.0 = 15.0 of slack 7.5 above and 7.5 below. That 7.5 is a real
+/// font-metric remainder, not a choice — PlusJakartaSans's `bodySmall` box at
+/// this size does not divide the 32px token evenly, which is where the ".5"
+/// comes from.
+///
+/// `Title -> Subtitle` is `AppSpacing.sm` (8, from the title line to the
+/// subline's box) plus that 7.5 (the box to the text's own top): 15.5.
+/// `Subtitle -> Hero` is the same 7.5 (the text's bottom to the box's own
+/// bottom) plus another `AppSpacing.sm` (the box to the app bar's edge,
+/// where the hero begins): 15.5. Both are a token plus the line-box
+/// remainder, never two tokens and never a bare number — moving the subline
+/// to a token-multiple height would collapse the ".5" along with it, which is
+/// a subline-component change, not this ruler's to make.
+const Map<String, String> _allowedOffScale = <String, String>{
+  'Title -> Subtitle':
+      'AppSpacing.sm (8) to the subline box, plus 7.5 — half the slack '
+      'between the box\'s 32px (MxBreadcrumb.compactLineHeight) and its '
+      'text\'s real 17.0px line box — before the text itself starts.',
+  'Subtitle -> Hero':
+      'The same 7.5 the text sits above its box\'s bottom by, plus another '
+      'AppSpacing.sm (8) from the subline box to the app bar\'s edge.',
+};
 
 /// Whether a distance is one of the spacing steps, or an overlap.
 ///
@@ -527,7 +553,7 @@ class _RhythmRuler extends StatelessWidget {
         // harness default, which paints every glyph as a filled box — the
         // ruler's first two renders were unreadable for exactly that reason.
         style: TextStyle(
-          fontFamily: AppTypography.bodyFamily,
+          fontFamily: AppTypography.family,
           fontFamilyFallback: AppTypography.cjkFallback,
           color: _ink,
           fontSize: fontSize,

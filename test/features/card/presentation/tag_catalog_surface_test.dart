@@ -29,11 +29,11 @@ void main() {
     testWidgets('the search field and the catalog surface share edges', (
       tester,
     ) async {
-      // Narrow included since the surface took its gutter from
-      // `mxScreenGutter`: below `AppBreakpoints.compact` the shell's subheader
-      // steps to `md`, and the catalog now steps with it. This is the group
-      // that guards the coupling - the G1/G2 group above compares two search
-      // fields, both of which come from the shell and agree either way.
+      // Narrow included for parity with the shell coupling: `mxScreenGutter`
+      // is `lg` at every width now, but the group still guards two callers of
+      // the same helper agreeing with each other, not a specific number - the
+      // G1/G2 group above compares two search fields, both of which come from
+      // the shell and agree either way.
       for (final size in <Size>[kTagNarrow, kTagPhone, kTagWide]) {
         await pumpTagCatalog(tester, size: size);
         final search = tester.getRect(find.byType(MxSearchField));

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/extensions/app_ink.dart';
-// ignore: unused_import
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
-// ignore: unused_import
 import '../../../support/color_math.dart';
 
 /// The contract behind the closed ink set: every ink a feature can name is
@@ -40,8 +38,6 @@ void main() {
     }
   });
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('page-ground inks clear the text bar on surface and page', () {
     // The inks meant for plain grounds. `disabled` is exempt by WCAG's own
     // inactive-control carve-out; the on*Container inks are measured on their
@@ -139,10 +135,7 @@ void main() {
       });
     }
   });
-  */
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('container inks are measured on their containers', () {
     for (final entry in themes.entries) {
       testWidgets(entry.key, (tester) async {
@@ -183,7 +176,97 @@ void main() {
       });
     }
   });
-  */
+
+  group('text inks clear 4.5:1 on every text ground (GC-3)', () {
+    // The five grounds text lands on in each mode, read off the real
+    // ColorScheme rather than restated as literals — a ground that drifts
+    // should fail this test, not agree with it.
+    for (final entry in themes.entries) {
+      test(entry.key, () {
+        final scheme = entry.value.colorScheme;
+        final semantic = entry.value.extension<AppSemanticColors>()!;
+
+        final grounds = <String, Color>{
+          'surface': scheme.surface,
+          'surfaceContainerLowest': scheme.surfaceContainerLowest,
+          'surfaceContainerLow': scheme.surfaceContainerLow,
+          'surfaceContainer': scheme.surfaceContainer,
+          'surfaceContainerHigh': scheme.surfaceContainerHigh,
+        };
+        final inks = <String, Color>{
+          'accentInk': semantic.accentInk,
+          'dangerInk': semantic.dangerInk,
+          'successInk': semantic.successInk,
+          'warningInk': semantic.warningInk,
+          'secondaryInk': semantic.secondaryInk,
+          'tertiaryInk': semantic.tertiaryInk,
+        };
+
+        for (final ink in inks.entries) {
+          for (final ground in grounds.entries) {
+            expect(
+              contrast(ink.value, ground.value),
+              greaterThanOrEqualTo(4.5),
+              reason:
+                  '${entry.key}: AppSemanticColors.${ink.key} on '
+                  '${ground.key}',
+            );
+          }
+        }
+
+        // Invariant: one value, measured against the one ground it is for.
+        expect(
+          contrast(semantic.inversePrimaryInk, scheme.inverseSurface),
+          greaterThanOrEqualTo(4.5),
+          reason:
+              '${entry.key}: AppSemanticColors.inversePrimaryInk on '
+              'inverseSurface',
+        );
+      });
+    }
+  });
+
+  group('AppInk.resolve routes text through the same-hue ink (GC-3)', () {
+    const routed = <AppInk>[
+      AppInk.accent,
+      AppInk.success,
+      AppInk.warning,
+      AppInk.danger,
+      AppInk.error,
+      AppInk.overdue,
+      AppInk.secondary,
+      AppInk.tertiary,
+    ];
+
+    for (final entry in themes.entries) {
+      testWidgets(entry.key, (tester) async {
+        final semantic = entry.value.extension<AppSemanticColors>()!;
+        final resolved = <AppInk, Color>{};
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: entry.value,
+            home: Builder(
+              builder: (context) {
+                for (final ink in routed) {
+                  resolved[ink] = ink.resolve(context);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(resolved[AppInk.accent], semantic.accentInk);
+        expect(resolved[AppInk.success], semantic.successInk);
+        expect(resolved[AppInk.warning], semantic.warningInk);
+        expect(resolved[AppInk.danger], semantic.dangerInk);
+        expect(resolved[AppInk.error], semantic.dangerInk);
+        expect(resolved[AppInk.overdue], semantic.dangerInk);
+        expect(resolved[AppInk.secondary], semantic.secondaryInk);
+        expect(resolved[AppInk.tertiary], semantic.tertiaryInk);
+      });
+    }
+  });
 
   group('inked()', () {
     testWidgets('emphasis moves the variable-font axis, not just the number', (

@@ -153,10 +153,8 @@ class _SheetRow extends StatelessWidget {
         ),
         // Brand ink, and only here: the check is the one thing in the sheet
         // saying "you are here", so it is the one thing allowed to be the accent.
-        // `primary`, and this is one of the marks that used to need a second
-        // token: a sheet sits on `surface`, where the old fill tone measured
-        // 2.90:1 — under the 3:1 WCAG 1.4.11 asks of a graphic carrying state.
-        // Tone 80 reads 10.02:1 there (M100.18).
+        // `AppInk.accent` resolves to `accentInk` (GC-3), not `primary` — chosen
+        // so the icon clears the 3:1 WCAG 1.4.11 floor for a graphic carrying state.
         trailing: action.isSelected
             ? const MxIcon(Icons.check, ink: AppInk.accent)
             : null,

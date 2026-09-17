@@ -91,6 +91,15 @@ final List<Color> lightPaletteTokens = <Color>[
   AppMaterialRoles.tertiaryFixedDim,
   AppMaterialRoles.onTertiaryFixed,
   AppMaterialRoles.onTertiaryFixedVariant,
+  // Text inks (GC-3, owner answer A1, 2026-09-17): text that fails AA on a v3
+  // fill reads its ink instead, so the ink hexes have to close the palette too.
+  AppColors.accentInkLight,
+  AppColors.dangerInkLight,
+  AppColors.successInkLight,
+  AppColors.warningInkLight,
+  AppColors.secondaryInkLight,
+  AppColors.tertiaryInkLight,
+  AppColors.inversePrimaryInk,
 ];
 
 /// A list, not a set: several roles deliberately share a token — white is the
@@ -180,4 +189,13 @@ final List<Color> darkPaletteTokens = <Color>[
   AppMaterialRoles.tertiaryFixedDim,
   AppMaterialRoles.onTertiaryFixed,
   AppMaterialRoles.onTertiaryFixedVariant,
+  // Text inks (GC-3, owner answer A1, 2026-09-17): text that fails AA on a v3
+  // fill reads its ink instead, so the ink hexes have to close the palette too.
+  AppColors.accentInkDark,
+  AppColors.dangerInkDark,
+  AppColors.successInkDark,
+  AppColors.warningInkDark,
+  AppColors.secondaryInkDark,
+  AppColors.tertiaryInkDark,
+  AppColors.inversePrimaryInk,
 ];

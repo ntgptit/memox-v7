@@ -47,6 +47,7 @@ void main() {
                   context,
                   text,
                   width: width,
+                  state: state,
                 );
 
                 return GuessOptionItemWidget(

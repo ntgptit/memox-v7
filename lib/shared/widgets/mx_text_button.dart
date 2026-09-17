@@ -54,7 +54,8 @@ class MxTextButton extends StatefulWidget {
   /// Drawn after the label — `Icons.expand_more` on the show-summary link.
   final IconData? trailingIcon;
 
-  /// Danger as a label: the text goes `semanticColors.danger`.
+  /// Danger as a label: the text goes `semanticColors.dangerInk`, through
+  /// `AppInk.danger`.
   final bool isDestructive;
 
   /// Drops the label to `label-md`, for a link sharing a row with a heading.
@@ -89,7 +90,8 @@ class MxTextButton extends StatefulWidget {
   /// with a ripple no other text button in the app has. `TextButton.style`
   /// merges; this goes through it, exactly as [isDestructive] does.
   ///
-  /// Null keeps `AppInk.accent`, which is `primary` and right on the page.
+  /// Null keeps `AppInk.accent`, which resolves to `accentInk` (GC-3) — not
+  /// `primary` itself — and clears AA as text on the page.
   ///
   /// **An `AppInk`, not a `Color`** (M100.5). Four features were each passing
   /// `context.colors.onErrorContainer` here by hand — the same value, four

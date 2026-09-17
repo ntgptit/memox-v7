@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/core/theme/extensions/theme_context_extension.dart';
-import 'package:memox/core/theme/typography/app_text_styles.dart';
 import 'package:memox/features/card/domain/models/card_import_preview_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_section_label.dart';
 
 import 'support/card_import_wizard_harness.dart';
 
@@ -108,13 +107,17 @@ void main() {
             'heading, one place',
       );
 
-      // Standard rung, not the in-panel one: `sectionLabelSmall` is a face
-      // label inside a card, and at 11px it would read no louder than the
-      // captions underneath it.
-      final AppTextStyles styles = tester.element(heading).textStyles;
-      final double? renderedSize = tester.widget<Text>(heading).style?.fontSize;
-      expect(renderedSize, styles.sectionLabel.fontSize);
-      expect(renderedSize, isNot(styles.sectionLabelSmall.fontSize));
+      // `sectionLabel` and `sectionLabelSmall` build to byte-identical
+      // `TextStyle`s under v3's 12px floor (spec "12 is a hard floor"), so a
+      // style comparison can no longer tell the two rungs apart — it would
+      // pass the same way no matter which one the widget rendered.
+      // Collapsing the two named styles is a typography follow-up; until
+      // then, the distinction survives only in the widget API, so assert the
+      // rung the heading was built at rather than the style it produces.
+      final MxSectionLabel widget = tester.widget<MxSectionLabel>(
+        find.ancestor(of: heading, matching: find.byType(MxSectionLabel)),
+      );
+      expect(widget.rung, MxSectionLabelRung.standard);
     });
   });
 

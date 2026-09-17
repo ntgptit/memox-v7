@@ -210,37 +210,41 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
         '_SegmentedButtonDefaultsM3.side has no focus branch. The keyboard '
         'cue is the overlay.',
   ),
-  // **TextButton and TabBar are the two `primaryInk` reached first (M100.27),
-  // and neither had a row here.** The runtime contract compares resolved
-  // colours, so a token equal to `primary` passed it; only the source shows
-  // which name the slot reads. `accent` is the argument the text-link resolver
-  // takes its resting, hovered and pressed colour from, so it is the slot.
+  // **The two brand *labels* read the brand's ink, and refuse the fill**
+  // (GC-3, 2026-09-17, owner answer A1). Text on a v3 fill hex fails AA, so a
+  // text slot that named `primary` now requires `semantic.accentInk` instead
+  // and refuses `scheme.primary` — a slot drifting back to the fill is
+  // caught here. `accent` is the argument the text-link resolver takes its
+  // resting, hovered and pressed colour from, so it is the slot.
   RoleBinding(
     component: 'TextButton',
     slot: 'accent',
     file: _buttons,
     scope: 'buildTextButtonTheme',
-    requires: <String>['primary'],
-    refuses: <String>['secondary', 'tertiary', 'onSurfaceVariant'],
+    requires: <String>[],
+    requiresSemantic: <String>['accentInk'],
+    refuses: <String>['primary', 'secondary', 'tertiary', 'onSurfaceVariant'],
     because:
-        '_TextButtonDefaultsM3.foregroundColor is primary. A text link is bare '
-        'text on a surface; if the role fails 4.5:1 there, the palette moves.',
+        'A text link is bare text on a surface, and v3 fails 4.5:1 there — '
+        'the label is the brand\'s ink, not its fill.',
   ),
   RoleBinding(
     component: 'TabBar',
     slot: 'labelColor',
     file: _tabs,
     scope: 'buildTabBarTheme',
-    requires: <String>['primary'],
+    requires: <String>[],
+    requiresSemantic: <String>['accentInk'],
     refuses: <String>[
+      'primary',
       'secondary',
       'tertiary',
       'onSurfaceVariant',
       'onSecondaryContainer',
     ],
     because:
-        '_TabBarDefaultsM3.labelColor is primary: the selected label sits on '
-        'the page, not on a container, so it is the accent as ink.',
+        'The selected label sits on the page, not on a container, so it is '
+        'the brand as text — its ink, not its fill.',
   ),
   RoleBinding(
     component: 'TabBar',
@@ -256,13 +260,13 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'foregroundColor',
     file: _buttons,
     scope: 'buildOutlinedButtonTheme',
-    requires: <String>['primary'],
-    refuses: <String>['secondary', 'onSurfaceVariant'],
+    requires: <String>[],
+    requiresSemantic: <String>['accentInk'],
+    refuses: <String>['primary', 'secondary', 'onSurfaceVariant'],
     because:
-        '_OutlinedButtonDefaultsM3.foregroundColor is primary. The retired '
-        '`secondaryAction` token was a second name for it, and M100.27\'s '
-        '`primaryInk` was another — a role that fails a ratio is answered by '
-        'retuning the palette (M100.28), never by a substitute token.',
+        'The label is text on a page or a card — the brand\'s ink (GC-3, '
+        '2026-09-17). The retired `secondaryAction` token is still refused '
+        'by name.',
   ),
   RoleBinding(
     component: 'OutlinedButton',

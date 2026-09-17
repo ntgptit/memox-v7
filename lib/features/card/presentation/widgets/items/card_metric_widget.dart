@@ -56,7 +56,7 @@ final class CardMetric {
 /// its value.
 ///
 /// **The well is decoration and the text is the content**, which is why the
-/// glyph takes `primary` on `surfaceMuted` (6.36:1 light, 8.30:1 dark) and
+/// glyph takes `AppInk.accent` (`accentInk`, GC-3) on `surfaceMuted` and
 /// the label and value take the ordinary ink pair. Nothing here is a control, so
 /// nothing here carries a touch target — a read-only cell may be as compact as
 /// its type allows.
@@ -129,9 +129,8 @@ TextStyle cardMetricValueStyle(BuildContext context, CardMetricKind kind) {
       AppInk.stated,
       isTabular: true,
     ),
-    // 6.36:1 light and 4.66:1 dark on `surfaceMuted`, 7.27 / 5.51 on
-    // `surface` — the accent as text (`AppInk.accent` is `primary`, which
-    // since M100.18 reads as text on the dark panel too).
+    // The accent as text — `AppInk.accent` resolves to `accentInk` (GC-3),
+    // held ≥4.5:1 on every surface tier, not the raw `primary` fill.
     CardMetricKind.schedulerProgress => base.inked(
       context,
       AppInk.accent,

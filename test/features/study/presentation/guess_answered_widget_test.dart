@@ -72,13 +72,16 @@ void main() {
       ],
     );
 
+    // `AppInk.success`/`.danger` — the verdict edge, label and glyph all
+    // resolve through one `AppInk` (`GuessOptionItemWidget`), which is
+    // `successInk`/`dangerInk` since GC-3 (2026-09-17), not the fill.
     Color successOf(WidgetTester tester) => Theme.of(
       tester.element(find.byType(GuessQuestionSectionWidget)),
-    ).extension<AppSemanticColors>()!.success;
+    ).extension<AppSemanticColors>()!.successInk;
 
     Color dangerOf(WidgetTester tester) => Theme.of(
       tester.element(find.byType(GuessQuestionSectionWidget)),
-    ).extension<AppSemanticColors>()!.danger;
+    ).extension<AppSemanticColors>()!.dangerInk;
 
     testWidgets('marks the right answer even when it was not chosen', (
       tester,

@@ -59,7 +59,9 @@ void main() {
       final today = rectOf(tester, ProgressTodayWidget);
       final week = rectOf(tester, ProgressWeekWidget);
 
-      expect(hero.left, AppSpacing.md);
+      // `lg` at every width now, including 320 (GC-7) — the gutter this
+      // pinned at `md` (12) when 320dp still took the compact gutter.
+      expect(hero.left, AppSpacing.lg);
       expect(today.left, hero.left);
       expect(week.left, hero.left);
       expect(today.right, hero.right);
@@ -289,7 +291,7 @@ void main() {
     });
   });
 
-  testWidgets('a four-digit day pushes the bar column below its floor (X7)', (
+  testWidgets('a five-digit day pins the bar column against its floor (X7)', (
     tester,
   ) async {
     // The accepted limit, made into something that runs. The floor assertion in
@@ -304,7 +306,7 @@ void main() {
     // fails and the divergence is closed on purpose rather than by drift.
     await pumpProgressScreen(
       tester,
-      repository: seeded(totals: const <int>[0, 0, 0, 0, 0, 0, 1234]),
+      repository: seeded(totals: const <int>[0, 0, 0, 0, 0, 0, 12345]),
       surface: const Size(320, 720),
       textScale: 2,
       locale: const Locale('vi'),
@@ -314,7 +316,19 @@ void main() {
     final double content =
         rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
 
-    expect(bar.width, closeTo(63.8, 1));
+    // The v3 type scale dropped `bodyMedium`'s tracking (0.25 to 0), and both
+    // `IntrinsicColumnWidth` label columns narrowed: 1234 cards now clears the
+    // floor, so the breach X7 records starts later. Five digits still breach
+    // it — M99.23 deferred debt 5 is open — so the pin follows the input that
+    // reproduces the debt, not one a retune fixed.
+    //
+    // **Re-measured for the 16dp gutter at every width (GC-7, 2026-09-17).**
+    // This last measured 52.7dp against a 66.0 floor when 320dp still took the
+    // compact `md` (12) gutter; `lg` (16) everywhere costs this content column
+    // 8dp (264 -> 256), and both the bar and its floor move with it: now
+    // 44.67dp against 64.0. Still a breach, so debt 5 is still open — the
+    // witness below is what keeps holding that, not the absolute figure.
+    expect(bar.width, closeTo(44.67, 1));
     expect(bar.width, lessThan(content / 4));
     expect(tester.takeException(), isNull);
   });

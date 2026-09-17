@@ -29,9 +29,9 @@ void main() {
 
   /// Every ground an edge is drawn on in this app: a card, the page, and an
   /// inset tile. The third used to be the one `borderControl` alone did not
-  /// clear, and that sentence outlived the palette by two milestones — it
-  /// measures **3.39 / 3.50** there now. Re-measure before quoting it again.
-  // ignore: unused_element
+  /// clear; re-measured against the v3 palette (colors_and_type.css,
+  /// 2026-09-17) it is high contrast's boosted edge at **6.47 / 6.00** on the
+  /// muted tile. Re-measure before quoting it again.
   List<(String, Color)> groundsOf(ThemeData t) => <(String, Color)>[
     ('surface', t.colorScheme.surface),
     ('page', t.scaffoldBackgroundColor),
@@ -39,8 +39,6 @@ void main() {
   ];
 
   group('what high contrast changes', () {
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('every border that identifies clears 3:1 on every ground', () {
       // **The exemption, and exactly how far it reaches.** WCAG 1.4.11 asks
       // 3:1 of the visual information required to *identify* a component or
@@ -73,7 +71,6 @@ void main() {
         }
       }
     });
-    */
 
     test('the decorative hairline is left at normal strength', () {
       // **Owner decision, 2026-09-11.** The hairline used to be re-pointed

@@ -7,8 +7,8 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.96 |
-| **Last updated** | 2026-09-16 |
+| **Updated by task** | M100.97 |
+| **Last updated** | 2026-09-18 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -1030,6 +1030,99 @@ của M2.
 - **Dependencies:** M100.26.
 - **Tests required:** các test đã sửa ở Scope; không thêm file test.
 - **Checklist phases:** 7.
+
+### M100.97 · Nền thị giác MemoX v3 — palette, chữ, ladder và bóng đổ toàn app
+
+- **Status:** in-progress
+- **Owner:** Claude
+- **`M100.97` là placeholder** (ruling R13 của kế hoạch) — controller chạy
+  `git log --all` census ngay trước khi push để chốt số thật, vì PR song song có
+  thể đã giành số này (xem nợ cũ "Số WBS bị giành bởi PR song song").
+- **Goal:** Đưa toàn bộ hệ thị giác của app lên nền MemoX v3 theo handoff của chủ
+  dự án (`docs/superpowers/specs/2026-09-17-memox-v3-foundations.md`): palette 45
+  role ở cả hai theme, bảy ink chữ, một họ font (`PlusJakartaSans`) trải trên
+  mười lăm slot `TextTheme`, các ladder spacing/radius/icon/state-layer, ba bậc
+  bóng đổ v3, gutter 16 ở mọi bề rộng với đuôi cuộn 48, và bật lại toàn bộ
+  contrast gate mà M100.84 đã tắt riêng cho lượt đổi palette này — không đụng
+  hình học hay biến thể của bất kỳ component nào (ruling R1).
+- **Nhánh / PR:** `claude/memox-v3-foundations-818a6c`
+- **Scope:**
+  - `lib/core/theme/foundations/**`: palette 45 role × 2 theme, mười hai role
+    `*Fixed`, bảy ink chữ, ladder spacing/radius/icon/state-layer, ba bậc bóng đổ.
+  - `lib/core/theme/typography/**`: một họ `PlusJakartaSans` cho đủ mười lăm slot
+    `TextTheme`; `Inter` rời `pubspec.yaml`, trang licence, test font loader,
+    Widgetbook.
+  - Composition: `mxScreenGutter` 16 ở mọi bề rộng, `mxScrollEndInsetOf` đuôi
+    cuộn 48.
+  - Contrast gate quay lại (`test/core/theme`, `test/design_audit`,
+    `color_*_rules_test.dart`, các test feature liên quan) — pin lại theo giá
+    trị v3, không hạ ngưỡng.
+  - `docs/design-system/v3-foundations.md` (**mới**) — bản đồ giá trị GC-1…GC-7
+    (spec → symbol Dart), bảng alias resolve về role có sẵn, đổi tên radius/icon
+    CSS ↔ Dart, và bảng rulings R1–R13; `theme-architecture.md` §3 và
+    `ad-14-color-and-depth.md` trỏ sang thay vì chép lại giá trị.
+  - 19 doc comment production nói sai theo giá trị v3 (9 ở Task 10, 10 ở lượt rà
+    soát sau — cả hai liệt kê ở
+    `.superpowers/sdd/2026-09-17-memox-v3-foundations/task-10-report.md`) — sửa
+    câu chữ, không đổi giá trị nào.
+  - `design_audit/*` (7 file) dựng lại bằng `flutter test test/design_audit`.
+- **Out of scope:** biến thể/hình học từng component — card, FAB, nav indicator,
+  chip, switch giữ nguyên binding surface/fill/radius/height (ruling R1); spec
+  riêng của từng component sẽ đọc `v3-foundations.md` khi tới lượt. Màu v3 chưa
+  có caller (`mastery`, `status*`, `streak`, `error-fill`, …) chỉ ghi lại hex,
+  không khai báo hằng số (ruling R7).
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/v3-foundations.md`
+  (mới), `docs/design-system/theme-architecture.md`,
+  `docs/design-system/ad-14-color-and-depth.md`,
+  `docs/wireframes/m99-23-progress-overview.md` (đo lại X7 theo thang chữ v3 và
+  gutter 16), `docs/superpowers/specs/2026-09-17-memox-v3-foundations.md` (mới —
+  handoff của chủ dự án, chép nguyên văn) và
+  `docs/superpowers/plans/2026-09-17-memox-v3-foundations.md` (mới — plan thực
+  hiện).
+- **Output:** như Scope; `design_audit/*` (7 file) đổi nội dung theo palette mới.
+- **Acceptance criteria:**
+  - [x] Host suite (`flutter test --exclude-tags golden`) xanh: +5142.
+  - [x] `flutter analyze` toàn repo in "No issues found!".
+  - [x] `dart format --output=none --set-exit-if-changed lib test` sạch.
+  - [x] Guard `code-verification-guard-v2` (ruleset `memox-v7`): không finding.
+  - [x] `check_docs.py` sạch.
+  - [x] `v3-foundations.md` đủ header bảy dòng; đủ bốn mục (token map GC-1…GC-7,
+        alias + R7, map radius/icon R8, bảng rulings R1–R13); không hex nào gõ
+        lại từ trí nhớ — mọi giá trị chép từ GC hoặc từ spec.
+  - [x] 19 doc comment nói sai giá trị v3 đã sửa đúng, không đổi giá trị nào (9
+        ở Task 10 + 10 ở lượt rà soát sau, xem task-10-report.md § Fix round 1).
+  - [x] `design_audit/*` dựng lại và commit cùng lượt với docs.
+  - [x] Golden re-author trên Linux (`TZ=UTC`, danh sách file của
+        `goldens (linux)` trong CI): 269 ảnh ở `8d009785`, ba ảnh preview/ruler
+        đổi theo lượt sửa audit ở `b06478e1`; lượt so sánh lại trên Linux xanh
+        cả 44 file golden, không PNG nào bẩn.
+  - [x] `flutter test integration_test/ -d emulator-5554 --flavor development`
+        9/9 — chạy trên emulator, gồm IT-PLAT-009 với probe IPA mới; theo
+        `CLAUDE.md` một thay đổi chạm toàn bộ `lib/features/` qua theme vẫn
+        tính vào Definition of Done như một feature mới.
+  - [x] `build/screen_gallery.html` publish lại tại URL ghim (82 màn, header
+        `ảnh 718f3e76`); ảnh tách thành file rời vì trang nhúng nặng 16,7 MB.
+  - [ ] Merge `origin/main`, mở PR, CI xanh, merge, xoá nhánh — bước cuối.
+- **Dependencies:** M100.96.
+- **Tests required:** Task 10 không thêm test (docs-only); các task trước trong
+  cùng nhánh đã sửa/pin lại test theo palette v3 (host suite +5142 ở trên). Gate
+  còn thiếu: golden Linux, `integration_test/` trên emulator.
+- **Nợ để lại** (review cuối cùng chốt, không phải việc của nhánh này):
+  - Switch tối: cặp live/disabled đảo ngược thật (disabled đọc to hơn live)
+    do binding `outline` v3 trên `surfaceContainerHighest` — nợ của Switch
+    spec (R1). Pin ở `app_toggle_themes_test.dart`, test `'dark: the
+    disabled switch currently reads louder than the live one (v3 + the M3
+    switch binding)'`.
+  - Nhãn pressed-composite dưới AA: bốn ô light/high-contrast × primary/
+    destructive đo 3.77–4.00, cùng dạng đã chấp nhận ở M100.87/M100.89 — nợ
+    của Button spec (pressed treatment tối màu thay vì sáng màu). Pin ở
+    `mx_action_button_composite_state_test.dart`
+    (`acceptedSubAAPressedFloors`).
+  - `success` cách `info` 29.5° (light) / 36.5° (dark) về hue — dưới trần 40°
+    nhưng cố ý, theo owner answer A2 giữ nguyên `info`; spec nào dời `info`
+    sau này phải soát lại khoảng cách. Pin ở `app_palette_test.dart`,
+    assertion success-info hue gap.
+- **Checklist phases:** 7, 13.
 
 ## Known technical debt
 

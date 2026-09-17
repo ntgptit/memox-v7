@@ -39,6 +39,7 @@ void main() {
     'dialogTheme.contentTextStyle',
     'dialogTheme.titleTextStyle',
     'filledButtonTheme.style.textStyle',
+    'inputDecorationTheme.errorStyle',
     'inputDecorationTheme.hintStyle',
     'listTileTheme.leadingAndTrailingTextStyle',
     'listTileTheme.subtitleTextStyle',

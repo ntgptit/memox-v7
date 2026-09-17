@@ -8,7 +8,6 @@ import 'package:memox/features/card/presentation/widgets/items/card_history_even
 import 'package:memox/features/card/presentation/widgets/sections/card_detail_summary_widget.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 
-// ignore: unused_import
 import '../../../support/color_math.dart';
 import 'support/card_detail_harness.dart';
 import 'support/fake_card_detail_repository.dart';
@@ -139,7 +138,9 @@ void main() {
     final theme = Theme.of(tester.element(find.text('Box 2 → 3')));
     expect(
       tester.widget<Text>(find.text('Box 2 → 3')).style!.color,
-      theme.colorScheme.primary,
+      // The accent as text — `AppInk.accent`, which is `accentInk` since
+      // GC-3 (2026-09-17).
+      theme.extension<AppSemanticColors>()!.accentInk,
     );
     expect(
       tester.widget<Text>(find.textContaining('Due')).style!.color,
@@ -195,8 +196,6 @@ void main() {
   });
 
   group('contrast, measured rather than assumed', () {
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     for (final entry in <(String, ThemeData)>[
       ('light', buildLightTheme()),
       ('dark', buildDarkTheme()),
@@ -207,18 +206,25 @@ void main() {
 
       test('all three verdict tones clear 4.5:1 on the event card in '
           '${entry.$1}', () {
-        // The badge is an outline on the card's own surface precisely so that
-        // this holds for `warning` too — on `surfaceMuted` it is 4.00:1 in
-        // light, which is why the concept's filled pill could not be copied.
+        // **The badge's word is the text obligation; its outline and the dot
+        // beside it are graphics and hold to 3:1 instead** (WCAG 1.4.11) —
+        // `cardActionToneColor` (the raw fill) draws those, `cardActionToneInk`
+        // draws the word. Since GC-3 (2026-09-17) `AppInk.success/.warning/
+        // .danger` resolve to `successInk`/`warningInk`/`dangerInk`, not the
+        // raw fill, so the 4.5:1 text floor is measured on the ink the label
+        // actually paints.
         for (final ink in <Color>[
-          semantic.success,
-          semantic.warning,
-          semantic.danger,
+          semantic.successInk,
+          semantic.warningInk,
+          semantic.dangerInk,
         ]) {
           expect(contrast(ink, scheme.surface), greaterThanOrEqualTo(4.5));
         }
+        // The box schedule line's accent (`_scheduleLineStyle`) is
+        // `AppInk.accent`, i.e. `accentInk` since GC-3 — not `scheme.primary`
+        // directly.
         expect(
-          contrast(scheme.primary, scheme.surface),
+          contrast(semantic.accentInk, scheme.surface),
           greaterThanOrEqualTo(4.5),
         );
       });
@@ -229,8 +235,12 @@ void main() {
           contrast(semantic.borderControl, theme.scaffoldBackgroundColor),
           greaterThanOrEqualTo(3),
         );
+        // The metric panel's glyph and its `schedulerProgress` value both
+        // read `AppInk.accent` on `surfaceMuted` (`card_metric_widget.dart`)
+        // — `accentInk` since GC-3, not `scheme.primary`, which itself no
+        // longer clears 4.5:1 here under the v3 palette (3.95:1 light).
         expect(
-          contrast(scheme.primary, semantic.surfaceMuted),
+          contrast(semantic.accentInk, semantic.surfaceMuted),
           greaterThanOrEqualTo(4.5),
         );
         expect(
@@ -258,7 +268,6 @@ void main() {
         );
       });
     }
-    */
 
     test('the current and completed steps share one colour in dark, which is '
         'why height carries them', () {

@@ -73,18 +73,20 @@ class ReminderScreenHarness {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           // `copyWith`, not a bare `MediaQueryData`: that constructor defaults
-          // `size` to zero, so every `mxScreenGutter` call under it read the
-          // app as compact whatever [surface] said — the screen measured 12dp
-          // at 393 and the width this harness varies changed nothing.
+          // `size` to zero, so `CompactScaleWidget` read the app as compact
+          // whatever [surface] said — the width this harness varies would
+          // have forced the compact button padding and card-prompt size on
+          // every case regardless of the surface under test.
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(
               context,
             ).copyWith(textScaler: TextScaler.linear(textScale)),
             // **The compact scale, because the real app applies it here too**
             // (`app.dart`'s `MaterialApp.builder`). Without it every 320dp
-            // case rendered the roomy theme, so `ListTileTheme.contentPadding`
-            // stayed at 16 below 360dp while the gutter-derived rows beside it
-            // stepped to 12 — the tier those cases exist to exercise.
+            // case would render the roomy button padding and full-size card
+            // prompt instead of the compact ones the real app shows there —
+            // the screen gutter and `ListTileTheme.contentPadding` no longer
+            // move with this tier, but the button and prompt scale still do.
             child: CompactScaleWidget(child: child ?? const SizedBox.shrink()),
           ),
           home: const ReminderSettingsScreen(),

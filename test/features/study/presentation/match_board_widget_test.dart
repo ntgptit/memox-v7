@@ -13,11 +13,13 @@ import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
-/// The `success` token of the theme the harness builds, read from the tree so a
-/// test cannot assert against a value copied out of the palette.
+/// The ink `AppInk.success` resolves to in the theme the harness builds, read
+/// from the tree so a test cannot assert against a value copied out of the
+/// palette. `MatchTileWidget` ties its edge and its label to this one ink
+/// (`successInk` since GC-3, 2026-09-17), not the fill.
 Color wrapForTestSuccess(WidgetTester tester) => Theme.of(
   tester.element(find.byType(MatchBoardSectionWidget)),
-).extension<AppSemanticColors>()!.success;
+).extension<AppSemanticColors>()!.successInk;
 
 /// The two graded screens, and the four ways they must not grade.
 void main() {
@@ -172,11 +174,11 @@ void main() {
       await tester.pump(AppDurations.normal);
 
       final theme = Theme.of(tester.element(find.text('front-a')));
-      final accent = theme.colorScheme.primary;
+      final accent = theme.extension<AppSemanticColors>()!.accentInk;
       final label = tester.widget<Text>(find.text('front-a'));
 
-      // `primary`, the canonical accent, as a label on a surface — readable
-      // because the palette is tuned for it (M100.28), not via a second token.
+      // The brand's ink, as a label on a surface — `MatchTileWidget` ties the
+      // edge to the same `AppInk.accent` (GC-3, 2026-09-17), not the fill.
       expect(label.style?.color, accent);
 
       // The surface is painted by the tile's own `AnimatedContainer`, not by

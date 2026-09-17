@@ -142,14 +142,10 @@ class CardHistoryEventWidget extends StatelessWidget {
 
 /// The verdict, as a glyph and a word inside a pill.
 ///
-/// **Outlined, not filled, and that is a measurement.** A tinted fill is what
-/// the concept draws, and the only container this palette could give all three
-/// tones is `surfaceMuted` — where `warning` measures **4.00:1** in light,
-/// under the 4.5:1 its own label needs. On the card's own `surface` every tone
-/// clears it (success 5.20 / 8.10, danger 5.57 / 6.71, warning 4.58 / 11.24),
-/// and the border carries the same colour at the same ratio, well past the 3:1
-/// a graphic needs. So the pill keeps its shape and gives up its fill rather
-/// than the palette gaining a colour.
+/// **Outlined, not filled.** The label and icon take `cardActionToneInk` —
+/// held ≥4.5:1 on every surface tier by construction (GC-3) — so the border
+/// only needs `cardActionToneColor`'s raw fill at the 3:1 a graphic needs,
+/// not the 4.5:1 the fill does not promise everywhere.
 ///
 /// **Not upper-cased.** The concept sets these in caps; `search_group_header`
 /// already records why that is the translator's decision and not the widget's —
@@ -322,8 +318,9 @@ TextStyle _scheduleLineStyle(
     return base.inked(context, AppInk.quiet);
   }
 
-  // 7.27:1 light and 5.51:1 dark on the event card — the accent as text, which
-  // `ColorScheme.primary` is not on a dark surface.
+  // The accent as text: `AppInk.accent` resolves to `accentInk` (GC-3), which
+  // holds `primary`'s hue at a lightness that clears AA as text — light and
+  // dark alike, not the raw `ColorScheme.primary` fill.
   return base.inked(context, AppInk.accent, isEmphasized: true);
 }
 

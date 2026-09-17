@@ -1,122 +1,200 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/typography/app_text_styles.dart';
-import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/core/theme/typography/app_typography.dart';
 import 'dart:io';
 
-/// The type scale: which face each rung resolves, and that the two modes
-/// resolve the same scale.
-///
-/// **It used to pin every metric, and that stopped being a check.** The test
-/// was written when `app_typography.dart` set family and weight and left every
-/// size to Material 3's defaults: the defaults happened to equal the design's
-/// tokens, so an SDK bump could have moved the scale with nothing failing. The
-/// numbers were therefore copied by hand out of a CSS kit — a document nobody
-/// could change from inside Dart — so the test measured the code against the
-/// design rather than against itself.
-///
-/// Both halves of that argument are gone. The CSS kit was removed at M100.83,
-/// and `app_typography.dart` now declares every size and leading explicitly, so
-/// the literals here had become a second copy of the token file: they could no
-/// longer catch an SDK bump, and the only thing left that could turn them red
-/// was someone retuning the scale on purpose. Design System V1 was unlocked on
-/// 2026-09-17 and that is legitimate work, so the metric pins went with it.
-///
-/// What is asserted now holds at any scale: every rung resolves a style, each
-/// rung is on the right face, light and dark agree, and `cardPrompt` reads its
-/// own `AppTypography` tokens rather than inheriting a rung's.
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/typography/app_text_styles.dart';
+import 'package:memox/core/theme/typography/app_typography.dart';
+
+/// The type scale: GC-4's seven roles across the fifteen `TextTheme` slots
+/// (`.superpowers/sdd/2026-09-17-memox-v3-foundations/global-constraints.md`),
+/// pinned by hand so a retune has to come past this file on purpose.
 void main() {
   final TextTheme texts = buildLightTheme().textTheme;
 
-  /// One rung: which face it must resolve, and — only where a *token* names
-  /// the metric — that the slot actually resolves that token.
-  ///
-  /// `size`, `height` and `tracking` are optional since Design System V1 was
-  /// unlocked. Passing a bare number here re-freezes the rung, so the rungs
-  /// pass nothing; `AppTextStyles.cardPrompt` still passes its three
-  /// `AppTypography` constants, because that check is "the slot reads the
-  /// token", which holds at whatever the token becomes.
-  void expectStep(
-    String token,
+  void expectRole(
+    String slot,
     TextStyle? style, {
-    required String family,
-    double? size,
-    double? height,
-    double? tracking,
+    required double size,
+    required FontWeight weight,
+    required double height,
+    required double tracking,
   }) {
-    expect(style, isNotNull, reason: '$token has no style at all');
-    expect(style!.fontFamily, family, reason: '$token family');
-
-    if (size != null) {
-      expect(style.fontSize, size, reason: '$token size');
-    }
-    if (height != null) {
-      expect(style.height, closeTo(height, 0.0001), reason: '$token leading');
-    }
-    if (tracking != null) {
-      expect(style.letterSpacing, tracking, reason: '$token tracking');
-    }
+    expect(style, isNotNull, reason: '$slot has no style');
+    expect(style!.fontFamily, AppTypography.family, reason: '$slot family');
+    expect(style.fontSize, size, reason: '$slot size');
+    expect(style.fontWeight, weight, reason: '$slot weight');
+    expect(style.height, closeTo(height, 0.0001), reason: '$slot leading');
+    expect(style.letterSpacing, tracking, reason: '$slot tracking');
   }
 
-  const String display = AppTypography.displayFamily;
-  const String body = AppTypography.bodyFamily;
-
-  group('the display face carries the scale above title', () {
-    test('display-lg / md / sm', () {
-      expectStep('display-lg', texts.displayLarge, family: display);
-      expectStep('display-md', texts.displayMedium, family: display);
-      expectStep('display-sm', texts.displaySmall, family: display);
-    });
-
-    test('headline-lg / the card prompt / headline-sm', () {
-      expectStep('headline-lg', texts.headlineLarge, family: display);
-      // headline-md carried the card prompt's metrics until the prompt moved
-      // to its own `AppTextStyles.cardPrompt` slot. That separation is what
-      // the card-prompt test below still holds; the rung's own size is the
-      // scale's business.
-      expectStep('headline-md', texts.headlineMedium, family: display);
-      expectStep('headline-sm', texts.headlineSmall, family: display);
-    });
-
-    test('the card prompt owns its metrics outside the scale', () {
-      // The one deliberately large style: 30/1.22/-0.5, now an
-      // `AppTextStyles` slot rather than a rung a bystander can inherit.
-      final styles = buildLightTheme().extension<AppTextStyles>();
-
-      expect(styles, isNotNull);
-      expectStep(
-        'card-prompt',
-        styles!.cardPrompt,
-        size: AppTypography.cardPromptSize,
-        height: AppTypography.cardPromptHeight,
-        tracking: AppTypography.cardPromptTracking,
-        family: display,
+  test('stat — 40 / 600 / 1.0 / -0.64', () {
+    for (final (slot, style) in <(String, TextStyle?)>[
+      ('displayLarge', texts.displayLarge),
+      ('displayMedium', texts.displayMedium),
+    ]) {
+      expectRole(
+        slot,
+        style,
+        size: 40,
+        weight: FontWeight.w600,
+        height: 1.0,
+        tracking: -0.64,
       );
-    });
-
-    test('title-lg is the app-bar title', () {
-      expectStep('title-lg', texts.titleLarge, family: display);
-    });
+    }
   });
 
-  group('the body face carries title-md down', () {
-    test('title-md / title-sm', () {
-      expectStep('title-md', texts.titleMedium, family: body);
-      expectStep('title-sm', texts.titleSmall, family: body);
-    });
+  test('display — 32 / 800 / 1.1 / -0.64', () {
+    for (final (slot, style) in <(String, TextStyle?)>[
+      ('displaySmall', texts.displaySmall),
+      ('headlineLarge', texts.headlineLarge),
+    ]) {
+      expectRole(
+        slot,
+        style,
+        size: 32,
+        weight: FontWeight.w800,
+        height: 1.1,
+        tracking: -0.64,
+      );
+    }
+  });
 
-    test('body-lg / md / sm', () {
-      expectStep('body-lg', texts.bodyLarge, family: body);
-      expectStep('body-md', texts.bodyMedium, family: body);
-      expectStep('body-sm', texts.bodySmall, family: body);
-    });
+  test('headline — 24 / 700 / 1.2 / -0.64', () {
+    for (final (slot, style) in <(String, TextStyle?)>[
+      ('headlineMedium', texts.headlineMedium),
+      ('headlineSmall', texts.headlineSmall),
+    ]) {
+      expectRole(
+        slot,
+        style,
+        size: 24,
+        weight: FontWeight.w700,
+        height: 1.2,
+        tracking: -0.64,
+      );
+    }
+  });
 
-    test('label-lg / md / sm', () {
-      expectStep('label-lg', texts.labelLarge, family: body);
-      expectStep('label-md', texts.labelMedium, family: body);
-      expectStep('label-sm', texts.labelSmall, family: body);
-    });
+  test('title — 20 / 700 / 1.2 / -0.64 (the app-bar title)', () {
+    expectRole(
+      'titleLarge',
+      texts.titleLarge,
+      size: 20,
+      weight: FontWeight.w700,
+      height: 1.2,
+      tracking: -0.64,
+    );
+  });
+
+  test('body large — 16 / 500 / 1.5 / 0', () {
+    for (final (slot, style) in <(String, TextStyle?)>[
+      ('titleMedium', texts.titleMedium),
+      ('bodyLarge', texts.bodyLarge),
+    ]) {
+      expectRole(
+        slot,
+        style,
+        size: 16,
+        weight: FontWeight.w500,
+        height: 1.5,
+        tracking: 0,
+      );
+    }
+  });
+
+  test('body size at semibold — 14 / 600 / 1.5 / 0 (derived)', () {
+    for (final (slot, style) in <(String, TextStyle?)>[
+      ('titleSmall', texts.titleSmall),
+      ('labelLarge', texts.labelLarge),
+    ]) {
+      expectRole(
+        slot,
+        style,
+        size: 14,
+        weight: FontWeight.w600,
+        height: 1.5,
+        tracking: 0,
+      );
+    }
+  });
+
+  test('body — 14 / 400 / 1.5 / 0', () {
+    expectRole(
+      'bodyMedium',
+      texts.bodyMedium,
+      size: 14,
+      weight: FontWeight.w400,
+      height: 1.5,
+      tracking: 0,
+    );
+  });
+
+  test('caption size at body weight — 12 / 400 / 1.4 / 0 (derived)', () {
+    expectRole(
+      'bodySmall',
+      texts.bodySmall,
+      size: 12,
+      weight: FontWeight.w400,
+      height: 1.4,
+      tracking: 0,
+    );
+  });
+
+  test('caption at the label tracking — 12 / 600 / 1.4 / 0.72 (derived)', () {
+    expectRole(
+      'labelMedium',
+      texts.labelMedium,
+      size: 12,
+      weight: FontWeight.w600,
+      height: 1.4,
+      tracking: 0.72,
+    );
+  });
+
+  test('caption — 12 / 600 / 1.4 / 1.2', () {
+    expectRole(
+      'labelSmall',
+      texts.labelSmall,
+      size: 12,
+      weight: FontWeight.w600,
+      height: 1.4,
+      tracking: 1.2,
+    );
+  });
+
+  test('the card prompt owns its metrics outside the scale', () {
+    // 30/1.22/-0.5/w600, unchanged (R6) — a component style, not one of GC-4's
+    // seven roles, so it does not move with them.
+    final styles = buildLightTheme().extension<AppTextStyles>();
+
+    expect(styles, isNotNull);
+    expectRole(
+      'cardPrompt',
+      styles!.cardPrompt,
+      size: AppTypography.cardPromptSize,
+      weight: FontWeight.w600,
+      height: AppTypography.cardPromptHeight,
+      tracking: AppTypography.cardPromptTracking,
+    );
+  });
+
+  test('the hero numeral is the stat rung, tabular and cap-trimmed (R6)', () {
+    // No weight override: the stat rung is already 600, so restating it would
+    // only pin the numeral against `applyBoldText`.
+    final styles = buildLightTheme().extension<AppTextStyles>()!;
+    expectRole(
+      'heroNumeral',
+      styles.heroNumeral,
+      size: 40,
+      weight: FontWeight.w600,
+      height: AppTypography.heroNumeralCapTrim,
+      tracking: -0.64,
+    );
+    expect(
+      styles.heroNumeral.fontFeatures,
+      contains(const FontFeature.tabularFigures()),
+    );
   });
 
   test('dark resolves the same scale as light', () {
@@ -134,67 +212,10 @@ void main() {
           ('labelMedium', texts.labelMedium, dark.labelMedium),
         ]) {
       expect(b?.fontSize, a?.fontSize, reason: '$name size');
+      expect(b?.fontWeight, a?.fontWeight, reason: '$name weight');
       expect(b?.height, a?.height, reason: '$name leading');
       expect(b?.letterSpacing, a?.letterSpacing, reason: '$name tracking');
     }
-  });
-
-  group('the weights the app spends', () {
-    /// Every weight the text theme itself declares.
-    Set<FontWeight> themeWeights() {
-      final theme = AppTypography.buildTextTheme(ThemeData.light().textTheme);
-
-      return <FontWeight>{
-        for (final style in <TextStyle?>[
-          theme.displayLarge,
-          theme.displayMedium,
-          theme.displaySmall,
-          theme.headlineLarge,
-          theme.headlineMedium,
-          theme.headlineSmall,
-          theme.titleLarge,
-          theme.titleMedium,
-          theme.titleSmall,
-          theme.bodyLarge,
-          theme.bodyMedium,
-          theme.bodySmall,
-          theme.labelLarge,
-          theme.labelMedium,
-          theme.labelSmall,
-        ])
-          if (style?.fontWeight != null) style!.fontWeight!,
-      };
-    }
-
-    test('the scale spends more than one weight', () {
-      // Which weights it spends — 400 body, 500 and 600 for emphasis — used to
-      // be pinned here. That was the V1 scale's choice and it went when Design
-      // System V1 was unlocked. A scale that resolves one weight everywhere has
-      // no emphasis at all, which is a defect at any values; that is the claim
-      // left standing. The registry below is what names every heavy source.
-      expect(themeWeights().length, greaterThan(1));
-    });
-
-    test('the hero numeral is the one weight a feature adds, and it is named', () {
-      // `deck_list_root.md` §6 scored the deck list ❌ for four weights and had
-      // to hedge — the code said `w700` at a call site and nothing said why, so
-      // a deliberate exception and an accident read the same from outside.
-      //
-      // This asserts the exception is still exactly one, still the heaviest
-      // thing on the screen, and still heavier than the rung it overrides. A
-      // fifth weight has to come past this test and the note beside the
-      // constant.
-      // The two weights themselves (w700 for the numeral, w600 for the rung it
-      // overrides) used to be pinned here. They went when Design System V1 was
-      // unlocked: what makes the exception an exception is the relation below,
-      // and that holds at whatever the two weigh.
-      final theme = AppTypography.buildTextTheme(ThemeData.light().textTheme);
-      expect(
-        AppTypography.heroNumeralWeight.value,
-        greaterThan(theme.headlineLarge!.fontWeight!.value),
-        reason: 'an exception that is not heavier buys nothing',
-      );
-    });
   });
 
   group('the weight registry (A20.1 P1-10)', () {
@@ -283,13 +304,22 @@ void main() {
       };
     }
 
-    /// The only sources allowed to reach `w700`, each one named.
+    /// The only sources allowed to reach `w700` or `w800`, each one named.
+    ///
+    /// The heavy slots are GC-4's heading roles: display (800), headline and
+    /// title (700). The stat role is 600, so `displayLarge`, `displayMedium`
+    /// and the hero numeral left this list when they became it.
     const boldAllowlist = <String>{
-      // The two display rungs (`app_typography.dart`).
-      'displayLarge',
-      'displayMedium',
-      // `AppTypography.heroNumeralWeight` — the deck hero's numeral.
-      'textStyles.heroNumeral',
+      // The display role (`app_typography.dart`).
+      'displaySmall',
+      'headlineLarge',
+      // The headline role.
+      'headlineMedium',
+      'headlineSmall',
+      // The title role.
+      'titleLarge',
+      // The dial reads the display role directly (`app_time_picker_theme.dart`).
+      'timePicker.hourMinuteTextStyle',
       // `buttonLabelWeight` — every button family, one constant.
       'filledButton.textStyle',
       'outlinedButton.textStyle',
@@ -303,22 +333,28 @@ void main() {
       ('high contrast dark', buildHighContrastDarkTheme()),
     ]) {
       test(
-        '$name reaches exactly the four weights, and every w700 is named',
+        '$name reaches exactly the five weights, and every w700/w800 is named',
         () {
           final weights = reachable(theme);
-          // The set used to be pinned as exactly {w400, w500, w600, w700}.
-          // That was the V1 scale's own choice of weights, and it went when
-          // Design System V1 was unlocked. The allowlist below is the part
-          // that was ever a rule: a heavy weight reachable from a source
-          // nobody named is an accident, whatever the scale weighs.
+          // {400, 500, 600, 700, 800} is GC-4's own choice, not an M3 default —
+          // worth pinning as a set, unlike the specific slot values above.
+          expect(weights.values.toSet(), <FontWeight>{
+            FontWeight.w400,
+            FontWeight.w500,
+            FontWeight.w600,
+            FontWeight.w700,
+            FontWeight.w800,
+          });
           final bold = <String>{
             for (final entry in weights.entries)
-              if (entry.value == FontWeight.w700) entry.key,
+              if (entry.value == FontWeight.w700 ||
+                  entry.value == FontWeight.w800)
+                entry.key,
           };
           expect(
             bold.difference(boldAllowlist),
             isEmpty,
-            reason: 'a w700 source nobody named',
+            reason: 'a w700/w800 source nobody named',
           );
           expect(
             boldAllowlist.difference(bold),
@@ -329,21 +365,26 @@ void main() {
       );
     }
 
+    Set<String> spellersOf(String literal) => Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart') && !f.path.endsWith('.g.dart'))
+        .where((f) => f.readAsStringSync().contains(literal))
+        .map((f) => f.uri.pathSegments.last)
+        .toSet();
+
     test('the sources that may spell w700 are exactly the named ones', () {
       // The other half of the registry: the literal itself. `withWeight`
       // through a named constant is the only way a feature reaches bold.
-      final spellers = Directory('lib')
-          .listSync(recursive: true)
-          .whereType<File>()
-          .where((f) => f.path.endsWith('.dart') && !f.path.endsWith('.g.dart'))
-          .where((f) => f.readAsStringSync().contains('FontWeight.w700'))
-          .map((f) => f.uri.pathSegments.last)
-          .toSet();
-      expect(spellers, <String>{
-        'app_typography.dart', // the display rungs and `heroNumeralWeight`
+      expect(spellersOf('FontWeight.w700'), <String>{
+        'app_typography.dart', // the headline and title roles
         'app_button_themes.dart', // `buttonLabelWeight`
         'app_bold_text.dart', // the OS bold-text setting, every rung
       });
+    });
+
+    test('the only source that may spell w800 is the display role', () {
+      expect(spellersOf('FontWeight.w800'), <String>{'app_typography.dart'});
     });
   });
 }

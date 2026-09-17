@@ -4,11 +4,11 @@ import '../foundations/app_stroke.dart';
 
 /// The state-layer alphas, and the one place they are written down.
 ///
-/// Every value below is transcribed from `design_system/components/mx.css`, and
-/// the CSS selector it came from is named beside it. They are not
-/// interchangeable: the design gives a row, a card and a control three different
-/// hover weights on purpose, because the same wash reads as heavier on a
-/// full-width row than on a 48-wide button.
+/// v3 moved most of these off `design_system/components/mx.css`'s per-control
+/// weights onto two global values instead — hover 0.08, pressed 0.12 (spec
+/// Opacities table). The per-shape names stay (a row, an icon, a control, a
+/// card) so a caller still says which control it is; only focus (0.10, spec
+/// silent) still carries a value of its own.
 ///
 /// **What this file replaces is not a set of literals — it is a set of silences.**
 /// Before it, `MxCard` and `MxListTile` declared no interaction colours at all,
@@ -17,34 +17,29 @@ import '../foundations/app_stroke.dart';
 /// invisible to `design_audit/` because it exists only as a framework default. A
 /// missing decision looks the same as a made one until someone measures it.
 abstract final class AppStateOpacity {
-  /// A row — `button.mx-tile:hover`, 7% of the secondary text colour.
-  static const double hoverRow = 0.07;
+  /// A row's hover wash — v3 global hover, 0.08 (spec Opacities table).
+  static const double hoverRow = 0.08;
 
-  /// An icon-only control — `.mx-iconbtn:hover`, 8% of the secondary text
-  /// colour. Heavier than a row because the target is a fraction of the width.
+  /// An icon-only control's hover wash — v3 global hover, 0.08. The old kit
+  /// gave a row, an icon, a control and a card four different weights
+  /// (7/8/6/4%); v3 uses one.
   static const double hoverIcon = 0.08;
 
-  /// An outlined or text-weight control — `.mx-btn--secondary:hover`, 6% of the
-  /// accent.
-  static const double hoverControl = 0.06;
+  /// An outlined or text-weight control's hover wash — v3 global hover, 0.08.
+  static const double hoverControl = 0.08;
 
-  /// A card — `.mx-card__action:hover`, 4% of the accent. The lightest of the
-  /// four: a card is the largest hover area in the app.
-  static const double hoverCard = 0.04;
+  /// A card's hover wash — v3 global hover, 0.08.
+  static const double hoverCard = 0.08;
 
-  /// Press — `.mx-btn--secondary:active` and `.mx-iconbtn:active`, 12% of the
-  /// accent.
+  /// Press — v3 global pressed, 0.12 (spec Opacities table).
   static const double pressed = 0.12;
 
-  /// Press on a card — `.mx-card__action:active`, 10%.
+  /// Press on a card — v3 global pressed, 0.12.
   ///
-  /// **Two percent under [pressed], and the kit disagrees with itself here.**
-  /// `mx.css`'s own header comment says press is a 12% overlay everywhere; the
-  /// `.mx-card__action:active` rule it introduces says 10%. The rule is the
-  /// behaviour and the comment is the summary, so the rule wins — the same
-  /// precedence `docs/document-conventions.md` §9 sets between a rule and the
-  /// prose around it.
-  static const double pressedCard = 0.10;
+  /// Equal to [pressed] now: v3 gives every pressed control the same weight,
+  /// where the old kit's card rule (10%) disagreed with its own header (12%).
+  /// One value ends the disagreement.
+  static const double pressedCard = 0.12;
 
   /// Keyboard focus — a 10% overlay, from `mx.css`'s interaction-model header.
   ///
@@ -57,10 +52,11 @@ abstract final class AppStateOpacity {
   /// Material 3's own state layer, for a control whose ground is a **fill** —
   /// hover, then focus and press.
   ///
-  /// Transcribed from `_FilledButtonDefaultsM3.overlayColor` at 3.44.8:
-  /// `onPrimary` at 0.08 hovered, 0.10 focused, 0.10 pressed. The colour is
-  /// the fill's own `on` role and the alphas are the SDK's, because M3's
-  /// answer for a filled surface is a *lightness* move that leaves hue alone.
+  /// Hover and focus are still `_FilledButtonDefaultsM3.overlayColor` at
+  /// 3.44.8 (`onPrimary` at 0.08 hovered, 0.10 focused) — a *lightness* move
+  /// on the fill's own `on` role that leaves hue alone. Pressed no longer is:
+  /// v3 raises every pressed overlay to 0.12 (spec Opacities table), so this
+  /// constant now overrides the SDK default instead of transcribing it.
   ///
   /// **These replaced `filledHoverBlend` / `filledPressedBlend` at M100.36.**
   /// The blends lerped the fill toward `onSurface` while `controlOverlay` —
@@ -71,7 +67,7 @@ abstract final class AppStateOpacity {
   /// (#432 §3.2). One mechanism, the canonical one, and the pair's own ink.
   static const double stateLayerHover = 0.08;
   static const double stateLayerFocus = 0.10;
-  static const double stateLayerPressed = 0.10;
+  static const double stateLayerPressed = 0.12;
 
   /// How far a text link's label moves toward the ink on hover —
   /// `.mx-textbtn:hover`, `color-mix(… 85%, var(--color-text-primary))`.
@@ -98,8 +94,9 @@ abstract final class AppStateOpacity {
 /// The interaction states, resolved.
 ///
 /// One `WidgetStateProperty` per control shape, so a card hovered in one feature
-/// and a card hovered in another cannot land on different washes. The shapes are
-/// four because the design gives four weights — see [AppStateOpacity].
+/// and a card hovered in another cannot land on different washes. The shapes stay
+/// four so a caller still names its control; v3 gives all of them one hover and
+/// one pressed weight — see [AppStateOpacity].
 ///
 /// Focus resolves to a wash here and to a ring at the call site. Both are
 /// needed: the wash says *something* is focused, the ring says *which*, and only
@@ -136,7 +133,10 @@ abstract final class AppInteractionStates {
         scheme,
         hoverColor: scheme.primary,
         hoverAlpha: AppStateOpacity.hoverCard,
-        pressedAlpha: AppStateOpacity.pressedCard,
+        // No explicit pressedAlpha: v3 unified pressed to one global weight,
+        // so `AppStateOpacity.pressedCard` now equals `_overlay`'s own
+        // default (`AppStateOpacity.pressed`) — passing it would only
+        // restate the default.
       );
 
   /// A row in a list.
@@ -157,15 +157,10 @@ abstract final class AppInteractionStates {
   /// taken since is to move the palette, because a component belongs on the
   /// role M3 gives it.
   ///
-  /// | ground | `primary` dark, now |
-  /// |---|---|
-  /// | `background` | 11.36:1 |
-  /// | `surface` | 10.02:1 |
-  /// | `primaryContainer` | 7.37:1 |
-  /// | `secondaryContainer` | 7.31:1 |
-  ///
-  /// Light was never in question: 6.89 / 7.27 / 5.57 / 6.02. Pinned per ground,
-  /// in both modes, by `focus_ring_contrast_test.dart`.
+  /// `primary` clears the 3:1 floor on every ground a focus ring sits on — the
+  /// page, a card, its own container tones — in both light and dark.
+  /// `focus_ring_contrast_test.dart` pins the current numbers per ground; not
+  /// restated here, since the last palette move is what made the old ones stale.
   /// **Only for a slot Material 3 leaves empty.** M100.23 renamed this from
   /// `focusRing` because the old name invited exactly the misuse it was being
   /// put to: four components were resolving *their canonical border role* to

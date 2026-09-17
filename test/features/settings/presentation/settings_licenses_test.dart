@@ -51,7 +51,10 @@ void main() {
     });
 
     final packages = entries.expand((e) => e.packages).toSet();
-    for (final face in <String>['Inter', 'Plus Jakarta Sans', 'Noto Sans KR']) {
+    // Inter left the bundle (Task 5b); a licence for a face the app does not
+    // ship would be a false statement on the page.
+    expect(packages, isNot(contains('Inter')));
+    for (final face in <String>['Plus Jakarta Sans', 'Noto Sans KR']) {
       expect(
         packages,
         contains(face),

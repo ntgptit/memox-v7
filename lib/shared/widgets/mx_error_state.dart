@@ -71,7 +71,7 @@ class MxErrorState extends StatelessWidget {
             const MxIcon(
               Icons.error_outline,
               ink: AppInk.danger,
-              size: MxIconSize.lg,
+              size: MxIconSize.xl,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(

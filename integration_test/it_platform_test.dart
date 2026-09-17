@@ -308,7 +308,7 @@ void main() {
       // a script that rasterises identically to a private-use string of the
       // same length found nothing.
       const TextStyle systemOnly = TextStyle(
-        fontFamily: AppTypography.displayFamily,
+        fontFamily: AppTypography.family,
         fontFamilyFallback: <String>[],
         fontSize: 48,
         color: Color(0xFF000000),
@@ -338,6 +338,11 @@ void main() {
         (script: 'Kana', sample: 'ひらがな'),
         (script: 'Han', sample: '漢字学習'),
         (script: 'Simplified Han', sample: '汉字学习'),
+        // IPA left the bundle with Inter (Task 5b): Plus Jakarta Sans has no
+        // `ɪ` U+026A or `ˈ` U+02C8, and a card's pronunciation field is where
+        // people type them. Both codepoints are ones the bundle lacks, so
+        // only the platform can pass this probe.
+        (script: 'IPA', sample: 'ɪˈ'),
       ];
 
       for (final probe in probes) {

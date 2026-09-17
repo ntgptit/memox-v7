@@ -42,49 +42,18 @@ void main() {
   });
 
   group('light paints, dark does not', () {
-    test('a light card gets a float and a contact layer', () {
-      // **This assertion was `hasLength(1)` until M100.30, and the reason it
-      // gave still holds for the layer it was turning down.** That was
-      // Material's *ambient* second shadow — a full-size blur per surface,
-      // moving the result by under half an L* step. Tokyo's second layer is the
-      // opposite animal: a 2 px contact blur at 32%, which is cheap and which
-      // moves the ground by 9.27 L*.
-      //
-      // The two say different things and one layer can only say one of them.
-      // The float carries "this is above the page"; the contact carries "and it
-      // touches here". A tight dark drop on its own reads as a cut-out, which
-      // is what the app looked like.
+    test('a light card paints one soft, low-alpha layer', () {
+      // **Two layers (float + contact) until the v3 shadow tiers replaced
+      // Tokyo's shade.** `--memox-shadow-soft` (`colors_and_type.css`) is one
+      // shadow per level, so there is no second layer left to compare this one
+      // against.
       final shadows = shadowsFor(AppElevation.card, light);
-      expect(shadows, hasLength(2));
+      expect(shadows, hasLength(1));
 
-      final (float, contact) = (shadows.first, shadows.last);
-      expect(
-        float.blurRadius,
-        greaterThan(contact.blurRadius),
-        reason: 'the float is the wide layer',
-      );
-      expect(
-        float.offset.dy,
-        greaterThan(contact.offset.dy),
-        reason: 'the float travels further from the surface than the contact',
-      );
-      expect(
-        contact.color.a,
-        greaterThan(float.color.a),
-        reason:
-            'the contact layer is the denser of the two — it is what puts the '
-            'card *on* something rather than merely above it',
-      );
-      // Still not Material's ambient wash: if this ever grows past the float it
-      // has stopped being a contact layer.
-      expect(
-        contact.blurRadius,
-        lessThanOrEqualTo(AppElevation.raised),
-        reason:
-            'a contact layer is a tight blur; at this width it is the ambient '
-            'wash this file turned down, and a list of twenty cards pays for '
-            'it twenty times',
-      );
+      final soft = shadows.single;
+      expect(soft.offset.dy, greaterThan(0));
+      expect(soft.blurRadius, greaterThan(0));
+      expect(soft.color.a, lessThan(0.5), reason: 'a resting card stays soft');
     });
 
     test('a dark card gets a crisp rim, never a glow', () {
@@ -134,8 +103,6 @@ void main() {
       expect(drop.blurRadius, greaterThan(0));
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('and that is because a dark shadow buys almost nothing', () {
       // **The measurement the decision rests on, re-derived here rather than
       // quoted.** If the palette ever changes so that a dark shadow *would* be
@@ -200,14 +167,12 @@ void main() {
             "light's depth on its own — the surface step there is just 3.58",
       );
     });
-    */
   });
 
   group('the shadow itself', () {
     test('gets its colour from the theme, never from a literal', () {
-      // Both layers, because "the shadow is the token" stops being true the
-      // moment one of two layers is a literal — and the two now differ only in
-      // alpha, which is exactly where a hand-written second colour would hide.
+      // One soft layer at `card`; it must still be the theme's token at
+      // reduced alpha rather than a hand-written colour.
       for (final shadow in shadowsFor(AppElevation.card, light)) {
         expect(
           shadow.color.r,
@@ -241,23 +206,20 @@ void main() {
     });
 
     test('grows with the level rather than jumping', () {
-      // Per layer, and by geometry alone. Tokyo's alphas do not climb with the
-      // level — depth is how far the float travels and how wide it spreads, not
-      // how dark it gets, which is what stops a raised card reading as a
-      // *darker* card. The old single layer had to climb its alpha because a
-      // tight shade was the only handle it had.
-      for (final index in <int>[0, 1]) {
-        final card = shadowsFor(AppElevation.card, light)[index];
-        final overlay = shadowsFor(AppElevation.overlay, light)[index];
+      // **v3's tiers climb alpha with the level** — 4% at `card`, 12% at
+      // `overlay` (`--memox-shadow-soft` / `-fab`, `colors_and_type.css`) —
+      // unlike Tokyo's fixed-alpha float/contact pair this replaced. What still
+      // has to hold is offset and blur growing with depth.
+      final card = shadowsFor(AppElevation.card, light).single;
+      final overlay = shadowsFor(AppElevation.overlay, light).single;
 
-        expect(overlay.blurRadius, greaterThan(card.blurRadius));
-        expect(overlay.offset.dy, greaterThan(card.offset.dy));
-        expect(
-          overlay.color.a,
-          card.color.a,
-          reason: 'layer $index changed its alpha with the level',
-        );
-      }
+      expect(overlay.blurRadius, greaterThan(card.blurRadius));
+      expect(overlay.offset.dy, greaterThan(card.offset.dy));
+      expect(
+        overlay.color.a,
+        greaterThan(card.color.a),
+        reason: 'a deeper level should read as more present, not just bigger',
+      );
     });
   });
 }

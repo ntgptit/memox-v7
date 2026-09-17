@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 
@@ -144,6 +145,11 @@ class _ValueRow extends StatelessWidget {
 /// `danger` as a label, not as a fill. A destructive row that is a red block
 /// reads as an error the app is reporting rather than an action the user can
 /// take, and it drags the eye to the bottom of every settings screen.
+///
+/// The label and icon read `AppInk.danger`, not `semantic.danger` — the fill
+/// clears only 4.40:1 on this row's grounds, under the 4.5:1 text needs (GC-3,
+/// owner answer A1). Icons count here too: `Icon` paints its glyph through the
+/// same kind of render object as `Text`, so the audit holds it to the text bar.
 class _DestructiveRow extends StatelessWidget {
   const _DestructiveRow({required this.title});
 
@@ -151,7 +157,7 @@ class _DestructiveRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semantic = Theme.of(context).extension<AppSemanticColors>()!;
+    final Color ink = AppInk.danger.resolve(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -160,14 +166,14 @@ class _DestructiveRow extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          Icon(Icons.restart_alt, size: 20, color: semantic.danger),
+          Icon(Icons.restart_alt, size: 20, color: ink),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               title,
               style: Theme.of(
                 context,
-              ).textTheme.bodyLarge?.copyWith(color: semantic.danger),
+              ).textTheme.bodyLarge?.copyWith(color: ink),
             ),
           ),
         ],

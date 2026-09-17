@@ -41,7 +41,8 @@ class SearchGroupHeaderWidget extends StatelessWidget {
     // rather than a heading over a list.
     //
     // **Not `small`, not `list`.** `MxSectionLabelRung.small` is
-    // `sectionLabelSmall` — labelSmall, 11px, the caption's own size — so it
+    // `sectionLabelSmall` — labelSmall, 12px since v3's caption floor (the
+    // same size as `sectionLabel` now), the caption's own size — so it
     // would keep the very defect this closes; it is reserved for a face label
     // inside a card. `list` exists only because the deck toolbar's heading
     // shares its row with the sort control (`app_typography.dart:151-160`).

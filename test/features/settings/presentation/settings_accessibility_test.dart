@@ -3,14 +3,11 @@ import 'dart:ui' show CheckedState;
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-// ignore: unused_import
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/features/settings/domain/models/app_theme_mode_model.dart';
-// ignore: unused_import
 import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
-// ignore: unused_import
 import '../../../support/color_math.dart';
 import '../domain/support/fake_app_settings_repository.dart';
 import 'support/settings_widget_harness.dart';
@@ -21,7 +18,6 @@ void main() {
   final english = AppLocalizationsEn();
 
   /// WCAG AA for body text.
-  // ignore: unused_local_variable
   const double kAaBodyText = 4.5;
 
   group('guideline checks', () {
@@ -36,8 +32,6 @@ void main() {
     });
   });
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('contrast', () {
     // **Measured from the tokens, not from `textContrastGuideline`**, which is
     // the call `study_accessibility_test.dart` already made and recorded: that
@@ -77,33 +71,34 @@ void main() {
           contrast(scheme.onErrorContainer, scheme.errorContainer),
           greaterThanOrEqualTo(kAaBodyText),
         );
-        // **The band's Retry, and the pair that used to fail.** This asserted
-        // the opposite until M100.18: the brand ink measured 3.72:1 on the
-        // error band in dark (5.87:1 in light), which is why only dark had to
-        // route the button away from it. Inverting the dark accent to tone 80
-        // took it to 6.76:1, so the ground no longer forces the choice.
-        //
-        // Kept in the other direction rather than deleted, for the reason the
-        // original was written: a palette that drifts back under the floor
-        // must fail here rather than quietly re-introduce a fallback ink.
+        // **The band's Retry, re-pinned (v3 palette, 2026-09-17).** This
+        // checked `scheme.primary` since M100.18, on the premise that the
+        // action fell back onto brand ink where the ground allowed it. It
+        // never actually matched the widget: `MxFeedbackBand` (A20.1 Phase 5)
+        // shows the action always takes the band's own tone ink —
+        // `onErrorContainer` here, same as the title and message above it —
+        // in both brightnesses, never `primary`. `primary` itself no longer
+        // clears AA on this ground either way under v3 (3.65:1 light,
+        // 3.91:1 dark), which is moot for the reason just given, but is why
+        // this could not simply keep checking `primary`. Re-pinned on the
+        // ink the button actually resolves.
         expect(
-          contrast(scheme.primary, scheme.errorContainer),
+          contrast(scheme.onErrorContainer, scheme.errorContainer),
           greaterThanOrEqualTo(kAaBodyText),
-          reason:
-              'the brand ink fell back under AA on the error band, so the '
-              "band's Retry is forced onto a fallback again",
+          reason: "the band's Retry action must clear AA on its own ground",
         );
-        // The reset action, which is `danger` as a label rather than a fill
-        // (S5) — so it is held to the text floor, not to 3:1. Measured against
-        // the **page**, which is where it sits; it is not on a card.
+        // The reset action, which is `danger` as *ink* rather than a fill
+        // (S5) — `MxTextButton(isDestructive: true)` resolves `AppInk.danger`,
+        // which is `dangerInk` (GC-3), not the raw `danger` fill. Held to the
+        // text floor, not to 3:1. Measured against the **page**, which is
+        // where it sits; it is not on a card.
         expect(
-          contrast(semantic.danger, theme.scaffoldBackgroundColor),
+          contrast(semantic.dangerInk, theme.scaffoldBackgroundColor),
           greaterThanOrEqualTo(kAaBodyText),
         );
       });
     }
   });
-  */
 
   group('roles and values', () {
     testWidgets('each choice row is announced as a radio with its selected '

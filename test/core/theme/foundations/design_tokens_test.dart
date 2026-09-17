@@ -36,8 +36,10 @@ void main() {
         AppSpacing.sm,
         AppSpacing.md,
         AppSpacing.lg,
+        AppSpacing.card,
         AppSpacing.xl,
         AppSpacing.xxl,
+        AppSpacing.xxxl,
       ];
 
       expect(declared.toSet(), AppSpacing.scale.toSet());
@@ -46,14 +48,17 @@ void main() {
 
   group('required tokens exist', () {
     test('radius, icon size, duration and breakpoint tokens are present', () {
+      expect(AppRadius.xs, lessThan(AppRadius.sm));
       expect(AppRadius.sm, lessThan(AppRadius.md));
       expect(AppRadius.md, lessThan(AppRadius.lg));
       expect(AppRadius.lg, lessThan(AppRadius.xl));
-      expect(AppRadius.pill, greaterThan(AppRadius.xl));
+      expect(AppRadius.xl, lessThan(AppRadius.xxl));
+      expect(AppRadius.pill, greaterThan(AppRadius.xxl));
 
       expect(AppIconSize.sm, lessThan(AppIconSize.mdCompact));
       expect(AppIconSize.mdCompact, lessThan(AppIconSize.md));
       expect(AppIconSize.md, lessThan(AppIconSize.lg));
+      expect(AppIconSize.lg, lessThan(AppIconSize.xl));
 
       expect(AppDurations.fast, lessThan(AppDurations.normal));
       expect(AppDurations.normal, lessThan(AppDurations.slow));

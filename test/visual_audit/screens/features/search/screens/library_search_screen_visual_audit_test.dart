@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
+import 'package:memox/core/theme/foundations/app_border_colors.dart';
+import 'package:memox/core/theme/foundations/app_material_roles.dart';
 import 'package:memox/core/time/delay_provider.dart';
 import 'package:memox/features/search/di/library_search_repository_provider.dart';
 import 'package:memox/features/search/domain/models/search_result_model.dart';
@@ -60,6 +62,24 @@ void main() {
     anchors: <AuditAnchor>[
       AuditAnchor.type('shell', MxContentShell),
       AuditAnchor.type('empty_state', MxEmptyState),
+    ],
+    // Owner decision 5 (2026-09-13): the search field's resting border keeps
+    // `outline` (R1, `MxSearchField`'s `Border.all(color: colors.outline)`)
+    // against its own `surfaceMuted` fill rather than moving to a lighter
+    // edge. Idle only — `results`/`failed` focus the field, which swaps the
+    // border to `colors.primary` and clears 3:1.
+    nonTextContrastFloors: const <ContrastFloorAllowance>[
+      ContrastFloorAllowance(
+        itemId: 'shell',
+        foreground: AppBorderColors.borderControlDark,
+        background: AppMaterialRoles.surfaceContainerDark,
+        floor: 2.65,
+        rationale:
+            'Owner decision 5 (2026-09-13) keeps outline as the search '
+            "field's resting border on its own surfaceMuted fill in dark; "
+            'pinned at the measured 2.65:1, the same figure '
+            'control_border_grounds_test.dart carries.',
+      ),
     ],
     allowances: <AuditSkipAllowance>[...searchShellAllowances()],
   );

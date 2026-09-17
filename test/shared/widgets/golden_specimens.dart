@@ -68,10 +68,13 @@ class TypographySpecimen extends StatelessWidget {
           Text('Ephemeral', style: context.textStyles.cardPrompt),
           const SizedBox(height: 12),
           Text('Display / Jakarta 600', style: texts.titleLarge),
-          Text('Title / Inter 600', style: texts.titleMedium),
-          Text('Body / Inter 400 — 0123456789', style: texts.bodyMedium),
-          Text('Label / Inter 600', style: texts.labelLarge),
-          Text('Caption / Inter 400', style: texts.bodySmall),
+          Text('Title / Plus Jakarta Sans 500', style: texts.titleMedium),
+          Text(
+            'Body / Plus Jakarta Sans 400 — 0123456789',
+            style: texts.bodyMedium,
+          ),
+          Text('Label / Plus Jakarta Sans 600', style: texts.labelLarge),
+          Text('Caption / Plus Jakarta Sans 400', style: texts.bodySmall),
         ],
       ),
     );
@@ -91,7 +94,11 @@ class CardPrompt extends StatelessWidget {
       children: <Widget>[
         Text('ephemeral', style: context.textStyles.cardPrompt),
         const SizedBox(height: 8),
-        Text('adjective · /ɪˈfem(ə)rəl/', style: texts.bodyMedium),
+        // Respelled, not IPA. `ɪ` and `ˈ` are not in the bundle now that
+        // Inter has left it: the platform draws them on a device
+        // (IT-PLAT-009), and a host has no platform fonts, so a golden of
+        // them would record a box the app never shows on device.
+        Text('adjective · ih-FEM-er-ul', style: texts.bodyMedium),
       ],
     );
   }

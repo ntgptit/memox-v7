@@ -20,6 +20,13 @@ void main() {
       expect(changed.success, base.success);
       expect(changed.warning, base.warning);
       expect(changed.info, base.info);
+      expect(changed.accentInk, base.accentInk);
+      expect(changed.dangerInk, base.dangerInk);
+      expect(changed.successInk, base.successInk);
+      expect(changed.warningInk, base.warningInk);
+      expect(changed.secondaryInk, base.secondaryInk);
+      expect(changed.tertiaryInk, base.tertiaryInk);
+      expect(changed.inversePrimaryInk, base.inversePrimaryInk);
       expect(changed.surfaceMuted, base.surfaceMuted);
       expect(changed.borderSubtle, base.borderSubtle);
       expect(changed.surfaceEmphasis, base.surfaceEmphasis);
@@ -39,6 +46,28 @@ void main() {
       expect(mid.warning, Color.lerp(light.warning, dark.warning, 0.5));
       expect(mid.danger, Color.lerp(light.danger, dark.danger, 0.5));
       expect(mid.info, Color.lerp(light.info, dark.info, 0.5));
+      expect(mid.accentInk, Color.lerp(light.accentInk, dark.accentInk, 0.5));
+      expect(mid.dangerInk, Color.lerp(light.dangerInk, dark.dangerInk, 0.5));
+      expect(
+        mid.successInk,
+        Color.lerp(light.successInk, dark.successInk, 0.5),
+      );
+      expect(
+        mid.warningInk,
+        Color.lerp(light.warningInk, dark.warningInk, 0.5),
+      );
+      expect(
+        mid.secondaryInk,
+        Color.lerp(light.secondaryInk, dark.secondaryInk, 0.5),
+      );
+      expect(
+        mid.tertiaryInk,
+        Color.lerp(light.tertiaryInk, dark.tertiaryInk, 0.5),
+      );
+      // inversePrimaryInk is not checked against light/dark here: GC-3 makes
+      // it identical in both modes, so Color.lerp(x, x, 0.5) and a field that
+      // snaps to `this` instead of interpolating are the same number — the
+      // dedicated test below forces two different values instead.
       expect(
         mid.surfaceMuted,
         Color.lerp(light.surfaceMuted, dark.surfaceMuted, 0.5),
@@ -58,6 +87,24 @@ void main() {
       expect(
         mid.onDisabled,
         Color.lerp(light.onDisabled, dark.onDisabled, 0.5),
+      );
+    });
+
+    test('lerp interpolates inversePrimaryInk, which is identical in both '
+        'modes', () {
+      // light and dark carry the same inversePrimaryInk value (GC-3: its
+      // one ground, inverseSurface, is theme-invariant too), so a
+      // light-to-dark lerp can't tell a real blend from a field that snaps
+      // to `this` — both read as the unchanged value. Force two instances
+      // that actually differ so the assertion can fail.
+      const light = AppSemanticColors.light();
+      final variant = light.copyWith(
+        inversePrimaryInk: const Color(0xFF000000),
+      );
+
+      expect(
+        light.lerp(variant, 0.5).inversePrimaryInk,
+        Color.lerp(light.inversePrimaryInk, variant.inversePrimaryInk, 0.5),
       );
     });
 
@@ -85,13 +132,16 @@ void main() {
       // pins them to the formula rather than to a hex somebody typed. It is
       // also what keeps them honest if the surface or the ink moves: a solid
       // that no longer equals its own derivation is a colour nobody chose.
+      //
+      // v3 (GC-2, colors_and_type.css 2026-09-17) flattens over `surface`
+      // (the page), not the card: `AppSurfaceColors.page*`, not `paper*`.
       expect(
         light.disabledSurface.toARGB32(),
         Color.alphaBlend(
           AppColors.textPrimaryLight.withValues(
             alpha: AppStateOpacity.disabledSurfaceBlend,
           ),
-          AppSurfaceColors.paperLight,
+          AppSurfaceColors.pageLight,
         ).toARGB32(),
       );
       expect(
@@ -100,7 +150,7 @@ void main() {
           AppColors.textPrimaryDark.withValues(
             alpha: AppStateOpacity.disabledSurfaceBlend,
           ),
-          AppSurfaceColors.paperDark,
+          AppSurfaceColors.pageDark,
         ).toARGB32(),
       );
     });
@@ -113,8 +163,6 @@ void main() {
       expect(dark.disabledSurface.a, 1);
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('onDisabled is the ink at 38%', () {
       // Compared as packed ARGB, which is the comparison that matters: the
       // constant is written as a literal because MX-VIS-002 R2 keeps colour
@@ -133,6 +181,5 @@ void main() {
             .toARGB32(),
       );
     });
-    */
   });
 }

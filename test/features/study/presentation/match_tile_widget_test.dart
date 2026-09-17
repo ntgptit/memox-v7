@@ -212,12 +212,12 @@ void main() {
       );
     });
 
-    testWidgets('selected is primary on the edge and the label', (
+    testWidgets('selected is the brand ink on the edge and the label', (
       tester,
     ) async {
-      // `primary` — the canonical accent, as a label on a surface. It reads
-      // there because the palette was retuned to make it (M100.28), not
-      // because a second token stands in for it.
+      // `AppInk.accent` — the canonical accent, as a label on a surface. It
+      // reads there because the palette was retuned to make it (M100.28);
+      // since GC-3 (2026-09-17) that ink is `accentInk`, not the fill.
       await pumpTile(
         tester,
         text: term,
@@ -225,16 +225,14 @@ void main() {
         state: MatchTileState.selected,
       );
 
-      final accent = Theme.of(
-        tester.element(find.text(term)),
-      ).colorScheme.primary;
+      final accent = semanticOf(tester).accentInk;
       expect(skinOf(tester).border!.top.color, accent);
       expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, accent);
       expect(find.byType(Icon), findsNothing);
     });
 
-    testWidgets('wrong is danger on the edge, the label and the ✕', (
+    testWidgets('wrong is the danger ink on the edge, the label and the ✕', (
       tester,
     ) async {
       await pumpTile(
@@ -244,14 +242,14 @@ void main() {
         state: MatchTileState.wrong,
       );
 
-      final danger = semanticOf(tester).danger;
+      final danger = semanticOf(tester).dangerInk;
       expect(skinOf(tester).border!.top.color, danger);
       expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, danger);
       expect(tester.widget<Icon>(find.byIcon(Icons.close)).color, danger);
     });
 
-    testWidgets('paired is success on the edge, the label and the ✓', (
+    testWidgets('paired is the success ink on the edge, the label and the ✓', (
       tester,
     ) async {
       await pumpTile(
@@ -261,7 +259,7 @@ void main() {
         state: MatchTileState.paired,
       );
 
-      final success = semanticOf(tester).success;
+      final success = semanticOf(tester).successInk;
       expect(skinOf(tester).border!.top.color, success);
       expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, success);

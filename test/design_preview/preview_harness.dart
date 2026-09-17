@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
@@ -93,12 +94,22 @@ class VerdictAction extends StatelessWidget {
   const VerdictAction({
     required this.label,
     required this.tint,
+    required this.labelInk,
     required this.isSelected,
     super.key,
   });
 
   final String label;
   final Color tint;
+
+  /// The label's colour, as an [AppInk] rather than [tint] itself.
+  ///
+  /// [tint] is a fill (`semantic.danger`/`semantic.success`) and stays one for
+  /// the border below — R1/owner decision 5 keep that edge on the kit hex. Text
+  /// is held to 4.5:1 through its ink instead (GC-3, owner answer A1): in light
+  /// mode the danger and success fills read 4.40:1 / 2.82:1 on this card, both
+  /// under the bar.
+  final AppInk labelInk;
   final bool isSelected;
 
   @override
@@ -140,7 +151,7 @@ class VerdictAction extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: tint),
+        style: Theme.of(context).textTheme.labelLarge?.inked(context, labelInk),
       ),
     );
   }

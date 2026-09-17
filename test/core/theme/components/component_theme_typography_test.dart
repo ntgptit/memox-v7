@@ -49,8 +49,8 @@ void main() {
     );
     expect(
       style.fontFamily,
-      anyOf(AppTypography.bodyFamily, AppTypography.displayFamily),
-      reason: '$slot is not set in one of the two app faces',
+      AppTypography.family,
+      reason: '$slot is not set in the app face',
     );
   }
 
@@ -176,12 +176,14 @@ void main() {
         }
       });
 
-      test('the navigation label is label-md, and selection re-weights it', () {
+      test('the navigation label is label-md in both states', () {
         // The bar resolves per state, so both faces have to be asked for.
-        // Unselected is the rung untouched; selected is the rung at 600 — and
-        // the axis assertion inside the helper is the whole point, because
-        // this slot shipped a `copyWith(fontWeight:)` that reported 600 and
-        // painted 500 (theme-composition review, 2026-08).
+        // Both are the rung untouched: selected was the rung re-weighted to
+        // 600 while labelMedium's own weight was lighter (500); GC-4 made
+        // labelMedium 600 itself, so the explicit re-weight is now a no-op.
+        // The axis comparison inside the helper still matters — this slot once
+        // shipped a `copyWith(fontWeight:)` that reported 600 and painted 500
+        // (theme-composition review, 2026-08).
         final WidgetStateProperty<TextStyle?>? label =
             theme.navigationBarTheme.labelTextStyle;
         expect(label, isNotNull, reason: 'the bar declares no label style');
@@ -191,7 +193,7 @@ void main() {
           label!.resolve(const <WidgetState>{}),
           texts.labelMedium,
         );
-        expectRungReweighted(
+        expectSameRung(
           'navigationBarTheme.labelTextStyle (selected)',
           label.resolve(const <WidgetState>{WidgetState.selected}),
           texts.labelMedium,

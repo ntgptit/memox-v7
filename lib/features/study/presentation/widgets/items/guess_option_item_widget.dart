@@ -207,17 +207,29 @@ abstract final class AppGuessOption {
   /// The same style and the same insets the row builds with, so the two cannot
   /// disagree: a measurement that drifts from the widget is worse than none,
   /// because it looks authoritative.
+  ///
+  /// **[state] narrows the text column, on the two states that draw a verdict
+  /// icon.** The row's `Row` gives the icon and its gap
+  /// (`AppIconSize.sm + AppSpacing.sm`) off the top before `Expanded(Text)`
+  /// sees any width; measuring the full row width for every state undercounted
+  /// `correct`/`chosenWrong` by exactly one wrapped line once the v3 type scale
+  /// changed where this fixture's meaning wraps.
   static double naturalHeightOf(
     BuildContext context,
     String text, {
     required double width,
+    required GuessOptionState state,
   }) {
     final style = context.texts.bodyMedium;
+    final hasVerdict =
+        state == GuessOptionState.correct ||
+        state == GuessOptionState.chosenWrong;
+    final iconAllowance = hasVerdict ? MxIconSize.sm.dp + AppSpacing.sm : 0.0;
     final painter = TextPainter(
       text: TextSpan(text: text, style: style),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context),
-    )..layout(maxWidth: width - rowPadding.horizontal);
+    )..layout(maxWidth: width - rowPadding.horizontal - iconAllowance);
 
     final content = painter.height + rowPadding.vertical;
     painter.dispose();

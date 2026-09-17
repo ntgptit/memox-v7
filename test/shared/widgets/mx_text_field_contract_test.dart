@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -216,14 +217,25 @@ void main() {
         // #433 F4: the border went red and the `+` beside it stayed grey,
         // because the themed `IconButtonTheme` answered before the M3 default
         // that carries the error branch.
+        //
+        // The glyph is read like the error text beside it, so it is the
+        // danger ink, not the fill (GC-3, 2026-09-17) — the border keeps
+        // `error`.
         expect(
           await suffixColorOf(
             tester,
             errorText: 'Already tagged',
             isDark: mode.$2,
           ),
-          theme.colorScheme.error,
+          semantic.dangerInk,
         );
+        // The message itself is text, so it takes the same ink as the glyph
+        // beside it (GC-3, 2026-09-17) — left to `errorStyle`'s M3 default it
+        // would have painted `colorScheme.error`, the fill.
+        final errorMessage = tester.renderObject<RenderParagraph>(
+          find.text('Already tagged'),
+        );
+        expect(errorMessage.text.style?.color, semantic.dangerInk);
         expect(
           await suffixColorOf(tester, isEnabled: false, isDark: mode.$2),
           semantic.onDisabled,

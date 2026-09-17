@@ -293,14 +293,30 @@ void main() {
 
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surfaceContainerLow);
-        // **`borderOption`, not `borderControl`** (M100.2). An option card had
-        // been borrowing the *input* border, which `app_palette_test.dart`
-        // keeps untinted by a recorded rule — "the light canvas carries no
-        // lavender tint" names `input` explicitly. That rule is about a text
-        // field, which is canvas; a card sitting on a page is not, and its
-        // neighbours' edges moved into the brand family at M99.99.
+        // **`borderOption`** (M100.2). An option card had been borrowing the
+        // *input* border, which `app_palette_test.dart` keeps untinted by a
+        // recorded rule — "the light canvas carries no lavender tint" names
+        // `input` explicitly. That rule is about a text field, which is
+        // canvas; a card sitting on a page is not.
         expect(borderColorOf(tester), semantic.borderOption);
-        expect(borderColorOf(tester), isNot(semantic.borderControl));
+        if (themeName.startsWith('high-contrast')) {
+          // **A different, still-true reason — nothing to do with the v3
+          // swap in the `else` branch.** `highContrastSemantics`
+          // (`app_high_contrast.dart`) boosts `borderControl` to
+          // `onSurfaceVariant` as "the component boundary keeps the
+          // strongest edge"; `borderOption` is not one of the three it
+          // re-points, so the two still part company here.
+          expect(semantic.borderOption, isNot(semantic.borderControl));
+        } else {
+          // **No longer `isNot(borderControl)`.** v3 makes every outline
+          // indigo ("Outlines stay indigo, never gray"), so the
+          // neutral-input vs brand-option split this used to guard has no
+          // premise left — `borderOptionLight`/`Dark` is now
+          // `borderControlLight`/`Dark` under its call-site name
+          // (`app_border_colors.dart`). The option card's own resting edge is
+          // the option/Guess component spec's to revisit.
+          expect(semantic.borderOption, semantic.borderControl);
+        }
         expect(hasShadow(decoration), isFalse);
       });
     }

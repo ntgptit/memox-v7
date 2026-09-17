@@ -88,6 +88,12 @@ InputDecorationTheme buildInputDecorationTheme(
           : scheme.onSurfaceVariant,
     ),
   ),
+  // **The error message is text, so it takes the danger ink, not `error`**
+  // (GC-3, 2026-09-17). `_InputDecoratorDefaultsM3.errorStyle` is
+  // `textTheme.bodySmall` in `colorScheme.error`; the rung is kept from
+  // [texts] and only the role moves — the border keeps `error`, where 3:1 is
+  // what a boundary owes.
+  errorStyle: texts.bodySmall!.copyWith(color: semantic.dangerInk),
   // **The suffix follows the field's error state** (#433 F4). `InputDecorator`
   // resolves the suffix colour as `decoration.suffixIconColor ??
   // iconButtonTheme.foregroundColor ?? defaults.suffixIconColor`
@@ -96,9 +102,13 @@ InputDecorationTheme buildInputDecorationTheme(
   // never reached: the tag field's border went red and its `+` stayed grey.
   // Stating the slot here is the canonical fix; weakening `IconButtonTheme`
   // would have moved every icon button in the app.
+  //
+  // **Under error it is the danger ink, not `error`** (GC-3, 2026-09-17). The
+  // glyph is read like the error text beside it, and v3's `error` is a fill;
+  // the border keeps `error`, where 3:1 is what a boundary owes.
   suffixIconColor: WidgetStateColor.resolveWith((states) {
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
-    if (states.contains(WidgetState.error)) return scheme.error;
+    if (states.contains(WidgetState.error)) return semantic.dangerInk;
 
     return scheme.onSurfaceVariant;
   }),

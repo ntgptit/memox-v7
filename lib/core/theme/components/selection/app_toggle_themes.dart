@@ -59,8 +59,8 @@ import '../../foundations/app_stroke.dart';
 /// over.** M3 drops the track outline once the switch is on; this theme kept it
 /// and painted `onPrimary` there, because `primaryDark` used to sit at 2.90:1
 /// against a dark card and the pill needed an edge to be findable. M100.18
-/// inverted that tone — the on track now reads **10.01:1 on the dark card and
-/// 7.27:1 on the light one** — so the fill separates itself and the edge has
+/// inverted that tone — the on track now clears the 3:1 floor against the
+/// card in both modes — so the fill separates itself and the edge has
 /// nothing left to do. In light it was 1.03:1 white-on-near-white the whole
 /// time, which is to say the app was carrying a brightness-conditional
 /// workaround for a condition that no longer holds in either mode.
@@ -140,8 +140,8 @@ SwitchThemeData buildSwitchTheme(
 /// and drop it in light — a brightness switch, and it existed because the old
 /// dark `primary` was a fill tone at 2.90:1 against the card, so the box needed
 /// a ring to be findable. M100.18 inverted that tone and M100.21 removed the
-/// ring; the fill now reads 10.02:1 on the dark card and 7.27:1 on the light
-/// one, and carries the state on its own.
+/// ring; the fill now clears the 3:1 floor on the card in both modes and
+/// carries the state on its own.
 ///
 /// What the light half of that switch had already shown is why it was worth
 /// removing rather than mirroring: white on the sheet measures **1.03:1**, so
@@ -214,8 +214,8 @@ CheckboxThemeData buildCheckboxTheme(
       // This used to draw `onPrimary` in dark and nothing in light — a third
       // brightness switch, and it existed because the old dark `primary` was a
       // fill tone sitting close to the card, so the box needed a ring to be
-      // findable. Since dark inverted to tone 80 (M100.18) the fill reads on
-      // its own: 10.02:1 on the dark card, 7.27:1 on the light one.
+      // findable. Since dark inverted to tone 80 (M100.18) the fill clears 3:1
+      // on its own, in both modes, and needs no ring to be found.
       return BorderSide.none;
     }
     // M3 darkens the outline under a pointer *and* under keyboard focus, to the

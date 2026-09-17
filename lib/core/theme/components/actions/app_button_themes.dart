@@ -315,10 +315,10 @@ WidgetStateProperty<Color> textLinkForeground(
 /// trailing side, and `tapTargetSize: padded` gives the finger its horizontal
 /// 48 without drawing it.
 ///
-/// **Colour is `primary`.** It used to be a separate accent token, because the
-/// old dark `primary` was a fill tone measuring 3.33:1 as bare text — failing
-/// AA at label size. Since M100.18 inverted it to tone 80 it reads 10.02:1 on
-/// the card, so the role carries its own label.
+/// **Colour is the brand's ink, `accentInk`** (GC-3, 2026-09-17). A text link
+/// is bare text on a surface, and v3's light `primary` reads under 4.5:1 there
+/// (`AppColors.accentInkLight` solves the same hue for the text grounds); dark
+/// has its own near-fill ink, `#8D9CFF` against the fill's `#8B9AFF`.
 ///
 /// **Focus is an underline, and it is declared here rather than only in
 /// `MxTextButton`.** Suppressing the overlay takes the wash away, and the zero
@@ -340,10 +340,12 @@ TextButtonThemeData buildTextButtonTheme(
   AppSemanticColors semantic,
   TextTheme texts,
 ) {
+  // The brand's *ink*, not its fill: v3's light `primary` fails 4.5:1 as bare
+  // text (GC-3, 2026-09-17).
   final foreground = textLinkForeground(
     scheme,
     semantic,
-    accent: scheme.primary,
+    accent: semantic.accentInk,
   );
 
   return TextButtonThemeData(
@@ -388,16 +390,10 @@ TextButtonThemeData buildTextButtonTheme(
 
 /// The secondary action: `MxActionButton`'s `secondary` variant.
 ///
-/// **`primary` and `outline`, which is what `_OutlinedButtonDefaultsM3` names
-/// for both slots — restored at M100.22.**
-///
-/// The label read `semantic.secondaryAction`, a slate that is not in the brand
-/// family at all (`#454B5E` light, `#C3C6D2` dark). That token dates from when
-/// dark `primary` was a fill tone measuring 3.33:1 as bare text; M100.18
-/// inverted it to tone 80 and the role now reads **7.27:1 in light and 10.01:1
-/// in dark** on a card, 6.89 and 11.35 on the page. There is nothing left for a
-/// substitute to buy, and a secondary button whose label is not the brand
-/// colour is the one control that disagrees with every link beside it.
+/// **The brand's ink and `outline`.** `_OutlinedButtonDefaultsM3` names
+/// `primary` for both slots, but the label is text on a page or a card, and
+/// v3's light `primary` fails 4.5:1 there — so the label is `accentInk` (GC-3,
+/// 2026-09-17) while the edge keeps the canonical fill role.
 ///
 /// The edge read `semantic.borderControl`, which *is* `scheme.outline` — the
 /// scheme has bound them since the role audit. Saying `outline` changes no
@@ -411,7 +407,8 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
-      return scheme.primary;
+      // The label is text, so it takes the brand's ink (GC-3, 2026-09-17).
+      return semantic.accentInk;
     }),
     side: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) {

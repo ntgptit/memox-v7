@@ -57,7 +57,9 @@ DatePickerThemeData buildDatePickerTheme(
     todayForegroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
-      return scheme.primary;
+      // The day number is text, so — unselected — it takes the brand's ink
+      // rather than the fill the ring beside it draws (GC-3, 2026-09-17).
+      return semantic.accentInk;
     }),
     // `secondaryContainer`, which is `_DatePickerDefaultsM3`'s own answer and
     // the same tint the pills and the navigation indicator take. It read

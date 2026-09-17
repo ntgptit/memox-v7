@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-// ignore: unused_import
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -33,7 +32,6 @@ void main() {
   // outside this map is a variant whose four themes, three states and two sizes
   // nobody measured — and the map is the only thing that decides, because the
   // enum is enumerated nowhere else here.
-  // ignore: unused_local_variable
   const filledVariants = <String, MxActionButtonVariant>{
     'primary': MxActionButtonVariant.primary,
     'destructive': MxActionButtonVariant.destructive,
@@ -92,24 +90,17 @@ void main() {
     return themeStyle == null ? null : select(themeStyle)?.resolve(states);
   }
 
-  // ignore: unused_local_variable
   const rest = <WidgetState>{};
-  // ignore: unused_local_variable
   const hovered = <WidgetState>{WidgetState.hovered};
-  // ignore: unused_local_variable
   const pressed = <WidgetState>{WidgetState.pressed};
-  // ignore: unused_local_variable
   const focused = <WidgetState>{WidgetState.focused};
   const disabled = <WidgetState>{WidgetState.disabled};
 
   for (final themeEntry in themes.entries) {
     final themeName = themeEntry.key;
-    // ignore: unused_local_variable
     final theme = themeEntry.value;
 
     group(themeName, () {
-      // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-      /*
       for (final variantEntry in filledVariants.entries) {
         for (final size in MxActionButtonSize.values) {
           final variantName = '${variantEntry.key} · ${size.name}';
@@ -199,13 +190,10 @@ void main() {
           });
         }
       }
-      */
 
       // Both sizes here too: compact swaps geometry, and geometry properties
       // are single-state — a compact button that lost its state resolvers
       // would fail this, not the drawn-40 test in mx_components_test.
-      // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-      /*
       for (final size in MxActionButtonSize.values) {
         testWidgets('secondary · ${size.name} · edge is borderControl at rest '
             'and while loading, focus ring when focused', (tester) async {
@@ -277,7 +265,6 @@ void main() {
           );
         });
       }
-      */
     });
   }
 
@@ -383,8 +370,6 @@ void main() {
       handle.dispose();
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     testWidgets('the kept-label spinner takes the foreground colour', (
       tester,
     ) async {
@@ -408,7 +393,6 @@ void main() {
         reason: 'the spinner must read on the fill it spins over',
       );
     });
-    */
   });
 
   group('icon composition', () {

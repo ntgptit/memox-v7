@@ -159,7 +159,9 @@ void main() {
         final foreground = entry.value.textButtonTheme.style!.foregroundColor!;
         final rest = foreground.resolve(resting);
 
-        expect(rest, entry.value.colorScheme.primary, reason: entry.key);
+        // The label is text, so it rests on the brand's ink, not its fill
+        // (GC-3, 2026-09-17).
+        expect(rest, semantic.accentInk, reason: entry.key);
         expect(
           foreground.resolve(hovered),
           isNot(rest),
@@ -340,20 +342,30 @@ void main() {
       }
     });
 
-    test('a card hovers lighter than a row, and a row lighter than an icon', () {
-      // The kit gives four weights on purpose: the same wash reads heavier on a
-      // full-width row than on a 48-wide button. Compared by alpha, which is
-      // what makes them different.
+    test('card, row, icon and control all hover at the same v3 weight', () {
+      // OLD: four tiered weights (card 4% < row 7% < icon 8%), on the theory
+      // that the same wash reads heavier on a small target. NEW (GC-5, spec
+      // Opacities table): v3 gives every shape one global hover alpha, 0.08 —
+      // the shapes stay named so a caller still says which control it is, but
+      // the values no longer differ.
       final scheme = themes['light']!.colorScheme;
 
-      expect(
-        AppInteractionStates.cardOverlay(scheme).resolve(hovered)!.a,
-        lessThan(AppInteractionStates.rowOverlay(scheme).resolve(hovered)!.a),
-      );
-      expect(
-        AppInteractionStates.rowOverlay(scheme).resolve(hovered)!.a,
-        lessThan(AppInteractionStates.iconOverlay(scheme).resolve(hovered)!.a),
-      );
+      final cardAlpha = AppInteractionStates.cardOverlay(
+        scheme,
+      ).resolve(hovered)!.a;
+      final rowAlpha = AppInteractionStates.rowOverlay(
+        scheme,
+      ).resolve(hovered)!.a;
+      final iconAlpha = AppInteractionStates.iconOverlay(
+        scheme,
+      ).resolve(hovered)!.a;
+      final controlAlpha = AppInteractionStates.controlOverlay(
+        scheme,
+      ).resolve(hovered)!.a;
+
+      expect(cardAlpha, rowAlpha);
+      expect(rowAlpha, iconAlpha);
+      expect(iconAlpha, controlAlpha);
     });
   });
 

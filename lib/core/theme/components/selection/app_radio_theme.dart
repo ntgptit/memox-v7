@@ -22,7 +22,8 @@ import '../../foundations/app_semantic_colors.dart';
 /// the role can now carry: a mark is a glyph on a bare surface, and the old
 /// dark fill tone reached only 2.90:1 against the card — under the 3:1 WCAG
 /// 1.4.11 asks of a control's visual information. That shortfall is what put a
-/// separate ink here until M100.18 inverted the tone; it now measures 10.02:1.
+/// separate ink here until M100.18 inverted the tone; it now clears 3:1 in
+/// both modes.
 RadioThemeData buildRadioTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,

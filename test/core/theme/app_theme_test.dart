@@ -12,7 +12,6 @@ import 'package:memox/features/settings/di/app_settings_repository_provider.dart
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../support/color_math.dart';
-// ignore: unused_import
 import '../../support/theme_probe.dart';
 import '../../features/settings/domain/support/fake_app_settings_repository.dart';
 
@@ -63,8 +62,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('a label on a filled action is readable', () {
       // The failure this catches is specific: M3's light-on-light pairing gives
       // white text 1.71:1 on the tone-80 lavender, which passes no standard.
@@ -93,10 +90,7 @@ void main() {
         );
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the outlined label is readable on page AND on card', () {
       for (final entry in themes.entries) {
         final label = outlinedButtonLabel(entry.value);
@@ -113,10 +107,7 @@ void main() {
         }
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the text link is readable at rest on page AND on card', () {
       // The link's label is bare text with no fill behind it, so it must clear
       // the body-text bar rather than the 3:1 UI bar. The slot is `primary`
@@ -141,10 +132,7 @@ void main() {
         }
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the radio mark is visible in both of its states', () {
       // WCAG 1.4.11 asks 3:1 of a UI component's visual information. Both
       // states matter: an invisible resting ring makes the unchosen options
@@ -172,11 +160,19 @@ void main() {
         }
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('semantic colours stay legible on card and page', () {
+      // v3 (colors_and_type.css, 2026-09-17): `success` and `warning` are
+      // tuned for their container pairs (GC-2), not to stand alone as a bare
+      // graphic — in light mode both read under the 3:1 WCAG 1.4.11 floor.
+      // The v3 hex stays and each cell is pinned at its measured figure
+      // (R12, owner decision 5); `danger` and `info` still clear 3:1 outright.
+      const pinnedFloors = <String, double>{
+        'light success card': 2.69,
+        'light success page': 2.81,
+        'light warning card': 1.95,
+        'light warning page': 2.03,
+      };
       for (final entry in themes.entries) {
         final semantic = entry.value.extension<AppSemanticColors>()!;
 
@@ -190,16 +186,17 @@ void main() {
             ('danger', semantic.danger),
             ('info', semantic.info),
           ]) {
+            final floor =
+                pinnedFloors['${entry.key} ${pair.$1} ${ground.$1}'] ?? 3.0;
             expect(
               contrast(pair.$2, ground.$2),
-              greaterThanOrEqualTo(3.0),
+              greaterThanOrEqualTo(floor),
               reason: '${entry.key}: ${pair.$1} on ${ground.$1}',
             );
           }
         }
       }
     });
-    */
 
     test('a card edge produces the same step in both modes', () {
       // **This replaced a rule that had become wrong.** Until M4.10h it asserted
@@ -248,10 +245,14 @@ void main() {
       // number and are instead each held to their own pair. The colour measured
       // here is painted solid by the rim's 1 px spread (`app_elevation_test`
       // pins it), so the ratio is the ring's, not a blurred approximation.
+      // 6.0 was Tokyo's two-layer float+contact shade. The v3 tiers
+      // (`--memox-shadow-soft`, `colors_and_type.css`) paint `card` at a
+      // single 4% layer, which measures 4.898 L* here; the floor is that
+      // figure floored to two decimals (R12), so any further drop is caught.
       final lightLift = liftOf(themes['light']!);
       expect(
         lightLift,
-        greaterThanOrEqualTo(6.0),
+        greaterThanOrEqualTo(4.89),
         reason:
             'light: a card edge moves the page by only '
             '${lightLift.toStringAsFixed(2)} L*. Below this a card does not '
@@ -344,8 +345,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the focus ring is visible on every surface a field can sit on', () {
       for (final entry in themes.entries) {
         final semantic = entry.value.extension<AppSemanticColors>()!;
@@ -363,7 +362,6 @@ void main() {
         }
       }
     });
-    */
   });
 
   group('state ownership follows the resting pair', () {

@@ -249,8 +249,9 @@ class _Chip extends StatelessWidget {
         style: AppTypography.withWeight(
           context.textStyles.sectionLabel,
           FontWeight.w600,
-          // The brand hue as text. `primary` is that since M100.18 —
-          // the dark tone inverted, so the role itself passes AA here.
+          // The brand hue as text, via `AppInk.accent` — which resolves to
+          // `accentInk` (GC-3), not `primary` itself. The ink exists because
+          // the raw role does not clear AA as text on this page.
         ).inked(context, AppInk.accent),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
