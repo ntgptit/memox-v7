@@ -3,9 +3,12 @@
 | | |
 |---|---|
 | **Status** | active |
-| **Source** | Owner handoff, 2026-09-17, generated from `design_system/MemoX Design System/ui_kits/mobile/v3` and `colors_and_type.css` |
-| **Companion** | `docs/superpowers/plans/2026-09-17-memox-v3-foundations.md` |
-| **Owner answers** | 2026-09-17 (AskUserQuestion), recorded at the foot of this file |
+| **Purpose** | Hold the owner's MemoX v3 foundations handoff verbatim, with the two answers given on 2026-09-17, so every later component spec argues from the same text |
+| **Scope** | The global visual system: palette both themes, type, spacing, radius, icon and elevation scales, composition and responsive rules. Screen layout, component variants and feature states are explicitly outside it |
+| **Source of truth for** | The owner's handoff as received (generated from `design_system/MemoX Design System/ui_kits/mobile/v3` and `colors_and_type.css`), and answers A1/A2 |
+| **Depends on** | `design_system/MemoX Design System/colors_and_type.css` |
+| **Updated by task** | M100.97 |
+| **Last updated** | 2026-09-18 |
 
 Everything between the two rules below is the owner's handoff. Every value, table row and rule is
 copied as received; only the list layout of the translation notes was condensed into sentences. The

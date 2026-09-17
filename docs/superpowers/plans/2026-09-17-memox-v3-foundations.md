@@ -1,5 +1,15 @@
 # MemoX v3 foundations implementation plan
 
+| | |
+|---|---|
+| **Status** | historical — the record of how the branch was executed; current values live in `docs/design-system/v3-foundations.md` |
+| **Purpose** | Turn the owner's v3 foundations handoff into eleven reviewable tasks, each with the exact values it must hit |
+| **Scope** | The global visual system only: palette, text inks, shadows, type, ladders, gutter and scroll tail. Component geometry, variants and surface treatments are out (ruling R1) |
+| **Source of truth for** | The task breakdown and the rulings R1–R13 made before execution |
+| **Depends on** | `docs/superpowers/specs/2026-09-17-memox-v3-foundations.md`, `docs/design-system/v3-foundations.md` |
+| **Updated by task** | M100.97 |
+| **Last updated** | 2026-09-18 |
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task.
 
 **Goal:** Put the app's global visual system on the MemoX v3 foundations — both palettes, the text inks, one type family and its seven roles, the spacing / radius / icon / state-layer ladders, the shadow recipe, and the 16 gutter with a 48 scroll tail — without touching any component's geometry, variant or surface treatment.

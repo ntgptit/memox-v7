@@ -317,8 +317,8 @@ WidgetStateProperty<Color> textLinkForeground(
 ///
 /// **Colour is the brand's ink, `accentInk`** (GC-3, 2026-09-17). A text link
 /// is bare text on a surface, and v3's light `primary` reads under 4.5:1 there
-/// (`AppColors.accentInkLight` solves the same hue for the text grounds); in
-/// dark the ink is the fill.
+/// (`AppColors.accentInkLight` solves the same hue for the text grounds); dark
+/// has its own near-fill ink, `#8D9CFF` against the fill's `#8B9AFF`.
 ///
 /// **Focus is an underline, and it is declared here rather than only in
 /// `MxTextButton`.** Suppressing the overlay takes the wash away, and the zero

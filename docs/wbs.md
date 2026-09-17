@@ -1070,11 +1070,15 @@ của M2.
   chip, switch giữ nguyên binding surface/fill/radius/height (ruling R1); spec
   riêng của từng component sẽ đọc `v3-foundations.md` khi tới lượt. Màu v3 chưa
   có caller (`mastery`, `status*`, `streak`, `error-fill`, …) chỉ ghi lại hex,
-  không khai báo hằng số (ruling R7). Golden re-author trên Linux và
-  `integration_test/` trên emulator — bước của controller, chưa chạy ở đây.
+  không khai báo hằng số (ruling R7).
 - **Editable documents:** `docs/wbs.md`, `docs/design-system/v3-foundations.md`
   (mới), `docs/design-system/theme-architecture.md`,
-  `docs/design-system/ad-14-color-and-depth.md`.
+  `docs/design-system/ad-14-color-and-depth.md`,
+  `docs/wireframes/m99-23-progress-overview.md` (đo lại X7 theo thang chữ v3 và
+  gutter 16), `docs/superpowers/specs/2026-09-17-memox-v3-foundations.md` (mới —
+  handoff của chủ dự án, chép nguyên văn) và
+  `docs/superpowers/plans/2026-09-17-memox-v3-foundations.md` (mới — plan thực
+  hiện).
 - **Output:** như Scope; `design_audit/*` (7 file) đổi nội dung theo palette mới.
 - **Acceptance criteria:**
   - [x] Host suite (`flutter test --exclude-tags golden`) xanh: +5142.
@@ -1088,15 +1092,17 @@ của M2.
   - [x] 19 doc comment nói sai giá trị v3 đã sửa đúng, không đổi giá trị nào (9
         ở Task 10 + 10 ở lượt rà soát sau, xem task-10-report.md § Fix round 1).
   - [x] `design_audit/*` dựng lại và commit cùng lượt với docs.
-  - [ ] Golden re-author trên Linux (`TZ=UTC`, danh sách file của
-        `goldens (linux)` trong CI) — **hoãn cho controller**, phiên này chạy
-        trên Windows.
-  - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development`
-        9/9 — **hoãn cho controller**, cần emulator; theo `CLAUDE.md` một thay
-        đổi chạm toàn bộ `lib/features/` qua theme vẫn tính vào Definition of
-        Done như một feature mới.
-  - [ ] `build/screen_gallery.html` publish lại tại URL ghim — chờ golden ở trên.
-  - [ ] Merge `origin/main`, mở PR, CI xanh, merge, xoá nhánh — chờ các bước trên.
+  - [x] Golden re-author trên Linux (`TZ=UTC`, danh sách file của
+        `goldens (linux)` trong CI): 269 ảnh ở `8d009785`, ba ảnh preview/ruler
+        đổi theo lượt sửa audit ở `b06478e1`; lượt so sánh lại trên Linux xanh
+        cả 44 file golden, không PNG nào bẩn.
+  - [x] `flutter test integration_test/ -d emulator-5554 --flavor development`
+        9/9 — chạy trên emulator, gồm IT-PLAT-009 với probe IPA mới; theo
+        `CLAUDE.md` một thay đổi chạm toàn bộ `lib/features/` qua theme vẫn
+        tính vào Definition of Done như một feature mới.
+  - [x] `build/screen_gallery.html` publish lại tại URL ghim (82 màn, header
+        `ảnh 718f3e76`); ảnh tách thành file rời vì trang nhúng nặng 16,7 MB.
+  - [ ] Merge `origin/main`, mở PR, CI xanh, merge, xoá nhánh — bước cuối.
 - **Dependencies:** M100.96.
 - **Tests required:** Task 10 không thêm test (docs-only); các task trước trong
   cùng nhánh đã sửa/pin lại test theo palette v3 (host suite +5142 ở trên). Gate
