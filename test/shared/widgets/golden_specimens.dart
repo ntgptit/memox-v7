@@ -91,7 +91,11 @@ class CardPrompt extends StatelessWidget {
       children: <Widget>[
         Text('ephemeral', style: context.textStyles.cardPrompt),
         const SizedBox(height: 8),
-        Text('adjective · /ɪˈfem(ə)rəl/', style: texts.bodyMedium),
+        // Respelled, not IPA. `ɪ` and `ˈ` are not in the bundle now that
+        // Inter has left (Task 5b): the platform draws them on a device
+        // (IT-PLAT-009), and a host has no platform fonts, so a golden of
+        // them would record a box the app never shows on device.
+        Text('adjective · ih-FEM-er-ul', style: texts.bodyMedium),
       ],
     );
   }

@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 /// Typography tokens — the v3 foundations' seven type roles, in one face.
 ///
 /// **One family, Plus Jakarta Sans.** The v3 palette gives every role — stat
-/// figures, titles, body and captions — the same face, so Inter, which used to
-/// carry body and UI text, is no longer read by anything here (Task 5b removes
-/// the now-unused bundle files).
+/// figures, titles, body and captions — the same face. Inter, which used to
+/// carry the IPA pronunciation glyphs, has left the bundle (Task 5b); IPA and
+/// every script beyond Hangul now come from the platform fallback, proven on
+/// a device by `IT-PLAT-009`.
 ///
 /// The seven roles (`colors_and_type.css`'s `--memox-fs-*` / `-fw-*` / `-ls-*`
 /// / `-lh-*` tokens; GC-4, 2026-09-17):
