@@ -15,8 +15,11 @@ enum MxIconSize {
   /// 24 — the default glyph.
   md(AppIconSize.md),
 
+  /// 32 — heavier than the default glyph, short of a hero one.
+  lg(AppIconSize.lg),
+
   /// 40 — hero glyphs in empty/result states.
-  lg(AppIconSize.lg);
+  xl(AppIconSize.xl);
 
   const MxIconSize(this.dp);
 
