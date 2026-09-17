@@ -7,8 +7,8 @@
 | **Scope** | Seed, 45 role của `ColorScheme`, cue chiều sâu theo mode, nguồn giá trị token, lịch sử các lần áp lại luật. Ngoài phạm vi: quyết định AD khác, layering của `lib/core/theme/` (`theme-architecture.md`) |
 | **Source of truth for** | Suy luận đầy đủ, số đo và các phương án từng cân nhắc của AD-14 (quyết định và đánh đổi vẫn được tuyên bố ở `../architecture.md`) |
 | **Depends on** | `../architecture.md` (AD-14) · `../document-conventions.md` |
-| **Updated by task** | M100.65 |
-| **Last updated** | 2026-09-08 |
+| **Updated by task** | M100.97 |
+| **Last updated** | 2026-09-18 |
 
 ---
 
@@ -255,12 +255,20 @@ thứ hai (bậc ≥ 4 L\* **và** rim ≥ 3:1, đo tách theo mode); R9 miễn 
 là paper trắng của Tokyo; trần bão hoà surface dark 0,75. Những gì bị revert:
 sàn 4,3, khoảng hue 16° (về 12°), `primaryInk`, `onPrimary` dark `#111633`.
 
-### Nguồn của giá trị token đã đổi hai lần (M4.10p, rồi M100.83)
+### Nguồn của giá trị token đã đổi ba lần (M4.10p, rồi M100.83, rồi v3 foundations)
 
 **Hiện tại: `lib/core/theme/` lại là nơi duy nhất định nghĩa một token.** Bộ kit
 CSS đã bị xoá khỏi dự án ở M100.83 theo quyết định của chủ dự án, cùng lượt thay
 toàn bộ 45 role màu. Không còn `design_system/` để đối chiếu, và cũng không còn
 sáu test parity giữ hai bên bằng nhau.
+
+**M100.97 thay toàn bộ 45 role đó lần nữa**, theo handoff MemoX v3 của chủ dự án
+(`docs/superpowers/specs/2026-09-17-memox-v3-foundations.md`). Nguồn vẫn là
+Dart — v3 chỉ đổi giá trị, không mở lại `design_system/`. Giá trị hiện hành,
+bảng alias và các ruling khi áp dụng nằm ở [`v3-foundations.md`](v3-foundations.md);
+mọi hex trong phần lịch sử M100.18–M100.28 bên dưới ("`primary` `#5569FF`",
+"card dark `#111633`"…) đã qua hai lần đổi kể từ đó và không còn là giá trị hiện
+hành — giữ lại vì lý luận đo đạc, không phải vì con số.
 
 Lý do là thứ đã đúng trên thực tế từ lâu trước khi được ghi ra: kit không còn là
 nơi ra quyết định. Mọi retune từ M100.22 trở đi đều bắt đầu ở Dart — một phép đo

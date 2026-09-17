@@ -7,25 +7,15 @@ import '../../states/app_interaction_states.dart';
 /// a bounded numeric parameter is what a slider is for.
 ///
 /// **`primary` on `secondaryContainer` — M3's own pairing, in both halves.**
-///
-/// The active half is worth its history, because it is the case this whole
-/// palette line was argued from. It was a substitute token for a while:
-/// measured against `secondaryContainer`, `primary` scored **6.02:1 in light
-/// and 2.11:1 in dark**, under the 3:1 a slider's value needs, because
-/// `primaryDark` was a fill tone held between the surfaces and the text and
-/// *no* neutral in the dark palette reached 3:1 from it.
-///
-/// M100.18 fixed the role instead of the component: `primary` against
-/// `secondaryContainer` now reads **6.02:1 light and 7.31:1 dark**, and against
-/// the card behind it 7.27:1 and 10.02:1. Both halves keep M3's role, which is
-/// the whole point of moving the palette rather than the component.
+/// The binding survives every palette move (v3 foundations ruling R1); only
+/// the hex behind each role changes, so per-palette contrast figures are not
+/// pinned here — git keeps that history — and a component spec re-measures
+/// them if it ever changes the pairing itself.
 ///
 /// **This reverses the argument this file first shipped**, which was that a
 /// slider is pressable so it takes the accent while a progress bar does not.
 /// The premise is still right — a slider is a control — but pressability is
-/// carried by the thumb, not by the hue. The hue had a contrast job `primary`
-/// could not do on a dark card, and the answer was to give `primary` a tone
-/// that can.
+/// carried by the thumb, not by the hue.
 ///
 /// The value indicator takes the inverse pair — the same surface a snack bar
 /// uses, and for the same reason: it is a momentary overlay that has to read
@@ -53,9 +43,8 @@ SliderThemeData buildSliderTheme(
   disabledActiveTrackColor: semantic.disabledSurface,
   disabledInactiveTrackColor: semantic.disabledSurface,
   disabledThumbColor: semantic.disabledSurface,
-  // White on the filled track: 7.66:1 in light, 3.09:1 in dark. The dark
-  // figure is the tightest number in this file and it clears the graphic
-  // floor, which is the right floor — a tick is a mark on a track, not text.
+  // `onPrimary` on the filled track — a tick is a mark on a track, not text,
+  // so it only needs the graphic floor, not 4.5:1.
   activeTickMarkColor: scheme.onPrimary,
   inactiveTickMarkColor: scheme.onSecondaryContainer,
   overlayColor: scheme.primary.withValues(alpha: AppStateOpacity.pressed),

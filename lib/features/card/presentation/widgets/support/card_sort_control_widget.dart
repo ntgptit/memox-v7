@@ -31,12 +31,13 @@ void _selectSort(WidgetRef ref, String deckId, CardListSort sort) =>
 /// is untouched: a sheet adds nothing above the list, and the order in force is
 /// still painted here rather than hidden behind the control.
 ///
-/// **`label-md`, and it is a rung above the line it sits beside.** The count
-/// line is `sectionLabelSmall`; a `TextButton` takes `label-lg` from Material,
-/// which is the hierarchy the deck toolbar was rebuilt to fix, so `isCompact`
-/// brings it down to the deck control's rung. Landing one rung above the count
-/// line rather than on it is the accepted cost of one shape across the two
-/// lists: the count is a detail, the sort is the control.
+/// **`label-md`, sitting beside `sectionLabelSmall`'s count line.** A
+/// `TextButton` takes `label-lg` (14) from Material, which is the hierarchy
+/// the deck toolbar was rebuilt to fix, so `isCompact` brings it down to
+/// `labelMedium`. Since v3's 12px floor that is the same size and weight as
+/// the count line's caption rung, distinguished only by tracking — a rung the
+/// type scale no longer carries is the accepted cost of one shape across the
+/// two lists: the count is a detail, the sort is the control.
 ///
 /// The 48 target is the theme's — `buildTextButtonTheme` sets the height floor,
 /// so the box the finger gets is no longer this widget's to hand-build.

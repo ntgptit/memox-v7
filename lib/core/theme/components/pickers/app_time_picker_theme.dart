@@ -23,10 +23,9 @@ import '../../foundations/app_spacing.dart';
 /// gives the hour and minute a `primaryContainer` fill when selected. That is
 /// already the app's answer for a selected control — the navigation bar's
 /// indicator and the filter pills use the same pair — so it stays, and the ink
-/// on it is `onPrimaryContainer`, the container's own `on` role: 11.46:1 in
-/// light and 8.87:1 in dark. This used to be a function that switched role by
-/// brightness, because `primary` on that fill measured 2.13:1 in dark
-/// (M100.19).
+/// on it is `onPrimaryContainer`, the container's own `on` role. This used to
+/// be a function that switched role by brightness, because `primary` on that
+/// fill failed contrast in dark (M100.19).
 TimePickerThemeData buildTimePickerTheme(ColorScheme scheme, TextTheme texts) {
   final selected = scheme.onPrimaryContainer;
 
@@ -55,7 +54,7 @@ TimePickerThemeData buildTimePickerTheme(ColorScheme scheme, TextTheme texts) {
     dialHandColor: scheme.primary,
     dialTextColor: WidgetStateColor.resolveWith((states) {
       // The number the hand is on sits ON the hand, so it takes the fill's
-      // partner: 7.51:1 in light, 5.88:1 in dark.
+      // partner, `onPrimary` — M3's own pairing for a `primary` fill.
       if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
       return scheme.onSurface;
@@ -93,14 +92,9 @@ TimePickerThemeData buildTimePickerTheme(ColorScheme scheme, TextTheme texts) {
     // ("which unit am I editing" and "morning or afternoon") and one fill for
     // both loses the distinction the component is drawn to make.
     //
-    // **What adopting it buys here is less than it should be, and the number
-    // is worth recording rather than discovering later.** Against
-    // `primaryContainer` the app's `tertiaryContainer` measures **1.10:1 in
-    // light and 1.29:1 in dark** — the two containers differ in hue but barely
-    // in lightness, so the distinction reads as a tint rather than as a
-    // separation. That is a property of a hand-tuned palette whose tertiary
-    // carries 8.8 chroma against primary's 14.5, not of this mapping: the fix,
-    // if the owner wants the distinction to carry, is a tone on
+    // **What adopting it buys depends on how far apart the two containers
+    // read**, which is a palette property, not a property of this mapping: if
+    // the owner wants the distinction to carry, the fix is a tone on
     // `tertiaryContainer`, not a different role in this file.
     //
     // It also gives the tertiary family its first renderer. Until now it was
@@ -113,7 +107,7 @@ TimePickerThemeData buildTimePickerTheme(ColorScheme scheme, TextTheme texts) {
       return Colors.transparent;
     }),
     dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
-      // 9.75:1 in light, 7.24:1 in dark on the fill above.
+      // `onTertiaryContainer` — the container's own `on` role, on the fill above.
       if (states.contains(WidgetState.selected)) {
         return scheme.onTertiaryContainer;
       }
