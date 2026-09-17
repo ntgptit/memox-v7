@@ -1107,6 +1107,21 @@ của M2.
 - **Tests required:** Task 10 không thêm test (docs-only); các task trước trong
   cùng nhánh đã sửa/pin lại test theo palette v3 (host suite +5142 ở trên). Gate
   còn thiếu: golden Linux, `integration_test/` trên emulator.
+- **Nợ để lại** (review cuối cùng chốt, không phải việc của nhánh này):
+  - Switch tối: cặp live/disabled đảo ngược thật (disabled đọc to hơn live)
+    do binding `outline` v3 trên `surfaceContainerHighest` — nợ của Switch
+    spec (R1). Pin ở `app_toggle_themes_test.dart`, test `'dark: the
+    disabled switch currently reads louder than the live one (v3 + the M3
+    switch binding)'`.
+  - Nhãn pressed-composite dưới AA: bốn ô light/high-contrast × primary/
+    destructive đo 3.77–4.00, cùng dạng đã chấp nhận ở M100.87/M100.89 — nợ
+    của Button spec (pressed treatment tối màu thay vì sáng màu). Pin ở
+    `mx_action_button_composite_state_test.dart`
+    (`acceptedSubAAPressedFloors`).
+  - `success` cách `info` 29.5° (light) / 36.5° (dark) về hue — dưới trần 40°
+    nhưng cố ý, theo owner answer A2 giữ nguyên `info`; spec nào dời `info`
+    sau này phải soát lại khoảng cách. Pin ở `app_palette_test.dart`,
+    assertion success-info hue gap.
 - **Checklist phases:** 7, 13.
 
 ## Known technical debt

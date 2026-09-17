@@ -69,14 +69,26 @@ void main() {
   /// change — the destructive press measured ΔE 11.7 before M100.36.
   const double overshoot = 12;
 
-  /// The v3 fill hex stays verbatim (owner decision 2, 2026-09-13); the
-  /// pressed state is Material's own state layer and it lightens that fill,
-  /// so on these four cells the composite label contrast sits under AA.
-  /// Pinned at what it measures (owner decision 5, 2026-09-13) rather than
-  /// forced back to 4.5 — the real fix, a pressed treatment that darkens
-  /// instead of lightening, or a fill tuned for it, belongs to the Button
-  /// component spec. Keyed per cell, not shared by value, so one cell
-  /// drifting cannot hide behind another cell's identical number.
+  /// **This is TEXT under AA, kept on purpose — not an oversight.** WCAG
+  /// 1.4.3 wants 4.5:1 for a label; these four cells measure less. The v3
+  /// fill hex stays verbatim (owner decision 2, 2026-09-13) and the pressed
+  /// state is Material's own state layer — it lightens that fill, neither of
+  /// which this branch controls — so on these four cells the composite label
+  /// contrast sits under AA. Pinned at what it measures (owner decision 5,
+  /// 2026-09-13) rather than forced back to 4.5.
+  ///
+  /// **Not the first time either.** The reverted M100.87/M100.89 work
+  /// accepted the same shape of trade-off on this same button: the
+  /// pressed-label floors the owner accepted there move with the alpha,
+  /// measured at 3.77 / 4.01 under a 12% overlay and pinned at 3.7 / 4.0.
+  /// These four cells are that precedent recurring under v3, not a new
+  /// exception.
+  ///
+  /// **The real fix belongs to the Button component spec** — a pressed
+  /// treatment that darkens the fill instead of lightening it, or a fill
+  /// tuned to survive the lightening — not this branch's to make. Keyed per
+  /// cell, not shared by value, so one cell drifting cannot hide behind
+  /// another cell's identical number.
   const Map<String, double> acceptedSubAAPressedFloors = <String, double>{
     'light primary': 3.77,
     'light destructive': 4.00,

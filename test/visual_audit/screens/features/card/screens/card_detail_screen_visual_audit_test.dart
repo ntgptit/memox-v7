@@ -104,8 +104,11 @@ void main() {
         rationale:
             'Owner decision 5 (2026-09-13) keeps success as the timeline '
             'action-tone border; pinned at the measured 2.70:1 on '
-            'surfaceContainerLow, the same settlement app_theme_test.dart '
-            'pins for light success (2.69 / 2.81).',
+            'surfaceContainerLow — the rounded form (this audit rule '
+            'compares ratio.toStringAsFixed(2)) of the same measurement '
+            'app_theme_test.dart floors at 2.69 for light success (its '
+            '2.69 / 2.81 pair). The audit rounds, the host test floors; '
+            '2.70 and 2.69 are the same settlement, not two.',
       ),
     ],
     allowances: const <AuditSkipAllowance>[

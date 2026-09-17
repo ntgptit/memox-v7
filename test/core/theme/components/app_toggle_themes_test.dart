@@ -295,35 +295,56 @@ void main() {
       // The other bound. Fixing the first one by making disabled look enabled
       // trades a real bug for a worse one.
       //
-      // v3 (colors_and_type.css, 2026-09-17) makes dark's live pairing
-      // (`outline` on `surfaceContainerHighest`, 1.96:1) weaker than its own
-      // disabled composite (`onDisabled` over `disabledSurface`, 3.00:1), so
-      // the ordering below inverts in dark only. Per R12 (owner decision 5), a
-      // non-text relation the v3 hex breaks is pinned at its measured figure
-      // rather than forced to hold; the gate returns in Tasks 8-9.
-      for (final entry in themes.entries) {
-        final t = entry.value;
+      // Light only. Under v3 dark's ordering inverts for real rather than
+      // merely narrowing — see the dedicated test below instead of a
+      // `continue` that would hide it behind this name.
+      final t = themes['light']!;
 
-        // Composited, not raw. `onDisabled` is translucent, and `contrast`
-        // reads RGB without alpha — so comparing the token itself would
-        // measure an opaque near-black thumb that nothing ever paints, and
-        // report the disabled switch as the louder of the two.
-        final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
-        final disabledContrast = contrast(disabledKnob, track(t, off));
-        final liveContrast = contrast(thumb(t, const {}), track(t, const {}));
+      // Composited, not raw. `onDisabled` is translucent, and `contrast`
+      // reads RGB without alpha — so comparing the token itself would
+      // measure an opaque near-black thumb that nothing ever paints, and
+      // report the disabled switch as the louder of the two.
+      final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
+      final disabledContrast = contrast(disabledKnob, track(t, off));
+      final liveContrast = contrast(thumb(t, const {}), track(t, const {}));
 
-        if (entry.key == 'dark') {
-          expect(disabledContrast, closeTo(3.00, 0.01));
-          expect(liveContrast, closeTo(1.96, 0.01));
-          continue;
-        }
+      expect(
+        disabledContrast,
+        lessThan(liveContrast),
+        reason: 'light: the disabled switch is as loud as a live one',
+      );
+    });
 
-        expect(
-          disabledContrast,
-          lessThan(liveContrast),
-          reason: '${entry.key}: the disabled switch is as loud as a live one',
-        );
-      }
+    test('dark: the disabled switch currently reads louder than the live one '
+        '(v3 + the M3 switch binding)', () {
+      // v3 (colors_and_type.css, 2026-09-17) moved `outline`, and the
+      // resting live pair — `outline` #5A6BAE on `surfaceContainerHighest`
+      // #353D7E — now measures 1.96:1, weaker than its own disabled
+      // composite (`onDisabled` over `disabledSurface`, 3.00:1). The
+      // disabled switch reads louder than the live one: a real inversion,
+      // not a narrowed floor, so it gets its own assertion instead of a
+      // silent `continue` inside the test above.
+      //
+      // The fix is a binding change — which role the switch's live thumb
+      // and track read — and that belongs to the Switch component spec
+      // (ruling R1), not to this branch. The day that spec moves the
+      // binding, this assertion fails on purpose and the relation folds
+      // back into the light test above (`disabledContrast < liveContrast`).
+      final t = themes['dark']!;
+
+      final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
+      final disabledContrast = contrast(disabledKnob, track(t, off));
+      final liveContrast = contrast(thumb(t, const {}), track(t, const {}));
+
+      expect(
+        disabledContrast,
+        greaterThan(liveContrast),
+        reason:
+            'dark: the disabled switch no longer reads louder than the '
+            'live one — has the Switch spec changed the binding?',
+      );
+      expect(disabledContrast, closeTo(3.00, 0.01));
+      expect(liveContrast, closeTo(1.96, 0.01));
     });
   });
 

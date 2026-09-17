@@ -358,6 +358,27 @@ void main() {
             );
           }
         }
+
+        // Pin what the narrowing above stopped checking (A2, owner answer):
+        // dropping `info` from the v3 trio does not mean its distance from
+        // `success` may drift unnoticed. v3 redesigned only `success`, so
+        // the gap it leaves with the unmoved `info` is not the same figure
+        // in both themes — light measures ~29.5°, dark ~36.5° — and each is
+        // pinned to its own measurement so either closing further is caught.
+        final rawSuccessInfoGap = (hue(hues['success']!)! - hue(hues['info']!)!)
+            .abs();
+        final successInfoGap = rawSuccessInfoGap > 180
+            ? 360 - rawSuccessInfoGap
+            : rawSuccessInfoGap;
+        final expectedSuccessInfoGap = entry.key == 'dark' ? 36.53 : 29.50;
+
+        expect(
+          successInfoGap,
+          closeTo(expectedSuccessInfoGap, 0.5),
+          reason:
+              '${entry.key}: success-info hue gap moved off the A2 '
+              'settlement — currently ${successInfoGap.toStringAsFixed(2)}°',
+        );
       }
     });
   });

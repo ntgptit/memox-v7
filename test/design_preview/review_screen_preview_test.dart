@@ -44,9 +44,12 @@ void main() {
         floor: 2.82,
         rationale:
             'Owner decision 5 (2026-09-13) keeps success as the idle border '
-            'tint; pinned at the measured 2.82:1 on the page, the same '
-            'settlement app_theme_test.dart pins for light success '
-            '(2.69 / 2.81).',
+            'tint; pinned at the measured 2.82:1 on the page — the rounded '
+            'form (this audit rule compares ratio.toStringAsFixed(2)) of '
+            'the same page measurement app_theme_test.dart floors at 2.81 '
+            'for light success (its 2.69 / 2.81 pair). The audit rounds, '
+            'the host test floors; 2.82 and 2.81 are the same settlement, '
+            'not two.',
       ),
       ContrastFloorAllowance(
         itemId: 'verdict[3]',
