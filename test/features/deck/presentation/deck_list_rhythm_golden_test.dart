@@ -405,7 +405,33 @@ String _report(List<_Band> bands) {
 /// else and an entry with a reason beats a threshold that quietly widens.
 /// Keyed by the pair, so an entry cannot cover a second gap that drifts to the
 /// same value elsewhere on the screen.
-const Map<String, String> _allowedOffScale = <String, String>{};
+///
+/// **Both entries are the same sum, read in opposite order.** The root
+/// subline (`DeckSubheaderWidget`) sits in a `SizedBox(height:
+/// MxBreadcrumb.compactLineHeight)` — 32, `AppSizing.controlDense` — and
+/// `Align` centres its 17.0-tall text line box inside it, splitting the
+/// 32 - 17.0 = 15.0 of slack 7.5 above and 7.5 below. That 7.5 is a real
+/// font-metric remainder, not a choice — PlusJakartaSans's `bodySmall` box at
+/// this size does not divide the 32px token evenly, which is where the ".5"
+/// comes from.
+///
+/// `Title -> Subtitle` is `AppSpacing.sm` (8, from the title line to the
+/// subline's box) plus that 7.5 (the box to the text's own top): 15.5.
+/// `Subtitle -> Hero` is the same 7.5 (the text's bottom to the box's own
+/// bottom) plus another `AppSpacing.sm` (the box to the app bar's edge,
+/// where the hero begins): 15.5. Both are a token plus the line-box
+/// remainder, never two tokens and never a bare number — moving the subline
+/// to a token-multiple height would collapse the ".5" along with it, which is
+/// a subline-component change, not this ruler's to make.
+const Map<String, String> _allowedOffScale = <String, String>{
+  'Title -> Subtitle':
+      'AppSpacing.sm (8) to the subline box, plus 7.5 — half the slack '
+      'between the box\'s 32px (MxBreadcrumb.compactLineHeight) and its '
+      'text\'s real 17.0px line box — before the text itself starts.',
+  'Subtitle -> Hero':
+      'The same 7.5 the text sits above its box\'s bottom by, plus another '
+      'AppSpacing.sm (8) from the subline box to the app bar\'s edge.',
+};
 
 /// Whether a distance is one of the spacing steps, or an overlap.
 ///

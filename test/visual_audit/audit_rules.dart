@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../support/color_math.dart';
+import 'audit_allowance.dart';
 import 'audit_model.dart';
 
 export 'audit_geometry_rules.dart';
@@ -101,7 +102,10 @@ class TextContrastRule implements AuditRule {
 /// This project ships a `focusRing` token whose entire job is to be a non-text
 /// indicator, so leaving it to a text rule would leave it unchecked.
 class NonTextContrastRule implements AuditRule {
-  const NonTextContrastRule(this.informationalColors);
+  const NonTextContrastRule(
+    this.informationalColors, {
+    this.floors = const <ContrastFloorAllowance>[],
+  });
 
   /// The tokens whose job is to *tell the user something*: focus, selection,
   /// validity, verdict.
@@ -112,6 +116,12 @@ class NonTextContrastRule implements AuditRule {
   /// of what the palette is for. Intent cannot be inferred from a rectangle, so
   /// it comes from the token vocabulary, which already encodes it.
   final List<Color> informationalColors;
+
+  /// Pairs the owner has already accepted below [_minimum] (owner decision 5).
+  /// A match still fails if the actual ratio drops below the pinned
+  /// [ContrastFloorAllowance.floor] — the allowance covers the measured figure,
+  /// not every future value.
+  final List<ContrastFloorAllowance> floors;
 
   static const double _minimum = 3.0;
 
@@ -134,6 +144,22 @@ class NonTextContrastRule implements AuditRule {
         final ratio = contrast(paint.color, background);
         if (ratio >= _minimum) continue;
 
+        final pinned = _matchingFloor(item.id, paint.color, background);
+        // Compared at the same two decimals the report prints: [floor] is
+        // itself a figure read off a printed ratio, so comparing it against
+        // the unrounded double would fail on the rounding this repo's own
+        // pins were read from — 2.6963 prints as "2.70" and is not >= 2.70.
+        final roundedRatio = double.parse(ratio.toStringAsFixed(2));
+        if (pinned != null && roundedRatio >= pinned.floor) {
+          // Printed unconditionally, the same way `AuditOutcome.describe()`
+          // prints an allowed skip — a permission that only shows up when the
+          // rule it excuses would otherwise fail is not visible to the next
+          // reader.
+          debugPrint('  allowed  $pinned');
+
+          continue;
+        }
+
         yield AuditFinding(
           rule: name,
           itemId: item.id,
@@ -144,6 +170,18 @@ class NonTextContrastRule implements AuditRule {
         );
       }
     }
+  }
+
+  ContrastFloorAllowance? _matchingFloor(
+    String itemId,
+    Color foreground,
+    Color background,
+  ) {
+    for (final floor in floors) {
+      if (floor.matches(itemId, foreground, background)) return floor;
+    }
+
+    return null;
   }
 }
 

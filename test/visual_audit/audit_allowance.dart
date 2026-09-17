@@ -163,3 +163,50 @@ class AuditAllowanceMiscount {
       '$allowance expected ${allowance.expectedMatches}, matched '
       '$actualMatches — ${isOverbroad ? 'covering nodes nobody examined' : 'no longer describes the screen'}';
 }
+
+/// Written permission for one non-text pair to stay under 3:1 (R12, owner
+/// decision 5, 2026-09-13): the kit hex is kept for a control edge or a status
+/// dot, and the ratio measured at the time of that decision is pinned as the
+/// floor instead of being raised to clear the rule.
+///
+/// Scoped to one item and one exact colour pair, like [AuditSkipAllowance] —
+/// "accept every low-contrast border on this screen" would hide the next
+/// regression inside the same permission. [floor] is the measured ratio, not a
+/// target: [NonTextContrastRule] still fails if the actual ratio ever drops
+/// below it, because a further drop is a new problem, not the one this
+/// allowance covers.
+@immutable
+class ContrastFloorAllowance {
+  const ContrastFloorAllowance({
+    required this.itemId,
+    required this.foreground,
+    required this.background,
+    required this.floor,
+    required this.rationale,
+  }) : assert(
+         itemId != '',
+         'A floor allowance must name the item it applies to.',
+       ),
+       assert(
+         rationale != '',
+         'A floor allowance is a promise that someone measured and accepted '
+         'this. Say who decided it and at what ratio.',
+       );
+
+  final String itemId;
+  final Color foreground;
+  final Color background;
+  final double floor;
+  final String rationale;
+
+  bool matches(String itemId, Color foreground, Color background) =>
+      itemId == this.itemId &&
+      foreground.toARGB32() == this.foreground.toARGB32() &&
+      background.toARGB32() == this.background.toARGB32();
+
+  @override
+  String toString() =>
+      'contrast.non_text: border ${hexOf(foreground)} on '
+      '${hexOf(background)} pinned at ${floor.toStringAsFixed(2)}:1  '
+      '[$itemId]\n           because: $rationale';
+}

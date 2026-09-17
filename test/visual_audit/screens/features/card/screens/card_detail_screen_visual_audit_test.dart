@@ -2,6 +2,8 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_colors.dart';
+import 'package:memox/core/theme/foundations/app_material_roles.dart';
 import 'package:memox/features/card/domain/models/card_history_page_model.dart';
 import 'package:memox/features/card/presentation/screens/card_detail_screen.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
@@ -89,6 +91,23 @@ void main() {
     // the timeline a settle before capture — otherwise the band is still its
     // loading indicator.
     drive: _settle,
+    // Owner decision 5 (2026-09-13): a history row's action-tone marker keeps
+    // `success` as its graphic colour (R1, `cardActionToneFill` in
+    // card_action_tone_widget.dart) rather than moving to an ink built for
+    // text grounds.
+    nonTextContrastFloors: const <ContrastFloorAllowance>[
+      ContrastFloorAllowance(
+        itemId: 'shell',
+        foreground: AppColors.successLight,
+        background: AppMaterialRoles.surfaceContainerLowLight,
+        floor: 2.70,
+        rationale:
+            'Owner decision 5 (2026-09-13) keeps success as the timeline '
+            'action-tone border; pinned at the measured 2.70:1 on '
+            'surfaceContainerLow, the same settlement app_theme_test.dart '
+            'pins for light success (2.69 / 2.81).',
+      ),
+    ],
     allowances: const <AuditSkipAllowance>[
       AuditSkipAllowance(
         itemId: 'screen',

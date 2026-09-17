@@ -19,7 +19,16 @@ import 'screen_auditor.dart';
 /// harness stops being reusable one commit after it is written.
 
 /// The rules every memox screen is held to.
-List<AuditRule> memoxAuditRules({required bool isDark}) {
+///
+/// [nonTextContrastFloors] are the screen's own accepted floors (owner
+/// decision 5) — pairs the audit would otherwise fail below 3:1, pinned at
+/// their measured ratio instead of raised. Empty for every screen that has
+/// none; see `NonTextContrastRule`.
+List<AuditRule> memoxAuditRules({
+  required bool isDark,
+  List<ContrastFloorAllowance> nonTextContrastFloors =
+      const <ContrastFloorAllowance>[],
+}) {
   final semantic = isDark
       ? const AppSemanticColors.dark()
       : const AppSemanticColors.light();
@@ -41,7 +50,7 @@ List<AuditRule> memoxAuditRules({required bool isDark}) {
       // omission is why the connector shipped its first draft at 1.38:1 on the
       // page ground and the audit reported PASS.
       semantic.borderControl,
-    ]),
+    ], floors: nonTextContrastFloors),
     PaletteClosureRule(isDark ? darkPaletteTokens : lightPaletteTokens),
   ];
 }
@@ -118,6 +127,8 @@ void memoxAuditTest(
   String state = 'idle',
   List<AuditAnchor> anchors = const <AuditAnchor>[],
   List<AuditSkipAllowance> allowances = const <AuditSkipAllowance>[],
+  List<ContrastFloorAllowance> nonTextContrastFloors =
+      const <ContrastFloorAllowance>[],
   List<AuditRule> additionalRules = const <AuditRule>[],
   Finder? surfaceFinder,
   AuditExpectation expectation = AuditExpectation.noViolations,
@@ -140,7 +151,13 @@ void memoxAuditTest(
 
       expectAudit(
         audit,
-        <AuditRule>[...memoxAuditRules(isDark: isDark), ...additionalRules],
+        <AuditRule>[
+          ...memoxAuditRules(
+            isDark: isDark,
+            nonTextContrastFloors: nonTextContrastFloors,
+          ),
+          ...additionalRules,
+        ],
         expectation: expectation,
         allowances: allowances,
       );
@@ -164,6 +181,8 @@ void memoxProductionScreenAuditTest(
   String state = 'idle',
   List<AuditAnchor> anchors = const <AuditAnchor>[],
   List<AuditSkipAllowance> allowances = const <AuditSkipAllowance>[],
+  List<ContrastFloorAllowance> nonTextContrastFloors =
+      const <ContrastFloorAllowance>[],
   List<AuditRule> additionalRules = const <AuditRule>[],
   Finder? surfaceFinder,
   Future<void> Function(WidgetTester tester)? drive,
@@ -174,6 +193,7 @@ void memoxProductionScreenAuditTest(
     state: state,
     anchors: anchors,
     allowances: allowances,
+    nonTextContrastFloors: nonTextContrastFloors,
     additionalRules: additionalRules,
     surfaceFinder: surfaceFinder,
     expectation: AuditExpectation.complete,

@@ -3,10 +3,15 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
+import 'package:memox/core/theme/foundations/app_colors.dart';
+import 'package:memox/core/theme/foundations/app_material_roles.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_surface_colors.dart';
 import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 
+import '../visual_audit/audit_allowance.dart';
 import '../visual_audit/memox_audit.dart';
 import '../visual_audit/screen_auditor.dart';
 import 'preview_harness.dart';
@@ -27,6 +32,32 @@ void main() {
     anchors: <AuditAnchor>[
       AuditAnchor.type('flashcard', PreviewCard),
       AuditAnchor.type('verdict', VerdictAction),
+    ],
+    // Owner decision 5 (2026-09-13): the idle border keeps the success kit hex
+    // rather than raising it to clear 3:1. Both are the `VerdictAction` border
+    // (R1), not its label — the label already reads `successInk` above.
+    nonTextContrastFloors: const <ContrastFloorAllowance>[
+      ContrastFloorAllowance(
+        itemId: 'verdict[1]',
+        foreground: AppColors.successLight,
+        background: AppSurfaceColors.pageLight,
+        floor: 2.82,
+        rationale:
+            'Owner decision 5 (2026-09-13) keeps success as the idle border '
+            'tint; pinned at the measured 2.82:1 on the page, the same '
+            'settlement app_theme_test.dart pins for light success '
+            '(2.69 / 2.81).',
+      ),
+      ContrastFloorAllowance(
+        itemId: 'verdict[3]',
+        foreground: AppColors.successLight,
+        background: AppMaterialRoles.surfaceContainerLight,
+        floor: 2.53,
+        rationale:
+            'Owner decision 5 (2026-09-13) keeps success as the selected '
+            'border tint; pinned at the measured 2.53:1 on surfaceContainer, '
+            'the same settlement as verdict[1] on a darker ground.',
+      ),
     ],
   );
 }
@@ -126,7 +157,11 @@ class _ReviewScreen extends StatelessWidget {
 
             Row(
               children: <Widget>[
-                Icon(Icons.error_outline, size: 18, color: semantic.danger),
+                Icon(
+                  Icons.error_outline,
+                  size: 18,
+                  color: AppInk.danger.resolve(context),
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -168,6 +203,7 @@ class _VerdictRow extends StatelessWidget {
               child: VerdictAction(
                 label: 'Forgotten',
                 tint: semantic.danger,
+                labelInk: AppInk.danger,
                 isSelected: selected == false,
               ),
             ),
@@ -176,6 +212,7 @@ class _VerdictRow extends StatelessWidget {
               child: VerdictAction(
                 label: 'Remembered',
                 tint: semantic.success,
+                labelInk: AppInk.success,
                 isSelected: selected ?? false,
               ),
             ),

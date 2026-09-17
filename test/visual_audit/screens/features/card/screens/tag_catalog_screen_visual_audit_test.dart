@@ -2,6 +2,8 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_border_colors.dart';
+import 'package:memox/core/theme/foundations/app_material_roles.dart';
 import 'package:memox/features/card/domain/models/tag_catalog_entry_model.dart';
 import 'package:memox/features/card/presentation/screens/tag_catalog_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
@@ -57,6 +59,22 @@ void main() {
     'tag_catalog_screen',
     () => tagScreenWith(loaded(), const TagCatalogScreen()),
     anchors: <AuditAnchor>[AuditAnchor.type('shell', MxContentShell)],
+    // Owner decision 5 (2026-09-13): the search field's resting border keeps
+    // `outline` (R1, `MxSearchField`'s `Border.all(color: colors.outline)`)
+    // against its own `surfaceMuted` fill rather than moving to a lighter edge.
+    nonTextContrastFloors: const <ContrastFloorAllowance>[
+      ContrastFloorAllowance(
+        itemId: 'shell',
+        foreground: AppBorderColors.borderControlDark,
+        background: AppMaterialRoles.surfaceContainerDark,
+        floor: 2.65,
+        rationale:
+            'Owner decision 5 (2026-09-13) keeps outline as the search '
+            "field's resting border on its own surfaceMuted fill in dark; "
+            'pinned at the measured 2.65:1, the same figure '
+            'control_border_grounds_test.dart carries.',
+      ),
+    ],
     allowances: const <AuditSkipAllowance>[
       AuditSkipAllowance(
         itemId: 'screen',
