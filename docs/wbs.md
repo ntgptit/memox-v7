@@ -1272,6 +1272,7 @@ của M2.
 
 - **Status:** **done** — analyze sạch, unit test xanh, golden vẽ lại trên Linux
   `TZ=UTC`, gallery republish tại URL ghim.
+- **Checklist phases:** 14.3
 - **Goal:** `MxSearchField` có spec component riêng (không nằm trong ba đợt
   M100.99–101, mà `app_input_theme.dart` đã ghi rõ "MxSearchField is its own
   composition and reads none of this — see its file"). Đưa hình học và màu của
@@ -1318,6 +1319,64 @@ của M2.
   - [x] Vùng trailing giữ 12dp chỗ trống khi rỗng thay vì để field giãn hết —
         field không còn đổi chiều rộng nhìn thấy khi gõ ký tự đầu tiên.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+
+### M100.108 · `MxAppBar`
+
+- **Status:** **in progress** — widget, wiring, Widgetbook use cases and unit
+  tests land in this task; goldens under `test/demo/` moved (compact title
+  16/700/−0.3 replaces `titleLarge` 20/700/−0.64) and are regenerated on Linux
+  `TZ=UTC` in a follow-up pass, not by this task.
+- **Goal:** Close the `MxAppBar` row of `.claude/skills/flutter-theme-design/
+  references/chrome-navigation.md`'s "Shared widget: `MxAppBar`" checklist —
+  extract the bar `MxContentShell` built inline into its own leaf component.
+- **Scope:** `lib/shared/widgets/mx_app_bar.dart` (new — two densities,
+  `PreferredSizeWidget`, fixed 56dp); `mx_content_shell.dart`'s `_buildAppBar`
+  wired to it for the no-`titleSubline` case; two new `AppTypography` title
+  trios (`appBarContentTitle*`, `appBarScreenTitle*`) plus their `_role`-built
+  styles; `widgetbook/lib/components/structure_components.dart`'s new
+  `appBarComponent()`; `test/shared/widgets/mx_app_bar_test.dart`.
+- **Out of scope:** `titleSubline` redesign (that branch of `_buildAppBar` is
+  untouched), `MxSessionTopBar` convergence, a `selectionMode` enum, a
+  `sizeAppBar` token, `dio`/network, auth.
+- **Dependencies:** none — a leaf extraction of existing `MxContentShell`
+  chrome.
+- **Tests required:** `mx_app_bar_test.dart` (preferredSize, slot order,
+  ellipsis under a narrow width, density padding/typography, no-actions full
+  width); existing `mx_content_shell_bar_test.dart`,
+  `mx_content_shell_chrome_test.dart`, `mx_content_shell_geometry_test.dart`
+  pass unmodified — the regression proof that the hairline, back affordance
+  and `automaticallyImplyLeading` did not move. `study_options_geometry_test`
+  and trash `geometry_test` G2 were changed in the same commit, because the bar
+  title now sits at the 8dp compact inset.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_app_bar.dart`,
+  `lib/shared/widgets/mx_content_shell.dart`,
+  `lib/core/theme/typography/app_typography.dart`,
+  `widgetbook/lib/components/structure_components.dart`, `widgetbook/lib/main.dart`.
+- **Acceptance criteria:**
+  - [x] `MxAppBar` takes `Widget? title`, `Widget? leading`,
+        `List<Widget>? actions`, `MxAppBarDensity density = compact`; paints no
+        background of its own.
+  - [x] Compact padding `AppSpacing.sm` (8), large `AppSpacing.lg` (16);
+        compact title 16/w700/−0.3, large 24/w700/−0.5, both through
+        `AppTypography`'s `_role`-shaped helper, not a `TextTheme` rung.
+  - [x] Row: leading → `xs` gap → `Expanded(title)` → (if actions) `xs` gap +
+        actions, each pair `xs` apart; no actions leaves the title the full
+        width via `Expanded` alone.
+  - [x] `preferredSize == Size.fromHeight(kToolbarHeight)` (56).
+  - [x] `MxContentShell._buildAppBar` delegates to `MxAppBar` (via `AppBar`'s
+        own `title:`/`leading:`/`actions:` slots) when `titleSubline == null`;
+        `automaticallyImplyLeading`, the scrolled hairline `shape:` and the
+        back-affordance check stay exactly where they were — proven by the
+        three existing `mx_content_shell_*_test.dart` files passing unmodified.
+  - [x] Widgetbook: `appBarComponent()` — Playground (density/leading/action
+        count knobs) plus `compact, with back + actions`, `large, screen title
+        only`, `no actions`.
+  - [x] `mx_app_bar_test.dart`: 8 tests covering every acceptance point above.
+  - [ ] Goldens under `test/demo/` regenerated on Linux `TZ=UTC` and the screen
+        gallery republished at its pinned Artifact URL — deferred to the
+        controller per this task's brief (Windows cannot author goldens).
+
 - **Checklist phases:** 7, 12.
 
 ### M100.104 · MxOptionRow — hàng chọn một của v3 (#578)
@@ -1384,6 +1443,38 @@ của M2.
         return sớm trước nhánh thêm `errorText`. Có test ghim; bỏ `buildCounter`
         thì test đỏ.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; chỉ sáu PNG lỗi đổi khi chạy 44 file test golden.
+- **Checklist phases:** 7, 12.
+
+### M100.109 · MxSection — nhóm hàng có overline, thẻ và ghi chú của v3
+
+- **Status:** **done** — analyze sạch, `mx_section_test.dart` + `mx_stress_test.dart`
+  + `widgetbook_coverage_test.dart` xanh; chưa màn nào dùng.
+- **Goal:** shared component cho hợp đồng Section của v3: overline in hoa phía trên,
+  một thẻ chứa nhóm hàng có hairline `border-ghost` giữa các hàng, ghi chú tuỳ chọn
+  bên dưới, và khoảng 16dp cuối khối. Hai màn Settings và Reminder đang tự dựng lại
+  đúng hình này trong từng feature.
+- **Scope:** `lib/shared/widgets/mx_section.dart`, test riêng, specimen stress, entry
+  Widgetbook (`sectionComponent`).
+- **Out of scope:** chuyển `SettingsSectionWidget` / `ReminderSettingsSectionWidget`
+  sang dùng nó — mỗi màn là một thay đổi riêng, giống M100.104. Không đụng token hay
+  theme.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_section_test.dart`, `mx_stress_test.dart`,
+  `widgetbook_coverage_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_section.dart`.
+- **Acceptance criteria:**
+  - [x] Overline đi qua `MxSectionLabel` (rung `standard`, ink `quiet` = `text-secondary`),
+        cách thẻ `AppSpacing.sm` = 8 — cùng giá trị `SettingsSectionWidget.headingGap`.
+  - [x] Hàng nằm trong `MxCard.raised(padding: MxCardPadding.none)` — thẻ đã sở hữu
+        fill `surface-raised` và clip theo bán kính, nên divider full-bleed gặp đúng
+        góc bo; widget này không tự resolve lại role đó.
+  - [x] Divider giữa hàng dùng `AppDecorations.hairlineEdge(...).color`
+        (`border-ghost`), dày `AppStroke.hairline`; N hàng có đúng N−1 divider.
+  - [x] Ghi chú cách thẻ 8, lề ngang `AppSpacing.xs` = 4; không đặt màu riêng vì
+        hợp đồng không nêu role cho nó (giữ `bodySmall` như panel ghi chú của Reminder).
+  - [x] 16dp cuối khối (`AppSpacing.lg`) do chính widget vẽ, có hay không có tiêu đề.
+  - [x] `rows` rỗng bị assert (fail fast).
 - **Checklist phases:** 7, 12.
 
 
