@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_colors.dart';
@@ -32,6 +34,13 @@ void main() {
       expect(changed.surfaceEmphasis, base.surfaceEmphasis);
       expect(changed.disabledSurface, base.disabledSurface);
       expect(changed.onDisabled, base.onDisabled);
+      expect(changed.mastery, base.mastery);
+      expect(changed.statusNew, base.statusNew);
+      expect(changed.statusLearning, base.statusLearning);
+      expect(changed.statusReviewing, base.statusReviewing);
+      expect(changed.statusMastered, base.statusMastered);
+      expect(changed.errorFill, base.errorFill);
+      expect(changed.onErrorFill, base.onErrorFill);
     });
 
     test('lerp interpolates every field, not just some', () {
@@ -87,6 +96,25 @@ void main() {
       expect(
         mid.onDisabled,
         Color.lerp(light.onDisabled, dark.onDisabled, 0.5),
+      );
+      expect(mid.mastery, Color.lerp(light.mastery, dark.mastery, 0.5));
+      expect(mid.statusNew, Color.lerp(light.statusNew, dark.statusNew, 0.5));
+      expect(
+        mid.statusLearning,
+        Color.lerp(light.statusLearning, dark.statusLearning, 0.5),
+      );
+      expect(
+        mid.statusReviewing,
+        Color.lerp(light.statusReviewing, dark.statusReviewing, 0.5),
+      );
+      expect(
+        mid.statusMastered,
+        Color.lerp(light.statusMastered, dark.statusMastered, 0.5),
+      );
+      expect(mid.errorFill, Color.lerp(light.errorFill, dark.errorFill, 0.5));
+      expect(
+        mid.onErrorFill,
+        Color.lerp(light.onErrorFill, dark.onErrorFill, 0.5),
       );
     });
 
@@ -180,6 +208,98 @@ void main() {
             .withValues(alpha: AppStateOpacity.disabledContent)
             .toARGB32(),
       );
+    });
+  });
+
+  group('v3 MEMOX_SEMANTIC_COLOR — BIND_NOW', () {
+    // docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md §5.1.
+    const AppSemanticColors light = AppSemanticColors.light();
+    const AppSemanticColors dark = AppSemanticColors.dark();
+
+    void pin(String name, Color l, Color d, int lightArgb, int darkArgb) {
+      expect(l.toARGB32(), lightArgb, reason: '$name light');
+      expect(d.toARGB32(), darkArgb, reason: '$name dark');
+    }
+
+    test('carry the registry values in both themes', () {
+      pin('mastery', light.mastery, dark.mastery, 0xFF1F8A5B, 0xFF6FE0BD);
+      pin(
+        'status-new',
+        light.statusNew,
+        dark.statusNew,
+        0xFF8C95B8,
+        0xFF6B75A3,
+      );
+      pin(
+        'status-learning',
+        light.statusLearning,
+        dark.statusLearning,
+        0xFFF59E0B,
+        0xFFFFC658,
+      );
+      pin(
+        'status-reviewing',
+        light.statusReviewing,
+        dark.statusReviewing,
+        0xFF5265F5,
+        0xFF8B9AFF,
+      );
+      pin(
+        'status-mastered',
+        light.statusMastered,
+        dark.statusMastered,
+        0xFF1F8A5B,
+        0xFF6FE0BD,
+      );
+      pin(
+        'error-fill',
+        light.errorFill,
+        dark.errorFill,
+        0xFFDC2D4E,
+        0xFFB0485C,
+      );
+      pin(
+        'on-error-fill',
+        light.onErrorFill,
+        dark.onErrorFill,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+      );
+    });
+
+    test('copyWith and lerp carry the new fields', () {
+      const Color probe = Color(0xFF000000);
+      final AppSemanticColors changed = light.copyWith(errorFill: probe);
+      expect(changed.errorFill, probe);
+      expect(changed.mastery, light.mastery);
+
+      final AppSemanticColors mid = light.lerp(dark, 0.5);
+      for (final (Color got, Color a, Color b) in <(Color, Color, Color)>[
+        (mid.mastery, light.mastery, dark.mastery),
+        (mid.statusNew, light.statusNew, dark.statusNew),
+        (mid.statusLearning, light.statusLearning, dark.statusLearning),
+        (mid.statusReviewing, light.statusReviewing, dark.statusReviewing),
+        (mid.statusMastered, light.statusMastered, dark.statusMastered),
+        (mid.errorFill, light.errorFill, dark.errorFill),
+        (mid.onErrorFill, light.onErrorFill, dark.onErrorFill),
+      ]) {
+        expect(got, Color.lerp(a, b, 0.5));
+      }
+    });
+
+    test('no v3 M3_ALIAS gained a field of its own', () {
+      // `surfaceMuted` is NOT on this list: it is a pre-#569 name collision
+      // (it resolves to `surfaceContainer`), not v3's `surface-muted`.
+      final String source = File(
+        'lib/core/theme/foundations/app_semantic_colors.dart',
+      ).readAsStringSync();
+      for (final String alias in <String>[
+        'bg',
+        'surfaceRaised',
+        'textSecondary',
+      ]) {
+        expect(source, isNot(contains('final Color $alias;')), reason: alias);
+      }
     });
   });
 }

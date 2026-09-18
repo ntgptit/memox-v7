@@ -30,5 +30,16 @@ bool isTranslucentFillViolation(ColorSite site) {
   // A shadow and a scrim are washes with no ground to blend against.
   // `elementKind` already separates them; this is belt and braces against a
   // slot being reclassified.
-  return !site.file.endsWith('app_elevation.dart');
+  if (site.file.endsWith('app_elevation.dart')) return false;
+
+  // `border-ghost` (`hairlineEdge` in `app_decorations.dart`) is a
+  // translucent EDGE rather than a shadow, and the registry states it that
+  // way on purpose (`rgba(82,101,245,.14)` / `rgba(139,154,255,.16)`). The
+  // argument is the same one `app_elevation.dart` already gets above: a
+  // ground-agnostic token factory in `foundations/` cannot know which surface
+  // a component will eventually draw this edge over, so it cannot precompute
+  // a solid colour the way R7 asks a fill with a known ground to. R7 has to
+  // catch the *consumer* that composites it against a background, not this
+  // file.
+  return !site.file.endsWith('app_decorations.dart');
 }

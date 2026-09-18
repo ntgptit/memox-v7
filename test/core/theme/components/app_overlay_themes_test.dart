@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/components/overlays/app_backdrop_recipe.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/schemes/app_color_scheme.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import '../../../support/color_math.dart';
@@ -59,14 +61,16 @@ void main() {
       }
     });
 
-    test('hides more in dark than in light', () {
-      // Not symmetry for its own sake. A 48% wash over `#F4F5F8` reads as a
-      // dimmed page; the same wash over `#0A082D` is nearly invisible, because
-      // the page is already almost as dark as the scrim.
-      final light = themes['light']!.dialogTheme.barrierColor!;
-      final dark = themes['dark']!.dialogTheme.barrierColor!;
-
-      expect(dark.a, greaterThan(light.a));
+    test('is exactly 0.45 in both themes, from the one shared recipe', () {
+      // **Used to be asymmetric — 0.48 light / 0.72 dark** — on the argument
+      // that a wash over the near-black `#0A082D` page needed to go deeper
+      // than the same wash over `#F4F5F8` to read as dimmed at all. v3 states
+      // one value instead (§15.1: Scrim, Dialog and BottomSheet are all given
+      // 0.45), so this is no longer a per-mode judgement call — it is one
+      // recipe applied twice.
+      expect(modalBarrierColor(lightColorScheme).toARGB32(), 0x730A0E27);
+      expect(modalBarrierColor(darkColorScheme).toARGB32(), 0x73000000);
+      expect(modalBarrierColor(lightColorScheme).r, lightColorScheme.scrim.r);
     });
   });
 

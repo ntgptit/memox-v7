@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 import 'app_material_roles.dart';
+import 'app_product_colors.dart';
 import 'app_surface_colors.dart';
 import 'app_border_colors.dart';
 
@@ -46,6 +47,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.borderControl,
     required this.disabledSurface,
     required this.onDisabled,
+    required this.mastery,
+    required this.statusNew,
+    required this.statusLearning,
+    required this.statusReviewing,
+    required this.statusMastered,
+    required this.errorFill,
+    required this.onErrorFill,
   });
 
   const AppSemanticColors.light()
@@ -81,7 +89,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderSubtle = AppBorderColors.borderSubtleLight,
       borderControl = AppBorderColors.borderControlLight,
       disabledSurface = AppColors.disabledSurfaceLight,
-      onDisabled = AppColors.onDisabledLight;
+      onDisabled = AppColors.onDisabledLight,
+      mastery = AppProductColors.masteryLight,
+      statusNew = AppProductColors.statusNewLight,
+      statusLearning = AppProductColors.statusLearningLight,
+      statusReviewing = AppProductColors.statusReviewingLight,
+      statusMastered = AppProductColors.statusMasteredLight,
+      errorFill = AppProductColors.errorFillLight,
+      onErrorFill = AppProductColors.onErrorFillLight;
 
   const AppSemanticColors.dark()
     : streakContainer = AppColors.streakContainerDark,
@@ -116,7 +131,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderSubtle = AppBorderColors.borderSubtleDark,
       borderControl = AppBorderColors.borderControlDark,
       disabledSurface = AppColors.disabledSurfaceDark,
-      onDisabled = AppColors.onDisabledDark;
+      onDisabled = AppColors.onDisabledDark,
+      mastery = AppProductColors.masteryDark,
+      statusNew = AppProductColors.statusNewDark,
+      statusLearning = AppProductColors.statusLearningDark,
+      statusReviewing = AppProductColors.statusReviewingDark,
+      statusMastered = AppProductColors.statusMasteredDark,
+      errorFill = AppProductColors.errorFillDark,
+      onErrorFill = AppProductColors.onErrorFillDark;
 
   /// The due chip's fill and its label. See `AppColors.streakContainerLight`
   /// for why the label is not the design's own value.
@@ -234,6 +256,31 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// grounds where [disabledSurface] has one.
   final Color onDisabled;
 
+  // --- v3 MEMOX_SEMANTIC_COLOR, BIND_NOW (spec §5.1) --------------------
+  // Product meanings Material has no role for. Values in AppProductColors;
+  // two of these equal another field today and each still owns its literal.
+
+  /// `mastery` — StudyTopBar progress fill, mode badge fill/label.
+  final Color mastery;
+
+  /// `status-new` — StatusBadge.new dot, label, container tint 12%.
+  final Color statusNew;
+
+  /// `status-learning` — StatusBadge.learning; MasteryRamp fill below 34%.
+  final Color statusLearning;
+
+  /// `status-reviewing` — StatusBadge.reviewing; MasteryRamp fill 34–66%.
+  final Color statusReviewing;
+
+  /// `status-mastered` — StatusBadge.mastered; MasteryRamp fill from 67%.
+  final Color statusMastered;
+
+  /// `error-fill` — Button.destructive tone container.
+  final Color errorFill;
+
+  /// `on-error-fill` — Button.destructive tone label and glyph.
+  final Color onErrorFill;
+
   @override
   AppSemanticColors copyWith({
     Color? streakContainer,
@@ -269,6 +316,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? borderControl,
     Color? disabledSurface,
     Color? onDisabled,
+    Color? mastery,
+    Color? statusNew,
+    Color? statusLearning,
+    Color? statusReviewing,
+    Color? statusMastered,
+    Color? errorFill,
+    Color? onErrorFill,
   }) {
     return AppSemanticColors(
       streakContainer: streakContainer ?? this.streakContainer,
@@ -304,6 +358,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderControl: borderControl ?? this.borderControl,
       disabledSurface: disabledSurface ?? this.disabledSurface,
       onDisabled: onDisabled ?? this.onDisabled,
+      mastery: mastery ?? this.mastery,
+      statusNew: statusNew ?? this.statusNew,
+      statusLearning: statusLearning ?? this.statusLearning,
+      statusReviewing: statusReviewing ?? this.statusReviewing,
+      statusMastered: statusMastered ?? this.statusMastered,
+      errorFill: errorFill ?? this.errorFill,
+      onErrorFill: onErrorFill ?? this.onErrorFill,
     );
   }
 
@@ -379,6 +440,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderControl: Color.lerp(borderControl, other.borderControl, t)!,
       disabledSurface: Color.lerp(disabledSurface, other.disabledSurface, t)!,
       onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,
+      mastery: Color.lerp(mastery, other.mastery, t)!,
+      statusNew: Color.lerp(statusNew, other.statusNew, t)!,
+      statusLearning: Color.lerp(statusLearning, other.statusLearning, t)!,
+      statusReviewing: Color.lerp(statusReviewing, other.statusReviewing, t)!,
+      statusMastered: Color.lerp(statusMastered, other.statusMastered, t)!,
+      errorFill: Color.lerp(errorFill, other.errorFill, t)!,
+      onErrorFill: Color.lerp(onErrorFill, other.onErrorFill, t)!,
     );
   }
 }

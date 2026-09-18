@@ -89,6 +89,16 @@ abstract final class AppStateOpacity {
   /// the surface. See `AppSemanticColors.disabledSurface`, which holds the
   /// result; this constant records where the result came from.
   static const double disabledSurfaceBlend = 0.12;
+
+  /// `op-disabled` — the v3 global rule: opacity 0.38 over the **whole
+  /// control**, applied once by the component
+  /// (docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md §8).
+  ///
+  /// The solid disabled fill below ([disabledContent], [disabledSurfaceBlend]
+  /// and `AppSemanticColors.disabledSurface`) stays exactly as it is: it is
+  /// what today's controls draw, and switching a resolver before its component
+  /// applies this opacity would make a disabled control look enabled.
+  static const double disabled = 0.38;
 }
 
 /// The interaction states, resolved.

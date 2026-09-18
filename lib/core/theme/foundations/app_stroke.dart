@@ -39,6 +39,13 @@ abstract final class AppStroke {
   /// a text button focuses with.
   static const double focus = 2;
 
+  /// The gap between a control's edge and its focus ring — the v3 global rule
+  /// is a 2dp `primary` ring at offset 2
+  /// (docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md §8).
+  /// A spacing of the ring, not a stroke width, and kept beside [focus]
+  /// because the two are one rule.
+  static const double focusRingOffset = 2;
+
   /// The outline of a selection control — a checkbox's box, a switch's track.
   ///
   /// **A fourth value, against this file's own warning, and the exception is

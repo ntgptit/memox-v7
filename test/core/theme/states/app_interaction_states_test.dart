@@ -417,4 +417,17 @@ void main() {
       }
     });
   });
+
+  group('v3 global state policy', () {
+    // docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md §5.5, §8.
+    test('disabled is 0.38 over the whole control', () {
+      expect(AppStateOpacity.disabled, 0.38);
+    });
+
+    test('the ink alpha it sits beside is a different token', () {
+      // `disabledContent` dims a label; `disabled` dims the control. Equal
+      // values, two semantics — the registry names only the second.
+      expect(AppStateOpacity.disabledContent, 0.38);
+    });
+  });
 }
