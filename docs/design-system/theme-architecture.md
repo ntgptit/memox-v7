@@ -302,10 +302,20 @@ của runtime.**
 
 MUST: một mục `PRESERVE_ONLY` không được thêm field, hằng số hay hàm nào —
 giữ nguyên định nghĩa cũ nếu có, không tạo bản sao không ai gọi. MUST: một
-`M3_ALIAS` không bao giờ có field runtime của riêng nó — nó luôn đọc thẳng
-`ColorScheme`. `test/core/theme/contracts/v3_theme_binding_test.dart` cưỡng
-chế cả hai bằng cách quét khai báo Dart (không quét chữ mù) trên toàn bộ
-`lib/core/theme`.
+`M3_ALIAS` (và mọi `COMPONENT_INPUT`/`NONE`) không bao giờ có field runtime
+của riêng nó — nó luôn đọc thẳng `ColorScheme`, hoặc không có giá trị theme
+nào cả.
+
+`test/core/theme/contracts/v3_theme_binding_test.dart` cưỡng chế hai MUST này
+bằng **hai cơ chế khác nhau, không phải một**. PRESERVE_ONLY được quét trên
+toàn bộ `lib/core/theme` — quét khai báo Dart theo hình dạng (field/const/hàm),
+không quét chữ mù, để một danh tính không liên quan (`AppWellFill.streak`,
+`AppColors.seed`) không thành báo sai. `M3_ALIAS` và `COMPONENT_INPUT`/`NONE`
+thì hẹp hơn: chỉ kiểm danh sách field của riêng `AppSemanticColors` — nơi duy
+nhất một field như vậy có thể đáp xuống nếu nó thật sự đáp xuống đâu đó — chứ
+không quét cả cây, vì quét cả cây sẽ báo sai đúng hai tên thuộc lớp rủi ro này
+(`AppColors.seed` là hằng số palette hợp lệ có từ trước v3; `accent` là tên
+tham số hợp lệ ở nhiều component builder).
 
 **Hai chỗ tên trùng nhau, ghi rõ để không ai đọc nhầm cái này thành cái kia:**
 
@@ -355,5 +365,9 @@ này trước khi tự đoán role.
 | `TextField` (`InputDecorationTheme`) | fill lúc nghỉ | `surface-muted` |
 | `TextField` (`InputDecorationTheme`) | fill lúc focus | `surface-raised` |
 | `TextField` (`InputDecorationTheme`) | viền | `border-ghost` / `primary` / `error`, hairline |
-| — (chưa ai gọi) | `AppDecorations.chromeShadow` | `shadow-chrome` |
-| `shadowsFor` (thang elevation) | ánh xạ level → treatment | hợp đồng từng component tự quyết khi tới lượt |
+
+Hai điều liên quan nhưng không phải một binding component · slot, nên đứng
+ngoài bảng thay vì kéo dãn cột "Target semantic role": `AppDecorations
+.chromeShadow` (`shadow-chrome`) đã có hàm nhưng chưa consumer nào gọi; và
+ánh xạ level → treatment của `shadowsFor` (thang elevation) là quyết định của
+hợp đồng từng component, chưa chốt ở đây.
