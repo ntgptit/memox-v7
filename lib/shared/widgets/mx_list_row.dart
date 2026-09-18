@@ -5,6 +5,7 @@ import '../../core/theme/foundations/app_decorations.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/states/app_interaction_states.dart';
+import '../../core/theme/typography/app_typography.dart';
 import 'mx_focus_ring.dart';
 import 'mx_icon.dart';
 import 'mx_icon_tile.dart';
@@ -129,12 +130,15 @@ class MxListRow extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: context.texts.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.1,
-                      height: 1.35,
-                      color: scheme.onSurface,
-                    ),
+                    style:
+                        AppTypography.withWeight(
+                          context.texts.bodyMedium!,
+                          FontWeight.w600,
+                        ).copyWith(
+                          letterSpacing: -0.1,
+                          height: 1.35,
+                          color: scheme.onSurface,
+                        ),
                   ),
                   if (subtitleText != null) ...<Widget>[
                     const SizedBox(height: _subtitleGap),

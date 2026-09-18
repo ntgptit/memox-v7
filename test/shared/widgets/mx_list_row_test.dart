@@ -49,7 +49,23 @@ void main() {
       );
 
       final Size size = tester.getSize(find.byType(MxListRow));
-      expect(size.height, greaterThanOrEqualTo(48));
+      expect(size.height, equals(48));
+    });
+
+    testWidgets('sets the title at wght 600 through the variable axis', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildLightTheme(),
+          home: const Scaffold(body: MxListRow(title: 'Academic Word List')),
+        ),
+      );
+
+      final Text title = tester.widget(find.text('Academic Word List'));
+      final TextStyle style = title.style!;
+      expect(style.fontWeight, FontWeight.w600);
+      expect(style.fontVariations, contains(const FontVariation('wght', 600)));
     });
 
     testWidgets('leadingIcon builds the default MxIconTile', (tester) async {
