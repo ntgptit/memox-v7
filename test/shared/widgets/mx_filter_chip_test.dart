@@ -337,7 +337,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('the painted pill is fixed at AppSizing.chipHeight', (
+    testWidgets('the painted pill is fixed at AppSizing.controlChip', (
       tester,
     ) async {
       await pump(
@@ -345,7 +345,7 @@ void main() {
         MxFilterChip(label: 'A', isSelected: false, onPressed: () {}),
       );
 
-      expect(tester.getSize(paintedMaterial()).height, AppSizing.chipHeight);
+      expect(tester.getSize(paintedMaterial()).height, AppSizing.controlChip);
     });
 
     testWidgets(

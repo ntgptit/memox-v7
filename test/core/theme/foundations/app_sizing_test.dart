@@ -27,8 +27,12 @@ void main() {
       // opacity have scales of their own and are not covered by this rule.
       for (final (String name, double value) in <(String, double)>[
         ('touchTarget', AppSizing.touchTarget),
+        ('controlChip', AppSizing.controlChip),
+        ('controlDense', AppSizing.controlDense),
+        ('controlSmall', AppSizing.controlSmall),
         ('controlCompact', AppSizing.controlCompact),
         ('floatingAction', AppSizing.floatingAction),
+        ('fab', AppSizing.fab),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
         // Not a control, and on the grid all the same: the rhythm is what
         // keeps a mark aligned with the text it sits beside.

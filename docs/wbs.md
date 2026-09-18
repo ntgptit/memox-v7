@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.112 |
+| **Updated by task** | M100.114 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1153,8 +1153,473 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.112 · Button — v3: hai tone đổi màu, ba nấc kích thước mới
 
-### M100.112 · MxFilterChip — control một-trong-N 28dp, caller đầu tiên của `border-ghost`
+- **Status:** **in-progress** — code, test, golden Linux, full host suite và gallery
+  đã xong (xem checklist); còn bộ integration trên thiết bị chưa chạy vì máy
+  không có emulator Android.
+- **Goal:** `MxActionButton` đọc đúng hợp đồng Button của v3 handoff: hai tone
+  đổi cặp màu, ba nấc kích thước mới, và các nút study đổi sang pill.
+- **Scope:**
+  - `tonal` đọc `surfaceContainer` / `onSurface` (trước là `secondaryContainer`
+    / `onSecondaryContainer`) qua `MxFilledPair.tonal`, kể cả `_busyStyle`.
+  - `destructive` đọc `errorFill` / `onErrorFill` (`AppSemanticColors`) thay cho
+    `error` / `onError`, kể cả `_busyStyle`.
+  - `dense` bo góc 8.
+  - Ba nấc mới của `MxActionButtonSize`: `small` (36), `chip` (28, pill viền
+    ghost, bỏ qua `variant`) và `study` (48, pill). `AppSizing` thêm
+    `controlSmall` và `controlChip`.
+  - Nối `study` vào Reveal / Continue / Retry của Recall, Check của Fill và
+    Reveal answer của self-assess. Cặp Forgot / Remembered và Show hint cố ý ở
+    lại `standard`: handoff định nghĩa study action là một động từ đứng giữa, còn
+    cặp kia là hai control ngang hàng trong `StudyCtaRowWidget`, nơi 2×36 padding
+    sẽ ăn hết hàng ở 320dp.
+- **Out of scope:** không `small` / `chip` nào có caller thật (handoff cố định
+  hình học của chúng, màn hình chưa dựng nút); không đổi token dùng chung ngoài
+  hai cặp màu ở trên; không đổi cặp Forgot / Remembered.
+- **Dependencies:** M100.99–101 (theme role v3), `errorFill` / `onErrorFill` đã
+  khai báo ở `v3-foundations.md`.
+- **Tests required:** `test/shared/widgets/mx_action_button_*_test.dart` (size,
+  study, chip, state matrix, composite state), `mx_tonal_and_outlined_test.dart`,
+  `study_action_size_test.dart`,
+  `study_card_face_test.dart`, `deck_workload_role_test.dart` (repin).
+- **Editable documents:** `docs/wbs.md`,
+  `docs/design-system/tokyo-component-mapping.md`,
+  `docs/design-system/v3-foundations.md`, `docs/design-system/v1-freeze.md`
+  (một dòng ghi chú lịch sử).
+- **Output:** `lib/shared/widgets/mx_action_button.dart`,
+  `lib/core/theme/components/actions/app_button_themes.dart`,
+  `lib/core/theme/foundations/app_sizing.dart`, các nút study.
+- **Acceptance criteria:**
+  - [x] `tonal` và `destructive` đổi cặp màu ở cả trạng thái nghỉ lẫn `_busyStyle`
+        (loading không còn đổi màu giữa chừng).
+  - [x] Reveal answer của self-assess là `study`, khớp Reveal của Recall; hai nút
+        chấm điểm sau khi lật vẫn `standard` (test ở `study_card_face_test.dart`).
+  - [x] **Sàn pressed dưới AA được chấp nhận có chủ ý:** nhãn destructive ở dark
+        và high-contrast dark đạt 4.28:1 (< 4.5) khi nhấn. Giá trị fill
+        (`#B0485C`) và nhãn (trắng) do theme handoff cố định; chỉnh chúng là việc
+        của bước theme, không phải của Button. Ghi vào `acceptedSubAAPressedFloors` (`mx_action_button_composite_state_test.dart`).
+        Mở lại nếu chủ dự án muốn `onErrorFill` sáng hơn hoặc state layer khác.
+  - [x] Golden vẽ lại trên Linux (WSL, clone riêng, `TZ=UTC`, `-j 1`): 41 PNG
+        đổi — 39 ở `test/demo/goldens` (deck list/actions/overlay, recall, fill),
+        `deck_list_rhythm.png` và `mx_confirm_dialog_destructive_dark.png`.
+  - [x] Full non-golden host suite: `+5380: All tests passed!` (một lần, sau khi
+        merge `origin/main`; cảnh báo tap của `trash_screen_test.dart` là nhiễu có
+        sẵn).
+  - [x] Gallery: ảnh 401f2460 — ghép 18 màn deck/study vào bản đang ghim (không
+        đè cả trang), cùng URL.
+  - [ ] Bộ integration trên thiết bị (`integration_test/`, baseline 9): chưa chạy —
+        máy không có emulator Android; task này chạm `lib/features/study/`.
+- **Màn hình đổi diện mạo:** nút Study trên hàng deck (pill tonal `surfaceContainer`),
+  nút destructive của mọi confirm dialog (`errorFill`), các nút study của
+  Recall / Fill / self-assess (pill 48).
+- **Hai quyết định chủ dự án có thể muốn xem lại:**
+  - Nhãn chip dùng `onSurfaceVariant`: handoff không có hàng label cho chip;
+    `app_chip_theme.dart` đã ghép `onSurfaceVariant` với `surfaceContainerLowest`
+    cho chip chưa chọn. Đổi thành `onSurface` nếu design muốn vậy.
+  - Chip disabled = `Opacity` 0.38 phủ cả control (đọc nguyên văn "op-disabled
+    over the whole control"), không dùng `disabledSurface` đặc như nút khác; nên
+    chip disabled trông khác các nút disabled còn lại.
+- **Nợ còn lại (minor hoãn từ review, chưa sửa):**
+  - Chip: chưa có test tương phản bốn theme (gồm high-contrast: nhãn ≥ 4.5, vòng
+    focus ≥ 3) và test semantics cho chip disabled có `semanticLabel`.
+  - `mx_tonal_and_outlined_test.dart`: khẳng định disabled bằng
+    `isNot(surfaceContainer)` quá yếu.
+  - Test bo góc `dense` chỉ phủ `primary`; đường `merge` của tonal / destructive
+    chưa được ghim.
+  - Chưa có test giữ chiều rộng cho `study` + `isLoading`; test Check ở 320dp chỉ
+    khẳng định không exception, chưa đo bố cục.
+  - `_iconGap` đọc thang `labelLarge` cho `chip` / `dense` (nhãn thật là
+    `labelMedium`); chênh không đáng kể.
+  - Nhánh `secondary` của `_busyStyle` (không với tới được) vẫn mang
+    `error` / `onError`.
+  - Thứ tự import trong `mx_action_button_size_test.dart`.
+  - `mx_action_button.dart` đã vượt 700 dòng; guard chưa cắt nhưng nên tách khi
+    chạm lần sau.
+- **Checklist phases:** 7, 12.
+
+### M100.107 · Breadcrumb đọc dimension table v3 — chỉ ở dải scroll thường
+
+- **Status:** **done** — analyze sạch, 449/449 test đích pass (gồm
+  `breadcrumb_grammar_test.dart` không sửa), guard 0 violation.
+- **Goal:** Áp bảng dimension Breadcrumb của v3 handoff (padding 2/16/8, gap 4,
+  kiểu chữ 12/500 ancestor · 12/700 current, tracking 0.1, separator
+  chevron-right màu `outline`) lên MỘT trong hai ngữ pháp của `MxBreadcrumb` —
+  dải scroll từng-bước-tap-được (không `onUp`) — không đụng ngữ pháp header
+  một-target mà mọi màn hình thật đang dùng.
+- **Scope:** `mx_breadcrumb.dart`, `mx_breadcrumb_step.dart`,
+  `mx_breadcrumb_test.dart` (2 assertion đổi theo giá trị mới),
+  `icon_ink_boundary_test.dart` (thêm `allowedInKit` cho
+  `mx_breadcrumb_step.dart`).
+- **Out of scope:** ngữ pháp header (`onUp`, separator `/`, fold-into-ellipsis
+  ở cả hai mode) — chủ dự án chọn "cosmetic only, keep grammar" qua
+  AskUserQuestion khi phát hiện xung đột với `breadcrumb_grammar_test.dart`
+  (owner review 2026-08-21). Không màn hình sản phẩm nào dùng dải scroll
+  thường nên rủi ro rò rỉ sang ngữ pháp header bằng 0 — đã verify `_padding`/
+  `_MxBreadcrumbSeparator` không được `_buildSingleTarget`/`_stepsThatFit`
+  đọc, ở cả task review và final review.
+- **Dependencies:** kế thừa theme roles `onSurface`/`onSurfaceVariant`/
+  `outline` đã có sẵn từ M100.99–101; không cần thay đổi theme.
+- **Tests required:** `mx_breadcrumb_test.dart`, `mx_breadcrumb_focus_test.dart`,
+  `mx_stress_test.dart`, `breadcrumb_grammar_test.dart` (phải xanh KHÔNG sửa),
+  `icon_ink_boundary_test.dart`, `deck_path_test.dart`,
+  `card_editor_up_navigation_test.dart`, `card_import_up_navigation_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_breadcrumb.dart`,
+  `lib/shared/widgets/mx_breadcrumb_step.dart`.
+- **Acceptance criteria:**
+  - [x] padding 2 top · 16 sides · 8 bottom quanh dải scroll — hằng số cục bộ
+        `_kBreadcrumbPadding` (không token mới; `2` không có bậc `AppSpacing`).
+  - [x] gap 4 giữa segment và chevron — `AppSpacing.xs` đã sẵn = 4.
+  - [x] segment ancestor 12/500 `onSurfaceVariant`; current 12/700
+        `onSurface`, tracking 0.1 (hằng số cục bộ `_kSegmentTracking`) — đảo
+        màu current so với comment cũ ("a breadcrumb is chrome"); comment đã
+        viết lại lý do mới thay vì để mâu thuẫn với code.
+  - [x] separator đổi từ `/` sang icon `chevron_right` màu `outline`, cỡ
+        `AppIconSize.sm` — CHỈ ở dải scroll thường; dải header vẫn `/` vì lý
+        do 2026-08-21 (hai chevron ngược hướng cạnh nút back) vẫn còn đúng,
+        không liên quan v1-freeze mà redesign v3 thay thế.
+  - [x] `context.colors.outline` không có thành viên `AppInk` — đọc trực
+        tiếp trên `Icon`, thêm entry `allowedInKit` trong
+        `icon_ink_boundary_test.dart` (tiền lệ: `mx_search_field.dart:173`).
+  - [x] Không golden nào bị đụng — widget này chưa có golden nào.
+  - [x] Task review + final whole-branch review: cả hai "Approved"/"Ready to
+        merge: Yes", 0 Critical/Important; 2 Minor đã park (line-count trên
+        raw `wc -l` nhưng guard dùng `count_mode: logical` và xanh; một câu
+        giải thích trong report của implementer không chính xác 100% nhưng
+        không phải lỗi code).
+- **Checklist phases:** 7, 12.
+
+### M100.105 · V3 component pass — BottomNav đọc đúng hợp đồng v3
+
+- **Status:** **done** — analyze sạch, host suite xanh, golden vẽ lại trên Linux
+  (47 PNG đổi), gallery republish tại URL ghim.
+- **Goal:** `MxNavigationBar` thôi là dải opaque sát mép; nó là một thẻ kính nổi
+  trong luồng, đúng hợp đồng BottomNav của v3.
+- **Scope:** `mx_navigation_bar.dart` (wrapper 4/8/12 + inset cử chỉ, `ClipRRect`
+  `AppRadius.lg`, `BackdropFilter` `glassBlurSigma`, fill `chrome-glass`, viền
+  `border-ghost` cả bốn cạnh, `NavigationBar.height` cố định),
+  `app_navigation_bar_theme.dart` (nền trong suốt, glyph 20dp),
+  `app_sizing.dart` (`bottomBarHeight` 64), `app_navigation_shell.dart` (ba glyph
+  theo nghĩa: `layers` / `play_circle` / `bar_chart`), hai file ghim role cũ.
+- **Out of scope:** `extendBody` của shell — vẫn là quyết định bố cục của caller,
+  đúng như M100.100 đã chặn: bật nó thì Scaffold thôi trừ chiều cao bar khỏi
+  `MediaQuery` của body và mọi branch phải tự chừa chỗ. Hôm nay blur làm mờ nền
+  phẳng của Scaffold, tức fallback "solid chrome-glass" mà hợp đồng cho phép.
+  Icon rỗng của `_ProgressEmptyView` (`insights_outlined`) chưa đổi theo glyph
+  Progress mới; đó là nội dung màn hình của feature.
+- **Dependencies:** M100.101.
+- **Tests required:** group `v3 glass geometry` trong `mx_navigation_bar_test.dart`;
+  `m3_role_contract_test.dart` và `m3_role_bindings.dart` đã sửa.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/shared/widgets/mx_navigation_bar.dart`
+- **Acceptance criteria:**
+  - [x] Bar vẽ cố định 64dp bất kể inset; wrapper cao 4 + 64 + 12 = 80 và lớn thêm
+        đúng bằng inset cử chỉ. `NavigationBar` bị bỏ `SafeArea` nội bộ bằng
+        `MediaQuery.removePadding`, nên inset chỉ được tính một lần.
+  - [x] `backgroundColor` của theme là trong suốt; hai guard từng ghim
+        `surfaceContainer` được nới có chủ đích vì role đã chuyển sang
+        `chrome-glass`, đọc trực tiếp bởi component.
+  - [x] Focus ring và ripple giữ hành vi toàn cục/canonical, không thêm quy ước.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
+### M100.102 · Fab — hộp 52×52, glyph 20 và vòng focus `onPrimary`
+
+- **Status:** **done** — analyze sạch, host suite 5258 pass, guard 0, golden vẽ
+  lại trên Linux.
+- **Goal:** `MxFab` khớp hợp đồng Fab của v3: hộp vuông 52, glyph 20, và một
+  vòng focus bàn phím (trước đó FAB không có vòng nào).
+- **Scope:** `app_sizing.dart` (`AppSizing.fab`), `app_fab_theme.dart`
+  (`sizeConstraints`, `iconSize`), `mx_focus_ring.dart` (tham số `color` tùy
+  chọn), `mx_fab.dart` (bọc bằng `MxFocusRing`); `mx_fab_test.dart` mới và hai
+  test theme/sizing mở rộng.
+- **Out of scope:** màu, shape, elevation của FAB (đã đúng từ M100.100/M100.35);
+  `AppSizing.floatingAction` và `AppSpacing.fabScrollClearance` — clearance
+  thuộc caller (`ScreenScroll`), nên vẫn 56 dù hộp vẽ là 52, dư 4dp.
+- **Dependencies:** M100.101.
+- **Tests required:** các test ở Scope.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/theme/`, `lib/shared/widgets/mx_fab.dart`,
+  `lib/shared/widgets/mx_focus_ring.dart`
+- **Acceptance criteria:**
+  - [x] Hộp vẽ **52×52** thay vì 56 mặc định của SDK; glyph **20** thay vì 24.
+  - [x] **Vòng focus dùng `onPrimary`, không phải `primary` như prose của spec.**
+        Nền FAB đã là `primary`, nên vòng `primary` là 1.00:1 — vô hình; đây
+        đúng là trường hợp `focusIndicatorOf` sinh ra để xử lý và nút filled đã
+        theo. Không có offset 2: mọi chỗ dùng `MxFocusRing` vẽ sát hình, và một
+        biến thể offset chỉ cho FAB là quy ước thứ hai.
+  - [x] `MxFocusRing` tương thích ngược: năm caller cũ không truyền `color`.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
+### M100.103 · SearchField đọc handoff v3 riêng của nó
+
+- **Status:** **done** — analyze sạch, unit test xanh, golden vẽ lại trên Linux
+  `TZ=UTC`, gallery republish tại URL ghim.
+- **Checklist phases:** 14.3
+- **Goal:** `MxSearchField` có spec component riêng (không nằm trong ba đợt
+  M100.99–101, mà `app_input_theme.dart` đã ghi rõ "MxSearchField is its own
+  composition and reads none of this — see its file"). Đưa hình học và màu của
+  nó theo đúng handoff v3 mới: bo góc, chiều cao, fill/viền hai trạng thái, kích
+  cỡ icon.
+- **Scope:** `lib/shared/widgets/mx_search_field.dart`,
+  `test/shared/widgets/mx_search_field_test.dart`.
+- **Out of scope:** token dùng chung (`AppRadius`, `AppSpacing`,
+  `AppIconSize`, `AppDecorations`) — component chỉ đọc, không sửa; caller nào
+  render field (`library_search_screen.dart`, `card_list_screen.dart`,
+  `tag_catalog_screen.dart`) không đổi API nên không chạm.
+- **Dependencies:** M100.101 (đợt Controls đã đặt `border-ghost` +
+  `AppStroke.hairline` làm khuôn cho cặp fill/viền hai trạng thái mà
+  SearchField nối theo).
+- **Tests required:** `mx_search_field_test.dart` (sửa tại chỗ), stress
+  test (`mx_stress_test.dart`), test alignment của hai màn dùng field
+  (`card_list_alignment_test.dart`, `tag_catalog_alignment_test.dart`), test
+  route/state của màn tìm kiếm.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_search_field.dart`.
+- **Acceptance criteria:**
+  - [x] Bo góc đổi từ pill (999) sang `AppRadius.md` (12, `radius-input` theo
+        bảng đổi tên của `v3-foundations.md` §3).
+      - [x] Floor chiều cao đổi 48 → 52 (`--memox-size-input`). `_fieldInset`
+        đổi theo (48 → 52 trừ line-height 20, chia đôi) và tình cờ rơi đúng
+        `AppSpacing.lg` (16) — không phải quy tắc, chỉ là trùng hợp của hai
+        con số mới. Cơ chế "floor không phải ceiling" (#433 F2) **giữ
+        nguyên**: field vẫn lớn theo `textScaler`, chỉ giá trị nghỉ dời.
+  - [x] Viền nghỉ đổi từ `scheme.outline` (đặc, M100.36 4E) sang `border-ghost`
+        (`AppDecorations.hairlineEdge`, mờ) ở `AppStroke.hairline` (1, trước là
+        `AppStroke.control` 1.5) — cùng đánh đổi độ tương phản chủ dự án đã
+        chấp nhận cho `MxTextField` ở M100.101 (**1.19:1** đo lại khớp con số
+        `app_input_theme.dart` đã ghim cho cùng `border-ghost` trên cùng trang).
+  - [x] Fill nghỉ đổi sang đọc trực tiếp `colors.surfaceContainer` (cùng giá
+        trị `semantic.surfaceMuted` cũ, chỉ đổi đường đọc theo đúng bảng
+        `access: DIRECT` của spec); fill focus đổi từ `colors.surface` sang
+        `colors.surfaceContainerLowest`.
+  - [x] Icon glyph dẫn đầu đổi 16 (`MxIconSize.sm`) → 20 (`MxIconSize.mdCompact`
+        — bảng icon `v3-foundations.md` §3 map "compact control" 20 vào đúng
+        bậc này) và **đổi màu theo trạng thái lần đầu tiên**: `onSurfaceVariant`
+        nghỉ → `AppInk.accent` (primary's hue, không phải raw `primary`, vì
+        `icon_ink_boundary_test.dart` chỉ chấp nhận màu đi qua `AppInk`) khi
+        focus.
+  - [x] Vùng trailing giữ 12dp chỗ trống khi rỗng thay vì để field giãn hết —
+        field không còn đổi chiều rộng nhìn thấy khi gõ ký tự đầu tiên.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+
+### M100.108 · `MxAppBar`
+
+- **Status:** **in progress** — widget, wiring, Widgetbook use cases and unit
+  tests land in this task; goldens under `test/demo/` moved (compact title
+  16/700/−0.3 replaces `titleLarge` 20/700/−0.64) and are regenerated on Linux
+  `TZ=UTC` in a follow-up pass, not by this task.
+- **Goal:** Close the `MxAppBar` row of `.claude/skills/flutter-theme-design/
+  references/chrome-navigation.md`'s "Shared widget: `MxAppBar`" checklist —
+  extract the bar `MxContentShell` built inline into its own leaf component.
+- **Scope:** `lib/shared/widgets/mx_app_bar.dart` (new — two densities,
+  `PreferredSizeWidget`, fixed 56dp); `mx_content_shell.dart`'s `_buildAppBar`
+  wired to it for the no-`titleSubline` case; two new `AppTypography` title
+  trios (`appBarContentTitle*`, `appBarScreenTitle*`) plus their `_role`-built
+  styles; `widgetbook/lib/components/structure_components.dart`'s new
+  `appBarComponent()`; `test/shared/widgets/mx_app_bar_test.dart`.
+- **Out of scope:** `titleSubline` redesign (that branch of `_buildAppBar` is
+  untouched), `MxSessionTopBar` convergence, a `selectionMode` enum, a
+  `sizeAppBar` token, `dio`/network, auth.
+- **Dependencies:** none — a leaf extraction of existing `MxContentShell`
+  chrome.
+- **Tests required:** `mx_app_bar_test.dart` (preferredSize, slot order,
+  ellipsis under a narrow width, density padding/typography, no-actions full
+  width); existing `mx_content_shell_bar_test.dart`,
+  `mx_content_shell_chrome_test.dart`, `mx_content_shell_geometry_test.dart`
+  pass unmodified — the regression proof that the hairline, back affordance
+  and `automaticallyImplyLeading` did not move. `study_options_geometry_test`
+  and trash `geometry_test` G2 were changed in the same commit, because the bar
+  title now sits at the 8dp compact inset.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_app_bar.dart`,
+  `lib/shared/widgets/mx_content_shell.dart`,
+  `lib/core/theme/typography/app_typography.dart`,
+  `widgetbook/lib/components/structure_components.dart`, `widgetbook/lib/main.dart`.
+- **Acceptance criteria:**
+  - [x] `MxAppBar` takes `Widget? title`, `Widget? leading`,
+        `List<Widget>? actions`, `MxAppBarDensity density = compact`; paints no
+        background of its own.
+  - [x] Compact padding `AppSpacing.sm` (8), large `AppSpacing.lg` (16);
+        compact title 16/w700/−0.3, large 24/w700/−0.5, both through
+        `AppTypography`'s `_role`-shaped helper, not a `TextTheme` rung.
+  - [x] Row: leading → `xs` gap → `Expanded(title)` → (if actions) `xs` gap +
+        actions, each pair `xs` apart; no actions leaves the title the full
+        width via `Expanded` alone.
+  - [x] `preferredSize == Size.fromHeight(kToolbarHeight)` (56).
+  - [x] `MxContentShell._buildAppBar` delegates to `MxAppBar` (via `AppBar`'s
+        own `title:`/`leading:`/`actions:` slots) when `titleSubline == null`;
+        `automaticallyImplyLeading`, the scrolled hairline `shape:` and the
+        back-affordance check stay exactly where they were — proven by the
+        three existing `mx_content_shell_*_test.dart` files passing unmodified.
+  - [x] Widgetbook: `appBarComponent()` — Playground (density/leading/action
+        count knobs) plus `compact, with back + actions`, `large, screen title
+        only`, `no actions`.
+  - [x] `mx_app_bar_test.dart`: 8 tests covering every acceptance point above.
+  - [ ] Goldens under `test/demo/` regenerated on Linux `TZ=UTC` and the screen
+        gallery republished at its pinned Artifact URL — deferred to the
+        controller per this task's brief (Windows cannot author goldens).
+
+- **Checklist phases:** 7, 12.
+
+### M100.104 · MxOptionRow — hàng chọn một của v3 (#578)
+
+- **Status:** **done** — merged (#578), CI xanh; chưa màn nào dùng.
+- **Goal:** shared component cho hợp đồng OptionRow của v3: vòng radio 20dp dày
+  lên 2px → 6px primary khi chọn (không có chấm), min-height 48, padding 12/16,
+  divider `border-ghost`, dim `op-disabled` khi khoá.
+- **Scope:** `lib/shared/widgets/mx_option_row.dart`, hai role `optionRowTitle` /
+  `optionRowDescription` trong `AppTextStyles` (+ hằng số ở `AppTypography`),
+  test riêng, specimen stress, entry Widgetbook.
+- **Out of scope:** chuyển caller sang dùng nó (`study_direction_chooser_widget`,
+  picker thuật toán, thứ tự thẻ mới, reset) — mỗi màn là một thay đổi riêng.
+  Không sửa `MxRadioRows`: `RadioListTile` bị buộc vào `ListTileTheme` (56/4/16)
+  và `Radio` M3 vẽ cố định 16dp chấm-trong-vòng, nên hợp đồng này không đạt được
+  qua nó.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_option_row_test.dart`, `mx_stress_test.dart`, test theme
+  typography.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_option_row.dart`.
+- **Acceptance criteria:**
+  - [x] Vòng 20dp, viền `AppStroke.selectionControl` (2) khi chưa chọn và 6 khi
+        chọn, màu `outline` / `primary`; sáng và tối.
+  - [x] Tap target qua `MxPressable` (sàn 48, vòng focus dùng chung).
+  - [x] Title/description đi qua role có tên (guard `no_text_restyle` cấm
+        `copyWith` tại chỗ) — tracking −0.1 và leading 1.45 là giá trị của kit.
+- **Checklist phases:** 7, 12.
+
+### M100.106 · TextField — dòng lỗi có glyph `alert-circle`
+
+- **Status:** **done** — analyze sạch (chỉ còn lỗi của gói `widgetbook/` do chưa `pub get`), host suite xanh,
+  guard sạch, sáu golden lỗi vẽ lại trên Linux `TZ=UTC`.
+- **Goal:** Handoff v3 của TextField ghi dòng lỗi gồm glyph 16 + chữ, và registry
+  (`docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md:340`) liệt
+  kê "message text + glyph". Theme của field đã đúng v3 từ M100.101; chỗ hở còn
+  lại là widget vẽ lỗi bằng `errorText` thuần chữ, không có chỗ cho icon.
+- **Scope:** `lib/shared/widgets/mx_text_field.dart` (lỗi đi qua
+  `InputDecoration.error` thay cho `errorText`), test hợp đồng và test
+  editor-surface, sáu golden `mx_text_field_{error,focused_error,suffix_error}`.
+- **Out of scope:** `app_input_theme.dart` và mọi token — không đụng. API công
+  khai của `MxTextField` không đổi (`errorText` vẫn là `String?`).
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_text_field_contract_test.dart`,
+  `mx_editor_surface_test.dart`, `mx_text_field_counter_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_text_field.dart`.
+- **Acceptance criteria:**
+  - [x] Glyph `Icons.error_outline` (một glyph duy nhất của app cho nghĩa này),
+        `MxIconSize.sm` = 16, cách chữ `AppSpacing.xs` = 4, trang trí (không
+        `semanticLabel`).
+  - [x] Màu glyph là `AppInk.error` (→ `dangerInk`), khớp chữ bên cạnh — nối tiếp
+        phán quyết GC-3 trong `app_input_theme.dart`, không dùng `scheme.error`
+        (viền vẫn dùng `error`).
+  - [x] **Đảo phán quyết của audit trước v3** (`docs/reviews/mx-text-field-deep-audit.md`
+        ghi "không có error icon by design"): audit đó dựa trên baseline
+        `filled: false` mà M100.101 đã đảo; handoff và registry v3 đều đòi glyph.
+  - [x] Chiều cao dòng lỗi không đổi khi lỗi xuất hiện; test layout-stability cũ
+        chạy nguyên bản.
+  - [x] `errorMaxLines` không còn tác dụng với lỗi dạng widget; test ghim nó chuyển
+        sang `Text.maxLines == 3` của chính dòng lỗi.
+  - [x] Trường hợp text vượt `maxLength` + có lỗi **không** nổ assert
+        "error và errorText cùng khai báo": `buildCounter` luôn được truyền nên SDK
+        return sớm trước nhánh thêm `errorText`. Có test ghim; bỏ `buildCounter`
+        thì test đỏ.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; chỉ sáu PNG lỗi đổi khi chạy 44 file test golden.
+- **Checklist phases:** 7, 12.
+
+### M100.109 · MxSection — nhóm hàng có overline, thẻ và ghi chú của v3
+
+- **Status:** **done** — analyze sạch, `mx_section_test.dart` + `mx_stress_test.dart`
+  + `widgetbook_coverage_test.dart` xanh; chưa màn nào dùng.
+- **Goal:** shared component cho hợp đồng Section của v3: overline in hoa phía trên,
+  một thẻ chứa nhóm hàng có hairline `border-ghost` giữa các hàng, ghi chú tuỳ chọn
+  bên dưới, và khoảng 16dp cuối khối. Hai màn Settings và Reminder đang tự dựng lại
+  đúng hình này trong từng feature.
+- **Scope:** `lib/shared/widgets/mx_section.dart`, test riêng, specimen stress, entry
+  Widgetbook (`sectionComponent`).
+- **Out of scope:** chuyển `SettingsSectionWidget` / `ReminderSettingsSectionWidget`
+  sang dùng nó — mỗi màn là một thay đổi riêng, giống M100.104. Không đụng token hay
+  theme.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_section_test.dart`, `mx_stress_test.dart`,
+  `widgetbook_coverage_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_section.dart`.
+- **Acceptance criteria:**
+  - [x] Overline đi qua `MxSectionLabel` (rung `standard`, ink `quiet` = `text-secondary`),
+        cách thẻ `AppSpacing.sm` = 8 — cùng giá trị `SettingsSectionWidget.headingGap`.
+  - [x] Hàng nằm trong `MxCard.raised(padding: MxCardPadding.none)` — thẻ đã sở hữu
+        fill `surface-raised` và clip theo bán kính, nên divider full-bleed gặp đúng
+        góc bo; widget này không tự resolve lại role đó.
+  - [x] Divider giữa hàng dùng `AppDecorations.hairlineEdge(...).color`
+        (`border-ghost`), dày `AppStroke.hairline`; N hàng có đúng N−1 divider.
+  - [x] Ghi chú cách thẻ 8, lề ngang `AppSpacing.xs` = 4; không đặt màu riêng vì
+        hợp đồng không nêu role cho nó (giữ `bodySmall` như panel ghi chú của Reminder).
+  - [x] 16dp cuối khối (`AppSpacing.lg`) do chính widget vẽ, có hay không có tiêu đề.
+  - [x] `rows` rỗng bị assert (fail fast).
+- **Checklist phases:** 7, 12.
+
+
+### M100.110 · MxIconTile — ô vuông tô màu dẫn đầu một hàng, theo hợp đồng IconTile của v3
+
+- **Status:** **done** — analyze sạch, `mx_icon_tile_test.dart` + `icon_ink_boundary_test.dart`
+  + `mx_stress_test.dart` + `widgetbook_coverage_test.dart` xanh; chưa màn nào dùng.
+- **Goal:** shared component cho IconTile: ba cỡ (hộp 28/36/44, bo 8/12/12, glyph 16/20/20),
+  tint `primary` 10% sáng / 16% tối hoặc `seed` của caller 12%, glyph đậm đủ, và một ô
+  `child` thay glyph.
+- **Scope:** `lib/shared/widgets/mx_icon_tile.dart`, test riêng, specimen stress, entry
+  Widgetbook (`iconTileComponent`), một dòng trong `allowedInKit` của `icon_ink_boundary_test`.
+- **Out of scope:** chuyển `DeckIconArea`, ListRow, SettingsRow sang dùng nó — mỗi nơi là
+  một thay đổi riêng. Không đụng token hay theme.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_icon_tile_test.dart`, `icon_ink_boundary_test.dart`,
+  `mx_stress_test.dart`, `widgetbook_coverage_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_icon_tile.dart`.
+- **Acceptance criteria:**
+  - [x] Nền ô là `Color.alphaBlend(tint, scheme.surface)` — không để màu trong suốt trên
+        `decoration.color` (rule R7); `surface` là nền được chọn một lần.
+  - [x] Glyph đọc thẳng `scheme.primary` hoặc `seed`, không qua `AppInk` (`AppInk.accent`
+        là `accentInk`, khác `primary`); file được khai trong `allowedInKit` kèm lý do.
+  - [x] Đúng một trong `icon` / `child` (assert); `child` không bị ép màu.
+  - [x] Ô cố định `SizedBox.square`, không co — cột chữ bên cạnh nhường chỗ.
+- **Checklist phases:** 7, 12.
+
+### M100.111 · MxListRow — hàng nội dung một dòng của v3 (deck, kết quả tìm, tag, thẻ)
+
+- **Status:** **done** — analyze sạch, `mx_list_row_test.dart` + `mx_stress_test.dart` +
+  `widgetbook_coverage_test.dart` + `test/core/theme/` xanh; chưa màn nào dùng.
+- **Goal:** shared component `MxListRow`, **không** phải `MxListTile` (hàng điều hướng/cài đặt):
+  tiêu đề và phụ đề mỗi cái đúng một dòng ellipsis nên mọi hàng trong list cao bằng nhau.
+  Lưới leading / 1fr / trailing, gap 12, padding 12×16, cao tối thiểu 48, divider hairline
+  `border-ghost` (`showDivider`), leading mặc định là `MxIconTile` cỡ `sm` (chuyển `seed`
+  nguyên vẹn), trailing glyph tô `onSurfaceVariant`.
+- **Scope:** `lib/shared/widgets/mx_list_row.dart`, test riêng, specimen stress, entry
+  Widgetbook (`listRowComponent`), vai chữ `AppTextStyles.listRowTitle` (14/600, tracking
+  -0.1, leading 1.35 — hai hằng đặt tên ở `AppTypography`).
+- **Out of scope:** chuyển deck/card/tag/search row hiện có sang dùng nó; `SettingsRow`;
+  golden của component (không test nào bắt buộc, và golden chỉ tác giả được trên Linux).
+- **Dependencies:** M100.110.
+- **Tests required:** `mx_list_row_test.dart`, `mx_stress_test.dart`,
+  `widgetbook_coverage_test.dart`, `test/core/theme/`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_list_row.dart`.
+- **Acceptance criteria:**
+  - [x] `onTap == null` là nội dung thuần (không `InkWell`, không semantics button); có `onTap`
+        thì `MxFocusRing` + `InkWell` với `AppInteractionStates.rowOverlay` và `Semantics(button)`.
+  - [x] Cao tối thiểu 48 đặt **ngoài** padding; tiêu đề và phụ đề `maxLines: 1`, chỉ cột chữ
+        nhường chỗ cho leading/trailing.
+  - [x] Trọng lượng 600 của tiêu đề đi qua `AppTypography.withWeight` (font biến thiên: `fontWeight`
+        trần không đổi gì trên máy).
+  - [x] Không thêm assert loại trừ `leading`/`leadingIcon` — dartdoc ghi icon bị bỏ qua khi
+        widget được truyền.
+- **Checklist phases:** 7, 12.
+
+
+### M100.114 · MxFilterChip — control một-trong-N 28dp, caller đầu tiên của `border-ghost`
 
 - **Status:** **in-progress** — code, Widgetbook và specimen đã có; chờ golden
   Linux `TZ=UTC` và gate đầy đủ.
@@ -1162,15 +1627,15 @@ của M2.
   không chạm `ChipThemeData` dùng chung, nên `ChoiceChip` và `MxPillButton`
   không đổi.
 - **Scope:** `lib/shared/widgets/mx_filter_chip.dart` (`MxFilterChip`: 28dp cố
-  định, count tuỳ chọn, tick thay glyph khi chọn); token `AppSizing.chipHeight`,
-  `AppBorderColors.borderGhost*`, `AppSemanticColors.borderGhost` (khai báo cùng
+  định, count tuỳ chọn, tick thay glyph khi chọn); tái dùng `AppSizing.controlChip`
+  (M100.112, cùng nấc chip 28), thêm `AppBorderColors.borderGhost*`, `AppSemanticColors.borderGhost` (khai báo cùng
   caller đầu tiên theo R7, và bản high-contrast của nó); entry Widgetbook;
   specimen golden `FilterChipGroupSpecimen` / `FilterChipStatesSpecimen`; bảng §7
   của `theme-architecture.md` và dòng R7 của `v3-foundations.md`.
 - **Out of scope:** `ChipThemeData` và mọi component đang dùng nó; `MxPillButton`
   (không đụng, kể cả trích `_TapTarget` dùng chung — `MxFilterChip` chép nguyên
   văn và ghi rõ đó là ứng viên cho task trích riêng); nối chip vào màn hình nào.
-- **Dependencies:** M100.101.
+- **Dependencies:** M100.101, M100.112 (`AppSizing.controlChip`).
 - **Tests required:** `mx_filter_chip_test.dart`, specimen stress trong
   `mx_stress_selection_specimens.dart`, `high_contrast_figures_test.dart`,
   `widgetbook_coverage_test.dart`, hai golden mới.

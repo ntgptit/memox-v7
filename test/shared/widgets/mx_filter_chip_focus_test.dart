@@ -88,7 +88,7 @@ void main() {
         final Rect target = tester.getRect(find.byType(MxFilterChip));
 
         expect(ring, painted, reason: 'the ring is not on the chip');
-        expect(ring.height, AppSizing.chipHeight);
+        expect(ring.height, AppSizing.controlChip);
         expect(
           target.height,
           greaterThan(ring.height),

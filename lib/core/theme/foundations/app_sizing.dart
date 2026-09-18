@@ -2,13 +2,14 @@
 ///
 /// **Not a scale, and deliberately not one.** [AppSpacing], [AppRadius] and
 /// [AppIconSize] are ladders — pick a rung, and the neighbouring rung is the
-/// answer when this one is wrong. These three are floors and fixed extents: a
-/// touch target is not "one step below" anything, and inventing `controlSm` /
-/// `controlMd` / `controlLg` rungs nothing renders would be three decisions
-/// made without a screen to check them against, which is the rule the
-/// unrendered component themes in `app_theme.dart` already follow.
+/// answer when this one is wrong. These are floors and fixed extents: a
+/// touch target is not "one step below" anything, and a generic `controlSm` /
+/// `controlMd` / `controlLg` ladder would be decisions made without a screen to
+/// check them against. What the control rungs below hold instead is the sizes
+/// the v3 Button handoff fixes (48 / 40 / 36 / 32 / 28), each named for the
+/// button size that paints it.
 ///
-/// **Every value here already existed; none is new** (M100.29). Two were on
+/// **Every value in the first group already existed** (M100.29). Two were on
 /// `AppSpacing`, whose own header says it holds "every gap, pad and inset" —
 /// and then immediately had to disclaim [touchTarget] as "a floor, not a step".
 /// A class that has to argue a member is not what the class is for is a member
@@ -39,13 +40,25 @@ abstract final class AppSizing {
   /// `MaterialTapTargetSize.padded` restores [touchTarget] around it, so the
   /// body comes down and the finger's floor does not.
   ///
-  /// **Two heights, not a five-rung ladder.** 32 / 40 / 48 / 56 / 64 is the
-  /// usual control scale and this app renders two of them; the other three
-  /// would be sizes with no screen to check them against, which is the rule
-  /// the unrendered component themes in `app_theme.dart` already follow. It was a
-  /// private `_kCompactHeight` in `mx_action_button.dart` until M100.30 — the
-  /// one control dimension the design system could not see.
+  /// **A short ladder, not the usual 32 / 40 / 48 / 56 / 64 scale.** The
+  /// rungs here are the ones the v3 handoff fixes ([controlChip], [controlDense],
+  /// [controlSmall], this one and [touchTarget]) — each a size the button enum
+  /// names. [controlSmall] and [controlChip] have no live caller yet; they are
+  /// admitted because the handoff fixes their geometry, not because a screen
+  /// needs them today.
+  /// It was a private `_kCompactHeight` in `mx_action_button.dart` until
+  /// M100.30 — the one control dimension the design system could not see.
   static const double controlCompact = 40;
+
+  /// The v3 handoff's small button rung: between [controlCompact] and
+  /// [controlDense], keeping [touchTarget] around it the same way.
+  ///
+  /// The handoff names four roles for it — a reminder-time control, a
+  /// tag-management empty action and two deck-import file pickers. None is a
+  /// built button yet (the reminder time is a list tile; the tag empty state
+  /// has no action), so `MxActionButtonSize.small` is admitted ahead of its
+  /// screens because the handoff fixes its geometry.
+  static const double controlSmall = 36;
 
   /// The dense tier — a chip's content box, the compact breadcrumb line, the
   /// 32 dp icon well beside a metric or a catalog row.
@@ -59,11 +72,19 @@ abstract final class AppSizing {
   /// the two apart.
   static const double controlDense = 32;
 
-  /// A filter chip's fixed painted height (v3 component table —
-  /// docs/design-system/v3-foundations.md:195-198 — "chip cỡ cố định 28").
-  /// Below RawChip's own painted floor, which is why `MxFilterChip` does not
-  /// wrap `ChoiceChip`.
-  static const double chipHeight = 28;
+  /// The v3 handoff's chip-sized button: the shortest control body, keeping
+  /// [touchTarget] around it through `MaterialTapTargetSize.padded`.
+  ///
+  /// The one rung whose look is not a tone: `MxActionButtonSize.chip` paints a
+  /// fixed ghost-edged pill whatever `variant` says, because the handoff's
+  /// `themeRoleUsage` table has no per-tone row for it.
+  ///
+  /// Also `MxFilterChip`'s fixed painted height — the same v3 "chip" size
+  /// (docs/design-system/v3-foundations.md, "chip cỡ cố định 28"), so one
+  /// number serves both rather than two tokens that must agree. Below
+  /// `RawChip`'s own painted floor, which is why `MxFilterChip` does not wrap
+  /// `ChoiceChip`.
+  static const double controlChip = 28;
 
   /// The scrollbar's thumb — Material's own 4, stated (A20.1 P3-09).
   static const double scrollbarThickness = 4;
@@ -84,10 +105,16 @@ abstract final class AppSizing {
   /// its own size.
   ///
   /// Read only to derive clearances — `AppSpacing.fabScrollClearance` — and
-  /// never to size a FAB: `FloatingActionButton` sizes itself, and a widget
-  /// that restated this number would be a second answer able to drift from the
-  /// SDK's.
+  /// not to size a FAB: [fab] states the FAB's own painted size now, so this
+  /// constant's one remaining job is feeding the clearance arithmetic.
   static const double floatingAction = 56;
+
+  /// The v3 Fab contract's own size — the actual painted box, fixed at 52×52
+  /// (never [floatingAction], which backs `AppSpacing.fabScrollClearance`
+  /// only). Two constants because they answer two different questions: this
+  /// one is what the FAB *is*; [floatingAction] is what the scroll tail
+  /// clears, and shrinking the FAB does not need to shrink the clearance.
+  static const double fab = 52;
 
   /// The narrowest a button is allowed to be, label notwithstanding.
   ///
@@ -96,6 +123,16 @@ abstract final class AppSizing {
   /// plus padding and read as a link beside its neighbour. Height comes from
   /// [touchTarget]; this is the other half of the same `Size`.
   static const double buttonMinWidth = 64;
+
+  /// The bottom navigation bar's own painted height — v3's `size-bottom-bar`.
+  ///
+  /// Fixed regardless of the device's gesture inset: [MxNavigationBar] locks
+  /// `NavigationBar.height` to this and hands the inset to its own wrapper
+  /// padding instead, so the painted bar never grows taller on a device with
+  /// more or less gesture-nav space. The spec's 80dp wrapper total is
+  /// `AppSpacing.xs` (top) + this + `AppSpacing.md` (bottom) — not a symbol of
+  /// its own, since nothing computes with it directly.
+  static const double bottomBarHeight = 64;
 
   /// A painted mark that reports state and is not a control: the Library
   /// header's "something is ready to study" dot.

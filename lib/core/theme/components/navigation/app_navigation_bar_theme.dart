@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../typography/app_typography.dart';
 import '../../foundations/app_elevation.dart';
+import '../../foundations/app_icon_size.dart';
 
 /// The bottom bar's whole appearance.
 ///
@@ -13,12 +14,14 @@ NavigationBarThemeData buildNavigationBarTheme(
   ColorScheme scheme,
   TextTheme texts,
 ) => NavigationBarThemeData(
-  // `surfaceContainer`, which is `_NavigationBarDefaultsM3.backgroundColor`.
-  // It took the page colour before M100.22 — passed in as a `background`
-  // parameter, so the bar was the one surface in the app whose role could not
-  // be read off the theme. A bar painted the same colour as the page behind it
-  // is not a bar; the ladder has a rung for exactly this and it is this one.
-  backgroundColor: scheme.surfaceContainer,
+  // **Transparent, since v3 (spec bottom-nav).** `MxNavigationBar` now paints
+  // the bar's own surface — `chrome-glass`, blurred, in its rounded wrapper —
+  // so a second opaque fill here would sit on top of the glass and hide it.
+  // `scheme.surfaceContainer` lived here from M100.22 to give the bar a role
+  // the theme could name; that role moved to `AppDerivedColors.chromeGlass`,
+  // read directly by the component per the v3 theme-prerequisite spec's
+  // access mode for this slot (DIRECT, not via `NavigationBarThemeData`).
+  backgroundColor: Colors.transparent,
   // **A `primary` tint, which v3 names for this slot** (M100.100) — 14% in
   // light, 20% in dark, composited here because AD-14 §1 forbids paint-time
   // alpha.
@@ -55,6 +58,11 @@ NavigationBarThemeData buildNavigationBarTheme(
       color: states.contains(WidgetState.selected)
           ? scheme.primary
           : scheme.onSurfaceVariant,
+      // v3's glyph step for this bar: `AppIconSize.mdCompact` (20), not the
+      // M3 default 24 — stated rather than left to `_NavigationBarDefaultsM3`
+      // so the FIXED dimension in BottomNav's contract has one place it comes
+      // from.
+      size: AppIconSize.mdCompact,
     ),
   ),
   // **The selected label is `primary`, per v3, and this is the one real

@@ -147,10 +147,11 @@ void main() {
           ).filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{});
       expect(
         studyFill,
-        scheme.secondaryContainer,
+        scheme.surfaceContainer,
         reason:
-            'the tonal pair belongs to M3 — a fourth colour here would '
-            'make this a third accent rather than a third weight',
+            'the tonal pair is the v3 secondary tone (surfaceContainer) — a '
+            'fourth colour here would make this a third accent rather than a '
+            'third weight',
       );
       expect(
         studyFill,

@@ -143,7 +143,7 @@ class MxFilterChip extends StatelessWidget {
                         horizontal: AppSpacing.sm,
                       ),
                       child: SizedBox(
-                        height: AppSizing.chipHeight,
+                        height: AppSizing.controlChip,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           spacing: AppSpacing.xs,

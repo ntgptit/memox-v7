@@ -43,8 +43,8 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | FilledButton | background | `primary` (disabled: `onSurface`) | = | disabled dùng `semantic.disabledSurface` — solid, R7 |
 | FilledButton | foreground | `onPrimary` (disabled: `onSurface`) | = | disabled dùng `semantic.onDisabled` |
 | FilledButton | overlay | `onPrimary` @ .08/.10/.10 | = | qua `MxFilledPair.stateLayerOf`; guard AST (M100.36). Trước đó là blend về `onSurface` **cộng** overlay `primary` — xem §6 |
-| FilledButton (destructive) | background / foreground / overlay | `error` / `onError` / `onError` | = | `MxFilledPair.destructive`; guard AST cả ba slot |
-| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | **không dựng** | `MxActionButtonVariant.tonal` gỡ ở M100.36: 0 caller từ #384, và hệ thứ bậc chấm điểm (§4B) chốt bằng `secondary` |
+| FilledButton (destructive) | background / foreground / overlay | `error` / `onError` / `onError` | `errorFill` / `onErrorFill` / `onErrorFill` (`AppSemanticColors`) | `MxFilledPair.destructive`; guard AST cả ba slot. Lệch có chủ ý từ M100.112 (v3): `errorFill` là fill đặc, khác `error` ở dark |
+| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | `surfaceContainer` / `onSurface` | `MxActionButtonVariant.tonal`: gỡ ở M100.36 (0 caller từ #384), dựng lại ở M100.73, và từ M100.112 (v3) đọc `surfaceContainer` / `onSurface` qua `MxFilledPair.tonal` — không còn là cặp M3; cặp này được ghim bằng `mx_tonal_and_outlined_test.dart`, chưa có hàng trong `m3_role_bindings` |
 | OutlinedButton | foreground | `primary` | = | guard AST |
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | = | guard AST |

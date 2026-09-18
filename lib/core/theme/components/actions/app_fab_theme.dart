@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../foundations/app_elevation.dart';
+import '../../foundations/app_icon_size.dart';
 import '../../foundations/app_radius.dart';
+import '../../foundations/app_sizing.dart';
 import '../../states/app_interaction_states.dart';
 
 /// **`primary`/`onPrimary`, because the v3 registry names that pair** — and
@@ -37,6 +39,15 @@ FloatingActionButtonThemeData buildFloatingActionButtonTheme(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(AppRadius.lg),
   ),
+  // The v3 Fab contract's own dimension table — a fixed 52×52 painted box
+  // and a 20dp glyph — not `_FABDefaultsM3`'s 56/24. `sizeConstraints` is
+  // the mechanism `FloatingActionButton` already resolves through for its
+  // `regular` type, so no widget-level `SizedBox` is needed.
+  sizeConstraints: const BoxConstraints.tightFor(
+    width: AppSizing.fab,
+    height: AppSizing.fab,
+  ),
+  iconSize: AppIconSize.mdCompact,
   // **The state washes move with the pair, or they describe the old one.**
   // M3's defaults are not derived from the effective foreground — the SDK
   // hardcodes `onPrimaryContainer` at 8/10/10% — so overriding the resting

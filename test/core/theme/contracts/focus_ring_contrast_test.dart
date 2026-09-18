@@ -150,13 +150,17 @@ void main() {
     group('$mode filled focus ring', () {
       final ThemeData theme = build();
       final ColorScheme scheme = theme.colorScheme;
+      final AppSemanticColors semantic = theme.extension<AppSemanticColors>()!;
 
       /// Every fill `buildFilledStyle` is applied to, with the label that
       /// travels with it — the primary CTA and `MxActionButton`'s destructive
       /// variant. (The tonal pair left with the variant at M100.36.)
       final variants = <String, (Color, Color)>{
         'primary': (filledButtonFill(theme), scheme.onPrimary),
-        'error': (scheme.error, scheme.onError),
+        // Repinned from `scheme.error` / `onError` (Task 2, v3 Button): the
+        // destructive button now draws `errorFill` / `onErrorFill`, so those
+        // are the pixels the ring sits on.
+        'error': (semantic.errorFill, semantic.onErrorFill),
       };
 
       test('a filled button draws a ring at all', () {

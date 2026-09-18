@@ -26,11 +26,13 @@ void main() {
     home: Scaffold(body: Center(child: child)),
   );
 
-  group('the tonal pair reads M3 tonal roles, and only those', () {
-    // `secondaryContainer` / `onSecondaryContainer` is what
-    // `_FilledButtonDefaultsM3` gives `FilledButton.tonal`. Reading anything
-    // else here would make the app's tonal button a fourth colour rather than
-    // M3's third weight — and it would do it invisibly, because any container
+  group('the tonal pair reads the v3 secondary-tone roles, and only those', () {
+    // `surfaceContainer` / `onSurface` is the v3 Button handoff's binding for
+    // the "secondary" tone (`themeRoleUsage`, M3_COLOR/DIRECT/FULL_STRENGTH),
+    // superseding M100.73's choice of M3's own `FilledButton.tonal` pair
+    // (`secondaryContainer` / `onSecondaryContainer`). Reading anything else
+    // here would make the app's tonal button some other colour than the
+    // handoff names — and it would do it invisibly, because any container
     // role looks plausible on screen.
     for (final (String name, ThemeData theme) in <(String, ThemeData)>[
       ('light', light),
@@ -38,15 +40,50 @@ void main() {
     ]) {
       test(name, () {
         final scheme = theme.colorScheme;
+        final semantic = theme.extension<AppSemanticColors>()!;
 
-        expect(MxFilledPair.tonal.fillOf(scheme), scheme.secondaryContainer);
-        expect(MxFilledPair.tonal.labelOf(scheme), scheme.onSecondaryContainer);
         expect(
-          MxFilledPair.tonal.stateLayerOf(scheme),
-          scheme.onSecondaryContainer,
+          MxFilledPair.tonal.fillOf(scheme, semantic),
+          scheme.surfaceContainer,
+        );
+        expect(MxFilledPair.tonal.labelOf(scheme, semantic), scheme.onSurface);
+        expect(
+          MxFilledPair.tonal.stateLayerOf(scheme, semantic),
+          scheme.onSurface,
           reason:
               'the state layer is the pair\'s own `on` role for every pair — a '
               'layer in some other role rotates the hue on press',
+        );
+      });
+    }
+  });
+
+  group('the destructive pair reads the v3 error-fill tokens, not error', () {
+    // The handoff's `themeRoleUsage` binds the destructive container to
+    // `error-fill` — "the SOLID destructive fill, deeper than `error`, which is
+    // the error text colour". `scheme.error` / `onError` stay the text/icon
+    // "this is an error" colour; a button painted with them would be the wrong
+    // red, and both reds are plausible on screen, hence the exact pin.
+    for (final (String name, ThemeData theme) in <(String, ThemeData)>[
+      ('light', light),
+      ('dark', dark),
+    ]) {
+      test(name, () {
+        final scheme = theme.colorScheme;
+        final semantic = theme.extension<AppSemanticColors>()!;
+
+        expect(
+          MxFilledPair.destructive.fillOf(scheme, semantic),
+          semantic.errorFill,
+        );
+        expect(
+          MxFilledPair.destructive.labelOf(scheme, semantic),
+          semantic.onErrorFill,
+        );
+        expect(
+          MxFilledPair.destructive.stateLayerOf(scheme, semantic),
+          semantic.onErrorFill,
+          reason: 'the state layer is the pair\'s own `on` token',
         );
       });
     }
@@ -77,11 +114,11 @@ void main() {
 
     expect(
       button.style?.backgroundColor?.resolve(<WidgetState>{}),
-      scheme.secondaryContainer,
+      scheme.surfaceContainer,
     );
     expect(
       button.style?.foregroundColor?.resolve(<WidgetState>{}),
-      scheme.onSecondaryContainer,
+      scheme.onSurface,
     );
   });
 
@@ -114,7 +151,7 @@ void main() {
     );
     expect(
       style.backgroundColor?.resolve(<WidgetState>{WidgetState.disabled}),
-      isNot(light.colorScheme.secondaryContainer),
+      isNot(light.colorScheme.surfaceContainer),
       reason: 'a disabled button that keeps its fill looks armed and is inert',
     );
   });

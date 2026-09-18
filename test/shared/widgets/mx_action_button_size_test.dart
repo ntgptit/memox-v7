@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/components/actions/app_button_themes.dart'
+    show buttonLabelWeight;
 import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 
 /// What each size *draws*, and the floor none of them may take with it.
@@ -37,11 +41,107 @@ void main() {
     return (tester.getRect(ink).height, tester.getRect(button).height);
   }
 
-  test('the three bodies are the three tokens, in order', () {
-    // Stated as an ordering rather than three numbers: what the enum promises
+  test('the five bodies are the five tokens, in order', () {
+    // Stated as an ordering rather than four numbers: what the enum promises
     // is a ladder, and a ladder that stops descending is the bug.
-    expect(AppSizing.controlDense, lessThan(AppSizing.controlCompact));
+    expect(AppSizing.controlChip, lessThan(AppSizing.controlDense));
+    expect(AppSizing.controlDense, lessThan(AppSizing.controlSmall));
+    expect(AppSizing.controlSmall, lessThan(AppSizing.controlCompact));
     expect(AppSizing.controlCompact, lessThan(AppSizing.touchTarget));
+  });
+
+  testWidgets('small draws 36 and the finger still gets 48', (tester) async {
+    final (body, target) = await pump(tester, MxActionButtonSize.small);
+
+    expect(body, AppSizing.controlSmall);
+    expect(
+      target,
+      greaterThanOrEqualTo(AppSizing.touchTarget),
+      reason: 'a smaller body must never mean a smaller target',
+    );
+  });
+
+  testWidgets('small pads 12 bare and 16 with a glyph', (tester) async {
+    for (final (IconData? icon, double inset) in <(IconData?, double)>[
+      (null, AppSpacing.md),
+      (Icons.add, AppSpacing.lg),
+    ]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: light,
+          home: Scaffold(
+            body: Center(
+              child: MxActionButton(
+                label: 'Study',
+                icon: icon,
+                size: MxActionButtonSize.small,
+                onPressed: _noop,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final button = tester.widget<FilledButton>(
+        find.bySubtype<FilledButton>(),
+      );
+
+      expect(
+        button.style!.padding!.resolve(<WidgetState>{}),
+        EdgeInsets.symmetric(horizontal: inset),
+        reason: 'small padding with icon: $icon',
+      );
+    }
+  });
+
+  testWidgets('small keeps the standard label rung; compact keeps its own', (
+    tester,
+  ) async {
+    // `small` states no `textStyle` of its own, so the label must arrive as
+    // the theme's `label-lg` at the button weight — not compact's `label-md`.
+    for (final (size, rung) in <(MxActionButtonSize, TextStyle)>[
+      (MxActionButtonSize.standard, light.textTheme.labelLarge!),
+      (MxActionButtonSize.small, light.textTheme.labelLarge!),
+      (MxActionButtonSize.compact, light.textTheme.labelMedium!),
+      (MxActionButtonSize.dense, light.textTheme.labelMedium!),
+    ]) {
+      // A fresh tree per size: the button's text style is an
+      // `AnimatedDefaultTextStyle`, and re-pumping over the previous size reads
+      // that size's rung mid-tween (and asserts on the inherit mismatch).
+      await tester.pumpWidget(const SizedBox.shrink());
+      await pump(tester, size);
+
+      final TextStyle drawn = DefaultTextStyle.of(
+        tester.element(find.text('Study')),
+      ).style;
+
+      expect(drawn.fontSize, rung.fontSize, reason: '$size label size');
+      expect(drawn.fontWeight, buttonLabelWeight, reason: '$size weight');
+    }
+  });
+
+  testWidgets('small keeps the standard icon gap', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: light,
+        home: const Scaffold(
+          body: Center(
+            child: MxActionButton(
+              label: 'Study',
+              icon: Icons.add,
+              size: MxActionButtonSize.small,
+              onPressed: _noop,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final double gap =
+        tester.getRect(find.text('Study')).left -
+        tester.getRect(find.byIcon(Icons.add)).right;
+
+    expect(gap, AppSpacing.sm);
   });
 
   testWidgets('standard draws its target', (tester) async {
@@ -72,6 +172,37 @@ void main() {
       greaterThanOrEqualTo(AppSizing.touchTarget),
       reason: 'a smaller body must never mean a smaller target',
     );
+  });
+
+  testWidgets('dense paints the handoff compact radius, the rest keep md', (
+    tester,
+  ) async {
+    // The v3 handoff's "compact" rung is 32 with radius 8 — the box `dense`
+    // already draws — so the radius lives on `dense`. Every other size keeps
+    // the shared `AppRadius.md`; asserting both pins the branching.
+    for (final (size, radius) in <(MxActionButtonSize, double)>[
+      (MxActionButtonSize.standard, AppRadius.md),
+      (MxActionButtonSize.small, AppRadius.md),
+      (MxActionButtonSize.compact, AppRadius.md),
+      (MxActionButtonSize.dense, AppRadius.sm),
+    ]) {
+      await pump(tester, size);
+
+      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      final Set<WidgetState> none = <WidgetState>{};
+      final OutlinedBorder? shape = (button.style ?? const ButtonStyle()).shape
+          ?.resolve(none);
+      final OutlinedBorder effective =
+          shape ??
+          (light.filledButtonTheme.style!.shape!.resolve(none)
+              as OutlinedBorder);
+
+      expect(
+        effective,
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+        reason: '$size radius',
+      );
+    }
   });
 
   testWidgets('every size keeps the floor at 2.0x text scale', (tester) async {
