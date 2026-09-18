@@ -344,6 +344,34 @@ void main() {
     }
   });
 
+  group('error over the limit', () {
+    testWidgets('a caller error on text already past maxLength still builds', (
+      tester,
+    ) async {
+      // `TextField` adds `errorText: ''` to its decoration when the text is
+      // over `maxLength`, and `InputDecoration` rejects `error` beside
+      // `errorText`. That branch is unreachable only because `MxTextField`
+      // always passes `buildCounter`, which makes `TextField` return early
+      // (text_field.dart `_getEffectiveDecoration`). This pins that: dropping
+      // `buildCounter` makes this test throw the assertion.
+      final controller = TextEditingController(text: 'abcdefgh');
+      addTearDown(controller.dispose);
+
+      await pump(
+        tester,
+        MxTextField(
+          controller: controller,
+          label: 'Name',
+          maxLength: 5,
+          errorText: 'Too long',
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Too long'), findsOneWidget);
+    });
+  });
+
   group('counter', () {
     testWidgets('speaks the characters remaining, not the fraction', (
       tester,
