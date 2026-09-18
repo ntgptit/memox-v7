@@ -6,6 +6,7 @@ import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
@@ -291,6 +292,56 @@ void main() {
         reason: 'layout moved',
       );
     });
+  });
+
+  group('error glyph', () {
+    testWidgets('shows exactly one glyph beside the error text, and none '
+        'without one', (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await pump(
+        tester,
+        MxTextField(
+          controller: controller,
+          label: 'Limit',
+          errorText: 'Enter 1–500',
+        ),
+      );
+      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+
+      await pump(tester, MxTextField(controller: controller, label: 'Limit'));
+      expect(find.byIcon(Icons.error_outline), findsNothing);
+    });
+
+    for (final mode in <(String, bool)>[('light', false), ('dark', true)]) {
+      testWidgets('${mode.$1} · the glyph matches the message-s ink exactly', (
+        tester,
+      ) async {
+        final controller = TextEditingController();
+        addTearDown(controller.dispose);
+        await pump(
+          tester,
+          MxTextField(
+            controller: controller,
+            label: 'Limit',
+            errorText: 'Enter 1–500',
+          ),
+          isDark: mode.$2,
+        );
+
+        final theme = mode.$2 ? buildDarkTheme() : buildLightTheme();
+        final semantic = theme.extension<AppSemanticColors>()!;
+        final glyph = tester.widget<Icon>(
+          find.descendant(
+            of: find.byType(MxIcon),
+            matching: find.byIcon(Icons.error_outline),
+          ),
+        );
+
+        expect(glyph.color, semantic.dangerInk);
+      });
+    }
   });
 
   group('counter', () {
