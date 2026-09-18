@@ -7,6 +7,7 @@ import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
+import 'package:memox/shared/widgets/mx_icon_tile.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -613,6 +614,29 @@ WidgetbookComponent listTileComponent() {
                     _ => null,
                   },
                 ),
+              ),
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent iconTileComponent() {
+  return WidgetbookComponent(
+    name: 'MxIconTile',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final isSeeded = context.knobs.boolean(label: 'seeded');
+
+          return Scaffold(
+            body: Center(
+              child: MxIconTile(
+                icon: Icons.layers_outlined,
+                seed: isSeeded ? const Color(0xFF5265F5) : null,
               ),
             ),
           );
