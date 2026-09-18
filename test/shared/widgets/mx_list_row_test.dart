@@ -40,7 +40,7 @@ void main() {
       expect(find.byType(Text), findsOneWidget);
     });
 
-    testWidgets('is at least 48dp tall with only a title', (tester) async {
+    testWidgets('is exactly 48dp tall with only a title', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: buildLightTheme(),
@@ -65,6 +65,7 @@ void main() {
       final Text title = tester.widget(find.text('Academic Word List'));
       final TextStyle style = title.style!;
       expect(style.fontWeight, FontWeight.w600);
+      expect(style.letterSpacing, -0.1);
       expect(style.fontVariations, contains(const FontVariation('wght', 600)));
     });
 

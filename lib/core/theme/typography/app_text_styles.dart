@@ -24,6 +24,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.stateChipLabel,
     required this.listHeading,
     required this.heroNumeral,
+    required this.listRowTitle,
   });
 
   /// Both styles, derived from the built [texts] so they inherit whatever the
@@ -65,6 +66,13 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
         height: AppTypography.heroNumeralCapTrim,
         fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
       ),
+      listRowTitle: AppTypography.withWeight(
+        (texts.bodyMedium ?? const TextStyle()).copyWith(
+          height: AppTypography.listRowTitleHeight,
+          letterSpacing: AppTypography.listRowTitleTracking,
+        ),
+        FontWeight.w600,
+      ),
     );
   }
 
@@ -101,6 +109,11 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// declared the weight and painted the rung's default.
   final TextStyle heroNumeral;
 
+  /// The title of a content row (`MxListRow`): `body-md` at the emphatic 600,
+  /// closed up by `listRowTitleTracking` and set on the row's own leading.
+  /// Colour stays with the caller — `AppInk.stated` at the row.
+  final TextStyle listRowTitle;
+
   @override
   AppTextStyles copyWith({
     TextStyle? cardPrompt,
@@ -109,6 +122,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     TextStyle? stateChipLabel,
     TextStyle? listHeading,
     TextStyle? heroNumeral,
+    TextStyle? listRowTitle,
   }) => AppTextStyles(
     cardPrompt: cardPrompt ?? this.cardPrompt,
     sectionLabel: sectionLabel ?? this.sectionLabel,
@@ -116,6 +130,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     stateChipLabel: stateChipLabel ?? this.stateChipLabel,
     listHeading: listHeading ?? this.listHeading,
     heroNumeral: heroNumeral ?? this.heroNumeral,
+    listRowTitle: listRowTitle ?? this.listRowTitle,
   );
 
   @override
@@ -133,6 +148,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       stateChipLabel: TextStyle.lerp(stateChipLabel, other.stateChipLabel, t)!,
       listHeading: TextStyle.lerp(listHeading, other.listHeading, t)!,
       heroNumeral: TextStyle.lerp(heroNumeral, other.heroNumeral, t)!,
+      listRowTitle: TextStyle.lerp(listRowTitle, other.listRowTitle, t)!,
     );
   }
 }

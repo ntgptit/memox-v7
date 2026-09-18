@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/extensions/app_ink.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import '../../core/theme/foundations/app_decorations.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/states/app_interaction_states.dart';
-import '../../core/theme/typography/app_typography.dart';
 import 'mx_focus_ring.dart';
 import 'mx_icon.dart';
 import 'mx_icon_tile.dart';
@@ -90,7 +90,7 @@ class MxListRow extends StatelessWidget {
 
   /// `null` lets the title (and subtitle, if present) be read as separate
   /// nodes. Set it when the tappable row's target needs one merged
-  /// announcement instead.
+  /// announcement instead. Ignored when [onTap] is null.
   final String? semanticLabel;
 
   @override
@@ -130,15 +130,10 @@ class MxListRow extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        AppTypography.withWeight(
-                          context.texts.bodyMedium!,
-                          FontWeight.w600,
-                        ).copyWith(
-                          letterSpacing: -0.1,
-                          height: 1.35,
-                          color: scheme.onSurface,
-                        ),
+                    style: context.textStyles.listRowTitle.inked(
+                      context,
+                      AppInk.stated,
+                    ),
                   ),
                   if (subtitleText != null) ...<Widget>[
                     const SizedBox(height: _subtitleGap),
@@ -146,8 +141,9 @@ class MxListRow extends StatelessWidget {
                       subtitleText,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: context.texts.bodySmall!.copyWith(
-                        color: scheme.onSurfaceVariant,
+                      style: context.texts.bodySmall!.inked(
+                        context,
+                        AppInk.quiet,
                       ),
                     ),
                   ],
@@ -174,6 +170,10 @@ class MxListRow extends StatelessWidget {
 
     final VoidCallback? tap = onTap;
     if (tap == null) return bordered;
+
+    // Press paints the InkWell splash plus `ThemeData.highlightColor` — the
+    // same accepted fall-through as `MxListTile` (mx_list_tile.dart:152-155),
+    // not a second overlay of this row's own.
 
     final WidgetStateProperty<Color?> overlay = AppInteractionStates.rowOverlay(
       scheme,
