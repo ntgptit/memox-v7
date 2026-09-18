@@ -1153,7 +1153,7 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
-### M100.102 · SearchField đọc handoff v3 riêng của nó
+### M100.103 · SearchField đọc handoff v3 riêng của nó
 
 - **Status:** **done** — analyze sạch, unit test xanh, golden vẽ lại trên Linux
   `TZ=UTC`, gallery republish tại URL ghim.
