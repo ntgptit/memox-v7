@@ -1,10 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/presentation/screens/card_import_screen.dart';
+import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/features/study/presentation/screens/study_entry_screen.dart';
 import 'package:memox/features/study/presentation/screens/study_home_screen.dart';
 import 'package:memox/features/study/presentation/screens/study_options_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox_widgetbook/screens/card_import_screen_use_case.dart';
+import 'package:memox_widgetbook/screens/card_list_screen_use_case.dart';
 import 'package:memox_widgetbook/screens/study_screens_use_case.dart';
 import 'package:memox_widgetbook/support/catalog_route_stub.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -116,6 +118,42 @@ void main() {
             .widget<CatalogRouteStubPage>(find.byType(CatalogRouteStubPage))
             .routeName,
         'Card list',
+      );
+    });
+  });
+
+  group('Card list', () {
+    // BR-246: a tap on a row is the most-used gesture here, and it has to lead
+    // to the reading surface. It used to open the editor, so the assertion is
+    // on *which* destination arrived, not merely that one did.
+    testWidgets('a row tap opens card detail, not the editor', (tester) async {
+      await pumpUseCase(tester, cardListScreenComponent());
+      expect(find.byType(CardListScreen), findsOneWidget);
+
+      await tester.tap(find.text('안녕하세요').first);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester
+            .widget<CatalogRouteStubPage>(find.byType(CatalogRouteStubPage))
+            .routeName,
+        'Card detail',
+      );
+    });
+
+    testWidgets('and the FAB opens the editor in create mode', (tester) async {
+      await pumpUseCase(tester, cardListScreenComponent());
+
+      await tester.tap(find.bySemanticsLabel(english.cardListNewAction).first);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester
+            .widget<CatalogRouteStubPage>(find.byType(CatalogRouteStubPage))
+            .routeName,
+        'Card editor · create',
       );
     });
   });

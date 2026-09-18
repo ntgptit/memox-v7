@@ -14,6 +14,7 @@ import 'screens/card_detail_screen_use_case.dart';
 import 'screens/card_editor_screen_use_case.dart';
 import 'screens/card_export_sheet_use_case.dart';
 import 'screens/card_import_screen_use_case.dart';
+import 'screens/card_list_screen_use_case.dart';
 import 'screens/deck_list_screen_use_case.dart';
 import 'screens/progress_deck_screen_use_case.dart';
 import 'screens/progress_screen_use_case.dart';
@@ -143,6 +144,7 @@ class MemoxWidgetbook extends StatelessWidget {
             cardEditorScreenComponent(),
             cardExportSheetComponent(),
             cardImportScreenComponent(),
+            cardListScreenComponent(),
             deckListScreenComponent(),
             progressScreenComponent(),
             settingsScreenComponent(),
