@@ -136,6 +136,9 @@ abstract final class AppTypography {
   /// sits inside a pill, not over a list.
   static const double stateChipTracking = 0.6;
 
+  /// The v3 Breadcrumb current-segment weight.
+  static const FontWeight breadcrumbCurrentWeight = FontWeight.w700;
+
   /// The hero numeral's line box, as a multiple of its own size.
   ///
   /// **Not a leading adjustment — a cap-height trim, and the number is
@@ -171,6 +174,14 @@ abstract final class AppTypography {
   /// the app sits above a group of rows with no control beside it, and
   /// [labelTracking] is still right there.
   static const double listHeadingTracking = 0.72;
+
+  /// The option row's title — `-0.1` at `title-sm` (body-14 semibold, GC-4).
+  /// No scale rung carries this tracking; the kit states it for this row.
+  static const double optionRowTitleTracking = -0.1;
+
+  /// The option row's description leading — `1.45` at `body-sm` (caption-12
+  /// at body weight, GC-4), which otherwise leads at [captionHeight] (1.4).
+  static const double optionRowDescriptionHeight = 1.45;
 
   /// Pairs a [FontWeight] with the matching variable-axis setting.
   static List<FontVariation> _wght(FontWeight weight) => <FontVariation>[

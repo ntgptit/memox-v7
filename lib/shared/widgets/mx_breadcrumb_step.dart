@@ -6,6 +6,12 @@
 // parameter took the file past the 400-line guard.
 part of 'mx_breadcrumb.dart';
 
+/// v3's Breadcrumb segment-type tracking — no named `AppTypography`
+/// tracking token is this value (`labelTracking`=0.72,
+/// `sectionLabelTracking`=1.2), so it is declared here the same way
+/// `mx_breadcrumb.dart`'s `_kFocusUnderlineThickness` is.
+const double _kSegmentTracking = 0.1;
+
 /// One step: a link when there is somewhere to go, text when there is not.
 ///
 /// **A link, not a button — every state lives on the text.** It was an `InkWell`
@@ -50,8 +56,8 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
   bool _isFocused = false;
 
   EdgeInsetsGeometry get _padding => EdgeInsetsDirectional.only(
-    start: widget.isFirst ? 0 : AppSpacing.sm,
-    end: AppSpacing.sm,
+    start: widget.isFirst ? 0 : AppSpacing.xs,
+    end: AppSpacing.xs,
   );
 
   /// The step's leading glyph, tinted to match the label it belongs to.
@@ -73,9 +79,10 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
     // step. The deck list stopped doing that and the bug was immediate: its
     // final ancestor was a working link drawn as though it were not one.
     //
-    // Both states rest at `onSurfaceVariant` and weight separates them: a link
-    // used to be `onSurface`, which made the path as loud as the app-bar title
-    // one line above it. A breadcrumb is chrome.
+    // v3's dimension table fixes the current segment at `onSurface`/700 so it
+    // reads as the bold, non-tappable "you are here" marker; the ancestor
+    // stays quiet/500 below it, in the tappable branch further down (see
+    // docs/superpowers/plans/2026-09-18-breadcrumb-v3-geometry.md).
     //
     // **No 48 floor here.** `AppSpacing` calls the touch target a floor because
     // it applies to what a finger must hit, and this step is a statement. A
@@ -92,7 +99,13 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
             ?_icon(AppInk.quiet),
             Text(
               widget.item.label,
-              style: context.texts.labelMedium!.inked(context, AppInk.quiet),
+              style:
+                  AppTypography.withWeight(
+                        context.texts.labelMedium!,
+                        AppTypography.breadcrumbCurrentWeight,
+                      )
+                      .inked(context, AppInk.stated)
+                      .copyWith(letterSpacing: _kSegmentTracking),
               maxLines: 1,
             ),
           ],
@@ -112,7 +125,7 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
     // Through the wght axis — a bare `fontWeight:` paints the rung's old
     // weight.
     final style =
-        AppTypography.withWeight(context.texts.labelMedium!, FontWeight.w600)
+        AppTypography.withWeight(context.texts.labelMedium!, FontWeight.w500)
             .inked(context, ink)
             .copyWith(
               decoration: _isHovered || _isFocused
@@ -122,6 +135,7 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
               decorationThickness: _isFocused
                   ? _kFocusUnderlineThickness
                   : null,
+              letterSpacing: _kSegmentTracking,
             );
 
     return Semantics(
@@ -173,14 +187,16 @@ class _MxBreadcrumbSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // **A slash, not a chevron** (owner review, 2026-08-21). The header's way
-    // back is a `<`, and a `>` between every step put two arrows pointing
-    // opposite ways on one line — the eye reads them as controls in
-    // disagreement rather than as punctuation.
+    // chevron-right, not the header's `/` (owner review, 2026-08-21,
+    // this file's `_kSeparator` doc): that rejection is about the header's
+    // own chevron_left "back" affordance reading as two controls in
+    // disagreement. This mode has no whole-strip back affordance, so the
+    // v3 kit's chevron-right applies here only.
     return ExcludeSemantics(
-      child: Text(
-        _kSeparator,
-        style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+      child: Icon(
+        Icons.chevron_right,
+        size: AppIconSize.sm,
+        color: context.colors.outline,
       ),
     );
   }

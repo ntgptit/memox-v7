@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart' show Color;
+import 'package:memox/core/theme/foundations/app_derived_colors.dart';
 import 'package:memox/core/theme/schemes/app_color_scheme.dart';
 
 import 'audit_allowance.dart';
@@ -143,6 +145,7 @@ List<AuditSkipAllowance> deckShellAllowances({
           'and pinned by m3_role_contract_test.dart; the two selected states '
           'are pinned by the mx_navigation_bar_* goldens.',
     ),
+    ...navigationBarGlassAllowances,
     AuditSkipAllowance(
       itemId: screenItemId,
       reason: SkipReason.rasterOnly,
@@ -242,10 +245,39 @@ List<AuditSkipAllowance> mxActionButtonAllowances(
   ),
 ];
 
+/// The two skips the bar's glass surface adds (M100.105), spelled once because
+/// every screen inside the navigation shell paints it.
+const List<AuditSkipAllowance>
+navigationBarGlassAllowances = <AuditSkipAllowance>[
+  AuditSkipAllowance(
+    itemId: 'navigation_bar',
+    reason: SkipReason.unknownRenderType,
+    detailContains: 'RenderBackdropFilter',
+    rationale:
+        'The bar blurs whatever is behind it (glass-blur, M100.105). A '
+        'RenderBackdropFilter paints no colour of its own — it only filters '
+        'what was painted before it — so there is nothing for the audit to '
+        'extract. The fill on top is the chrome-glass token, which the audit '
+        'does read and the palette now closes over; the blur sigma is the '
+        'AppEffects.glassBlurSigma constant.',
+  ),
+  AuditSkipAllowance(
+    itemId: 'navigation_bar',
+    reason: SkipReason.rasterNotFlat,
+    detailContains: 'covers only 0% of its own rect',
+    rationale:
+        'chrome-glass is 84% surface, composited over the backdrop at paint '
+        'time, so no pixel in the bar ever equals the declared fill and the '
+        'raster cannot confirm or contradict it. The declared colour is '
+        'derived once in AppDerivedColors.chromeGlass and pinned by '
+        'v3_theme_binding_test.dart and mx_navigation_bar_test.dart.',
+  ),
+];
+
 /// The active tab label's accepted text floor (M100.100).
 ///
-/// v3 inks the selected label with `primary`, which measures **3.95:1** on the
-/// bar in light — under the 4.5:1 WCAG 1.4.3 asks of small text. The owner
+/// v3 inks the selected label with `primary`, which measured **3.95:1** on the
+/// old bar in light — under the 4.5:1 WCAG 1.4.3 asks of small text. The owner
 /// chose v3 with that figure in hand; this keeps the deviation visible in
 /// every audit report rather than switching the rule off, and a further drop
 /// still fails because the floor is pinned at the measured value.
@@ -254,20 +286,27 @@ List<AuditSkipAllowance> mxActionButtonAllowances(
 ///
 /// Spelled once here because every screen inside the navigation shell paints
 /// it, and nine copies of one decision is how the copies start disagreeing.
-final List<ContrastFloorAllowance> navigationBarSelectedLabelFloors =
-    <ContrastFloorAllowance>[
-      ContrastFloorAllowance(
-        itemId: 'navigation_bar',
-        foreground: lightColorScheme.primary,
-        background: lightColorScheme.surfaceContainer,
-        floor: 3.94,
-        rationale:
-            'v3 inks the active tab label with primary (M100.100). 3.95:1 on '
-            'the bar in light, under the 4.5 small text owes — floored to 3.94 '
-            'per R12 because the measurement is 3.9485. The selection is still '
-            'carried without colour by the outlined/filled icon pair, the w600 '
-            'weight and Semantics(selected:). Restoring the floor means a '
-            'darker primary for ink use or a bar ground further from it, and '
-            'belongs to whichever task takes that on.',
-      ),
-    ];
+final List<ContrastFloorAllowance>
+navigationBarSelectedLabelFloors = <ContrastFloorAllowance>[
+  for (final background in <Color>[
+    lightColorScheme.surface,
+    AppDerivedColors.chromeGlass(lightColorScheme),
+  ])
+    ContrastFloorAllowance(
+      itemId: 'navigation_bar',
+      foreground: lightColorScheme.primary,
+      background: background,
+      floor: 4.38,
+      rationale:
+          'v3 inks the active tab label with primary (M100.100). Since the '
+          'bar became chrome-glass (M100.105) the label reads 4.39:1 on '
+          'surface — up from 3.95 on the old surfaceContainer bar, but '
+          'still under the 4.5 small text owes — so the floor moves up to '
+          '4.38 per R12. Checked against both the flat surface and the '
+          'declared glass fill, because the audit measures each. The '
+          'selection is still carried without colour by the outlined/filled '
+          'icon pair, the w600 weight and Semantics(selected:). Restoring '
+          'the full 4.5 means a darker primary for ink use, and belongs to '
+          'whichever task takes that on.',
+    ),
+];
