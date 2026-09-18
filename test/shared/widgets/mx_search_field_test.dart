@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_decorations.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
-/// `MxSearchField` — the filled pill under an app bar.
+/// `MxSearchField` — the v3 filled control under an app bar.
 void main() {
   final light = buildLightTheme();
-  final semantic = light.extension<AppSemanticColors>()!;
 
   Future<void> pump(
     WidgetTester tester, {
@@ -70,22 +69,25 @@ void main() {
       await pump(tester);
       await tester.pumpAndSettle();
 
-      expect(decorationOf(tester).color, semantic.surfaceMuted);
-      // The boundary is the control system's, not the fill's own colour: an
-      // edge at 1.09:1 identified nothing (#433 §4.1, M100.36 4E).
-      expect(decorationOf(tester).border!.top.color, light.colorScheme.outline);
-      expect(decorationOf(tester).border!.top.width, AppStroke.control);
+      expect(decorationOf(tester).color, light.colorScheme.surfaceContainer);
+      // v3: the boundary is `border-ghost`, not `scheme.outline` — the same
+      // low-contrast trade-off M100.101 already made for `MxTextField`.
+      expect(
+        decorationOf(tester).border!.top.color,
+        AppDecorations.hairlineEdge(light.colorScheme).color,
+      );
+      expect(decorationOf(tester).border!.top.width, AppStroke.hairline);
 
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
       expect(
         decorationOf(tester).color,
-        light.colorScheme.surface,
+        light.colorScheme.surfaceContainerLowest,
         reason: 'a field being typed into stops being a well in the page',
       );
       expect(decorationOf(tester).border!.top.color, light.colorScheme.primary);
-      expect(decorationOf(tester).border!.top.width, AppStroke.control);
+      expect(decorationOf(tester).border!.top.width, AppStroke.hairline);
     });
 
     testWidgets('the border is there at rest, so focus costs no layout', (
@@ -119,7 +121,7 @@ void main() {
 
       expect(
         paintedDecorationOf(tester).color,
-        isNot(light.colorScheme.surface),
+        isNot(light.colorScheme.surfaceContainerLowest),
         reason: 'the pill arrived before the transition had run',
       );
     });
@@ -133,7 +135,10 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pump();
 
-      expect(paintedDecorationOf(tester).color, light.colorScheme.surface);
+      expect(
+        paintedDecorationOf(tester).color,
+        light.colorScheme.surfaceContainerLowest,
+      );
       expect(
         paintedDecorationOf(tester).border!.top.color,
         light.colorScheme.primary,
@@ -202,12 +207,13 @@ void main() {
   group('layout', () {
     testWidgets('the glyph and the text share a centre line', (tester) async {
       // OLD assertion: bottoms within a pixel — held by a `-0.1` vertical
-      // nudge on a field that filled a fixed 48 box. NEW contract (M100.36):
-      // the field is its own line box, centred in the row like the glyph, so
-      // the relationship a centred row actually has is the one asserted. A
-      // 16 glyph and a 20 line box centred together have bottoms 2 apart by
-      // construction, which is not the "hint sits lower" defect the old test
-      // was written for — that was a whole-box misalignment.
+      // nudge on a field that filled a fixed 48 box. NEW contract (M100.36,
+      // and unchanged by the v3 geometry pass): the field is its own line
+      // box, centred in the row like the glyph, so the relationship a centred
+      // row actually has is the one asserted — not the "hint sits lower"
+      // defect the old test was written for, which was a whole-box
+      // misalignment. The glyph is 20 now (v3's `icon sm`), the same step as
+      // the line box, so the two also land bottom-flush.
       await pump(tester);
       await tester.pumpAndSettle();
 
@@ -221,11 +227,13 @@ void main() {
       );
     });
 
-    testWidgets('48 is a floor: the pill grows with the text and clips '
+    testWidgets('52 is a floor: the pill grows with the text and clips '
         'nothing', (tester) async {
       // #433 F2: `SizedBox(height: 48)` + `expands: true` turned a documented
       // floor into a ceiling, and from 2.5× the placeholder was clipped to
-      // the box — silently, because clipping is not an overflow.
+      // the box — silently, because clipping is not an overflow. The floor
+      // itself moved to 52 for the v3 SearchField spec's own input height;
+      // the floor-not-ceiling mechanism this test guards did not.
       for (final width in <double>[320, 360, 393]) {
         for (final scale in <double>[1.0, 1.3, 2.0, 2.5, 3.0]) {
           tester.view.physicalSize = Size(width, 640);
@@ -259,21 +267,19 @@ void main() {
           final text = tester.getRect(find.byType(EditableText));
           final why = '$width × $scale';
           expect(tester.takeException(), isNull, reason: why);
-          expect(pill.height, greaterThanOrEqualTo(48), reason: why);
+          expect(pill.height, greaterThanOrEqualTo(52), reason: why);
           expect(text.top, greaterThanOrEqualTo(pill.top), reason: why);
           expect(text.bottom, lessThanOrEqualTo(pill.bottom), reason: why);
           if (scale == 1.0) {
-            // 49, not 48, at every width: v3's input text line box is a
-            // text-driven pixel taller than the rung it replaced. Still the
-            // floor plus a pixel, not a floor violation — see
-            // `greaterThanOrEqualTo(48)` above — and whether the floor
-            // itself should move to meet it is the SearchField component
-            // spec's call (v3's own input height is 52), not this
-            // foundations task's.
-            expect(pill.height, 49.0, reason: why);
+            // 53, not 52: the same text-engine-rounding pixel the old 48
+            // floor carried (49, not 48) — `_fieldInset` scales with the
+            // floor, so the inset grew with it and the content still lands
+            // one pixel past its own floor. Still the floor plus a pixel, not
+            // a floor violation — see `greaterThanOrEqualTo(52)` above.
+            expect(pill.height, 53.0, reason: why);
           }
           if (scale >= 2.5) {
-            expect(pill.height, greaterThan(48), reason: '$why: still pinned');
+            expect(pill.height, greaterThan(52), reason: '$why: still pinned');
           }
         }
       }

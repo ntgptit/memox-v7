@@ -175,6 +175,14 @@ abstract final class AppTypography {
   /// [labelTracking] is still right there.
   static const double listHeadingTracking = 0.72;
 
+  /// The option row's title — `-0.1` at `title-sm` (body-14 semibold, GC-4).
+  /// No scale rung carries this tracking; the kit states it for this row.
+  static const double optionRowTitleTracking = -0.1;
+
+  /// The option row's description leading — `1.45` at `body-sm` (caption-12
+  /// at body weight, GC-4), which otherwise leads at [captionHeight] (1.4).
+  static const double optionRowDescriptionHeight = 1.45;
+
   /// Pairs a [FontWeight] with the matching variable-axis setting.
   static List<FontVariation> _wght(FontWeight weight) => <FontVariation>[
     FontVariation('wght', weight.value.toDouble()),
