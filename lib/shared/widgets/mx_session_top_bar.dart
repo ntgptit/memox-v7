@@ -5,9 +5,8 @@ import '../../core/theme/foundations/app_icon_size.dart';
 import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
-import '../../core/theme/extensions/app_ink.dart';
-import '../../core/theme/extensions/theme_context_extension.dart';
 import '../../core/theme/typography/app_typography.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_content_shell.dart';
 import 'mx_icon_button.dart';
 import 'mx_progress_bar.dart';
@@ -294,16 +293,14 @@ class _Chip extends StatelessWidget {
         // *classification*, not the sentence a screen wrote — the same reason
         // the context line under it is uppercase and a deck name never is.
         label.toUpperCase(),
-        // [accent] directly, not an `AppInk` — this is the one
-        // `COMPONENT_INPUT` colour the theme layer hands a caller on purpose
-        // (see `AppProductColors.mastery`'s doc comment), not a
-        // general-purpose escape from the ink vocabulary. Through
-        // `withComponentInputColor` rather than a local `.copyWith` so this
-        // stays the one legal spelling of "a caller-supplied colour on a text
-        // rung" — see that extension's doc comment.
-        style: context.textStyles.sectionLabel.withComponentInputColor(
-          accent,
-          weight: AppTypography.badgeLabelWeight,
+        // [accent] directly, not an `AppInk` — the one `COMPONENT_INPUT`
+        // colour the theme layer hands a caller on purpose (see
+        // `AppProductColors.mastery`'s doc comment). The colour goes on
+        // through this file's own private [_inkedIn], so no open-colour helper
+        // is added to the public theme API for a feature to reach.
+        style: AppTypography.withWeight(
+          _inkedIn(context.textStyles.sectionLabel, accent),
+          AppTypography.badgeLabelWeight,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -311,3 +308,8 @@ class _Chip extends StatelessWidget {
     ),
   );
 }
+
+/// [rung] in a colour the caller handed the component — the one place this
+/// file restyles a text rung, and file-private on purpose: [AppInk] is a closed
+/// set of theme roles and cannot carry a per-instance [MxSessionTopBar.accent].
+TextStyle _inkedIn(TextStyle rung, Color color) => rung.copyWith(color: color);

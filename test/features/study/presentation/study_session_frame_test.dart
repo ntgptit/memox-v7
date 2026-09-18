@@ -456,8 +456,39 @@ void main() {
     testWidgets('mastery drives the accent in recall and fill only', (
       tester,
     ) async {
-      for (final mode in <StudyMode>[StudyMode.recall, StudyMode.fill]) {
+      const chipWords = <StudyMode, String>{
+        StudyMode.recall: 'RECALL',
+        StudyMode.fill: 'FILL IN',
+      };
+      for (final mode in chipWords.keys) {
         await pumpFrame(tester, frame(mode: mode));
+
+        final chipLabel = tester.widget<Text>(find.text(chipWords[mode]!));
+        expect(
+          chipLabel.style?.color,
+          semantic.mastery,
+          reason: '${mode.name} chip label',
+        );
+        final chipFill =
+            tester
+                    .widget<DecoratedBox>(
+                      find
+                          .ancestor(
+                            of: find.text(chipWords[mode]!),
+                            matching: find.byType(DecoratedBox),
+                          )
+                          .first,
+                    )
+                    .decoration
+                as BoxDecoration;
+        expect(
+          chipFill.color,
+          Color.alphaBlend(
+            semantic.mastery.withValues(alpha: 0.10),
+            light.colorScheme.surface,
+          ),
+          reason: '${mode.name} chip fill',
+        );
 
         final indicator = tester.widget<LinearProgressIndicator>(
           find.byType(LinearProgressIndicator),
