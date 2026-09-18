@@ -5,7 +5,9 @@ import 'package:memox/app/app.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_elevation.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
 import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
@@ -400,6 +402,16 @@ void main() {
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
         );
+        // The v3 Fab contract's own dimension table — 52×52 painted box, 20dp
+        // glyph — distinct from `_FABDefaultsM3`'s 56/24.
+        expect(
+          fab.sizeConstraints,
+          const BoxConstraints.tightFor(
+            width: AppSizing.fab,
+            height: AppSizing.fab,
+          ),
+        );
+        expect(fab.iconSize, AppIconSize.mdCompact);
         for (final (String state, Color? wash) in <(String, Color?)>[
           ('hover', fab.hoverColor),
           ('focus', fab.focusColor),
