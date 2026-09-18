@@ -1153,7 +1153,87 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
-### M100.102 · `MxAppBar`
+### M100.102 · Fab — hộp 52×52, glyph 20 và vòng focus `onPrimary`
+
+- **Status:** **done** — analyze sạch, host suite 5258 pass, guard 0, golden vẽ
+  lại trên Linux.
+- **Goal:** `MxFab` khớp hợp đồng Fab của v3: hộp vuông 52, glyph 20, và một
+  vòng focus bàn phím (trước đó FAB không có vòng nào).
+- **Scope:** `app_sizing.dart` (`AppSizing.fab`), `app_fab_theme.dart`
+  (`sizeConstraints`, `iconSize`), `mx_focus_ring.dart` (tham số `color` tùy
+  chọn), `mx_fab.dart` (bọc bằng `MxFocusRing`); `mx_fab_test.dart` mới và hai
+  test theme/sizing mở rộng.
+- **Out of scope:** màu, shape, elevation của FAB (đã đúng từ M100.100/M100.35);
+  `AppSizing.floatingAction` và `AppSpacing.fabScrollClearance` — clearance
+  thuộc caller (`ScreenScroll`), nên vẫn 56 dù hộp vẽ là 52, dư 4dp.
+- **Dependencies:** M100.101.
+- **Tests required:** các test ở Scope.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/theme/`, `lib/shared/widgets/mx_fab.dart`,
+  `lib/shared/widgets/mx_focus_ring.dart`
+- **Acceptance criteria:**
+  - [x] Hộp vẽ **52×52** thay vì 56 mặc định của SDK; glyph **20** thay vì 24.
+  - [x] **Vòng focus dùng `onPrimary`, không phải `primary` như prose của spec.**
+        Nền FAB đã là `primary`, nên vòng `primary` là 1.00:1 — vô hình; đây
+        đúng là trường hợp `focusIndicatorOf` sinh ra để xử lý và nút filled đã
+        theo. Không có offset 2: mọi chỗ dùng `MxFocusRing` vẽ sát hình, và một
+        biến thể offset chỉ cho FAB là quy ước thứ hai.
+  - [x] `MxFocusRing` tương thích ngược: năm caller cũ không truyền `color`.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
+### M100.103 · SearchField đọc handoff v3 riêng của nó
+
+- **Status:** **done** — analyze sạch, unit test xanh, golden vẽ lại trên Linux
+  `TZ=UTC`, gallery republish tại URL ghim.
+- **Goal:** `MxSearchField` có spec component riêng (không nằm trong ba đợt
+  M100.99–101, mà `app_input_theme.dart` đã ghi rõ "MxSearchField is its own
+  composition and reads none of this — see its file"). Đưa hình học và màu của
+  nó theo đúng handoff v3 mới: bo góc, chiều cao, fill/viền hai trạng thái, kích
+  cỡ icon.
+- **Scope:** `lib/shared/widgets/mx_search_field.dart`,
+  `test/shared/widgets/mx_search_field_test.dart`.
+- **Out of scope:** token dùng chung (`AppRadius`, `AppSpacing`,
+  `AppIconSize`, `AppDecorations`) — component chỉ đọc, không sửa; caller nào
+  render field (`library_search_screen.dart`, `card_list_screen.dart`,
+  `tag_catalog_screen.dart`) không đổi API nên không chạm.
+- **Dependencies:** M100.101 (đợt Controls đã đặt `border-ghost` +
+  `AppStroke.hairline` làm khuôn cho cặp fill/viền hai trạng thái mà
+  SearchField nối theo).
+- **Tests required:** `mx_search_field_test.dart` (sửa tại chỗ), stress
+  test (`mx_stress_test.dart`), test alignment của hai màn dùng field
+  (`card_list_alignment_test.dart`, `tag_catalog_alignment_test.dart`), test
+  route/state của màn tìm kiếm.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_search_field.dart`.
+- **Acceptance criteria:**
+  - [x] Bo góc đổi từ pill (999) sang `AppRadius.md` (12, `radius-input` theo
+        bảng đổi tên của `v3-foundations.md` §3).
+      - [x] Floor chiều cao đổi 48 → 52 (`--memox-size-input`). `_fieldInset`
+        đổi theo (48 → 52 trừ line-height 20, chia đôi) và tình cờ rơi đúng
+        `AppSpacing.lg` (16) — không phải quy tắc, chỉ là trùng hợp của hai
+        con số mới. Cơ chế "floor không phải ceiling" (#433 F2) **giữ
+        nguyên**: field vẫn lớn theo `textScaler`, chỉ giá trị nghỉ dời.
+  - [x] Viền nghỉ đổi từ `scheme.outline` (đặc, M100.36 4E) sang `border-ghost`
+        (`AppDecorations.hairlineEdge`, mờ) ở `AppStroke.hairline` (1, trước là
+        `AppStroke.control` 1.5) — cùng đánh đổi độ tương phản chủ dự án đã
+        chấp nhận cho `MxTextField` ở M100.101 (**1.19:1** đo lại khớp con số
+        `app_input_theme.dart` đã ghim cho cùng `border-ghost` trên cùng trang).
+  - [x] Fill nghỉ đổi sang đọc trực tiếp `colors.surfaceContainer` (cùng giá
+        trị `semantic.surfaceMuted` cũ, chỉ đổi đường đọc theo đúng bảng
+        `access: DIRECT` của spec); fill focus đổi từ `colors.surface` sang
+        `colors.surfaceContainerLowest`.
+  - [x] Icon glyph dẫn đầu đổi 16 (`MxIconSize.sm`) → 20 (`MxIconSize.mdCompact`
+        — bảng icon `v3-foundations.md` §3 map "compact control" 20 vào đúng
+        bậc này) và **đổi màu theo trạng thái lần đầu tiên**: `onSurfaceVariant`
+        nghỉ → `AppInk.accent` (primary's hue, không phải raw `primary`, vì
+        `icon_ink_boundary_test.dart` chỉ chấp nhận màu đi qua `AppInk`) khi
+        focus.
+  - [x] Vùng trailing giữ 12dp chỗ trống khi rỗng thay vì để field giãn hết —
+        field không còn đổi chiều rộng nhìn thấy khi gõ ký tự đầu tiên.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+
+### M100.104 · `MxAppBar`
 
 - **Status:** **in progress** — widget, wiring, Widgetbook use cases and unit
   tests land in this task; goldens under `test/demo/` moved (compact title
@@ -1209,6 +1289,7 @@ của M2.
   - [ ] Goldens under `test/demo/` regenerated on Linux `TZ=UTC` and the screen
         gallery republished at its pinned Artifact URL — deferred to the
         controller per this task's brief (Windows cannot author goldens).
+
 - **Checklist phases:** 7, 12.
 
 
