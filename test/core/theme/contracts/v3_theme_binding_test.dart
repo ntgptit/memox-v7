@@ -213,12 +213,18 @@ void main() {
 
 // --- PRESERVE_ONLY scan -----------------------------------------------------
 
-/// The 14 registry names whose disposition is PRESERVE_ONLY and that could
-/// plausibly land as a colour-bearing symbol somewhere under
-/// `lib/core/theme` (MEMOX_SEMANTIC_COLOR-, M3_ALIAS-, DERIVED_COLOR- and
-/// DECORATION-shaped entries). `success`, `warning` and `danger` are
-/// deliberately absent — they are pre-existing repository fields that keep
-/// their names (owner ruling 2026-09-18).
+/// 16 of the registry's 19 PRESERVE_ONLY names (spec §5.1–§5.5) — every one
+/// that could plausibly land as a colour- or opacity-bearing symbol somewhere
+/// under `lib/core/theme` (MEMOX_SEMANTIC_COLOR, M3_ALIAS, DERIVED_COLOR,
+/// DECORATION and STATE_TOKEN shaped entries).
+///
+/// **Three, and only three, are deliberately absent: `success`, `warning`
+/// and `danger`.** They are pre-existing repository fields that keep their
+/// names (owner ruling 2026-09-18); scanning for them would report every
+/// call site that already, correctly, uses one — the false positive this
+/// file's other checks are built to avoid, not a gap in this one. Every other
+/// PRESERVE_ONLY name is checked below; one missing with no comment here
+/// would be a forgotten name, not a second deliberate exclusion.
 const List<String> _preserveOnlyNames = <String>[
   'onWarning',
   'streak',
@@ -227,6 +233,7 @@ const List<String> _preserveOnlyNames = <String>[
   'onDanger',
   'textMuted',
   'badgeBg',
+  'textPrimary',
   'primarySoft',
   'primaryBorder',
   'dangerBorder',
@@ -234,6 +241,7 @@ const List<String> _preserveOnlyNames = <String>[
   'warningSoft',
   'shadowNone',
   'borderStrong',
+  'opHover',
 ];
 
 /// Comments stripped the way `theme_layering_test.dart` already does it, so
