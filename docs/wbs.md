@@ -1336,8 +1336,8 @@ của M2.
 
 ### M100.107 · IconButton (plain) đọc đúng hình học v3 — 36 vẽ, 48 chạm, bo tròn, glyph 20
 
-- **Status:** **done** (phần code) — analyze, host suite và guard xanh trên
-  worktree này; golden là việc của controller, xem Dependencies.
+- **Status:** **done** — analyze, host suite 5290/5290 và guard xanh; golden vẽ lại
+  trên Linux `TZ=UTC` (WSL, 44 file, 100 PNG đổi, không thêm/xoá).
 - **Goal:** Style plain của `IconButton` (`buildIconButtonTheme`) đổi từ vẽ trọn
   ô 48×48 squircle `AppRadius.md`, glyph 24 sang đúng hợp đồng handoff kit
   MemoX v3 (Actions & controls, 2026-09-18): một hình tròn sơn 36×36, đặt giữa
@@ -1356,9 +1356,10 @@ của M2.
   siết `BoxConstraints.tightFor(48,48)` cho `MxSessionTopBar`, không còn đổi
   glyph. Không đụng màu, overlay, focus ring, disabled — tất cả đã đúng từ
   M100.101.
-- **Dependencies:** M100.101 (màu đã xong). **Golden chưa vẽ lại** — worktree
-  này chạy Windows, và goldens chỉ author trên Linux (xem quy tắc gallery ở
-  đầu file này); controller vẽ lại và republish gallery sau khi review xong.
+- **Dependencies:** M100.101 (màu đã xong). Gallery republish tại URL ghim theo
+  kiểu **ghép**: 19 figure lấy từ nhánh này, 40 figure còn hình IconButton cũ vì
+  bản live đang mang thay đổi chưa merge của nhánh Button/SearchField — chúng tự
+  cập nhật khi nhánh đó republish.
 - **Tests required:** `app_sizing_test.dart` (hằng số mới vào bảng lưới 4dp,
   assertion `iconButtonInk < touchTarget`, pin `iconButtonTheme.minimumSize`
   đổi từ `touchTarget` sang `iconButtonInk`); nhóm mới "the plain icon button"
