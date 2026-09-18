@@ -1478,6 +1478,54 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
+### M100.110 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
+
+- **Status:** **done** — analyze sạch, `mx_card_*` + `mx_section_test` +
+  `mx_app_bar_test` xanh, golden vẽ lại trên Linux (44 file, 121 PNG; compare
+  44/44 xanh và không ghi PNG nào).
+- **Goal:** Hợp đồng Card của v3 cố định **radius 20** và **padding 20**, và có
+  biến thể *tinted hero* (`surface-hero` + `border-ghost` ở cả hai theme). Hai token
+  đã có sẵn nhưng không ai dùng: `AppRadius.xl` chỉ `.focal`/`.recessed` đọc, còn
+  `AppSpacing.card` không có caller nào trong `lib/`; các recipe trang vẫn vẽ góc 16
+  (thang trước v3) và `MxCardPadding.standard` vẫn đo 16. `AppDerivedColors.surfaceHero`
+  cũng không có consumer.
+- **Scope:** `mx_card.dart` (sáu recipe `.flat` `.raised` `.feedback` `.muted`
+  `.tonal` `.accent` đổi `AppRadius.lg` → `xl`; `standard` đọc `AppSpacing.card`;
+  recipe mới `.hero`), `app_card_theme.dart` (fallback cho `Card` trần đổi cùng),
+  `app_radius.dart` (doc), `mx_card_recipes_test.dart`,
+  `progress_deck_screen_visual_audit_test.dart`, Widgetbook Playground,
+  `card-recipes.md`, 121 golden.
+- **Out of scope:** `.tile` (góc `md`, hàng dày đặc) và `.option` (góc `lg`, dạng
+  control) giữ nguyên — mỗi cái có lý do ghi ngay trong doc của recipe; padding
+  `compact` (12) không nằm trong hợp đồng nên giữ; bottom sheet và dialog vẫn ở
+  `lg` (thuộc component khác); chuyển caller sang `.hero` (deck summary dùng
+  `.accent`, Study Home dùng `.tonal`) — mỗi màn là một thay đổi riêng, giống
+  M100.104 và M100.109. Không đụng theme, token hay palette: **không có theme gap.**
+- **Dependencies:** M100.99.
+- **Tests required:** `mx_card_recipes_test.dart` (bảng radius, padding
+  `standard` = 20, recipe `hero` ở bốn theme), `progress_deck_screen_visual_audit_test.dart`,
+  goldens.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/card-recipes.md`
+- **Output:** `lib/shared/widgets/mx_card.dart`
+- **Acceptance criteria:**
+  - [x] Sáu recipe trang vẽ góc 20; `.focal`/`.recessed` vốn đã 20; `.tile` 12 và
+        `.option` 16 giữ nguyên.
+  - [x] `MxCardPadding.standard` = `AppSpacing.card` = 20 (`none` 0, `compact` 12).
+  - [x] `.hero`: fill = `AppDerivedColors.surfaceHero(scheme)` đúng giá trị theme
+        trả về (card không tự áp phần trăm), viền `border-ghost` ở light **và**
+        dark, góc 20, độ sâu như `.raised`; test ở bốn theme.
+  - [x] **Số đếm của visual audit đổi và đã được đo, không sửa cho qua:** face
+        `library_mixed` của `progress_deck_screen` mất đúng một host `InkWell`.
+        Ở viewport 420×1040, hai deck row trước đây nằm ở 763…924.9 và
+        948.9…1074.5; sau khi ba thẻ section và row đầu cao thêm 8dp mỗi thẻ,
+        chúng nằm ở 787…956.9 và row thứ hai (bấm được) bắt đầu ở ~981, quá đáy
+        vùng cuộn nên sliver không build. `tappableCards` 1 → 0.
+  - [x] Chưa màn nào dùng `.hero`; không golden nào phụ thuộc nó.
+- **Ghi nhận:** `surface-hero` (`AppDerivedColors`) và `surfaceEmphasis` (`.tonal`)
+  là hai giá trị khác nhau cùng được mô tả là "hero" ở hai chỗ trong theme;
+  `.tonal` vẫn đọc `surfaceEmphasis`. Gộp hay không là quyết định khi migrate caller.
+- **Checklist phases:** 7, 12.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
