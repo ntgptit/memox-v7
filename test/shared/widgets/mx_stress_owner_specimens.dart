@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_icon_tile.dart';
 import 'package:memox/shared/widgets/mx_reading_column.dart';
 import 'package:memox/shared/widgets/mx_section.dart';
 import 'package:memox/shared/widgets/mx_section_label.dart';
@@ -28,6 +29,17 @@ List<MxStressSpecimen> ownerStressSpecimens() => <MxStressSpecimen>[
       rows: const <Widget>[
         ListTile(title: Text(kLongLabel)),
         ListTile(title: Text('Sound')),
+      ],
+    ),
+  ),
+  MxStressSpecimen(
+    // The tile beside a long title in a row: the stress is the text column
+    // giving up the width and the 44dp tile keeping its box at 2.0x.
+    name: 'MxIconTile',
+    build: () => const Row(
+      children: <Widget>[
+        MxIconTile(icon: Icons.folder, size: MxIconTileSize.lg),
+        Expanded(child: Text(kLongTitle)),
       ],
     ),
   ),

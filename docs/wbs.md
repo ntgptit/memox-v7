@@ -1523,6 +1523,32 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
+### M100.110 · MxIconTile — ô vuông tô màu dẫn đầu một hàng, theo hợp đồng IconTile của v3
+
+- **Status:** **done** — analyze sạch, `mx_icon_tile_test.dart` + `icon_ink_boundary_test.dart`
+  + `mx_stress_test.dart` + `widgetbook_coverage_test.dart` xanh; chưa màn nào dùng.
+- **Goal:** shared component cho IconTile: ba cỡ (hộp 28/36/44, bo 8/12/12, glyph 16/20/20),
+  tint `primary` 10% sáng / 16% tối hoặc `seed` của caller 12%, glyph đậm đủ, và một ô
+  `child` thay glyph.
+- **Scope:** `lib/shared/widgets/mx_icon_tile.dart`, test riêng, specimen stress, entry
+  Widgetbook (`iconTileComponent`), một dòng trong `allowedInKit` của `icon_ink_boundary_test`.
+- **Out of scope:** chuyển `DeckIconArea`, ListRow, SettingsRow sang dùng nó — mỗi nơi là
+  một thay đổi riêng. Không đụng token hay theme.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_icon_tile_test.dart`, `icon_ink_boundary_test.dart`,
+  `mx_stress_test.dart`, `widgetbook_coverage_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_icon_tile.dart`.
+- **Acceptance criteria:**
+  - [x] Nền ô là `Color.alphaBlend(tint, scheme.surface)` — không để màu trong suốt trên
+        `decoration.color` (rule R7); `surface` là nền được chọn một lần.
+  - [x] Glyph đọc thẳng `scheme.primary` hoặc `seed`, không qua `AppInk` (`AppInk.accent`
+        là `accentInk`, khác `primary`); file được khai trong `allowedInKit` kèm lý do.
+  - [x] Đúng một trong `icon` / `child` (assert); `child` không bị ép màu.
+  - [x] Ô cố định `SizedBox.square`, không co — cột chữ bên cạnh nhường chỗ.
+- **Checklist phases:** 7, 12.
+
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
