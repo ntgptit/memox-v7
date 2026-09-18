@@ -7,7 +7,7 @@
 | **Scope** | Cấu trúc thư mục, trách nhiệm từng tầng, public API của theme. Ngoài phạm vi: *giá trị* của token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" · ma trận dịch Tokyo → MemoX |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-23) |
-| **Updated by task** | M100.97 |
+| **Updated by task** | M100.98 |
 | **Last updated** | 2026-09-18 |
 
 ---
@@ -276,3 +276,84 @@ Ghi lại để lần sau không đề xuất lại:
 - **API của shared surface/action** thuộc AD-23.
 - Cấu trúc `presentation/widgets/` của một feature thuộc AD-15. File này chỉ nói
   về `lib/core/theme/`.
+
+---
+
+## 7. Định tuyến registry v3 theo kind
+
+M100.97 (#569) đưa 45 role `ColorScheme`, mười hai `*Fixed`, bảy ink chữ và
+toàn bộ ladder vào repo — **tầng này không viết lại giá trị nào của #569**.
+Phần còn lại của registry v3
+(`docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md`) là những
+mục Foundation *chưa* có nơi chứa: mỗi mục mang một `KIND`, và KIND quyết
+định nó chảy vào cơ chế nào — không phải agent tự chọn theo cảm tính.
+**#569 sở hữu giá trị Foundation; tầng này sở hữu định tuyến và quyền sống
+của runtime.**
+
+| Kind | Cơ chế | File |
+|---|---|---|
+| `MEMOX_SEMANTIC_COLOR` (BIND_NOW) | Field trên `AppSemanticColors`, giá trị đọc từ hằng số riêng | `foundations/app_semantic_colors.dart` + `foundations/app_product_colors.dart` |
+| `M3_ALIAS` | Đọc thẳng role `ColorScheme` tương ứng — không field riêng | `schemes/app_color_scheme.dart` |
+| `DERIVED_COLOR` | Một hàm dẫn xuất trung tâm, nhận `ColorScheme` | `foundations/app_derived_colors.dart` |
+| `DECORATION` | Một hàm treatment có tên, trả `List<BoxShadow>` hoặc `BorderSide` | `foundations/app_decorations.dart` |
+| `STATE_TOKEN` | Hằng số trên chính sách interaction-state | `states/app_interaction_states.dart` (`AppStateOpacity`) |
+| `EFFECT_TOKEN` | Hằng số đứng ngoài tầng state | `foundations/app_effects.dart` |
+| `COMPONENT_INPUT` / `NONE` | Không field nào — tham số component tự truyền, hoặc hằng số sẵn có của Flutter (`Colors.transparent`) | — |
+
+MUST: một mục `PRESERVE_ONLY` không được thêm field, hằng số hay hàm nào —
+giữ nguyên định nghĩa cũ nếu có, không tạo bản sao không ai gọi. MUST: một
+`M3_ALIAS` không bao giờ có field runtime của riêng nó — nó luôn đọc thẳng
+`ColorScheme`. `test/core/theme/contracts/v3_theme_binding_test.dart` cưỡng
+chế cả hai bằng cách quét khai báo Dart (không quét chữ mù) trên toàn bộ
+`lib/core/theme`.
+
+**Hai chỗ tên trùng nhau, ghi rõ để không ai đọc nhầm cái này thành cái kia:**
+
+- `AppSemanticColors.surfaceMuted` là tên cũ, có từ trước #569, đọc
+  `ColorScheme.surfaceContainer`. `surface-muted` của v3 là một role khác —
+  `surfaceContainerLow`. Hai giá trị khác nhau, hai ý nghĩa khác nhau; field
+  cũ **không đổi**, và **không** phải alias của role v3 cùng tên (owner
+  ruling 2026-09-18).
+- `AppSemanticColors.progressTrack` là một compatibility alias, không phải
+  nguồn thứ hai: nó đọc đúng `ColorScheme.surfaceContainerHigh` — route
+  canonical mà `progress-track` cũng trỏ vào. Không call site nào đọc field
+  này hôm nay; nó nằm trong danh sách nợ cần rút, chờ dịp component nào đó
+  đọc thẳng `context.colors.surfaceContainerHigh` thay vì field này.
+
+### COMPONENT_MIGRATION_PENDING
+
+Slot mà v3 đã đặt tên vai trò nhưng component hôm nay còn đọc vai khác — biết
+trước, hoãn lại, không sửa "tiện tay" trong task ghi nhận này (owner rule 8;
+delta matrix D3/D5 của kế hoạch này). Task implement component nào đọc bảng
+này trước khi tự đoán role.
+
+| Component | Slot | Target semantic role |
+|---|---|---|
+| `MxCard` | container fill (`_MxCardFill.surface`) | `surface-raised` (`surfaceContainerLowest`) |
+| `MxCard` | recessed fill (`_MxCardFill.recessed`) | `surface-muted` (`surfaceContainerLow`) |
+| `MxCard` | viền dark | `border-ghost` (hôm nay: `outlineVariant`) |
+| `CardTheme` | `color` | `surface-raised` |
+| `ChoiceChip` | fill lúc nghỉ | `surfaceContainerLowest` |
+| `BottomSheetThemeData` | `backgroundColor` | `surfaceContainerHigh` (hôm nay: `surfaceContainerLow`) |
+| `BottomSheetThemeData` | grabber (`dragHandleColor`) | `outlineVariant` (hôm nay: `onSurfaceVariant`) |
+| `ThemeData` | `canvasColor` (menu dropdown) | `surface-raised` |
+| guess-option row | nền | `surface-raised` |
+| match tile | nền | `surface-raised` |
+| hai chỗ blend disabled | nền | `surface-raised` |
+| `ProgressIndicatorThemeData` | `linearTrackColor` | `progress-track` (`surfaceContainerHigh`) |
+| `NavigationBar` | nền | `chrome-glass` |
+| `NavigationBar` | indicator | `primary` TINT 14% light / 20% dark |
+| `NavigationBar` | icon + label đã chọn | `primary` |
+| `FloatingActionButton` | nền / glyph | `primary` / `onPrimary` |
+| `MxNavigationBar` | viền trên | `border-ghost` (hôm nay: `borderSubtle`) |
+| `FilterChip` | nền + label đã chọn | `primary` / `onPrimary` |
+| `FilterChip` | label chưa chọn | `onSurface` |
+| `FilterChip` | viền | `border-ghost` |
+| `Switch` | thumb | `surfaceBright` |
+| `OutlinedButton` | side | `outlineVariant` |
+| `IconButton` | glyph | `onSurface` |
+| `TextField` (`InputDecorationTheme`) | fill lúc nghỉ | `surface-muted` |
+| `TextField` (`InputDecorationTheme`) | fill lúc focus | `surface-raised` |
+| `TextField` (`InputDecorationTheme`) | viền | `border-ghost` / `primary` / `error`, hairline |
+| — (chưa ai gọi) | `AppDecorations.chromeShadow` | `shadow-chrome` |
+| `shadowsFor` (thang elevation) | ánh xạ level → treatment | hợp đồng từng component tự quyết khi tới lượt |
