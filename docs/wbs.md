@@ -1200,12 +1200,16 @@ của M2.
         (`#B0485C`) và nhãn (trắng) do theme handoff cố định; chỉnh chúng là việc
         của bước theme, không phải của Button. Ghi vào `acceptedSubAAPressedFloors` (`mx_action_button_composite_state_test.dart`).
         Mở lại nếu chủ dự án muốn `onErrorFill` sáng hơn hoặc state layer khác.
-  - [ ] Golden vẽ lại trên Linux `TZ=UTC`: `study_recall_states`,
-        `study_fill_states`, `study_modes`, `study_session_faces`, golden
-        list/row của deck và golden confirm dialog (mọi nút destructive).
-  - [ ] Full non-golden host suite xanh một lần (chưa chạy: máy nặng, mỗi lần
-        >10 phút; các task chỉ chạy test đích + guard + analyze).
-  - [ ] Gallery: ảnh <digest>
+  - [x] Golden vẽ lại trên Linux (WSL, clone riêng, `TZ=UTC`, `-j 1`): 41 PNG
+        đổi — 39 ở `test/demo/goldens` (deck list/actions/overlay, recall, fill),
+        `deck_list_rhythm.png` và `mx_confirm_dialog_destructive_dark.png`.
+  - [x] Full non-golden host suite: `+5380: All tests passed!` (một lần, sau khi
+        merge `origin/main`; cảnh báo tap của `trash_screen_test.dart` là nhiễu có
+        sẵn).
+  - [x] Gallery: ảnh 401f2460 — ghép 18 màn deck/study vào bản đang ghim (không
+        đè cả trang), cùng URL.
+  - [ ] Bộ integration trên thiết bị (`integration_test/`, baseline 9): chưa chạy —
+        máy không có emulator Android; task này chạm `lib/features/study/`.
 - **Màn hình đổi diện mạo:** nút Study trên hàng deck (pill tonal `surfaceContainer`),
   nút destructive của mọi confirm dialog (`errorFill`), các nút study của
   Recall / Fill / self-assess (pill 48).
