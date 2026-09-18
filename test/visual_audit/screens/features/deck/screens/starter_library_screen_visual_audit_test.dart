@@ -21,6 +21,7 @@ import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../../audit_allowance.dart';
+import '../../../../deck_audit_allowances.dart';
 import '../../../../audit_model.dart';
 import '../../../../audit_rules.dart';
 import '../../../../memox_audit.dart';
@@ -95,6 +96,7 @@ void main() {
       AuditAnchor.type('navigation_bar', MxNavigationBar),
     ],
     drive: (tester) => tester.pumpAndSettle(),
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       const AuditSkipAllowance(
         itemId: 'screen',
@@ -125,8 +127,9 @@ void main() {
         rationale:
             'NavigationBar paints its selection indicator into a Material ink '
             'layer, so the pill has no render object of its own. Its colour is '
-            'secondaryContainer, set in navigationBarTheme, and the states are '
-            'pinned by the mx_navigation_bar_* goldens.',
+            'a composited primary tint since M100.100, set in '
+            'navigationBarTheme and pinned by m3_role_contract_test.dart; the '
+            'states are pinned by the mx_navigation_bar_* goldens.',
       ),
       // The starter screen's own Material layers: its Scaffold, its AppBar
       // (title + automatic back), and the one tappable template card.

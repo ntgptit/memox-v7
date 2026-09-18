@@ -39,21 +39,27 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'backgroundColor',
     file: _fab,
     scope: 'buildFloatingActionButtonTheme',
-    requires: <String>['primaryContainer'],
-    refuses: <String>['primary', 'secondaryContainer', 'tertiaryContainer'],
+    requires: <String>['primary'],
+    refuses: <String>['secondaryContainer', 'tertiaryContainer'],
     because:
-        '_FABDefaultsM3.backgroundColor is primaryContainer. It was `primary` '
-        'from an owner mockup (2026-08-20); if the FAB needs more brand, the '
-        'primaryContainer family moves — this slot does not.',
+        'v3 names primary/onPrimary for the FAB (M100.100), so the brand here '
+        'is the design system speaking rather than a component preference — '
+        'which is what made the 2026-08-20 mockup version wrong and this one '
+        'right. It also lifts the button off the page: primaryContainer read '
+        '1.19:1 there in light and 1.64:1 in dark. _FABDefaultsM3 still says '
+        'primaryContainer; this is a stated deviation, not a drift.',
   ),
   RoleBinding(
     component: 'FloatingActionButton',
     slot: 'foregroundColor',
     file: _fab,
     scope: 'buildFloatingActionButtonTheme',
-    requires: <String>['onPrimaryContainer'],
-    refuses: <String>['onPrimary'],
-    because: '_FABDefaultsM3.foregroundColor is onPrimaryContainer.',
+    requires: <String>['onPrimary'],
+    refuses: <String>['onPrimaryContainer'],
+    because:
+        'The pair moves together (M100.100). _FABDefaultsM3.foregroundColor '
+        'is onPrimaryContainer; the glyph reads 4.63:1 in light and 6.76:1 in '
+        'dark on the new fill, above the 4.5 a label owes.',
   ),
   RoleBinding(
     component: 'Card',
@@ -118,34 +124,41 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'indicatorColor',
     file: _nav,
     scope: 'buildNavigationBarTheme',
-    requires: <String>['secondaryContainer'],
-    refuses: <String>['primaryContainer'],
+    requires: <String>['primary'],
+    refuses: <String>['primaryContainer', 'secondaryContainer'],
     because:
-        '_NavigationBarDefaultsM3.indicatorColor is secondaryContainer. If '
-        'the indicator does not read against the bar, move the tone in '
-        'AppMaterialRoles — not this binding.',
+        'v3 states a primary TINT for this slot — 14% light, 20% dark, '
+        'composited in _indicatorTint because AD-14 §1 forbids paint-time '
+        'alpha (M100.100). It reverses M100.22, which had put the slot back '
+        'on M3 secondaryContainer and moved that role tone instead. The pill '
+        'is not the selection cue either way: it reads 1.18:1 on the bar in '
+        'light and 1.41:1 in dark.',
   ),
   RoleBinding(
     component: 'NavigationBar',
     slot: 'iconTheme',
     file: _nav,
     scope: 'buildNavigationBarTheme',
-    requires: <String>['onSecondaryContainer', 'onSurfaceVariant'],
-    refuses: <String>['onPrimaryContainer'],
+    requires: <String>['primary', 'onSurfaceVariant'],
+    refuses: <String>['onPrimaryContainer', 'onSecondaryContainer'],
     because:
-        'The active glyph sits inside the indicator and takes its `on` '
-        'role.',
+        'v3 inks the active glyph with primary (M100.100). It used to take '
+        'the indicator `on` role; on the tint the glyph now reads 3.34:1 in '
+        'light and 3.69:1 in dark — enough for a graphic.',
   ),
   RoleBinding(
     component: 'NavigationBar',
     slot: 'labelTextStyle',
     file: _nav,
     scope: 'buildNavigationBarTheme',
-    requires: <String>['onSurface', 'onSurfaceVariant'],
+    requires: <String>['primary', 'onSurfaceVariant'],
     refuses: <String>['onPrimaryContainer', 'onSecondaryContainer'],
     because:
-        'The active label sits *below* the indicator, on the bar, so M3 '
-        'inks it onSurface rather than with the pill.',
+        'v3 inks the active label with primary (M100.100). The label sits '
+        '*below* the indicator, on the bar, where M3 would ink it onSurface — '
+        'so this is a stated deviation with a measured cost: 15.03:1 becomes '
+        '3.95:1 in light, under the 4.5 small text owes. '
+        'component_depth_and_state_test.dart pins that figure.',
   ),
   RoleBinding(
     component: 'ChoiceChip',

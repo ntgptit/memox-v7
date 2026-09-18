@@ -1076,6 +1076,41 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.100 · V3 component pass, đợt 2 — Chrome đọc đúng vai v3
+
+- **Status:** **done** — analyze sạch, host suite 5251 pass, guard 0, architecture
+  sạch, `check_docs` xanh, golden vẽ lại trên Linux.
+- **Goal:** Năm dòng nhóm Chrome của `COMPONENT_MIGRATION_PENDING` thôi trỏ sai
+  vai; hai va chạm không tự quyết được thì báo chứ không tự bịa binding.
+- **Scope:** `app_fab_theme.dart` (cặp màu + ba wash trạng thái),
+  `app_navigation_bar_theme.dart` (indicator tint, icon và label đã chọn),
+  `app_progress_theme.dart` (`linearTrackColor`), `mx_navigation_bar.dart`
+  (viền trên); tám file test ghim giá trị cũ; bảng §7.
+- **Out of scope:** nền `NavigationBar` → `chrome-glass` (**chặn** — cần
+  `extendBody` + `BackdropFilter`, là quyết định bố cục); mười dòng Controls.
+- **Dependencies:** M100.99.
+- **Tests required:** các test đã sửa ở Scope, cộng hai pin mới trong
+  `component_depth_and_state_test.dart`.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/theme-architecture.md`
+- **Output:** `lib/core/theme/components/`, `lib/shared/widgets/mx_navigation_bar.dart`
+- **Acceptance criteria:**
+  - [x] FAB là `primary`/`onPrimary`; thân nó rời **1.19:1** (light) và
+        **1.64:1** (dark) so với trang lên **4.39** và **7.39**. Ba wash
+        hover/focus/splash đi theo cặp mới.
+  - [x] Indicator của `NavigationBar` là `primary` tint 14%/20%, composite tại
+        chỗ vì AD-14 §1 cấm alpha lúc vẽ — và composite **ở ngay slot**, vì
+        guard chỉ đọc role trong khai báo có tên slot.
+  - [x] Icon và label đã chọn là `primary`. Glyph đạt **3.34 / 3.69** trên pill
+        (đủ cho graphic); label **3.95 / 5.22** trên bar — light **dưới sàn 4.5**
+        của chữ nhỏ, ghim floor 3.94 theo R12 như bản ghi trạng thái trung gian.
+  - [x] `linearTrackColor` là `surfaceContainerHigh`; track đọc 3.74 / 4.43 so
+        với `primary` fill.
+  - [x] Viền trên `MxNavigationBar` là `border-ghost`.
+  - [x] **Hai va chạm được báo, không tự quyết:** nền `chrome-glass` bị chặn bởi
+        `extendBody`; `SegmentedButton` rời "house pair" vì v3 không nhắc tới nó.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 

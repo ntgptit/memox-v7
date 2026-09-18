@@ -84,6 +84,19 @@ void main() {
       // review moved this app's active state to the brand container, and the
       // navigation bar already renders it — a third answer here would make one
       // question look different on three screens.
+      //
+      // **That coupling broke at M100.100, and this records it rather than
+      // papering over it.** v3 moved the navigation indicator to a composited
+      // `primary` tint; it says nothing about `SegmentedButton`, which is not
+      // in the registry's table at all. So the two now disagree, and the
+      // honest assertion is the narrower one: the segment wears *an app
+      // decision* rather than M3's own pair. Re-uniting them means either the
+      // registry naming this component or the owner ruling that the segment
+      // follows the bar — neither is a call this task gets to make by
+      // inventing a binding.
+      //
+      // COMPONENT_MIGRATION_PENDING in `theme-architecture.md` §7 carries the
+      // mismatch.
       for (final entry in themes.entries) {
         final t = entry.value;
         const on = <WidgetState>{WidgetState.selected};
@@ -91,8 +104,11 @@ void main() {
 
         expect(
           style.backgroundColor!.resolve(on),
-          t.navigationBarTheme.indicatorColor,
-          reason: '${entry.key}: the active segment left the house pair',
+          t.colorScheme.secondaryContainer,
+          reason:
+              '${entry.key}: the active segment left the pair it was given. '
+              'It no longer tracks navigationBarTheme.indicatorColor — v3 '
+              'moved that slot and left this one alone (M100.100).',
         );
         expect(
           contrast(

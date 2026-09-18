@@ -12,6 +12,7 @@ import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
 import '../../../../audit_allowance.dart';
+import '../../../../deck_audit_allowances.dart';
 import '../../../../audit_model.dart';
 import '../../../../card_audit_harness.dart';
 import '../../../../audit_rules.dart';
@@ -108,6 +109,7 @@ void main() {
             'control_border_grounds_test.dart carries.',
       ),
     ],
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: const <AuditSkipAllowance>[
       // The MaterialApp's own surfaces, above the screen.
       AuditSkipAllowance(

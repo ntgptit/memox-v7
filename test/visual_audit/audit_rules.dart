@@ -49,7 +49,20 @@ List<AuditFinding> runAuditRules(ScreenAudit audit, List<AuditRule> rules) =>
 /// contains the ink overlay, the elevation tint and whatever else is stacked
 /// under the text.
 class TextContrastRule implements AuditRule {
-  const TextContrastRule();
+  const TextContrastRule({this.floors = const <ContrastFloorAllowance>[]});
+
+  /// Pairs the owner has already accepted below the WCAG threshold, in the
+  /// same shape [NonTextContrastRule] uses and for the same reason: a match
+  /// still fails if the actual ratio drops below the pinned figure, so an
+  /// allowance covers the measurement someone took and not every future value.
+  ///
+  /// **A text floor is a heavier thing to grant than a non-text one**, which is
+  /// why this channel did not exist until M100.100: 1.4.3 is about whether the
+  /// words can be read. It exists now because v3 put the navigation bar's
+  /// active label on `primary`, which measures 3.95:1 in light, and the choice
+  /// was made with that figure in hand. Recording it here keeps it visible in
+  /// every audit report instead of turning the rule off.
+  final List<ContrastFloorAllowance> floors;
 
   static const double _normal = 4.5;
   static const double _large = 3.0;
@@ -81,6 +94,13 @@ class TextContrastRule implements AuditRule {
         final ratio = contrast(paint.color, background);
         if (ratio >= threshold) continue;
 
+        final ContrastFloorAllowance? allowed = _matchingFloor(
+          item.id,
+          paint.color,
+          background,
+        );
+        if (allowed != null && ratio >= allowed.floor) continue;
+
         yield AuditFinding(
           rule: name,
           itemId: item.id,
@@ -92,6 +112,18 @@ class TextContrastRule implements AuditRule {
         );
       }
     }
+  }
+
+  ContrastFloorAllowance? _matchingFloor(
+    String itemId,
+    Color foreground,
+    Color background,
+  ) {
+    for (final floor in floors) {
+      if (floor.matches(itemId, foreground, background)) return floor;
+    }
+
+    return null;
   }
 }
 

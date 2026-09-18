@@ -390,8 +390,8 @@ void main() {
         final FloatingActionButtonThemeData fab =
             entry.value.floatingActionButtonTheme;
 
-        expect(fab.backgroundColor, scheme.primaryContainer);
-        expect(fab.foregroundColor, scheme.onPrimaryContainer);
+        expect(fab.backgroundColor, scheme.primary);
+        expect(fab.foregroundColor, scheme.onPrimary);
         // The house corner, owned here since the deck list stopped stating it
         // per-site — M3's default is the 16dp squircle nothing else uses.
         expect(
@@ -412,9 +412,12 @@ void main() {
                 '$state left null falls to M3\'s onPrimaryContainer wash — '
                 'another pair\'s ink over this pair\'s fill',
           );
+          // The resting pair is `primary`/`onPrimary` since M100.100, and
+          // these three move with it — a wash in the old pair's ink would be
+          // another system's ink over this system's fill.
           expect(
             wash!.withValues(alpha: 1),
-            scheme.onPrimaryContainer.withValues(alpha: 1),
+            scheme.onPrimary.withValues(alpha: 1),
             reason: '$state washes in a colour that is not the foreground',
           );
         }

@@ -17,5 +17,8 @@ ProgressIndicatorThemeData buildProgressIndicatorTheme(ColorScheme scheme) =>
       // faint track behind a circular indicator in newer versions; on a card
       // that reads as a second ring nobody asked for.
       circularTrackColor: Colors.transparent,
-      linearTrackColor: scheme.secondaryContainer,
+      // v3's `progress-track` (M100.100). The track reads 3.74:1 in light
+      // and 4.43:1 in dark against the `primary` fill it carries, so the
+      // filled portion stays tellable from the empty one.
+      linearTrackColor: scheme.surfaceContainerHigh,
     );
