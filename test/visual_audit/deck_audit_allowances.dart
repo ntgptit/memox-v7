@@ -245,7 +245,7 @@ List<AuditSkipAllowance> mxActionButtonAllowances(
   ),
 ];
 
-/// The two skips the bar's glass surface adds (M100.102), spelled once because
+/// The two skips the bar's glass surface adds (M100.104), spelled once because
 /// every screen inside the navigation shell paints it.
 const List<AuditSkipAllowance>
 navigationBarGlassAllowances = <AuditSkipAllowance>[
@@ -254,7 +254,7 @@ navigationBarGlassAllowances = <AuditSkipAllowance>[
     reason: SkipReason.unknownRenderType,
     detailContains: 'RenderBackdropFilter',
     rationale:
-        'The bar blurs whatever is behind it (glass-blur, M100.102). A '
+        'The bar blurs whatever is behind it (glass-blur, M100.104). A '
         'RenderBackdropFilter paints no colour of its own — it only filters '
         'what was painted before it — so there is nothing for the audit to '
         'extract. The fill on top is the chrome-glass token, which the audit '
@@ -299,7 +299,7 @@ navigationBarSelectedLabelFloors = <ContrastFloorAllowance>[
       floor: 4.38,
       rationale:
           'v3 inks the active tab label with primary (M100.100). Since the '
-          'bar became chrome-glass (M100.102) the label reads 4.39:1 on '
+          'bar became chrome-glass (M100.104) the label reads 4.39:1 on '
           'surface — up from 3.95 on the old surfaceContainer bar, but '
           'still under the 4.5 small text owes — so the floor moves up to '
           '4.38 per R12. Checked against both the flat surface and the '

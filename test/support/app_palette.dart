@@ -109,7 +109,7 @@ final List<Color> lightPaletteTokens = <Color>[
   // from the treatment rather than restated as a hex, so the palette cannot
   // close over a value the app no longer paints.
   AppDecorations.hairlineEdge(lightColorScheme).color,
-  // v3's `chrome-glass` (M100.102): `MxNavigationBar`'s fill, `surface` at
+  // v3's `chrome-glass` (M100.104): `MxNavigationBar`'s fill, `surface` at
   // 84%. Declared translucent on purpose — it composites over the blurred
   // backdrop at paint time — so it is an exact token here rather than a
   // blend the raster check would have to explain.
@@ -218,7 +218,7 @@ final List<Color> darkPaletteTokens = <Color>[
   // from the treatment rather than restated as a hex, so the palette cannot
   // close over a value the app no longer paints.
   AppDecorations.hairlineEdge(darkColorScheme).color,
-  // v3's `chrome-glass` (M100.102): `MxNavigationBar`'s fill, `surface` at
+  // v3's `chrome-glass` (M100.104): `MxNavigationBar`'s fill, `surface` at
   // 84%. Declared translucent on purpose — it composites over the blurred
   // backdrop at paint time — so it is an exact token here rather than a
   // blend the raster check would have to explain.

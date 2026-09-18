@@ -1153,7 +1153,7 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
-### M100.102 · V3 component pass — BottomNav đọc đúng hợp đồng v3
+### M100.104 · V3 component pass — BottomNav đọc đúng hợp đồng v3
 
 - **Status:** **done** — analyze sạch, host suite xanh, golden vẽ lại trên Linux
   (47 PNG đổi), gallery republish tại URL ghim.
@@ -1184,6 +1184,35 @@ của M2.
         `surfaceContainer` được nới có chủ đích vì role đã chuyển sang
         `chrome-glass`, đọc trực tiếp bởi component.
   - [x] Focus ring và ripple giữ hành vi toàn cục/canonical, không thêm quy ước.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
+### M100.102 · Fab — hộp 52×52, glyph 20 và vòng focus `onPrimary`
+
+- **Status:** **done** — analyze sạch, host suite 5258 pass, guard 0, golden vẽ
+  lại trên Linux.
+- **Goal:** `MxFab` khớp hợp đồng Fab của v3: hộp vuông 52, glyph 20, và một
+  vòng focus bàn phím (trước đó FAB không có vòng nào).
+- **Scope:** `app_sizing.dart` (`AppSizing.fab`), `app_fab_theme.dart`
+  (`sizeConstraints`, `iconSize`), `mx_focus_ring.dart` (tham số `color` tùy
+  chọn), `mx_fab.dart` (bọc bằng `MxFocusRing`); `mx_fab_test.dart` mới và hai
+  test theme/sizing mở rộng.
+- **Out of scope:** màu, shape, elevation của FAB (đã đúng từ M100.100/M100.35);
+  `AppSizing.floatingAction` và `AppSpacing.fabScrollClearance` — clearance
+  thuộc caller (`ScreenScroll`), nên vẫn 56 dù hộp vẽ là 52, dư 4dp.
+- **Dependencies:** M100.101.
+- **Tests required:** các test ở Scope.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/theme/`, `lib/shared/widgets/mx_fab.dart`,
+  `lib/shared/widgets/mx_focus_ring.dart`
+- **Acceptance criteria:**
+  - [x] Hộp vẽ **52×52** thay vì 56 mặc định của SDK; glyph **20** thay vì 24.
+  - [x] **Vòng focus dùng `onPrimary`, không phải `primary` như prose của spec.**
+        Nền FAB đã là `primary`, nên vòng `primary` là 1.00:1 — vô hình; đây
+        đúng là trường hợp `focusIndicatorOf` sinh ra để xử lý và nút filled đã
+        theo. Không có offset 2: mọi chỗ dùng `MxFocusRing` vẽ sát hình, và một
+        biến thể offset chỉ cho FAB là quy ước thứ hai.
+  - [x] `MxFocusRing` tương thích ngược: năm caller cũ không truyền `color`.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
