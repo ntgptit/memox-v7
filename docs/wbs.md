@@ -1155,18 +1155,28 @@ của M2.
 
 ### M100.102 · MxChipTrigger — the ghost menu-trigger chip
 
-- **Status:** done — analyze sạch, host suite pass, guard 0, architecture sạch,
-  `check_docs` xanh.
+- **Status:** done — đã chạy và pass: `flutter test --exclude-tags golden`
+  **+5281**, `widgetbook` **+8**, `flutter analyze` `No issues found!`, guard 0
+  violation, `check_architecture.sh` sạch, `check_docs.py` xanh. Không chạy golden
+  (không màn hình nào dùng chip này, không golden mới).
 - **Goal:** Thêm `MxChipTrigger` — chip ghost 28dp mở menu do caller sở hữu, không
   bao giờ đọc là "đã chọn". Component đầu tiên hiện thực contract "menu trigger"
   của MemoX v3 design kit (nhóm B · Actions & controls).
 - **Scope:** `lib/shared/widgets/mx_chip_trigger.dart` (mới),
   `lib/shared/widgets/mx_tap_target.dart` (mới — `MxTapTarget`, chuyển nguyên hành vi
   từ `_TapTarget` của `mx_pill_button.dart`, nay dùng chung),
+  `lib/shared/widgets/mx_pill_button.dart` (dùng `MxTapTarget`, bỏ bản private),
   `test/shared/widgets/mx_chip_trigger_test.dart` (mới),
   `test/shared/widgets/mx_stress_selection_specimens.dart` (specimen bắt buộc của
-  `mx_stress_test`), `widgetbook/lib/components/control_components.dart`,
+  `mx_stress_test`), `test/shared/widgets/mx_stress_test.dart` (miễn trừ có lý do cho
+  `MxTapTarget`), `test/shared/widgets/mx_pill_button_construction_test.dart` (một
+  chuỗi `reason:` đổi tên `_TapTarget` → `MxTapTarget`),
+  `test/visual_audit/render_classification.dart` (comment trỏ tới file mới),
+  `test/app/shared_api_closure_test.dart` (`mx_chip_trigger.dart` vào
+  `kClosedApiFiles`), `widgetbook/lib/components/control_components.dart`,
   `widgetbook/lib/main.dart`.
+- **Ghi chú:** ở text scale > 1, dải nội dung 28dp là **cố định** (handoff bắt
+  buộc) nên dòng chữ có thể vẽ lấn nhẹ ra ngoài dải; caller cuộn hàng chứa nó.
 - **Out of scope:** nối `MxChipTrigger` vào bất kỳ màn hình nào (CardFilterBarWidget,
   deck toolbar, …) — handoff để ngỏ, caller sở hữu menu và quyết định khi nào dùng.
 - **Dependencies:** không — dùng token/thành phần đã có (`MxFocusRing`, `MxIcon`,

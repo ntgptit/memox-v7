@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/states/app_interaction_states.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -250,38 +251,62 @@ void main() {
   });
 
   group('theming', () {
-    testWidgets('the ink is onSurfaceVariant in both themes', (tester) async {
+    // The label and both glyphs wear one ink: `quiet` (`onSurfaceVariant`)
+    // enabled, `disabled` (`AppSemanticColors.onDisabled`) when `onPressed` is
+    // null — read off the painted `Text` and `Icon`s, not the theme.
+    Color labelInk(WidgetTester tester) =>
+        tester.widget<Text>(find.text('Newest first')).style!.color!;
+    Color glyphInk(WidgetTester tester, IconData icon) =>
+        tester.widget<Icon>(find.byIcon(icon)).color!;
+
+    testWidgets('label and both glyphs are onSurfaceVariant when enabled', (
+      tester,
+    ) async {
       for (final isDark in <bool>[false, true]) {
         await pump(
           tester,
-          MxChipTrigger(label: 'Newest first', onPressed: () {}),
+          MxChipTrigger(
+            label: 'Newest first',
+            leadingIcon: Icons.swap_vert,
+            onPressed: () {},
+          ),
           isDark: isDark,
         );
 
-        final theme = isDark ? buildDarkTheme() : buildLightTheme();
-        final icon = tester.widget<Icon>(find.byIcon(Icons.expand_more));
-        expect(icon.color, theme.colorScheme.onSurfaceVariant);
+        final ink = (isDark ? buildDarkTheme() : buildLightTheme())
+            .colorScheme
+            .onSurfaceVariant;
+        expect(labelInk(tester), ink, reason: 'label, dark: $isDark');
+        expect(glyphInk(tester, Icons.swap_vert), ink, reason: 'leading');
+        expect(glyphInk(tester, Icons.expand_more), ink, reason: 'chevron');
       }
     });
 
-    testWidgets('disabled ink is dimmer than enabled ink', (tester) async {
-      await pump(
-        tester,
-        MxChipTrigger(label: 'Newest first', onPressed: () {}),
-      );
-      final Color enabled = tester
-          .widget<Icon>(find.byIcon(Icons.expand_more))
-          .color!;
+    testWidgets('label and both glyphs are onDisabled when disabled', (
+      tester,
+    ) async {
+      for (final isDark in <bool>[false, true]) {
+        await pump(
+          tester,
+          const MxChipTrigger(
+            label: 'Newest first',
+            leadingIcon: Icons.swap_vert,
+            onPressed: null,
+          ),
+          isDark: isDark,
+        );
 
-      await pump(
-        tester,
-        const MxChipTrigger(label: 'Newest first', onPressed: null),
-      );
-      final Color disabled = tester
-          .widget<Icon>(find.byIcon(Icons.expand_more))
-          .color!;
-
-      expect(disabled, isNot(enabled));
+        final ThemeData theme = isDark ? buildDarkTheme() : buildLightTheme();
+        final Color ink = theme.extension<AppSemanticColors>()!.onDisabled;
+        expect(labelInk(tester), ink, reason: 'label, dark: $isDark');
+        expect(glyphInk(tester, Icons.swap_vert), ink, reason: 'leading');
+        expect(glyphInk(tester, Icons.expand_more), ink, reason: 'chevron');
+        expect(
+          ink,
+          isNot(theme.colorScheme.onSurfaceVariant),
+          reason: 'disabled is indistinguishable from enabled',
+        );
+      }
     });
   });
 
