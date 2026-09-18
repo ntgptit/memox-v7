@@ -53,10 +53,14 @@ InputDecorationTheme buildInputDecorationTheme(
   ),
   // **`outline`, not `outlineVariant`.** An empty field with a placeholder and
   // nothing else is identified by its edge alone, which is exactly the
-  // information WCAG 1.4.11 asks 3:1 of; the hairline measured 1.38:1 in
-  // light. A card's edge stays subtle because a card is identified by its
-  // content. `control_border_grounds_test.dart` holds this on every ground a
-  // field is drawn on.
+  // information WCAG 1.4.11 asks 3:1 of; the hairline reads 1.53:1 on the page
+  // and 1.30:1 on a dialog's surface — nowhere near it. `outline` measures
+  // 3.44:1 on the page and 3.62:1 on a card, and 2.92:1 on a dialog's
+  // `surfaceContainerHigh`, the one ground where the v3 hex lands under the
+  // floor; that figure is pinned rather than fixed, because the palette ships
+  // verbatim (M100.84). A card's edge stays subtle because a card is
+  // identified by its content. `control_border_grounds_test.dart` holds this
+  // on every ground a field is drawn on.
   border: _inputBorder(scheme.outline),
   enabledBorder: _inputBorder(scheme.outline),
   focusedBorder: _inputBorder(scheme.primary),
@@ -65,8 +69,9 @@ InputDecorationTheme buildInputDecorationTheme(
   // Solid, per MX-VIS-002 rule R7. Blended here rather than read from
   // `disabledSurface`: this is the *hairline* faded, that is the *ink*. The
   // blend base is the paper (`surfaceContainerLow`); a disabled field on the
-  // page or in a dialog is blended against a slightly wrong ground, measured
-  // 1.98 → 1.81 and contrast-exempt, so it stays one value (#433 §5.4).
+  // page or in a dialog is blended against a slightly wrong ground: the blend
+  // is `#B6BCD3` in light, which reads 1.79:1 on the page against 1.52:1 in a
+  // dialog. Contrast-exempt either way, so it stays one value (#433 §5.4).
   disabledBorder: _inputBorder(
     Color.alphaBlend(
       scheme.outline.withValues(alpha: 0.5),
