@@ -318,8 +318,8 @@ void main() {
       for (final isDark in <bool>[false, true]) {
         await pumpBar(tester, isDark: isDark);
 
-        final scheme = (isDark ? buildDarkTheme() : buildLightTheme())
-            .colorScheme;
+        final scheme =
+            (isDark ? buildDarkTheme() : buildLightTheme()).colorScheme;
         final decoration =
             tester.widget<DecoratedBox>(find.byType(DecoratedBox)).decoration
                 as BoxDecoration;
