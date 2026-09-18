@@ -75,6 +75,10 @@ void main() {
         'already resolved its WidgetStateColor for this row. There is no '
         'AppInk member for "whatever the chip decided", and naming one would '
         'drop the selected and disabled states the theme resolves.',
+    'mx_icon_tile.dart':
+        'the glyph colour is the tile\'s own computed tint (`primary` or a '
+        'caller `seed`), never a nameable AppInk — the same exception '
+        'mx_pill_button.dart already carries.',
     'mx_breadcrumb_step.dart':
         'the plain-mode separator paints the theme\'s own outline role '
         'directly on a chevron_right — AppInk has no member for that '
