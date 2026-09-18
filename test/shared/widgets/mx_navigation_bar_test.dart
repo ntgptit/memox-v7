@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_decorations.dart';
+import 'package:memox/core/theme/foundations/app_derived_colors.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 /// `MxNavigationBar` on its own, with no router and no feature behind it.
@@ -34,6 +39,7 @@ void main() {
     bool isDark = false,
     Size surface = const Size(360, 640),
     double textScale = 1,
+    double gestureInset = 0,
   }) async {
     final taps = <int>[];
 
@@ -49,9 +55,10 @@ void main() {
           // `size`, `padding` and `viewInsets`, so the widget under test is
           // told the screen is 0x0 while `tester.view` says otherwise.
           builder: (context) => MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(textScaler: TextScaler.linear(textScale)),
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(textScale),
+              padding: EdgeInsets.only(bottom: gestureInset),
+            ),
             child: Scaffold(
               body: const SizedBox.expand(),
               bottomNavigationBar: MxNavigationBar(
@@ -242,6 +249,101 @@ void main() {
       final atReview = tester.getSize(find.byType(NavigationBar));
 
       expect(atReview, atDecks);
+    });
+  });
+
+  group('v3 glass geometry', () {
+    testWidgets('the painted bar is a fixed height, with no gesture inset', (
+      tester,
+    ) async {
+      await pumpBar(tester);
+
+      expect(
+        tester.getSize(find.byType(NavigationBar)).height,
+        AppSizing.bottomBarHeight,
+      );
+    });
+
+    testWidgets(
+      'the painted bar stays fixed even when the device has a gesture inset',
+      (tester) async {
+        // The bar's own contract is a constant painted height; the inset
+        // belongs to the wrapper's padding instead, per the component's
+        // ownership boundary. A bar that grew with the inset would be
+        // reading the same MediaQuery twice.
+        await pumpBar(tester, gestureInset: 34);
+
+        expect(
+          tester.getSize(find.byType(NavigationBar)).height,
+          AppSizing.bottomBarHeight,
+        );
+      },
+    );
+
+    testWidgets('the wrapper grows by exactly the gesture inset', (
+      tester,
+    ) async {
+      await pumpBar(tester);
+      final flush = tester.getSize(find.byType(MxNavigationBar));
+
+      await pumpBar(tester, gestureInset: 34);
+      final inset = tester.getSize(find.byType(MxNavigationBar));
+
+      expect(inset.height, flush.height + 34);
+    });
+
+    testWidgets('the wrapper is the spec total at zero gesture inset', (
+      tester,
+    ) async {
+      // 4 top + 64 painted + 12 bottom — the contract's 80dp block height,
+      // derived rather than pinned as a second literal.
+      await pumpBar(tester);
+
+      expect(
+        tester.getSize(find.byType(MxNavigationBar)).height,
+        AppSpacing.xs + AppSizing.bottomBarHeight + AppSpacing.md,
+      );
+    });
+
+    testWidgets('the bar is clipped to the v3 radius', (tester) async {
+      await pumpBar(tester);
+
+      final clip = tester.widget<ClipRRect>(find.byType(ClipRRect));
+
+      expect(clip.borderRadius, BorderRadius.circular(AppRadius.lg));
+    });
+
+    testWidgets('the surface is chrome-glass, with a ghost border on every '
+        'side', (tester) async {
+      for (final isDark in <bool>[false, true]) {
+        await pumpBar(tester, isDark: isDark);
+
+        final scheme =
+            (isDark ? buildDarkTheme() : buildLightTheme()).colorScheme;
+        final decoration =
+            tester.widget<DecoratedBox>(find.byType(DecoratedBox)).decoration
+                as BoxDecoration;
+        final expectedEdge = AppDecorations.hairlineEdge(scheme);
+
+        expect(decoration.color, AppDerivedColors.chromeGlass(scheme));
+        expect(decoration.border, isA<Border>());
+        final border = decoration.border! as Border;
+        for (final side in <BorderSide>[
+          border.top,
+          border.bottom,
+          border.left,
+          border.right,
+        ]) {
+          expect(side.color, expectedEdge.color);
+          expect(side.width, expectedEdge.width);
+        }
+      }
+    });
+
+    testWidgets('lives behind a live blur', (tester) async {
+      await pumpBar(tester);
+
+      expect(find.byType(BackdropFilter), findsOneWidget);
     });
   });
 }
