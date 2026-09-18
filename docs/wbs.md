@@ -1445,6 +1445,38 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; chỉ sáu PNG lỗi đổi khi chạy 44 file test golden.
 - **Checklist phases:** 7, 12.
 
+### M100.109 · MxSection — nhóm hàng có overline, thẻ và ghi chú của v3
+
+- **Status:** **done** — analyze sạch, `mx_section_test.dart` + `mx_stress_test.dart`
+  + `widgetbook_coverage_test.dart` xanh; chưa màn nào dùng.
+- **Goal:** shared component cho hợp đồng Section của v3: overline in hoa phía trên,
+  một thẻ chứa nhóm hàng có hairline `border-ghost` giữa các hàng, ghi chú tuỳ chọn
+  bên dưới, và khoảng 16dp cuối khối. Hai màn Settings và Reminder đang tự dựng lại
+  đúng hình này trong từng feature.
+- **Scope:** `lib/shared/widgets/mx_section.dart`, test riêng, specimen stress, entry
+  Widgetbook (`sectionComponent`).
+- **Out of scope:** chuyển `SettingsSectionWidget` / `ReminderSettingsSectionWidget`
+  sang dùng nó — mỗi màn là một thay đổi riêng, giống M100.104. Không đụng token hay
+  theme.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_section_test.dart`, `mx_stress_test.dart`,
+  `widgetbook_coverage_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_section.dart`.
+- **Acceptance criteria:**
+  - [x] Overline đi qua `MxSectionLabel` (rung `standard`, ink `quiet` = `text-secondary`),
+        cách thẻ `AppSpacing.sm` = 8 — cùng giá trị `SettingsSectionWidget.headingGap`.
+  - [x] Hàng nằm trong `MxCard.raised(padding: MxCardPadding.none)` — thẻ đã sở hữu
+        fill `surface-raised` và clip theo bán kính, nên divider full-bleed gặp đúng
+        góc bo; widget này không tự resolve lại role đó.
+  - [x] Divider giữa hàng dùng `AppDecorations.hairlineEdge(...).color`
+        (`border-ghost`), dày `AppStroke.hairline`; N hàng có đúng N−1 divider.
+  - [x] Ghi chú cách thẻ 8, lề ngang `AppSpacing.xs` = 4; không đặt màu riêng vì
+        hợp đồng không nêu role cho nó (giữ `bodySmall` như panel ghi chú của Reminder).
+  - [x] 16dp cuối khối (`AppSpacing.lg`) do chính widget vẽ, có hay không có tiêu đề.
+  - [x] `rows` rỗng bị assert (fail fast).
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 
