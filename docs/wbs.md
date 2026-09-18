@@ -1445,7 +1445,7 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; chỉ sáu PNG lỗi đổi khi chạy 44 file test golden.
 - **Checklist phases:** 7, 12.
 
-### M100.107 · MxSection — nhóm hàng có overline, thẻ và ghi chú của v3
+### M100.109 · MxSection — nhóm hàng có overline, thẻ và ghi chú của v3
 
 - **Status:** **done** — analyze sạch, `mx_section_test.dart` + `mx_stress_test.dart`
   + `widgetbook_coverage_test.dart` xanh; chưa màn nào dùng.
