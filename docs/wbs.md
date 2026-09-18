@@ -1234,6 +1234,45 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.104 · TextField — dòng lỗi có glyph `alert-circle`
+
+- **Status:** **done** — analyze sạch ngoài gói `widgetbook/`, host suite xanh,
+  guard sạch, sáu golden lỗi vẽ lại trên Linux `TZ=UTC`.
+- **Goal:** Handoff v3 của TextField ghi dòng lỗi gồm glyph 16 + chữ, và registry
+  (`docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md:340`) liệt
+  kê "message text + glyph". Theme của field đã đúng v3 từ M100.101; chỗ hở còn
+  lại là widget vẽ lỗi bằng `errorText` thuần chữ, không có chỗ cho icon.
+- **Scope:** `lib/shared/widgets/mx_text_field.dart` (lỗi đi qua
+  `InputDecoration.error` thay cho `errorText`), test hợp đồng và test
+  editor-surface, sáu golden `mx_text_field_{error,focused_error,suffix_error}`.
+- **Out of scope:** `app_input_theme.dart` và mọi token — không đụng. API công
+  khai của `MxTextField` không đổi (`errorText` vẫn là `String?`).
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_text_field_contract_test.dart`,
+  `mx_editor_surface_test.dart`, `mx_text_field_counter_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_text_field.dart`.
+- **Acceptance criteria:**
+  - [x] Glyph `Icons.error_outline` (một glyph duy nhất của app cho nghĩa này),
+        `MxIconSize.sm` = 16, cách chữ `AppSpacing.xs` = 4, trang trí (không
+        `semanticLabel`).
+  - [x] Màu glyph là `AppInk.error` (→ `dangerInk`), khớp chữ bên cạnh — nối tiếp
+        phán quyết GC-3 trong `app_input_theme.dart`, không dùng `scheme.error`
+        (viền vẫn dùng `error`).
+  - [x] **Đảo phán quyết của audit trước v3** (`docs/reviews/mx-text-field-deep-audit.md`
+        ghi "không có error icon by design"): audit đó dựa trên baseline
+        `filled: false` mà M100.101 đã đảo; handoff và registry v3 đều đòi glyph.
+  - [x] Chiều cao dòng lỗi không đổi khi lỗi xuất hiện; test layout-stability cũ
+        chạy nguyên bản.
+  - [x] `errorMaxLines` không còn tác dụng với lỗi dạng widget; test ghim nó chuyển
+        sang `Text.maxLines == 3` của chính dòng lỗi.
+  - [x] Trường hợp text vượt `maxLength` + có lỗi **không** nổ assert
+        "error và errorText cùng khai báo": `buildCounter` luôn được truyền nên SDK
+        return sớm trước nhánh thêm `errorText`. Có test ghim; bỏ `buildCounter`
+        thì test đỏ.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; chỉ sáu PNG lỗi đổi trong 44 file.
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 
