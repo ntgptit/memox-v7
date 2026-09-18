@@ -313,9 +313,11 @@ không quét chữ mù, để một danh tính không liên quan (`AppWellFill.s
 `AppColors.seed`) không thành báo sai. `M3_ALIAS` và `COMPONENT_INPUT`/`NONE`
 thì hẹp hơn: chỉ kiểm danh sách field của riêng `AppSemanticColors` — nơi duy
 nhất một field như vậy có thể đáp xuống nếu nó thật sự đáp xuống đâu đó — chứ
-không quét cả cây, vì quét cả cây sẽ báo sai đúng hai tên thuộc lớp rủi ro này
-(`AppColors.seed` là hằng số palette hợp lệ có từ trước v3; `accent` là tên
-tham số hợp lệ ở nhiều component builder).
+không quét cả cây. Lý do đo được, không phải phỏng đoán: mở rộng chính cái
+scan theo hình dạng ấy ra cả cây sẽ báo sai `AppColors.seed`, một hằng số
+palette hợp lệ có từ trước v3. (`accent` thì không — nó chỉ tồn tại ở đây như
+tham số của một builder và như một giá trị enum `AppInk`, hai hình dạng mà
+scan này không bắt; nó chỉ là rủi ro với một phép quét chữ mù.)
 
 **Hai chỗ tên trùng nhau, ghi rõ để không ai đọc nhầm cái này thành cái kia:**
 
