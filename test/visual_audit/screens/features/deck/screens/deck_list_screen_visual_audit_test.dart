@@ -63,6 +63,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // One declared: the bar's overflow, where the tag catalog and Trash
@@ -106,6 +107,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckPlainAnchors,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // One action per row for three decks, plus the bar's one overflow menu
@@ -176,6 +178,7 @@ void main() {
       AuditAnchor.type('error_state', MxErrorState),
       AuditAnchor.type('navigation_bar', MxNavigationBar),
     ],
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // A failed read renders no rows and no toolbar — there is nothing to
@@ -218,6 +221,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       // One declared icon button — the deck's action menu — plus the floating
       // create. One breadcrumb step: no ancestors, so the path is the deck
@@ -255,6 +259,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         screenIconButtons: 1,
@@ -308,6 +313,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckPlainAnchors,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       // The action menu and one per child row — plus the AppBar's back button.
       // Three children, so four declared, plus create and the deck action menu.
@@ -378,6 +384,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         screenIconButtons: 1,
@@ -411,6 +418,7 @@ void main() {
       AuditAnchor.type('error_state', MxErrorState),
       AuditAnchor.type('navigation_bar', MxNavigationBar),
     ],
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       // **The bar stays, with Back** (A20.1 P1-15): a screen in its error
       // state used to drop its bar and the way back with it. No title and no

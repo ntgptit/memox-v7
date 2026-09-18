@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:memox/core/theme/foundations/app_colors.dart';
+import 'package:memox/core/theme/foundations/app_decorations.dart';
 import 'package:memox/core/theme/foundations/app_material_roles.dart';
 import 'package:memox/core/theme/foundations/app_surface_colors.dart';
 import 'package:memox/core/theme/foundations/app_border_colors.dart';
+import 'package:memox/core/theme/schemes/app_color_scheme.dart';
 
 /// The approved palette — Tokyo's since M100.26 — as flat lists.
 ///
@@ -100,6 +102,12 @@ final List<Color> lightPaletteTokens = <Color>[
   AppColors.secondaryInkLight,
   AppColors.tertiaryInkLight,
   AppColors.inversePrimaryInk,
+  // v3's `border-ghost` (M100.100). A declared paint has to be an exact
+  // token, and this edge is one — `AppDecorations.hairlineEdge` is its one
+  // source, and `MxNavigationBar` and the dark card rim both draw it. Read
+  // from the treatment rather than restated as a hex, so the palette cannot
+  // close over a value the app no longer paints.
+  AppDecorations.hairlineEdge(lightColorScheme).color,
 ];
 
 /// A list, not a set: several roles deliberately share a token — white is the
@@ -198,4 +206,10 @@ final List<Color> darkPaletteTokens = <Color>[
   AppColors.secondaryInkDark,
   AppColors.tertiaryInkDark,
   AppColors.inversePrimaryInk,
+  // v3's `border-ghost` (M100.100). A declared paint has to be an exact
+  // token, and this edge is one — `AppDecorations.hairlineEdge` is its one
+  // source, and `MxNavigationBar` and the dark card rim both draw it. Read
+  // from the treatment rather than restated as a hex, so the palette cannot
+  // close over a value the app no longer paints.
+  AppDecorations.hairlineEdge(darkColorScheme).color,
 ];

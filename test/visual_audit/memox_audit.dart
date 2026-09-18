@@ -28,6 +28,8 @@ List<AuditRule> memoxAuditRules({
   required bool isDark,
   List<ContrastFloorAllowance> nonTextContrastFloors =
       const <ContrastFloorAllowance>[],
+  List<ContrastFloorAllowance> textContrastFloors =
+      const <ContrastFloorAllowance>[],
 }) {
   final semantic = isDark
       ? const AppSemanticColors.dark()
@@ -37,7 +39,7 @@ List<AuditRule> memoxAuditRules({
   return <AuditRule>[
     // First, because everything after it is meaningless if the screen threw.
     const NoErrorWidgetRule(),
-    const TextContrastRule(),
+    TextContrastRule(floors: textContrastFloors),
     NonTextContrastRule(<Color>[
       scheme.primary,
       semantic.success,
@@ -129,6 +131,8 @@ void memoxAuditTest(
   List<AuditSkipAllowance> allowances = const <AuditSkipAllowance>[],
   List<ContrastFloorAllowance> nonTextContrastFloors =
       const <ContrastFloorAllowance>[],
+  List<ContrastFloorAllowance> textContrastFloors =
+      const <ContrastFloorAllowance>[],
   List<AuditRule> additionalRules = const <AuditRule>[],
   Finder? surfaceFinder,
   AuditExpectation expectation = AuditExpectation.noViolations,
@@ -155,6 +159,7 @@ void memoxAuditTest(
           ...memoxAuditRules(
             isDark: isDark,
             nonTextContrastFloors: nonTextContrastFloors,
+            textContrastFloors: textContrastFloors,
           ),
           ...additionalRules,
         ],
@@ -183,6 +188,8 @@ void memoxProductionScreenAuditTest(
   List<AuditSkipAllowance> allowances = const <AuditSkipAllowance>[],
   List<ContrastFloorAllowance> nonTextContrastFloors =
       const <ContrastFloorAllowance>[],
+  List<ContrastFloorAllowance> textContrastFloors =
+      const <ContrastFloorAllowance>[],
   List<AuditRule> additionalRules = const <AuditRule>[],
   Finder? surfaceFinder,
   Future<void> Function(WidgetTester tester)? drive,
@@ -194,6 +201,7 @@ void memoxProductionScreenAuditTest(
     anchors: anchors,
     allowances: allowances,
     nonTextContrastFloors: nonTextContrastFloors,
+    textContrastFloors: textContrastFloors,
     additionalRules: additionalRules,
     surfaceFinder: surfaceFinder,
     expectation: AuditExpectation.complete,

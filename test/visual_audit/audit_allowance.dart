@@ -204,9 +204,12 @@ class ContrastFloorAllowance {
       foreground.toARGB32() == this.foreground.toARGB32() &&
       background.toARGB32() == this.background.toARGB32();
 
+  // The rule is not named here any more: since M100.100 the same allowance
+  // serves `contrast.text` as well, and a line that always said
+  // `contrast.non_text` would mislabel half of them in the report.
   @override
   String toString() =>
-      'contrast.non_text: border ${hexOf(foreground)} on '
-      '${hexOf(background)} pinned at ${floor.toStringAsFixed(2)}:1  '
-      '[$itemId]\n           because: $rationale';
+      'contrast floor: ${hexOf(foreground)} on ${hexOf(background)} pinned at '
+      '${floor.toStringAsFixed(2)}:1  [$itemId]\n'
+      '           because: $rationale';
 }

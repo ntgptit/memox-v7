@@ -1,3 +1,5 @@
+import 'package:memox/core/theme/schemes/app_color_scheme.dart';
+
 import 'audit_allowance.dart';
 import 'audit_model.dart';
 
@@ -136,9 +138,10 @@ List<AuditSkipAllowance> deckShellAllowances({
       detailContains: '_RenderInkFeatures',
       rationale:
           'NavigationBar paints its selection indicator into a Material ink '
-          'layer, so the pill has no render object of its own. Its colour is '
-          'primaryContainer, set in navigationBarTheme, and the two selected '
-          'states are pinned by the mx_navigation_bar_* goldens.',
+          'layer, so the pill has no render object of its own. Its colour is a '
+          'composited primary tint since M100.100, set in navigationBarTheme '
+          'and pinned by m3_role_contract_test.dart; the two selected states '
+          'are pinned by the mx_navigation_bar_* goldens.',
     ),
     AuditSkipAllowance(
       itemId: screenItemId,
@@ -238,3 +241,33 @@ List<AuditSkipAllowance> mxActionButtonAllowances(
         'overlayColor is asserted in app_theme_test.dart.',
   ),
 ];
+
+/// The active tab label's accepted text floor (M100.100).
+///
+/// v3 inks the selected label with `primary`, which measures **3.95:1** on the
+/// bar in light — under the 4.5:1 WCAG 1.4.3 asks of small text. The owner
+/// chose v3 with that figure in hand; this keeps the deviation visible in
+/// every audit report rather than switching the rule off, and a further drop
+/// still fails because the floor is pinned at the measured value.
+///
+/// Light only: dark reads 5.22:1 and needs no allowance.
+///
+/// Spelled once here because every screen inside the navigation shell paints
+/// it, and nine copies of one decision is how the copies start disagreeing.
+final List<ContrastFloorAllowance> navigationBarSelectedLabelFloors =
+    <ContrastFloorAllowance>[
+      ContrastFloorAllowance(
+        itemId: 'navigation_bar',
+        foreground: lightColorScheme.primary,
+        background: lightColorScheme.surfaceContainer,
+        floor: 3.94,
+        rationale:
+            'v3 inks the active tab label with primary (M100.100). 3.95:1 on '
+            'the bar in light, under the 4.5 small text owes — floored to 3.94 '
+            'per R12 because the measurement is 3.9485. The selection is still '
+            'carried without colour by the outlined/filled icon pair, the w600 '
+            'weight and Semantics(selected:). Restoring the floor means a '
+            'darker primary for ink use or a bar ground further from it, and '
+            'belongs to whichever task takes that on.',
+      ),
+    ];

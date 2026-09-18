@@ -6,6 +6,7 @@ import 'package:memox/features/trash/presentation/screens/trash_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 
 import '../../../../audit_allowance.dart';
+import '../../../../deck_audit_allowances.dart';
 import '../../../../audit_model.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
@@ -34,6 +35,7 @@ void main() {
     ),
     state: 'loaded',
     anchors: <AuditAnchor>[AuditAnchor.type('shell', MxContentShell)],
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: const <AuditSkipAllowance>[
       AuditSkipAllowance(
         itemId: 'screen',
@@ -123,6 +125,7 @@ void main() {
     () => trashScreenWith(FakeTrashRepository(), const TrashScreen()),
     state: 'empty',
     anchors: <AuditAnchor>[AuditAnchor.type('shell', MxContentShell)],
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: const <AuditSkipAllowance>[
       AuditSkipAllowance(
         itemId: 'screen',

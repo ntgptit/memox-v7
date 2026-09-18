@@ -102,6 +102,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: _plainAnchors,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // No app-bar action: this screen reads and offers nothing to press up
@@ -165,6 +166,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: _plainAnchors,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         screenIconButtons: 0,
@@ -208,6 +210,7 @@ void main() {
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: _anchorsWithEmpty,
+    textContrastFloors: navigationBarSelectedLabelFloors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         screenIconButtons: 0,
