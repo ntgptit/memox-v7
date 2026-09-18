@@ -1503,6 +1503,36 @@ của M2.
   - [x] Ô cố định `SizedBox.square`, không co — cột chữ bên cạnh nhường chỗ.
 - **Checklist phases:** 7, 12.
 
+### M100.111 · MxListRow — hàng nội dung một dòng của v3 (deck, kết quả tìm, tag, thẻ)
+
+- **Status:** **done** — analyze sạch, `mx_list_row_test.dart` + `mx_stress_test.dart` +
+  `widgetbook_coverage_test.dart` + `test/core/theme/` xanh; chưa màn nào dùng.
+- **Goal:** shared component `MxListRow`, **không** phải `MxListTile` (hàng điều hướng/cài đặt):
+  tiêu đề và phụ đề mỗi cái đúng một dòng ellipsis nên mọi hàng trong list cao bằng nhau.
+  Lưới leading / 1fr / trailing, gap 12, padding 12×16, cao tối thiểu 48, divider hairline
+  `border-ghost` (`showDivider`), leading mặc định là `MxIconTile` cỡ `sm` (chuyển `seed`
+  nguyên vẹn), trailing glyph tô `onSurfaceVariant`.
+- **Scope:** `lib/shared/widgets/mx_list_row.dart`, test riêng, specimen stress, entry
+  Widgetbook (`listRowComponent`), vai chữ `AppTextStyles.listRowTitle` (14/600, tracking
+  -0.1, leading 1.35 — hai hằng đặt tên ở `AppTypography`).
+- **Out of scope:** chuyển deck/card/tag/search row hiện có sang dùng nó; `SettingsRow`;
+  golden của component (không test nào bắt buộc, và golden chỉ tác giả được trên Linux).
+- **Dependencies:** M100.110.
+- **Tests required:** `mx_list_row_test.dart`, `mx_stress_test.dart`,
+  `widgetbook_coverage_test.dart`, `test/core/theme/`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_list_row.dart`.
+- **Acceptance criteria:**
+  - [x] `onTap == null` là nội dung thuần (không `InkWell`, không semantics button); có `onTap`
+        thì `MxFocusRing` + `InkWell` với `AppInteractionStates.rowOverlay` và `Semantics(button)`.
+  - [x] Cao tối thiểu 48 đặt **ngoài** padding; tiêu đề và phụ đề `maxLines: 1`, chỉ cột chữ
+        nhường chỗ cho leading/trailing.
+  - [x] Trọng lượng 600 của tiêu đề đi qua `AppTypography.withWeight` (font biến thiên: `fontWeight`
+        trần không đổi gì trên máy).
+  - [x] Không thêm assert loại trừ `leading`/`leadingIcon` — dartdoc ghi icon bị bỏ qua khi
+        widget được truyền.
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 

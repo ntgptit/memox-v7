@@ -5,6 +5,7 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_icon_tile.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
+import 'package:memox/shared/widgets/mx_list_row.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
@@ -614,6 +615,60 @@ WidgetbookComponent listTileComponent() {
                     'unselected' => false,
                     _ => null,
                   },
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent listRowComponent() {
+  return WidgetbookComponent(
+    name: 'MxListRow',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final title = context.knobs.string(
+            label: 'title',
+            initialValue: 'Academic Word List',
+          );
+          final subtitle = context.knobs.stringOrNull(
+            label: 'subtitle',
+            initialValue: '120 cards · 8 due',
+          );
+          final hasLeading = context.knobs.boolean(
+            label: 'with leading tile',
+            initialValue: true,
+          );
+          final isSeeded = context.knobs.boolean(label: 'seeded leading tile');
+          final hasTrailing = context.knobs.boolean(
+            label: 'with trailing chevron',
+            initialValue: true,
+          );
+          final isInteractive = context.knobs.boolean(
+            label: 'has onTap',
+            initialValue: true,
+          );
+          final hasDivider = context.knobs.boolean(
+            label: 'show divider',
+            initialValue: true,
+          );
+
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: MxListRow(
+                  title: title,
+                  subtitle: subtitle,
+                  leadingIcon: hasLeading ? Icons.layers_outlined : null,
+                  seed: isSeeded ? const Color(0xFF5265F5) : null,
+                  trailingIcon: hasTrailing ? Icons.chevron_right : null,
+                  onTap: isInteractive ? _noop : null,
+                  hasDivider: hasDivider,
                 ),
               ),
             ),
