@@ -18,7 +18,10 @@ IconButtonThemeData buildIconButtonTheme(
         // The 48×48 minimum lives here rather than in `MxIconButton`, so no
         // screen can pass a smaller one — there is no parameter to pass.
         minimumSize: const Size.square(AppSizing.touchTarget),
-        foregroundColor: scheme.onSurfaceVariant,
+        // v3's `onSurface` (M100.101). A straight gain: the glyph reads
+        // **16.72:1** on the page in light and **15.59:1** in dark, where
+        // `onSurfaceVariant` read 7.20 and 8.50.
+        foregroundColor: scheme.onSurface,
         // Named, not left to `defaultStyleOf` where no audit can see it.
         disabledForegroundColor: semantic.onDisabled,
         shape: RoundedRectangleBorder(

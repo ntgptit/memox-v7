@@ -377,6 +377,11 @@ void main() {
       // borders keep the input stroke; focused error alone takes
       // `AppStroke.focus` — `_InputDecoratorDefaultsM3.outlineBorder`'s own
       // answer. Still from the token, never a literal.
+      //
+      // **The input stroke is `AppStroke.hairline` since M100.101**, because
+      // v3 states this edge at one dp. The relation the test protects is
+      // unchanged — four borders share one width and focused error is the one
+      // that differs — only the width they share moved.
       for (final entry in themes.entries) {
         final input = entry.value.inputDecorationTheme;
 
@@ -388,7 +393,7 @@ void main() {
         ]) {
           expect(
             border.$2!.borderSide.width,
-            AppStroke.control,
+            AppStroke.hairline,
             reason: '${entry.key}: the ${border.$1} border left the token',
           );
         }

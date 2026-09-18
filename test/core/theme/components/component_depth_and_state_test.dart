@@ -73,7 +73,23 @@ void main() {
   });
 
   group('OutlinedButton resting border', () {
-    test('reads as a control boundary on every ground it is drawn on', () {
+    // **The 3:1 is no longer met, and this records it** (M100.101). v3 gives
+    // the outlined button the chip's edge — `outlineVariant` — which reads
+    // **1.53:1** on the page in light and **1.58:1** in dark, where `outline`
+    // read 3.44 and 3.75. WCAG 1.4.11 asks 3:1 of a control boundary; the
+    // owner chose v3 with those figures in hand.
+    //
+    // The button is the *least* harmed of the three edges v3 moved, because it
+    // keeps a label inside it: a bare text field does not, which is why
+    // `control_border_grounds_test.dart` carries the fuller record.
+    //
+    // Pinned as an intermediate-state record: a further drop still fails, and
+    // what would restore the floor is a darker `outlineVariant` or a return to
+    // `outline` for this component.
+    const double pinnedLight = 1.53;
+    const double pinnedDark = 1.58;
+
+    test('is pinned where v3 left it, below the 3:1 a control owes', () {
       for (final entry in themes.entries) {
         final theme = entry.value;
         final scheme = theme.colorScheme;
@@ -90,32 +106,37 @@ void main() {
         ]) {
           expect(
             contrast(side.color, ground.$2),
-            greaterThanOrEqualTo(3),
+            greaterThanOrEqualTo(
+              entry.key == 'light' ? pinnedLight : pinnedDark,
+            ),
             reason:
-                'In ${entry.key} on ${ground.$1}: WCAG 1.4.11 asks 3:1 of a '
-                'control boundary. `borderSubtle` — the decorative edge, which '
-                'is `outlineVariant` — gave 1.45 in light and 2.04 in dark.',
+                'In ${entry.key} on ${ground.$1}: the edge is already below '
+                'the 3:1 WCAG 1.4.11 asks of a control boundary — it must not '
+                'get quieter still',
           );
         }
       }
     });
 
-    test('it is the token the scheme already calls `outline`', () {
+    test('it is the token the scheme calls `outlineVariant`', () {
       for (final entry in themes.entries) {
         final theme = entry.value;
         final side = theme.outlinedButtonTheme.style!.side!.resolve(
           <WidgetState>{},
         )!;
 
+        // It used to be `borderControl` (`colorScheme.outline`). v3 moved it
+        // to the chip's edge, so the assertion moves with it — what the test
+        // still guards is that the button reads *a named role* rather than a
+        // literal someone typed.
         expect(
           side.color,
-          semanticsOf(theme).borderControl,
+          theme.colorScheme.outlineVariant,
           reason:
-              'In ${entry.key}, `colorScheme.outline` maps to `borderControl`. '
-              'The button reading a different token is an internal mismatch, '
-              'not a considered deviation from Material.',
+              'In ${entry.key}, the outlined button reads v3 outlineVariant '
+              '(M100.101). A different value here is an internal mismatch, '
+              'not a considered deviation.',
         );
-        expect(side.color, theme.colorScheme.outline);
       }
     });
   });

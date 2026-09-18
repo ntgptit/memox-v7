@@ -406,18 +406,28 @@ class MxActionButton extends StatelessWidget {
     // and leaves `backgroundColor` to the theme — naming a fill for it would
     // mean naming a colour that is not a role.
     if (variant == MxActionButtonVariant.secondary) {
-      // The brand's ink and `outline`, the same pair the resting button draws
-      // (GC-3, 2026-09-17). This copy has been wrong three times for the same
-      // reason — it is a second spelling of the theme's answer, and it does
-      // not move when the theme does: `borderSubtle`, then `secondaryAction`,
-      // then `primary` after the label moved to its ink. Each time a
-      // secondary button changed colour for the duration of a save.
+      // **The edge is read back from the theme, not named again** (M100.101).
+      // This copy had been wrong three times for one reason — it was a second
+      // spelling of the theme's answer and did not move when the theme did:
+      // `borderSubtle`, then `secondaryAction`, then `primary` after the label
+      // moved to its ink. Each time a secondary button changed colour for the
+      // duration of a save. v3 moving the edge to `outlineVariant` made it
+      // four, which is enough: resolving the theme's own resting side cannot
+      // drift, because there is no longer a second value to drift from.
+      //
+      // The ink still names `accentInk` because the theme resolves it per
+      // state and the state here is `disabled` — reading it back would return
+      // the disabled ink, which is the thing being overridden.
+      final BorderSide? restingSide = Theme.of(
+        context,
+      ).outlinedButtonTheme.style?.side?.resolve(const <WidgetState>{});
+
       return ButtonStyle(
         foregroundColor: WidgetStatePropertyAll<Color>(
           context.semanticColors.accentInk,
         ),
         side: WidgetStatePropertyAll<BorderSide>(
-          BorderSide(color: colors.outline),
+          restingSide ?? BorderSide(color: colors.outlineVariant),
         ),
       );
     }

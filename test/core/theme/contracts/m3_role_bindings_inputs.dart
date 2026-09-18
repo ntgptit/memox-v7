@@ -92,12 +92,18 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
     slot: 'enabledBorder',
     file: _inputs,
     scope: 'buildInputDecorationTheme',
-    requires: <String>['outline'],
-    refuses: <String>['outlineVariant', 'onSurface', 'primary'],
+    requires: <String>[],
+    refuses: <String>['outline', 'onSurface'],
     because:
-        '_InputDecoratorDefaultsM3.outlineBorder rests on outline. The '
-        'hairline (outlineVariant, once `borderSubtle`) measured 1.38:1 and '
-        'an empty field is identified by its edge alone.',
+        'v3 rests this edge on border-ghost (M100.101), which is '
+        'AppDecorations.hairlineEdge and therefore names no ColorScheme role '
+        'at the slot — hence an empty requires. It reads 1.17-1.19:1 in light '
+        'and 1.28-1.32:1 in dark on the five grounds a field is drawn on, '
+        'where outline read 2.92-3.44 and 2.25-3.75. The field also gained a '
+        'fill in the same change, but the fill does not carry the boundary '
+        'either: 1.05:1 against the page in light. '
+        '_InputDecoratorDefaultsM3.outlineBorder rests on outline; this is a '
+        'stated deviation, and control_border_grounds_test.dart holds it.',
   ),
   RoleBinding(
     component: 'TextField',

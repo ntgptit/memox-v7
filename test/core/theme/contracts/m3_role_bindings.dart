@@ -290,20 +290,27 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'side',
     file: _buttons,
     scope: 'buildOutlinedButtonTheme',
-    requires: <String>['outline', 'primary'],
-    refuses: <String>['outlineVariant'],
+    requires: <String>['outlineVariant', 'primary'],
+    refuses: <String>['outline'],
     because:
-        'outline at rest and primary on focus — this is the one component '
-        'whose border role M3 itself changes with focus, so both are required.',
+        'v3 gives the outlined button the chip answer (M100.101): '
+        'outlineVariant at rest, 1.53:1 in light and 1.58:1 in dark on the '
+        'page where outline read 3.44 and 3.75. primary on focus stays — this '
+        'is the one component whose border role M3 itself changes with focus. '
+        'A stated deviation from the 3:1 of 1.4.11; '
+        'control_border_grounds_test.dart carries the figures.',
   ),
   RoleBinding(
     component: 'Switch',
     slot: 'thumbColor',
     file: _toggles,
     scope: 'buildSwitchTheme',
-    requires: <String>['outline', 'onPrimary'],
+    requires: <String>['surfaceBright', 'onPrimary'],
     refuses: <String>['onSurfaceVariant'],
     because:
+        'v3 rests the thumb on surfaceBright (M100.101): 1.32:1 on its track '
+        'in light and 1.36:1 in dark, where outline read 2.74 and 1.96 — '
+        'neither met 3:1, and this is a further drop the owner took knowingly. '
         '_SwitchDefaultsM3 rests the thumb on outline. It read '
         'onSurfaceVariant to dodge a contrast failure that M100.22 fixed in the '
         'palette instead.',

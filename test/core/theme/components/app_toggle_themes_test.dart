@@ -42,13 +42,21 @@ void main() {
       // The thumb IS the state — which side it sits on is the whole answer —
       // so this is the measurement the control cannot ship without.
       //
-      // v3 (colors_and_type.css, 2026-09-17) moved `outline`, and the resting
-      // pair (`outline` on `surfaceContainerHighest`) reads under 3:1 again —
-      // see 'the M3 pairing…' below for the full measurement and why the
-      // floor is pinned rather than the component moved off it (R1, R12).
+      // **M100.101 moved the resting thumb off `outline` to v3's
+      // `surfaceBright`, and it got quieter again:** 1.32:1 in light and
+      // 1.36:1 in dark, where the `outline` pairing read 2.74 and 1.96 and the
+      // 3:1 of 1.4.11 was already unmet. The owner chose v3 with both numbers.
+      //
+      // Before that, v3's palette had already moved `outline` itself — see
+      // 'the M3 pairing…' below for that measurement and for why this floor is
+      // pinned rather than the component moved off it (R1, R12).
+      //
+      // **The serious consequence is the inversion below**, not this figure:
+      // the disabled thumb now reads *louder* than the live one. That is
+      // recorded in its own test rather than smoothed over here.
       for (final entry in themes.entries) {
         final t = entry.value;
-        final restingFloor = entry.key == 'dark' ? 1.95 : 2.73;
+        final restingFloor = entry.key == 'dark' ? 1.35 : 1.32;
 
         expect(
           contrast(thumb(t, const {}), track(t, const {})),
@@ -291,60 +299,70 @@ void main() {
       }
     });
 
-    test('and still reads as disabled rather than as available', () {
-      // The other bound. Fixing the first one by making disabled look enabled
-      // trades a real bug for a worse one.
+    test('but since M100.101 it reads LOUDER than a live one, in both modes', () {
+      // **This test asserted the opposite until M100.101, and the flip is the
+      // finding.** The bound it used to hold — a disabled control must not be
+      // louder than a live one — is the right bound; fixing a too-quiet
+      // disabled state by making it look enabled trades a real bug for a worse
+      // one. It is now broken in both modes, so the test records the breakage
+      // instead of asserting a property the app does not have.
       //
-      // Light only. Under v3 dark's ordering inverts for real rather than
-      // merely narrowing — see the dedicated test below instead of a
-      // `continue` that would hide it behind this name.
-      final t = themes['light']!;
-
-      // Composited, not raw. `onDisabled` is translucent, and `contrast`
-      // reads RGB without alpha — so comparing the token itself would
-      // measure an opaque near-black thumb that nothing ever paints, and
-      // report the disabled switch as the louder of the two.
-      final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
-      final disabledContrast = contrast(disabledKnob, track(t, off));
-      final liveContrast = contrast(thumb(t, const {}), track(t, const {}));
-
-      expect(
-        disabledContrast,
-        lessThan(liveContrast),
-        reason: 'light: the disabled switch is as loud as a live one',
-      );
-    });
-
-    test('dark: the disabled switch currently reads louder than the live one '
-        '(v3 + the M3 switch binding)', () {
-      // v3 (colors_and_type.css, 2026-09-17) moved `outline`, and the
-      // resting live pair — `outline` #5A6BAE on `surfaceContainerHighest`
-      // #353D7E — now measures 1.96:1, weaker than its own disabled
-      // composite (`onDisabled` over `disabledSurface`, 3.00:1). The
-      // disabled switch reads louder than the live one: a real inversion,
-      // not a narrowed floor, so it gets its own assertion instead of a
-      // silent `continue` inside the test above.
+      // Dark inverted first, when v3 moved `outline` (2026-09-17): the live
+      // pair measured 1.96:1 against a disabled composite of 3.00:1. Light
+      // followed at M100.101, when v3 moved the resting thumb itself to
+      // `surfaceBright`: the live pair is now **1.32:1** against a disabled
+      // **2.30:1**.
       //
-      // The fix is a binding change — which role the switch's live thumb
-      // and track read — and that belongs to the Switch component spec
-      // (ruling R1), not to this branch. The day that spec moves the
-      // binding, this assertion fails on purpose and the relation folds
-      // back into the light test above (`disabledContrast < liveContrast`).
-      final t = themes['dark']!;
+      // So on both themes a switch the user cannot touch is the more visible
+      // of the two, which is the opposite of what the state means. The fix is a
+      // binding change — which roles the live thumb and track read — and it
+      // belongs to the Switch component spec (ruling R1). **The day that spec
+      // moves the binding, this test fails on purpose** and folds back into
+      // `disabledContrast < liveContrast`.
+      for (final entry in themes.entries) {
+        final t = entry.value;
 
-      final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
-      final disabledContrast = contrast(disabledKnob, track(t, off));
-      final liveContrast = contrast(thumb(t, const {}), track(t, const {}));
+        // Composited, not raw. `onDisabled` is translucent and `contrast`
+        // reads RGB without alpha, so comparing the token itself would measure
+        // an opaque near-black thumb nothing ever paints.
+        final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
+        final disabledContrast = contrast(disabledKnob, track(t, off));
+        final liveContrast = contrast(thumb(t, const {}), track(t, const {}));
 
+        expect(
+          disabledContrast,
+          greaterThan(liveContrast),
+          reason:
+              '${entry.key}: the disabled switch no longer reads louder than '
+              'the live one — has the Switch spec changed the binding?',
+        );
+      }
+
+      // The figures, pinned so neither side can drift without being seen.
+      final light = themes['light']!;
+      final dark = themes['dark']!;
       expect(
-        disabledContrast,
-        greaterThan(liveContrast),
-        reason:
-            'dark: the disabled switch no longer reads louder than the '
-            'live one — has the Switch spec changed the binding?',
+        contrast(
+          Color.alphaBlend(thumb(light, off), track(light, off)),
+          track(light, off),
+        ),
+        closeTo(2.30, 0.01),
       );
-      expect(disabledContrast, closeTo(3.00, 0.01));
-      expect(liveContrast, closeTo(1.96, 0.01));
+      expect(
+        contrast(thumb(light, const {}), track(light, const {})),
+        closeTo(1.32, 0.01),
+      );
+      expect(
+        contrast(
+          Color.alphaBlend(thumb(dark, off), track(dark, off)),
+          track(dark, off),
+        ),
+        closeTo(3.00, 0.01),
+      );
+      expect(
+        contrast(thumb(dark, const {}), track(dark, const {})),
+        closeTo(1.36, 0.01),
+      );
     });
   });
 

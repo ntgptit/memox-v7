@@ -209,7 +209,18 @@ class _MxSearchFieldState extends State<MxSearchField> {
                     ),
                   ),
                   // The pill *is* the decoration. Left to the theme this would
-                  // draw the form field's 1.5px outline inside it.
+                  // draw the form field's hairline inside it — and, since
+                  // M100.101, the theme's own fill as well.
+                  //
+                  // **`filled: false` is load-bearing, not tidiness.** v3 gave
+                  // `InputDecorationTheme` a fill; this control already paints
+                  // one, on the `BoxDecoration` above, and it is the one that
+                  // changes on focus. With both, the theme's fill paints
+                  // *inside* the pill and covers it: the visual audit caught it
+                  // as the pill's declared colour reaching only 8% of its own
+                  // rect. A control that supplies its own container opts out of
+                  // the theme's.
+                  filled: false,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
