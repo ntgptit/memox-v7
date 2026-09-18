@@ -116,7 +116,7 @@ enum MxActionButtonSize {
   ///
   /// **Also the v3 handoff's "compact" rung: 32 tall, radius 8
   /// ([AppRadius.sm]).** Same painted box, so it is this member and not a
-  /// fourth one; every other size keeps the shared [AppRadius.md]. The one
+  /// separate one; every other size keeps the shared [AppRadius.md]. The one
   /// live caller, `DeckStudyButtonWidget`, therefore gets an 8dp corner.
   dense,
 
@@ -131,7 +131,24 @@ enum MxActionButtonSize {
   /// paint. Disabled dims the whole control at `AppStateOpacity.disabled`
   /// instead of swapping to the solid disabled pair.
   chip,
+
+  /// Drawn at 48 like [standard], as a pill with 36 of horizontal padding.
+  ///
+  /// The v3 handoff's "study action": the one verb a study turn ends with —
+  /// `Reveal answer`, `Continue`, `Retry` on Recall and `Check` on Fill. **A
+  /// shape, not a look:** colour, edge and disabled treatment still come from
+  /// `variant`, unlike [chip]. The label is the standard `label-lg` rung, and
+  /// the body already is the touch target, so nothing is padded out.
+  ///
+  /// Not for the Forgot / Remembered pair or `Show hint`: those are equal-weight
+  /// `secondary` buttons sharing a row, where 2 × 36 of padding would eat it.
+  study,
 }
+
+/// The handoff's "study action … padding 0 36" — a step no `AppSpacing` rung
+/// has, and one rung's worth of need, so it stays here rather than growing the
+/// scale (`design_tokens_test` pins the eight steps).
+const double _studyInset = 36;
 
 /// The app's button.
 ///
@@ -403,9 +420,10 @@ class MxActionButton extends StatelessWidget {
     final ButtonStyle geometry = ButtonStyle(
       minimumSize: WidgetStatePropertyAll<Size>(
         Size(AppSizing.buttonMinWidth, switch (size) {
-          // Unreachable — `standard` returned above — but stated so the switch
-          // stays exhaustive and a fourth size fails the build here.
-          MxActionButtonSize.standard => AppSizing.touchTarget,
+          // `standard` returned above, so it is unreachable — stated so the
+          // switch stays exhaustive and a new size fails the build here.
+          MxActionButtonSize.standard ||
+          MxActionButtonSize.study => AppSizing.touchTarget,
           MxActionButtonSize.small => AppSizing.controlSmall,
           MxActionButtonSize.compact => AppSizing.controlCompact,
           MxActionButtonSize.dense => AppSizing.controlDense,
@@ -419,6 +437,7 @@ class MxActionButton extends StatelessWidget {
             MxActionButtonSize.small =>
               icon == null ? AppSpacing.md : AppSpacing.lg,
             MxActionButtonSize.chip => AppSpacing.sm,
+            MxActionButtonSize.study => _studyInset,
             MxActionButtonSize.standard ||
             MxActionButtonSize.compact ||
             MxActionButtonSize.dense => AppSpacing.md,
@@ -434,11 +453,12 @@ class MxActionButton extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(AppRadius.sm)),
             ),
           ),
-        MxActionButtonSize.chip => const WidgetStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(AppRadius.pill)),
+        MxActionButtonSize.chip || MxActionButtonSize.study =>
+          const WidgetStatePropertyAll<OutlinedBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.pill)),
+            ),
           ),
-        ),
         MxActionButtonSize.standard ||
         MxActionButtonSize.small ||
         MxActionButtonSize.compact => null,
@@ -450,10 +470,13 @@ class MxActionButton extends StatelessWidget {
       // rather than `label-lg` shrunk, because a 48-button's rung on a body this
       // short reads as text escaping its control.
       //
-      // `small` states none: its label is the standard `label-lg` rung, which
-      // [base] (or the theme) already carries at `buttonLabelWeight`.
+      // `small` and `study` state none: their label is the standard `label-lg`
+      // rung, which [base] (or the theme) already carries at
+      // `buttonLabelWeight`.
       textStyle: switch (size) {
-        MxActionButtonSize.standard || MxActionButtonSize.small => null,
+        MxActionButtonSize.standard ||
+        MxActionButtonSize.small ||
+        MxActionButtonSize.study => null,
         MxActionButtonSize.compact ||
         MxActionButtonSize.dense ||
         MxActionButtonSize.chip => WidgetStatePropertyAll<TextStyle>(
@@ -494,10 +517,6 @@ class MxActionButton extends StatelessWidget {
   /// state.
   ButtonStyle? _busyStyle(BuildContext context) {
     if (!isLoading || !shouldKeepLabelWhileLoading) return null;
-
-    // A chip's colours are fixed and it never reads this style — see
-    // [_buildButton] — so it must not be repainted with a variant's fill.
-    if (size == MxActionButtonSize.chip) return null;
 
     final colors = context.colors;
 
