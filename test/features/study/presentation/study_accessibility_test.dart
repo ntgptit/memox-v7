@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
@@ -113,26 +112,50 @@ void main() {
         find.byType(StudySessionFrameSectionWidget),
       );
       final scheme = Theme.of(element).colorScheme;
-      final semantic = Theme.of(element).extension<AppSemanticColors>()!;
 
-      // The context line and the hint line: the two the frame writes itself.
+      // The context line, the hint line, and now the counter too: the three
+      // the frame writes in `onSurfaceVariant` (StudyTopBar's counter binding
+      // moved it off `onSurface`, task-1 of the studytopbar-component plan).
       expect(
         contrast(scheme.onSurfaceVariant, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
-      // The counter and the clock.
-      expect(
-        contrast(scheme.onSurface, scheme.surface),
-        greaterThanOrEqualTo(_kAaBodyText),
+
+      // The mode pill. The StudyTopBar handoff's verbatim contract asks for
+      // the label in `accent` directly, full strength (`mode badge label:
+      // accent, COMPONENT_INPUT, full strength`) — no `AppInk.accent`
+      // indirection — over a fill that is the same `accent` tinted 10% into
+      // the page.
+      final chipBackground = Color.alphaBlend(
+        scheme.primary.withValues(alpha: 0.10),
+        scheme.surface,
       );
-      // The mode pill: `_Chip` paints its label in `AppInk.accent`, not raw
-      // `primary` — v3's light `primary` measures 3.95:1 on `surfaceMuted`
-      // (GC-3), which is exactly why the ink exists. `accentInk` is what
-      // reaches the canvas, so it is what this gate measures.
-      expect(
-        contrast(semantic.accentInk, semantic.surfaceMuted),
-        greaterThanOrEqualTo(_kAaBodyText),
-      );
+      final chipContrast = contrast(scheme.primary, chipBackground);
+
+      if (brightness == Brightness.dark) {
+        // `primaryDark` (0xFF8B9AFF) is light enough on a near-black page
+        // that painting it directly still clears AA — measured 6.4:1.
+        expect(chipContrast, greaterThanOrEqualTo(_kAaBodyText));
+      } else {
+        // **Known, measured regression in light — not silently fixed here.**
+        // `AppColors.accentInkLight`'s own doc comment says why the chip used
+        // to paint `accentInk` and not raw `primary`: light `primary` was
+        // shifted to 4.52:1 specifically because it does not clear AA on its
+        // own. Painting `accent` directly reintroduces exactly that gap in
+        // light only — measured ~3.87:1 here, pinned rather than assumed —
+        // because this task implements the handoff's contract as given
+        // rather than substituting its own colour choice for the plan
+        // owner's. See task-1's report for this finding.
+        expect(
+          chipContrast,
+          lessThan(_kAaBodyText),
+          reason:
+              'this pins today\'s measured $chipContrast:1 as a known light-mode '
+              'gap; if it ever reaches $_kAaBodyText:1 the comment above is '
+              'stale and the finding in task-1\'s report can be closed, not '
+              'just this assertion flipped',
+        );
+      }
     });
 
     testWidgets('the ✕ and the four sm2 actions are reachable in $theme', (

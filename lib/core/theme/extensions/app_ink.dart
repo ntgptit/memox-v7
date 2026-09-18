@@ -146,3 +146,31 @@ extension InkedTextStyle on TextStyle {
     );
   }
 }
+
+/// The one legal way for a component to colour a text rung in a colour the
+/// *caller*, not the theme, picked per instance.
+///
+/// [AppInk] cannot express this by construction — it is a closed, fixed set
+/// of theme roles, and a `COMPONENT_INPUT` in the design handoff's own
+/// vocabulary (e.g. `MxSessionTopBar.accent`, which is `primary` for most
+/// study modes and `mastery` for `recall`/`fill`) is neither: it is a `Color`
+/// the caller hands the component, not a role the theme resolves. Landing
+/// that `.copyWith(color:)` at the call site is exactly what
+/// `no_text_restyle` exists to catch (per-site text restyling), so this is
+/// the one place it is done instead — the guard's own message: "a
+/// combination neither can express is a missing role — add it to
+/// AppTextStyles/AppInk in lib/core/theme, do not assemble it here."
+///
+/// Still closed in the sense that matters: like [InkedTextStyle.inked], it
+/// never touches size, height or tracking — only weight (through
+/// [AppTypography.withWeight], for the same variable-font reason [inked]
+/// does) and colour.
+extension ComponentInputTextStyle on TextStyle {
+  TextStyle withComponentInputColor(Color color, {FontWeight? weight}) {
+    final TextStyle base = weight == null
+        ? this
+        : AppTypography.withWeight(this, weight);
+
+    return base.copyWith(color: color);
+  }
+}

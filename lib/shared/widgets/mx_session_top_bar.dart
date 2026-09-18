@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_durations.dart';
 import '../../core/theme/foundations/app_icon_size.dart';
 import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
-import '../../core/theme/typography/app_typography.dart';
+import '../../core/theme/extensions/app_ink.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/typography/app_typography.dart';
 import 'mx_content_shell.dart';
 import 'mx_icon_button.dart';
 import 'mx_progress_bar.dart';
-import '../../core/theme/extensions/app_ink.dart';
 
 /// The most of the row's *content* space the chip may claim before it starts
 /// ellipsizing — content space being what is left once the close button and the
@@ -35,6 +36,12 @@ import '../../core/theme/extensions/app_ink.dart';
 /// Two fifths: at 393 that is 108px against a 62px chip, so the first width
 /// where it bites is one where something has to give anyway.
 const double _kChipMaxWidthFraction = 0.4;
+
+/// The mode badge's fill, as a share of [MxSessionTopBar.accent] —
+/// `COMPONENT_INPUT, TINT 10%` in the handoff. Named rather than written at the
+/// call site because it is a decision (which tint reads as "badge", not
+/// "button"), not an arbitrary alpha.
+const double _kChipAccentTintAlpha = 0.10;
 
 /// What the row spends before the chip, the track and the figure get to argue:
 /// the close button, and the two [AppSpacing.sm] gaps — chip→track and
@@ -113,6 +120,7 @@ class MxSessionTopBar extends StatelessWidget {
     required this.trailing,
     required this.onClose,
     required this.closeLabel,
+    required this.accent,
     super.key,
   });
 
@@ -124,6 +132,13 @@ class MxSessionTopBar extends StatelessWidget {
   /// pair must divide it from the same pair [trailing] prints, or the bar and
   /// the figure describe different moments.
   final double progress;
+
+  /// The one colour this component varies by caller: the chip's label (full
+  /// strength) and fill (tinted, [_kChipAccentTintAlpha]), and the progress
+  /// track's fill. A `COMPONENT_INPUT` in the handoff's own terms — the caller
+  /// picks it, this widget only paints it — not a general-purpose escape hatch
+  /// for a colour the theme layer already has a name for.
+  final Color accent;
 
   /// The figure at the end of the row. Sized to its content, so it can be a
   /// counter one frame and a clock the next without the track jumping.
@@ -137,6 +152,20 @@ class MxSessionTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Fixed at `kToolbarHeight` (56, "it is an .appbar" per the handoff) —
+    // today's content is intrinsically ~48 (the close button), so centring it
+    // in 56 adds even breathing room top and bottom. A `SizedBox` around
+    // `Center` rather than padding the content itself: the row below still
+    // sizes to its own tallest child and every horizontal measurement
+    // (`_leadingInset`/`_trailingInset`/glyph placement) is unchanged — this is
+    // a height-only wrapper.
+    return SizedBox(
+      height: kToolbarHeight,
+      child: Center(child: _buildRow(context)),
+    );
+  }
+
+  Widget _buildRow(BuildContext context) {
     return Padding(
       // The start value positions the ✕ *glyph*, not its box: the button sits
       // [_kGlyphInset] behind its own glyph, so the box has to begin that much
@@ -196,7 +225,10 @@ class MxSessionTopBar extends StatelessWidget {
               // so it names the route (A20.1 P3-10): the session has no bar
               // to do it.
               child: MergeSemantics(
-                child: Semantics(namesRoute: true, child: _Chip(label: label)),
+                child: Semantics(
+                  namesRoute: true,
+                  child: _Chip(label: label, accent: accent),
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -206,7 +238,13 @@ class MxSessionTopBar extends StatelessWidget {
             // announcement, so a screen reader hears the count once rather than
             // twice.
             Expanded(
-              child: MxProgressBar(value: progress, size: MxProgressBarSize.sm),
+              child: MxProgressBar(
+                value: progress,
+                size: MxProgressBarSize.sm,
+                fillColor: accent,
+                duration: AppDurations.normal,
+                curve: AppDurations.standard,
+              ),
             ),
             const SizedBox(width: AppSpacing.sm),
             // Never capped. It is the count, and a truncated count is a wrong
@@ -226,14 +264,24 @@ class MxSessionTopBar extends StatelessWidget {
 /// callback as *disabled* — the label drops to 38% alpha and leaves the palette
 /// — and this is not a control that has been switched off, it is a name.
 class _Chip extends StatelessWidget {
-  const _Chip({required this.label});
+  const _Chip({required this.label, required this.accent});
 
   final String label;
+
+  /// [MxSessionTopBar.accent] — the fill is this at
+  /// [_kChipAccentTintAlpha], the label is this at full strength.
+  final Color accent;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      color: context.semanticColors.surfaceMuted,
+      // Blended onto the page rather than left translucent: R7 asks a fill
+      // for a solid colour, and the chip's ground is known — it sits on
+      // `surface`.
+      color: Color.alphaBlend(
+        accent.withValues(alpha: _kChipAccentTintAlpha),
+        context.colors.surface,
+      ),
       borderRadius: BorderRadius.circular(AppRadius.pill),
     ),
     child: Padding(
@@ -246,13 +294,17 @@ class _Chip extends StatelessWidget {
         // *classification*, not the sentence a screen wrote — the same reason
         // the context line under it is uppercase and a deck name never is.
         label.toUpperCase(),
-        style: AppTypography.withWeight(
-          context.textStyles.sectionLabel,
-          FontWeight.w600,
-          // The brand hue as text, via `AppInk.accent` — which resolves to
-          // `accentInk` (GC-3), not `primary` itself. The ink exists because
-          // the raw role does not clear AA as text on this page.
-        ).inked(context, AppInk.accent),
+        // [accent] directly, not an `AppInk` — this is the one
+        // `COMPONENT_INPUT` colour the theme layer hands a caller on purpose
+        // (see `AppProductColors.mastery`'s doc comment), not a
+        // general-purpose escape from the ink vocabulary. Through
+        // `withComponentInputColor` rather than a local `.copyWith` so this
+        // stays the one legal spelling of "a caller-supplied colour on a text
+        // rung" — see that extension's doc comment.
+        style: context.textStyles.sectionLabel.withComponentInputColor(
+          accent,
+          weight: AppTypography.badgeLabelWeight,
+        ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
