@@ -39,20 +39,26 @@ class AppNavigationShell extends StatelessWidget {
         // it is the second, non-colour signal that says which tab is current,
         // alongside the always-visible label. Colour alone fails for a
         // colour-blind user and in high-contrast modes.
+        //
+        // v3 (spec bottom-nav) repoints three of the four glyphs by meaning —
+        // the kit's Lucide names, mapped to the nearest Material Symbol:
+        // `layers` (a stacked library, not a single folder), `play` (an
+        // activity to start, not an institution) and `bar-chart-3` (a
+        // measurement, not a lightbulb). `settings` already matched.
         destinations: <NavigationDestination>[
           NavigationDestination(
-            icon: const Icon(Icons.folder_outlined),
-            selectedIcon: const Icon(Icons.folder),
+            icon: const Icon(Icons.layers_outlined),
+            selectedIcon: const Icon(Icons.layers),
             label: context.l10n.navigationDecksLabel,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.school_outlined),
-            selectedIcon: const Icon(Icons.school),
+            icon: const Icon(Icons.play_circle_outlined),
+            selectedIcon: const Icon(Icons.play_circle),
             label: context.l10n.navigationStudyLabel,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.insights_outlined),
-            selectedIcon: const Icon(Icons.insights),
+            icon: const Icon(Icons.bar_chart_outlined),
+            selectedIcon: const Icon(Icons.bar_chart),
             label: context.l10n.navigationProgressLabel,
           ),
           NavigationDestination(
