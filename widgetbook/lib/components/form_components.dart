@@ -7,6 +7,7 @@ import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
+import 'package:memox/shared/widgets/mx_option_row.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
 import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
@@ -695,6 +696,43 @@ WidgetbookComponent selectionRowsComponent() {
             labelOf: (int value) => 'Choice ${String.fromCharCode(65 + value)}',
           ),
         ),
+      ),
+      WidgetbookUseCase(
+        name: 'MxOptionRow',
+        builder: (BuildContext context) {
+          final selected = context.knobs.object.dropdown<int>(
+            label: 'selected',
+            options: const <int>[0, 1, 2],
+            labelBuilder: (int value) => 'Row $value',
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              MxOptionRow(
+                title: 'SM-2',
+                subtitle: 'Adaptive spacing — reviews stretch as you remember.',
+                isSelected: selected == 0,
+                onSelect: isEnabled ? _noop : null,
+              ),
+              MxOptionRow(
+                title: 'Leitner',
+                subtitle: 'Fixed boxes — a wrong answer resets the box.',
+                isSelected: selected == 1,
+                onSelect: isEnabled ? _noop : null,
+              ),
+              MxOptionRow(
+                title: 'Plain repetition',
+                isSelected: selected == 2,
+                onSelect: isEnabled ? _noop : null,
+                isLast: true,
+              ),
+            ],
+          );
+        },
       ),
       WidgetbookUseCase(
         name: 'MxDropdown',

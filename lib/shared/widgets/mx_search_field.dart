@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_decorations.dart';
 import '../../core/theme/foundations/app_durations.dart';
 import '../../core/theme/foundations/app_icon_size.dart';
 import '../../core/theme/foundations/app_motion_policy.dart';
 import '../../core/theme/foundations/app_radius.dart';
-import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/foundations/app_stroke.dart';
 import '../../core/theme/typography/app_typography.dart';
@@ -24,16 +24,22 @@ import '../../core/theme/extensions/app_ink.dart';
 /// flat scan of one level or a walk of a whole subtree is the screen's decision,
 /// and the two want different result rows.
 ///
-/// **A custom filled mobile control, not an `InputDecorator` clone** (M100.36
-/// 4E). It keeps its own surface model — a well in the page at rest, the paper
-/// once focused — and takes its *boundary* from the same system every other
-/// control uses: `scheme.outline` at rest, `scheme.primary` with focus, at
-/// [AppStroke.control]. Until M100.36 the resting border was the fill's own
-/// colour, so the pill had no boundary at all: 1.09:1 against the light page,
-/// identified only by its glyph and placeholder (#433 §4.1). A control that is
-/// somewhere to type is identified by its edge, which is what WCAG 1.4.11 asks
-/// 3:1 of. No shadow: search is flat, and the fill and the edge each carry a
-/// different fact.
+/// **A custom filled mobile control, not an `InputDecorator` clone.** It keeps
+/// its own surface model and its own shape — [AppRadius.md], not a pill, and
+/// `border-ghost` ([AppDecorations.hairlineEdge]) at rest / `scheme.primary`
+/// focused, both at [AppStroke.hairline] (the v3 SearchField spec, superseding
+/// M100.36 4E's pill + `scheme.outline` boundary). No shadow: search is flat,
+/// and the fill and the edge each carry a different fact.
+///
+/// **The resting edge is translucent, on purpose, and the owner chose that
+/// figure knowingly.** `border-ghost` measures **1.19:1** against the page in
+/// light — nowhere near WCAG 1.4.11's 3:1, the same trade-off already made for
+/// `MxTextField`'s enabled border under M100.101 (`app_input_theme.dart`). The
+/// field is legible without it: its own fill steps away from the page
+/// (`surfaceContainer` at rest, `surfaceContainerLowest` focused) and its text
+/// and glyph carry full-strength ink. `scheme.outline`'s M100.36 boundary fix
+/// (#433 §4.1) is superseded here, not forgotten — this is the same argument
+/// TextField already settled, extended to its sibling control.
 ///
 /// **Focus changes the fill and the border, never a size.** The border is drawn
 /// outside the box (`strokeAlignOutside`) so gaining a colour on focus moves
@@ -46,14 +52,22 @@ import '../../core/theme/extensions/app_ink.dart';
 /// [semanticLabel] is required and is the field's name in every state; the
 /// visible hint is excluded from semantics so the two are never read twice.
 ///
-/// **It grows with the text, from a floor of 48** (#433 F2). The pill used to
-/// be pinned at `AppSizing.touchTarget` with `expands: true`, which made a
-/// documented *floor* into a ceiling: from `textScaler` 2.5 the placeholder
-/// was clipped to the box. The floor is a floor now.
-/// The inset that brings a one-line field to [AppSizing.touchTarget] at the
-/// default scale: (48 − 20) / 2. Off-grid on purpose — the target is the
-/// contract, and the grid step above it would make the pill 52.
-const double _fieldInset = (AppSizing.touchTarget - _lineHeight) / 2;
+/// **It grows with the text, from a floor of [_pillFloorHeight] (52).** The v3
+/// SearchField spec states 52 as the field's own height — the foundations task
+/// measured the old 48-floor field at 49 by then and explicitly left "whether
+/// the floor itself should move to meet it" to this component's spec
+/// (`mx_search_field_test.dart`, `48 is a floor` test). The floor stays a
+/// *floor*, never a ceiling (#433 F2: `SizedBox` + `expands: true` used to clip
+/// the placeholder from `textScaler` 2.5) — only the resting value moved.
+/// The inset that brings a one-line field to [_pillFloorHeight] at the default
+/// scale: (52 − 20) / 2 = 16, which now lands on [AppSpacing.lg] — a byproduct
+/// of the new floor, not a rule computed from it.
+const double _fieldInset = (_pillFloorHeight - _lineHeight) / 2;
+
+/// The v3 SearchField spec's own height (`--memox-size-input`, 52) — specific
+/// to this control, so it stays local rather than joining `AppSizing`: nothing
+/// else in the app renders it (`AppSizing`'s own header rule).
+const double _pillFloorHeight = 52;
 
 /// `body-md`'s line at the default scale — 14 × 1.43, rounded as the engine
 /// rounds it.
@@ -136,7 +150,6 @@ class _MxSearchFieldState extends State<MxSearchField> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final semantic = context.semanticColors;
     final hasQuery = widget.value.isNotEmpty;
     final count = widget.resultCount;
     // **Its own rung, and it is the pill's to own** (M100.36 4P analogue). The
@@ -158,33 +171,50 @@ class _MxSearchFieldState extends State<MxSearchField> {
       // frame. Reduced motion drops the fade and keeps the state.
       duration: AppMotionPolicy.durationOf(context, AppDurations.fast),
       curve: AppDurations.standard,
-      // A floor, as `AppSizing` names it. The row inside grows with the text
-      // and the clear button already stands 48 tall, so the pill is 48 at the
-      // default scale and taller only when the text needs it.
-      constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
+      // A floor, as [_pillFloorHeight] names it. The row inside grows with the
+      // text, so the pill is 52 at the default scale and taller only when the
+      // text needs it.
+      constraints: const BoxConstraints(minHeight: _pillFloorHeight),
       decoration: BoxDecoration(
-        color: _hasFocus ? colors.surface : semantic.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+        color: _hasFocus
+            ? colors.surfaceContainerLowest
+            : colors.surfaceContainer,
+        borderRadius: BorderRadius.circular(AppRadius.md),
         // `strokeAlignOutside` keeps the stroke out of the layout: a border
-        // inside the box would make the pill 51 where the touch target needs
-        // its 48, and at 320 wide with `textScaler` 2.0 the chrome has no two
-        // pixels to spare.
+        // inside the box would grow the pill past its floor, and at 320 wide
+        // with `textScaler` 2.0 the chrome has no two pixels to spare.
         border: Border.all(
-          color: _hasFocus ? colors.primary : colors.outline,
-          width: AppStroke.control,
+          color: _hasFocus
+              ? colors.primary
+              : AppDecorations.hairlineEdge(colors).color,
+          // Stated rather than left to `Border.all`'s own default, on the
+          // precedent `AppDecorations.hairlineEdge` already argues: the width
+          // is one *because the stroke scale says a hairline is one*.
+          // ignore: avoid_redundant_argument_values
+          width: AppStroke.hairline,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),
-      // 8 on the trailing side against 12 on the leading one, as the design has
-      // it: the glyph needs room off the edge, the clear button brings its own.
-      padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.sm),
+      // 4 on the trailing side against 16 on the leading one, as the v3 spec
+      // has it: the glyph needs room off the edge, the clear button brings its
+      // own inset.
+      padding: const EdgeInsets.only(left: AppSpacing.lg, right: AppSpacing.xs),
       child: Row(
         // **Centre, not stretch.** The design's `align-items: center` aligns the
         // boxes themselves; stretching them made each child centre its own
-        // content by its own rules, and a glyph centred in a 48-tall box does
+        // content by its own rules, and a glyph centred in a taller box does
         // not land where a line of text centred in one does.
         children: <Widget>[
-          const MxIcon(Icons.search, size: MxIconSize.sm),
+          MxIcon(
+            Icons.search,
+            size: MxIconSize.mdCompact,
+            // The glyph tracks the border's hue rather than `AppInk.stated`:
+            // `accent` is `primary`'s hue held to text-legible lightness
+            // (`AppSemanticColors.accentInk`) — the closest named ink to a raw
+            // `primary` read, which the icon-ink guard reserves for a button's
+            // own inherited `IconTheme` (`icon_ink_boundary_test.dart`).
+            ink: _hasFocus ? AppInk.accent : AppInk.quiet,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Semantics(
@@ -227,11 +257,11 @@ class _MxSearchFieldState extends State<MxSearchField> {
                   // `isCollapsed`, not `isDense`: dense keeps some of the
                   // decorator's own vertical padding, and that padding is what
                   // biased the text off the glyph's line. The inset is stated
-                  // on the field rather than the pill so the 48-tall clear
-                  // button does not add to it. **The field itself stands 48**
-                  // (A20.1 P2-17): the pill was 48 while the field inside it
-                  // was 44, and Android's target guideline reads the node
-                  // that takes the tap, which is the field.
+                  // on the field rather than the pill so the clear button's own
+                  // 48dp touch target does not add to it (A20.1 P2-17) — the
+                  // pill sits at [_pillFloorHeight], the field a few dp inside
+                  // it, and Android's target guideline reads the node that
+                  // takes the tap, which is the field.
                   isCollapsed: true,
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: _fieldInset,
@@ -266,9 +296,12 @@ class _MxSearchFieldState extends State<MxSearchField> {
               ),
               const SizedBox(width: AppSpacing.xs),
             ],
-            // The design's clear button is 32 square. This one is 48, because
-            // that is the floor the same design declares for anything a finger
-            // has to hit, and `mx_stress_test.dart` enforces it.
+            // The v3 spec's clear button paints 36 square. This one is 48,
+            // because that is the floor the same design declares for anything
+            // a finger has to hit, and `mx_stress_test.dart` enforces it —
+            // shrinking the painted box below the target it keeps is the
+            // control's call, not this row's, and this control has already
+            // made it in favour of the floor (same call as the old 32).
             IconButton(
               onPressed: () => widget.onChanged(''),
               tooltip: widget.clearSemanticLabel,
@@ -278,7 +311,11 @@ class _MxSearchFieldState extends State<MxSearchField> {
                 semanticLabel: widget.clearSemanticLabel,
               ),
             ),
-          ],
+          ] else
+            // Reserved rather than omitted: an empty field's trailing edge
+            // sits where the clear button's would start, so typing the first
+            // character does not shift the placeholder that was already there.
+            const SizedBox(width: AppSpacing.md),
         ],
       ),
     );

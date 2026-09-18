@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_reading_column.dart';
+import 'package:memox/shared/widgets/mx_section.dart';
 import 'package:memox/shared/widgets/mx_section_label.dart';
 import 'package:memox/shared/widgets/mx_sheet.dart';
 
@@ -13,6 +14,22 @@ List<MxStressSpecimen> ownerStressSpecimens() => <MxStressSpecimen>[
     // names; the stress is the long label at 2.0x staying on its line.
     name: 'MxSectionLabel',
     build: () => const MxSectionLabel(label: kLongLabel, detail: '128'),
+  ),
+  MxStressSpecimen(
+    // A long title above and a long row inside: the stress is the label
+    // wrapping to its ellipsis and the row content wrapping without
+    // breaking the hairline divider — kept to two rows and a short note so
+    // the specimen itself stays inside the 320 x 640 stress frame at 2.0x,
+    // the same budget every non-scrolling specimen here works within.
+    name: 'MxSection',
+    build: () => MxSection(
+      title: kLongTitle,
+      note: kLongLabel,
+      rows: const <Widget>[
+        ListTile(title: Text(kLongLabel)),
+        ListTile(title: Text('Sound')),
+      ],
+    ),
   ),
   MxStressSpecimen(
     name: 'MxReadingColumn',
