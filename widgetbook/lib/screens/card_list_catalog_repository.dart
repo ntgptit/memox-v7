@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
+import 'package:memox/features/card/domain/entities/card_study_state_entity.dart';
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
@@ -13,7 +14,6 @@ import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/domain/models/tag_filter_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
-import 'package:memox/features/card/domain/entities/card_study_state_entity.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
@@ -99,8 +99,7 @@ final class CardListCatalogRepository implements CardRepository {
     final List<CardListItemModel> rows = _rows.where((CardListItemModel row) {
       final bool passesFilter = switch (filter) {
         CardListFilter.all => true,
-        CardListFilter.due =>
-          row.dueAt == null || !row.dueAt!.isAfter(at),
+        CardListFilter.due => row.dueAt == null || !row.dueAt!.isAfter(at),
         CardListFilter.isNew => row.state == CardState.isNew,
         CardListFilter.flagged => row.card.isFlagged,
       };
@@ -269,9 +268,7 @@ final class CardListCatalogRepository implements CardRepository {
   /// one tick, so the list never renders half a batch.
   @override
   Future<void> deleteCards(List<String> cardIds) async {
-    _rows.removeWhere(
-      (CardListItemModel row) => cardIds.contains(row.card.id),
-    );
+    _rows.removeWhere((CardListItemModel row) => cardIds.contains(row.card.id));
     _changes.add(null);
   }
 
@@ -288,16 +285,20 @@ final class CardListCatalogRepository implements CardRepository {
   // its own fake. Throwing names the mistake at the call site instead of
   // returning a plausible empty answer that would quietly pass for data.
 
-  Never _elsewhere(String member) =>
-      throw UnsupportedError('CardListCatalogRepository does not serve $member');
+  Never _elsewhere(String member) => throw UnsupportedError(
+    'CardListCatalogRepository does not serve $member',
+  );
 
   @override
-  Stream<List<CardEntity>> watchCardsByDeck(String deckId, {required int limit}) =>
-      _elsewhere('watchCardsByDeck');
+  Stream<List<CardEntity>> watchCardsByDeck(
+    String deckId, {
+    required int limit,
+  }) => _elsewhere('watchCardsByDeck');
 
   @override
-  Stream<CardStateDistributionModel> watchCardStateDistribution(String deckId) =>
-      _elsewhere('watchCardStateDistribution');
+  Stream<CardStateDistributionModel> watchCardStateDistribution(
+    String deckId,
+  ) => _elsewhere('watchCardStateDistribution');
 
   @override
   Future<bool> readDeckHoldsCards(String deckId) =>
@@ -338,10 +339,8 @@ final class CardListCatalogRepository implements CardRepository {
       _elsewhere('deleteCardsForUndo');
 
   @override
-  Future<void> setCardFlag({
-    required String cardId,
-    required bool isFlagged,
-  }) => _elsewhere('setCardFlag');
+  Future<void> setCardFlag({required String cardId, required bool isFlagged}) =>
+      _elsewhere('setCardFlag');
 
   @override
   Stream<bool> watchCardFlag(String cardId) => _elsewhere('watchCardFlag');
@@ -355,10 +354,8 @@ final class CardListCatalogRepository implements CardRepository {
       _elsewhere('addCardTag');
 
   @override
-  Future<void> removeCardTag({
-    required String cardId,
-    required String tagId,
-  }) => _elsewhere('removeCardTag');
+  Future<void> removeCardTag({required String cardId, required String tagId}) =>
+      _elsewhere('removeCardTag');
 }
 
 /// A fixed instant — the catalog never reads the wall clock, so a screenshot
@@ -411,7 +408,13 @@ List<CardListItemModel> _deckSeed() {
       dueInDays: 9,
       isFlagged: true,
     ),
-    _row(index: 5, front: '얼마예요?', back: 'bao nhiêu tiền?', box: 5, dueInDays: 12),
+    _row(
+      index: 5,
+      front: '얼마예요?',
+      back: 'bao nhiêu tiền?',
+      box: 5,
+      dueInDays: 12,
+    ),
     _row(
       index: 6,
       front: '주세요',
@@ -431,7 +434,8 @@ List<CardListItemModel> _longSeed() {
     _row(
       index: 0,
       front: '안녕하세요, 만나서 반갑습니다',
-      back: 'xin chào — một lời chào lịch sự dùng với người lớn tuổi hơn hoặc '
+      back:
+          'xin chào — một lời chào lịch sự dùng với người lớn tuổi hơn hoặc '
           'người mới gặp lần đầu, và cũng là câu mở đầu chuẩn trong hầu hết '
           'các tình huống trang trọng',
       box: 3,
@@ -442,7 +446,8 @@ List<CardListItemModel> _longSeed() {
     _row(
       index: 1,
       front: '정말 죄송합니다만 다시 한번 말씀해 주시겠어요?',
-      back: 'thành thật xin lỗi, nhưng anh/chị có thể nói lại một lần nữa được '
+      back:
+          'thành thật xin lỗi, nhưng anh/chị có thể nói lại một lần nữa được '
           'không ạ?',
       box: null,
       dueInDays: null,
