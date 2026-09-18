@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
+import 'package:memox/shared/widgets/mx_filter_chip.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
@@ -106,6 +107,24 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
       icon: Icons.filter_list,
       isSelected: true,
       onPressed: _noop,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Never shrinks or ellipsizes (no `Flexible` by design), so the honest
+    // stress is the caller's contract: a horizontally scrolling row, with the
+    // longest label plus a large count. It must lay out without overflow and
+    // its tap target must still reach the minimum.
+    name: 'MxFilterChip',
+    build: () => const SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: MxFilterChip(
+        label: kLongLabel,
+        count: 9999,
+        icon: Icons.filter_list,
+        isSelected: true,
+        onPressed: _noop,
+      ),
     ),
     isInteractive: true,
   ),

@@ -31,6 +31,13 @@ abstract final class AppBorderColors {
   static const Color borderAccentLight = Color(0xFFD5DAFD);
   static const Color borderAccentDark = Color(0xFF394379);
 
+  /// The hairline a `MxFilterChip` wears unselected — v3 `border-ghost`:
+  /// `primary` at 14% (light) / 16% (dark) over `surfaceContainerLowest`,
+  /// the same derivation as [borderAccentLight] at a lower alpha
+  /// (docs/design-system/v3-foundations.md:270).
+  static const Color borderGhostLight = Color(0xFFE7E9FE);
+  static const Color borderGhostDark = Color(0xFF262E5A);
+
   /// The resting edge of a selectable card — v3 has one non-brand edge, so
   /// this is [borderControlLight] under its call-site name.
   static const Color borderOptionLight = borderControlLight;

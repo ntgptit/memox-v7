@@ -59,6 +59,12 @@ abstract final class AppSizing {
   /// the two apart.
   static const double controlDense = 32;
 
+  /// A filter chip's fixed painted height (v3 component table —
+  /// docs/design-system/v3-foundations.md:195-198 — "chip cỡ cố định 28").
+  /// Below RawChip's own painted floor, which is why `MxFilterChip` does not
+  /// wrap `ChoiceChip`.
+  static const double chipHeight = 28;
+
   /// The scrollbar's thumb — Material's own 4, stated (A20.1 P3-09).
   static const double scrollbarThickness = 4;
 
