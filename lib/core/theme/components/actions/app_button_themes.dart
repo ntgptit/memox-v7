@@ -102,8 +102,16 @@ enum MxFilledPair {
   /// screen's one call to action.
   brand,
 
-  /// `error` / `onError` — the destructive action. `error` is `danger` in this
-  /// palette, so this is not a second red.
+  /// `errorFill` / `onErrorFill` — the destructive action, on the SOLID
+  /// destructive fill the v3 handoff binds it to (`themeRoleUsage`:
+  /// "`error-fill`, deeper than `error`").
+  ///
+  /// **Deliberately not `scheme.error` / `scheme.onError`.** Those are the
+  /// text/icon "this is an error" colour the rest of the app still uses for
+  /// validation messages and the like; the fill is a different pair with its
+  /// own contrast contract, so the button reads it from [AppSemanticColors]
+  /// rather than the scheme. Moved off `error` / `onError` at Task 2 of the v3
+  /// Button plan.
   destructive,
 
   /// `surfaceContainer` / `onSurface` — the v3 Button handoff's "secondary"
@@ -122,19 +130,22 @@ enum MxFilledPair {
   /// state mechanism, same resolver. Only the two colours differ.
   tonal;
 
-  /// The fill, read off the scheme rather than handed in.
-  Color fillOf(ColorScheme scheme) => switch (this) {
-    MxFilledPair.brand => scheme.primary,
-    MxFilledPair.destructive => scheme.error,
-    MxFilledPair.tonal => scheme.surfaceContainer,
-  };
+  /// The fill, read off the scheme (or, for [destructive], the semantic
+  /// tokens) rather than handed in.
+  Color fillOf(ColorScheme scheme, AppSemanticColors semantic) =>
+      switch (this) {
+        MxFilledPair.brand => scheme.primary,
+        MxFilledPair.destructive => semantic.errorFill,
+        MxFilledPair.tonal => scheme.surfaceContainer,
+      };
 
   /// The label that travels with [fillOf].
-  Color labelOf(ColorScheme scheme) => switch (this) {
-    MxFilledPair.brand => scheme.onPrimary,
-    MxFilledPair.destructive => scheme.onError,
-    MxFilledPair.tonal => scheme.onSurface,
-  };
+  Color labelOf(ColorScheme scheme, AppSemanticColors semantic) =>
+      switch (this) {
+        MxFilledPair.brand => scheme.onPrimary,
+        MxFilledPair.destructive => semantic.onErrorFill,
+        MxFilledPair.tonal => scheme.onSurface,
+      };
 
   /// The state layer painted over [fillOf] on hover, focus and press.
   ///
@@ -146,14 +157,15 @@ enum MxFilledPair {
   /// [labelOf] is what lets the source guard pin *this* slot: a future pair
   /// whose label and layer part would have to say so in two places, and
   /// `mx_action_button_composite_state_test.dart` asserts the two agree.
-  Color stateLayerOf(ColorScheme scheme) => switch (this) {
-    MxFilledPair.brand => scheme.onPrimary,
-    MxFilledPair.destructive => scheme.onError,
-    // Same role as [labelOf], as with every other pair — the v3 handoff's
-    // "secondary" tone label, `onSurface`. The layer moves lightness on a
-    // container that is already a surface tint, so hue stays put.
-    MxFilledPair.tonal => scheme.onSurface,
-  };
+  Color stateLayerOf(ColorScheme scheme, AppSemanticColors semantic) =>
+      switch (this) {
+        MxFilledPair.brand => scheme.onPrimary,
+        MxFilledPair.destructive => semantic.onErrorFill,
+        // Same role as [labelOf], as with every other pair — the v3 handoff's
+        // "secondary" tone label, `onSurface`. The layer moves lightness on a
+        // container that is already a surface tint, so hue stays put.
+        MxFilledPair.tonal => scheme.onSurface,
+      };
 }
 
 /// The primary action: `MxActionButton`'s `primary` variant.
@@ -201,9 +213,9 @@ ButtonStyle buildFilledStyle(
   TextTheme texts, {
   required MxFilledPair pair,
 }) {
-  final Color fill = pair.fillOf(scheme);
-  final Color label = pair.labelOf(scheme);
-  final Color layer = pair.stateLayerOf(scheme);
+  final Color fill = pair.fillOf(scheme, semantic);
+  final Color label = pair.labelOf(scheme, semantic);
+  final Color layer = pair.stateLayerOf(scheme, semantic);
 
   return buildSharedButtonStyle(scheme, texts).copyWith(
     // Disabled is the only state that changes the fill. Everything else is

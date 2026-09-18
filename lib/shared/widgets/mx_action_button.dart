@@ -448,8 +448,16 @@ class MxActionButton extends StatelessWidget {
         colors.surfaceContainer,
         colors.onSurface,
       ),
-      MxActionButtonVariant.secondary ||
-      MxActionButtonVariant.destructive => (colors.error, colors.onError),
+      // The v3 solid destructive pair, read from the same tokens
+      // `MxFilledPair.destructive` reads — a second spelling here is what
+      // flipped a saving button's colour every time the theme moved.
+      MxActionButtonVariant.destructive => (
+        context.semanticColors.errorFill,
+        context.semanticColors.onErrorFill,
+      ),
+      // Unreachable — `secondary` returned above — kept so the switch stays
+      // exhaustive and a variant added later fails the build here.
+      MxActionButtonVariant.secondary => (colors.error, colors.onError),
     };
 
     return ButtonStyle(
