@@ -212,6 +212,7 @@ class MemoxWidgetbook extends StatelessWidget {
             alertDialogComponent(),
             actionSheetComponent(),
             sheetHeaderComponent(),
+            appBarComponent(),
             contentShellComponent(),
             asyncViewComponent(),
             progressBarComponent(),
