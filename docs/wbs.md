@@ -1378,6 +1378,14 @@ của M2.
   - [x] Hằng số mới nằm trong bảng lưới 4dp và có assertion thứ tự so với
         `touchTarget`.
   - [x] Không đổi màu, overlay, focus ring, hay binding disabled.
+  - [x] **Sáu test ghim hình học cũ được trỏ lại, không nới.** Bốn test đo vùng chạm 48dp
+        qua `InkWell` nay đo `IconButton` (InkWell giờ là hình tròn sơn 36 theo thiết kế);
+        ngưỡng 47.5 giữ nguyên. Hai test G2 của trash suy `residue` từ
+        `touchTarget` và `mdCompact` thay vì gõ số.
+  - [x] **Hệ quả ghi lại, không giấu:** glyph 20 trong hộp 48 chừa 14dp mỗi bên, nên
+        glyph cuối hàng trash nằm **2dp** trong gutter thay vì đúng gutter (residue
+        0 → 2). Căn chính xác cần padding ngoài 2dp — lệch lưới 4dp và dưới `AppSpacing.xs`.
+        Các caller khác của `MxIconButton` dịch cùng 2dp nhưng chưa có test đo.
   - [x] `dart format`, `flutter analyze --no-fatal-infos`, full host suite
         (`--exclude-tags golden`), guard Python đều xanh.
 - **Checklist phases:** 7, 12.
