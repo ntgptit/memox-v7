@@ -1153,6 +1153,36 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.102 · MxChipTrigger — the ghost menu-trigger chip
+
+- **Status:** done — analyze sạch, host suite pass, guard 0, architecture sạch,
+  `check_docs` xanh.
+- **Goal:** Thêm `MxChipTrigger` — chip ghost 28dp mở menu do caller sở hữu, không
+  bao giờ đọc là "đã chọn". Component đầu tiên hiện thực contract "menu trigger"
+  của MemoX v3 design kit (nhóm B · Actions & controls).
+- **Scope:** `lib/shared/widgets/mx_chip_trigger.dart` (mới),
+  `test/shared/widgets/mx_chip_trigger_test.dart` (mới),
+  `test/shared/widgets/mx_stress_selection_specimens.dart` (specimen bắt buộc của
+  `mx_stress_test`), `widgetbook/lib/components/control_components.dart`,
+  `widgetbook/lib/main.dart`.
+- **Out of scope:** nối `MxChipTrigger` vào bất kỳ màn hình nào (CardFilterBarWidget,
+  deck toolbar, …) — handoff để ngỏ, caller sở hữu menu và quyết định khi nào dùng.
+- **Dependencies:** không — dùng token/thành phần đã có (`MxFocusRing`, `AppSizing`,
+  `AppSpacing`, `AppRadius`, `AppIconSize`, `AppStateOpacity`).
+- **Tests required:** `mx_chip_trigger_test.dart` (interaction, semantics, layout,
+  theming, focus).
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_chip_trigger.dart`.
+- **Acceptance criteria:**
+  - [x] Không có `isSelected`/trạng thái "đã chọn" nào trong API hay semantics.
+  - [x] Cao 28dp (nội dung), chạm tối thiểu 48×48, hình pill, không viền không nền.
+  - [x] Nhãn ở `label-md` (12/600), ink `onSurfaceVariant`, mờ đi khi disabled qua
+        `AppStateOpacity.disabledContent`.
+  - [x] Chevron `Icons.expand_more` 16dp luôn vẽ; icon dẫn đầu là slot tuỳ chọn.
+  - [x] Focus ring dùng `MxFocusRing` nguyên trạng — không thêm cơ chế focus mới.
+  - [x] Đăng ký trong Widgetbook (`chipTriggerComponent()`).
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 

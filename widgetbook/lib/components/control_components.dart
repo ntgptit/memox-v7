@@ -8,6 +8,7 @@ import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_chip_trigger.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
@@ -563,6 +564,75 @@ WidgetbookComponent pillButtonComponent() {
                 MxPillButton(label: 'Due', isSelected: true, onPressed: null),
               ],
             ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent chipTriggerComponent() {
+  return WidgetbookComponent(
+    name: 'MxChipTrigger',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: 'Newest first',
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+          final hasLeadingIcon = context.knobs.boolean(
+            label: 'with leading icon',
+          );
+          final semanticLabel = context.knobs.stringOrNull(
+            label: 'semanticLabel',
+          );
+
+          return CatalogCenterPage(
+            child: MxChipTrigger(
+              label: label,
+              onPressed: isEnabled ? _noop : null,
+              leadingIcon: hasLeadingIcon ? Icons.swap_vert : null,
+              semanticLabel: semanticLabel,
+            ),
+          );
+        },
+      ),
+      // The two worked examples from the design kit: a sort trigger and a
+      // filter trigger side by side.
+      WidgetbookUseCase(
+        name: 'Sort and filter row',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                MxChipTrigger(
+                  label: 'Newest first',
+                  leadingIcon: Icons.swap_vert,
+                  onPressed: _noop,
+                ),
+                MxChipTrigger(
+                  label: 'Manual · Due only',
+                  leadingIcon: Icons.tune,
+                  onPressed: _noop,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      WidgetbookUseCase(
+        name: 'Disabled',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: MxChipTrigger(label: 'Newest first', onPressed: null),
           );
         },
       ),
