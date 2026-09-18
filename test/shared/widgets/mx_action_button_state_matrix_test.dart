@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
@@ -89,6 +90,10 @@ void main() {
     return themeStyle == null ? null : select(themeStyle)?.resolve(states);
   }
 
+  // `chip` ignores `variant` and dims whole when disabled, so these per-variant
+  // assertions do not apply; `mx_action_button_chip_test.dart` measures it.
+  final tones = MxActionButtonSize.values.where((s) => s != .chip);
+
   const rest = <WidgetState>{};
   const hovered = <WidgetState>{WidgetState.hovered};
   const pressed = <WidgetState>{WidgetState.pressed};
@@ -101,7 +106,7 @@ void main() {
 
     group(themeName, () {
       for (final variantEntry in filledVariants.entries) {
-        for (final size in MxActionButtonSize.values) {
+        for (final size in tones) {
           final variantName = '${variantEntry.key} · ${size.name}';
           final variant = variantEntry.value;
 
@@ -193,7 +198,7 @@ void main() {
       // Both sizes here too: compact swaps geometry, and geometry properties
       // are single-state — a compact button that lost its state resolvers
       // would fail this, not the drawn-40 test in mx_components_test.
-      for (final size in MxActionButtonSize.values) {
+      for (final size in tones) {
         testWidgets('secondary · ${size.name} · edge is outlineVariant at rest '
             'and while loading, focus ring when focused', (tester) async {
           await pump(
@@ -292,15 +297,45 @@ void main() {
           disabled,
         );
         final Color? ink = resolved(tester, (s) => s.foregroundColor, disabled);
-        expect(
-          fill,
-          themeEntry.value.colorScheme.error,
-          reason: themeEntry.key,
-        );
+        // Repinned from `scheme.error`: the destructive tone paints the v3
+        // `errorFill` / `onErrorFill`, not `error` (the text colour). Both
+        // halves are pinned because `_busyStyle` restates the pair, and a
+        // saving button flipping colour is how it drifts.
+        final semantic = themeEntry.value.extension<AppSemanticColors>()!;
+        expect(fill, semantic.errorFill, reason: themeEntry.key);
+        expect(ink, semantic.onErrorFill, reason: themeEntry.key);
         expect(
           contrast(ink!, fill!),
           greaterThanOrEqualTo(4.5),
           reason: '${themeEntry.key}: the loading label is under AA',
+        );
+      });
+    }
+
+    for (final themeEntry in themes.entries) {
+      testWidgets('${themeEntry.key} · tonal keeps its resting pair while '
+          'loading', (tester) async {
+        // `_busyStyle` restates the tonal pair, so it drifted when the pair
+        // moved to the v3 secondary tone: a saving tonal button flipped back
+        // to `secondaryContainer` for the duration of the save.
+        await pump(
+          tester,
+          themeEntry.value,
+          MxActionButtonVariant.tonal,
+          isLoading: true,
+          shouldKeepLabelWhileLoading: true,
+        );
+
+        final scheme = themeEntry.value.colorScheme;
+        expect(
+          resolved(tester, (s) => s.backgroundColor, disabled),
+          scheme.surfaceContainer,
+          reason: '${themeEntry.key}: the loading tonal fill drifted',
+        );
+        expect(
+          resolved(tester, (s) => s.foregroundColor, disabled),
+          scheme.onSurface,
+          reason: '${themeEntry.key}: the loading tonal label drifted',
         );
       });
     }

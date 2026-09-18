@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../foundations/app_decorations.dart';
 import '../../foundations/app_sizing.dart';
 import '../../states/app_interaction_states.dart';
 import '../../foundations/app_radius.dart';
@@ -88,55 +89,64 @@ ButtonStyle buildSharedButtonStyle(
 /// see it. The builder now resolves the pair itself, so the only way to reach
 /// a filled button is to name one of the pairs the design system admits.
 ///
-/// Each member is a canonical M3 pair, and the fill, its `on` colour and the
-/// state layer travel together — passing one without the others is the
+/// Each member is a fixed role pair — `brand` and `destructive` are canonical
+/// M3 pairs, `tonal` is the v3 handoff's own — and the fill, its `on` colour
+/// and the state layer travel together; passing one without the others is the
 /// mismatch this closes. `m3_role_binding_guard_test.dart` reads each arm
 /// below at source level, so a swap to a role that happens to share a hex
 /// still fails.
 ///
-/// **`tonal` left at M100.36.** It had no production caller since #384 took
-/// Card Detail's Edit back to an icon, and the study grading hierarchy (4B)
-/// was settled with `secondary` for the lower-emphasis grades. A variant kept
-/// for a use it might someday have is exactly what a closed API is for
-/// refusing.
+/// **`tonal` is live:** `DeckStudyButtonWidget`'s deck-row verb uses it (it
+/// was dropped at M100.36 while unused and re-admitted at M100.73).
 enum MxFilledPair {
   /// `primary` / `onPrimary` — `_FilledButtonDefaultsM3`'s own pair, and the
   /// screen's one call to action.
   brand,
 
-  /// `error` / `onError` — the destructive action. `error` is `danger` in this
-  /// palette, so this is not a second red.
+  /// `errorFill` / `onErrorFill` — the destructive action, on the SOLID
+  /// destructive fill the v3 handoff binds it to (`themeRoleUsage`:
+  /// "`error-fill`, deeper than `error`").
+  ///
+  /// **Deliberately not `scheme.error` / `scheme.onError`.** Those are the
+  /// text/icon "this is an error" colour the rest of the app still uses for
+  /// validation messages and the like; the fill is a different pair with its
+  /// own contrast contract, so the button reads it from [AppSemanticColors]
+  /// rather than the scheme. Moved off `error` / `onError` at Task 2 of the v3
+  /// Button plan.
   destructive,
 
-  /// `secondaryContainer` / `onSecondaryContainer` — M3's own tonal button
-  /// pair, and the one rung between a filled button and an outlined one.
+  /// `surfaceContainer` / `onSurface` — the v3 Button handoff's "secondary"
+  /// tone, and the one rung between a filled button and an outlined one.
   ///
-  /// **Admitted because a screen needed a third weight, not a third colour.**
-  /// The Library's deck row carries one verb per card, three or four cards to a
-  /// viewport. Filled, the accent repeats until it stops meaning emphasis;
-  /// outlined, the verb reads as an alternative to something — and there is
-  /// nothing else on the row for it to be an alternative *to*. Tonal is the
-  /// weight that says "this is the action" without spending the accent, which
-  /// is exactly the gap M3 defines it for.
+  /// **Moved off M3's own tonal pair at Task 1 of the v3 Button plan.** Until
+  /// then this read `secondaryContainer` / `onSecondaryContainer` —
+  /// `_FilledButtonDefaultsM3`'s own `FilledButton.tonal` colours (M100.73).
+  /// The handoff's `themeRoleUsage` table binds the "secondary" tone's
+  /// container to `surfaceContainer` and its label to `onSurface` directly:
+  /// it is not naming M3's tonal button, it is naming this app's own
+  /// "secondary" tone, and the handoff is what this pair now paints.
   ///
   /// It is a pair on this enum rather than a fourth `MxFilledPair`-shaped
   /// concept somewhere else, because it is the same button: same shape, same
   /// state mechanism, same resolver. Only the two colours differ.
   tonal;
 
-  /// The fill, read off the scheme rather than handed in.
-  Color fillOf(ColorScheme scheme) => switch (this) {
-    MxFilledPair.brand => scheme.primary,
-    MxFilledPair.destructive => scheme.error,
-    MxFilledPair.tonal => scheme.secondaryContainer,
-  };
+  /// The fill, read off the scheme (or, for [destructive], the semantic
+  /// tokens) rather than handed in.
+  Color fillOf(ColorScheme scheme, AppSemanticColors semantic) =>
+      switch (this) {
+        MxFilledPair.brand => scheme.primary,
+        MxFilledPair.destructive => semantic.errorFill,
+        MxFilledPair.tonal => scheme.surfaceContainer,
+      };
 
   /// The label that travels with [fillOf].
-  Color labelOf(ColorScheme scheme) => switch (this) {
-    MxFilledPair.brand => scheme.onPrimary,
-    MxFilledPair.destructive => scheme.onError,
-    MxFilledPair.tonal => scheme.onSecondaryContainer,
-  };
+  Color labelOf(ColorScheme scheme, AppSemanticColors semantic) =>
+      switch (this) {
+        MxFilledPair.brand => scheme.onPrimary,
+        MxFilledPair.destructive => semantic.onErrorFill,
+        MxFilledPair.tonal => scheme.onSurface,
+      };
 
   /// The state layer painted over [fillOf] on hover, focus and press.
   ///
@@ -148,15 +158,15 @@ enum MxFilledPair {
   /// [labelOf] is what lets the source guard pin *this* slot: a future pair
   /// whose label and layer part would have to say so in two places, and
   /// `mx_action_button_composite_state_test.dart` asserts the two agree.
-  Color stateLayerOf(ColorScheme scheme) => switch (this) {
-    MxFilledPair.brand => scheme.onPrimary,
-    MxFilledPair.destructive => scheme.onError,
-    // Same role as [labelOf], as with every other pair — and here it is also
-    // what `_FilledButtonDefaultsM3` does for `FilledButton.tonal`, whose
-    // overlay is `onSecondaryContainer`. The layer moves lightness on a
-    // container that is already a tint, so hue stays put.
-    MxFilledPair.tonal => scheme.onSecondaryContainer,
-  };
+  Color stateLayerOf(ColorScheme scheme, AppSemanticColors semantic) =>
+      switch (this) {
+        MxFilledPair.brand => scheme.onPrimary,
+        MxFilledPair.destructive => semantic.onErrorFill,
+        // Same role as [labelOf], as with every other pair — the v3 handoff's
+        // "secondary" tone label, `onSurface`. The layer moves lightness on a
+        // container that is already a surface tint, so hue stays put.
+        MxFilledPair.tonal => scheme.onSurface,
+      };
 }
 
 /// The primary action: `MxActionButton`'s `primary` variant.
@@ -204,9 +214,9 @@ ButtonStyle buildFilledStyle(
   TextTheme texts, {
   required MxFilledPair pair,
 }) {
-  final Color fill = pair.fillOf(scheme);
-  final Color label = pair.labelOf(scheme);
-  final Color layer = pair.stateLayerOf(scheme);
+  final Color fill = pair.fillOf(scheme, semantic);
+  final Color label = pair.labelOf(scheme, semantic);
+  final Color layer = pair.stateLayerOf(scheme, semantic);
 
   return buildSharedButtonStyle(scheme, texts).copyWith(
     // Disabled is the only state that changes the fill. Everything else is
@@ -260,6 +270,60 @@ ButtonStyle buildFilledStyle(
       }
 
       return null;
+    }),
+  );
+}
+
+/// The chip-sized button's colours: `MxActionButtonSize.chip`, which ignores
+/// `variant`.
+///
+/// **A fixed look, not a fifth tone.** The v3 handoff's `themeRoleUsage` table
+/// binds this rung to one container (`surfaceContainerLowest`) and one border
+/// (`border-ghost`, [AppDecorations.hairlineEdge]) and has no per-tone row, so
+/// nothing here takes a pair. The label is `onSurfaceVariant` — the ink
+/// `app_chip_theme.dart` already puts on that same fill for an unselected pill,
+/// so the two answers for one pairing cannot part.
+///
+/// **No disabled branch, on purpose.** The handoff applies `op-disabled` over
+/// the *whole* control; `MxActionButton` wraps a disabled chip in that
+/// `Opacity`, so the fill, edge and label keep their enabled values here.
+/// Resolving to the solid `disabledSurface` / `onDisabled` pair as well would
+/// dim it twice.
+///
+/// Geometry (28 tall, pill, padding 8, `label-md`) is `MxActionButton`'s `_sized`
+/// and is merged over this; only colour, edge and state layer live here.
+ButtonStyle buildChipButtonStyle(ColorScheme scheme) {
+  final Color ink = scheme.onSurfaceVariant;
+
+  return ButtonStyle(
+    backgroundColor: WidgetStatePropertyAll<Color>(
+      scheme.surfaceContainerLowest,
+    ),
+    foregroundColor: WidgetStatePropertyAll<Color>(scheme.onSurfaceVariant),
+    // Pressed → focused → hovered, as in `buildFilledStyle`.
+    overlayColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.pressed)) {
+        return ink.withValues(alpha: AppStateOpacity.stateLayerPressed);
+      }
+      if (states.contains(WidgetState.focused)) {
+        return ink.withValues(alpha: AppStateOpacity.stateLayerFocus);
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return ink.withValues(alpha: AppStateOpacity.stateLayerHover);
+      }
+
+      return null;
+    }),
+    // **The ring replaces the ghost edge rather than sitting outside it**, so
+    // focus costs no layout. `primary` clears 3:1 on this near-white fill,
+    // which is why this can use `focusIndicator` where `buildFilledStyle` had
+    // to draw its ring in the label colour.
+    side: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.focused)) {
+        return AppInteractionStates.focusIndicator(scheme);
+      }
+
+      return AppDecorations.hairlineEdge(scheme);
     }),
   );
 }

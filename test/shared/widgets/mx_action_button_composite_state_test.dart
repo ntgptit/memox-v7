@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/components/actions/app_button_themes.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 
 import '../../support/color_math.dart';
@@ -70,10 +71,10 @@ void main() {
   const double overshoot = 12;
 
   /// **This is TEXT under AA, kept on purpose — not an oversight.** WCAG
-  /// 1.4.3 wants 4.5:1 for a label; these four cells measure less. The v3
+  /// 1.4.3 wants 4.5:1 for a label; these six cells measure less. The v3
   /// fill hex stays verbatim (owner decision 2, 2026-09-13) and the pressed
   /// state is Material's own state layer — it lightens that fill, neither of
-  /// which this branch controls — so on these four cells the composite label
+  /// which this branch controls — so on these cells the composite label
   /// contrast sits under AA. Pinned at what it measures (owner decision 5,
   /// 2026-09-13) rather than forced back to 4.5.
   ///
@@ -81,7 +82,7 @@ void main() {
   /// accepted the same shape of trade-off on this same button: the
   /// pressed-label floors the owner accepted there move with the alpha,
   /// measured at 3.77 / 4.01 under a 12% overlay and pinned at 3.7 / 4.0.
-  /// These four cells are that precedent recurring under v3, not a new
+  /// These cells are that precedent recurring under v3, not a new
   /// exception.
   ///
   /// **The real fix belongs to the Button component spec** — a pressed
@@ -94,6 +95,12 @@ void main() {
     'light destructive': 4.00,
     'high-contrast light primary': 3.77,
     'high-contrast light destructive': 4.00,
+    // Added with the destructive tone's move onto `errorFill` (Task 2, v3
+    // Button): dark `errorFill` #B0485C under white at the 12% pressed wash measures
+    // 4.28. Same precedent as above — the v3 fill is verbatim, the lightening
+    // is Material's — and the cell is pinned at what it measures.
+    'dark destructive': 4.28,
+    'high-contrast dark destructive': 4.28,
   };
 
   Future<ButtonStyle> effectiveStyle(
@@ -147,7 +154,14 @@ void main() {
           final style = await effectiveStyle(tester, theme, variant);
           final Color restFill = style.backgroundColor!.resolve(rest)!;
 
-          expect(restFill, pair.fillOf(theme.colorScheme), reason: themeName);
+          expect(
+            restFill,
+            pair.fillOf(
+              theme.colorScheme,
+              theme.extension<AppSemanticColors>()!,
+            ),
+            reason: themeName,
+          );
           for (final states in <Set<WidgetState>>[hovered, pressed, focused]) {
             expect(
               style.backgroundColor!.resolve(states),
@@ -162,7 +176,10 @@ void main() {
         testWidgets('$variantName · the state layer is the pair-s own ink, '
             'never the brand', (tester) async {
           final style = await effectiveStyle(tester, theme, variant);
-          final Color ink = pair.labelOf(theme.colorScheme);
+          final Color ink = pair.labelOf(
+            theme.colorScheme,
+            theme.extension<AppSemanticColors>()!,
+          );
 
           for (final states in <Set<WidgetState>>[hovered, pressed, focused]) {
             final Color? overlay = style.overlayColor?.resolve(states);
