@@ -6,6 +6,7 @@ import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
+import 'package:memox/shared/widgets/mx_section.dart';
 import 'package:memox/shared/widgets/mx_sheet_insets.dart';
 import 'package:widgetbook/widgetbook.dart';
 
@@ -311,6 +312,45 @@ WidgetbookComponent heroPrimaryComponent() {
                     onPressed: _noop,
                     isCramped: isCramped,
                   ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    ],
+  );
+}
+
+/// The labelled card-of-rows shape `SettingsSectionWidget` and
+/// `ReminderSettingsSectionWidget` each hand-rolled before this component
+/// existed: an optional overline, a raised card with a hairline between
+/// every pair of rows, and an optional note underneath.
+WidgetbookComponent sectionComponent() {
+  return WidgetbookComponent(
+    name: 'MxSection',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final title = context.knobs.stringOrNull(
+            label: 'title',
+            initialValue: 'Notifications',
+          );
+          final note = context.knobs.stringOrNull(
+            label: 'note',
+            description: 'Empty omits the note entirely',
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              MxSection(
+                title: title,
+                note: note,
+                rows: const <Widget>[
+                  ListTile(title: Text('Reminders')),
+                  ListTile(title: Text('Reminder time')),
+                  ListTile(title: Text('Sound')),
                 ],
               ),
             ],
