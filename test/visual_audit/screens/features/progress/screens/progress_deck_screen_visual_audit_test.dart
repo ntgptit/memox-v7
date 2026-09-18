@@ -122,6 +122,8 @@ void main() {
         // (the 1040 fold less the bar), so the sliver never builds it. Fewer
         // `InkWell` hosts by exactly that one: 4 `_RenderInkFeatures` and 2
         // `CustomPaint (no painter)`.
+        // Stated rather than defaulted: the zero is the measurement.
+        // ignore: avoid_redundant_argument_values
         tappableCards: 0,
         pills: 2,
         // No search on this branch.

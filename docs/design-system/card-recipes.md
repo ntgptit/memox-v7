@@ -28,14 +28,14 @@ Số caller đếm trong `lib/` (không tính test, Widgetbook, tài liệu).
 
 | Recipe | Nghĩa | Caller | Fill | Viền nghỉ | Elevation | Radius | Padding |
 |---|---|---:|---|---|---|---|---|
-| `flat` | Bề mặt nằm *trong* một bề mặt khác — cha đã tách nền rồi | 16 | `surfaceContainerLow` | không | `none` | `lg` 16 | `standard` 16 |
-| `raised` | Card thường trên trang | 22 | `surfaceContainerLow` | không | `card` 1 | `lg` 16 | `standard` 16 |
-| `focal` | Một bề mặt đứng riêng, mỗi màn một cái | 5 | `surfaceContainerLow` | không | `raised` 3 | `xl` 20 | `standard` 16 |
-| `recessed` | Hõm xuống — ô nhập, ô đáp án | 5 | `surfaceContainerLowest` | theo state | `none` | `xl` 20 | `standard` 16 |
-| `feedback` | Băng lỗi/cảnh báo | 4 | `errorContainer` | không | `none` | `lg` 16 | `compact` 12 |
-| `muted` | Chú thích đặt cạnh nội dung | 5 | `surfaceContainerHigh` | không | `none` | `lg` 16 | `compact` 12 |
-| `tonal` | Callout nhấn — xem §4 | 2 | `semantic.surfaceEmphasis` | không | `none` | `lg` 16 | `standard` 16 |
-| `accent` | Card được đánh dấu bằng viền thương hiệu | 4 | `surfaceContainerLow` | `borderAccent` | `raised` 3 | `lg` 16 | `standard` 16 |
+| `flat` | Bề mặt nằm *trong* một bề mặt khác — cha đã tách nền rồi | 16 | `surfaceContainerLow` | không | `none` | `xl` 20 | `standard` 20 |
+| `raised` | Card thường trên trang | 22 | `surfaceContainerLow` | không | `card` 1 | `xl` 20 | `standard` 20 |
+| `focal` | Một bề mặt đứng riêng, mỗi màn một cái | 5 | `surfaceContainerLow` | không | `raised` 3 | `xl` 20 | `standard` 20 |
+| `recessed` | Hõm xuống — ô nhập, ô đáp án | 5 | `surfaceContainerLowest` | theo state | `none` | `xl` 20 | `standard` 20 |
+| `feedback` | Băng lỗi/cảnh báo | 4 | `errorContainer` | không | `none` | `xl` 20 | `compact` 12 |
+| `muted` | Chú thích đặt cạnh nội dung | 5 | `surfaceContainerHigh` | không | `none` | `xl` 20 | `compact` 12 |
+| `tonal` | Callout nhấn — xem §4 | 2 | `semantic.surfaceEmphasis` | không | `none` | `xl` 20 | `standard` 20 |
+| `accent` | Card được đánh dấu bằng viền thương hiệu | 4 | `surfaceContainerLow` | `borderAccent` | `raised` 3 | `xl` 20 | `standard` 20 |
 | `tile` | Hàng trong dòng thời gian | 2 | `surfaceContainerLow` | không | `card` 1 | `md` 12 | `compact` 12 |
 | `option` | Một lựa chọn bấm được — xem §3 | 4 | `surfaceContainerLow` | `borderOption` | `none` | `lg` 16 | `compact` 12 |
 
@@ -100,4 +100,4 @@ không ai vô tình lùi:
 - không có `Border.all(color: fill)` giả;
 - focus không làm layout xê dịch;
 - sàn 48dp cho vùng chạm;
-- thang radius `md` 12 / `lg` 16 / `xl` 20 và thang padding 0 / 12 / 16.
+- thang radius `md` 12 / `lg` 16 / `xl` 20 và thang padding 0 / 12 / 20.
