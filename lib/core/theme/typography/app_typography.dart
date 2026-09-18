@@ -189,6 +189,14 @@ abstract final class AppTypography {
   /// [labelTracking] is still right there.
   static const double listHeadingTracking = 0.72;
 
+  /// The content row's title: `body-md` closed up a hair, so a one-line deck
+  /// or tag name reads as the row's head rather than as running text.
+  static const double listRowTitleTracking = -0.1;
+
+  /// The content row's title leading — tighter than [bodyHeight] because the
+  /// row is exactly one line and its height comes from the row, not the text.
+  static const double listRowTitleHeight = 1.35;
+
   /// The option row's title — `-0.1` at `title-sm` (body-14 semibold, GC-4).
   /// No scale rung carries this tracking; the kit states it for this row.
   static const double optionRowTitleTracking = -0.1;
