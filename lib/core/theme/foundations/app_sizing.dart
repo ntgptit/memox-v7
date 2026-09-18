@@ -97,6 +97,16 @@ abstract final class AppSizing {
   /// [touchTarget]; this is the other half of the same `Size`.
   static const double buttonMinWidth = 64;
 
+  /// The bottom navigation bar's own painted height — v3's `size-bottom-bar`.
+  ///
+  /// Fixed regardless of the device's gesture inset: [MxNavigationBar] locks
+  /// `NavigationBar.height` to this and hands the inset to its own wrapper
+  /// padding instead, so the painted bar never grows taller on a device with
+  /// more or less gesture-nav space. The spec's 80dp wrapper total is
+  /// `AppSpacing.xs` (top) + this + `AppSpacing.md` (bottom) — not a symbol of
+  /// its own, since nothing computes with it directly.
+  static const double bottomBarHeight = 64;
+
   /// A painted mark that reports state and is not a control: the Library
   /// header's "something is ready to study" dot.
   ///
