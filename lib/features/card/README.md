@@ -112,10 +112,11 @@ result: BR-166, BR-167.
 are BR-60…BR-66 and BR-163, and they belong to Deck; Card participates in that transaction but
 does not state the rule.
 
-**UC-04 is out of date against this feature** and is recorded as such in
-`docs/master-flow.md` §6: it never mentions the flag or tags although BR-93 and
-BR-95 both declare `Related: UC-04`. The reference is one-directional. Fixing it
-means editing a `frozen for MVP` document and has not been done.
+**UC-04 used to be out of date against this feature** — it described none of the
+flag or tag work although BR-93 and BR-95 both declare `Related: UC-04`, so the
+reference was one-directional. M100.96 closed that: A7 carries the flag (BR-92)
+and A8 the tags (BR-93, BR-94), and `docs/master-flow.md` §6 now records UC-04
+as **Đủ — gồm cờ, tag và ba trường phụ (BR-92…BR-95)**.
 
 ---
 
@@ -233,12 +234,6 @@ carrying:
 
 ## 9 · Known gaps
 
-- **Partially in the Widgetbook catalog.** `CardImportScreen` (M99.19),
-  `TagCatalogScreen` (M99.30) and `CardDetailScreen` (M99.31) are
-  registered; `CardListScreen` and `CardEditorScreen` are still absent,
-  against the Definition of Done in `CLAUDE.md`. Those two are covered by
-  the strict visual audit and by review renders in `test/demo/`, but not by
-  the catalog.
 - **The tag filter sheet and the rename/delete overlays have no visual audit**,
   the same gap the export sheet records in §6 and for the identical reason: the
   audit harness discovers subjects by `_screen.dart` and its raster cross-check
