@@ -71,7 +71,11 @@ void main() {
       test('NavigationBar', () {
         final t = theme.navigationBarTheme;
 
-        pin('backgroundColor', t.backgroundColor, scheme.surfaceContainer);
+        // v3 (spec bottom-nav): transparent. `MxNavigationBar` paints
+        // `chrome-glass` itself, read DIRECT rather than through this slot —
+        // a second opaque fill here would sit on top of it and hide the
+        // glass. Not a scheme role, so there is nothing left to pin here.
+        pin('backgroundColor', t.backgroundColor, Colors.transparent);
         // v3's primary tint, composited (M100.100). Not a scheme role, so it
         // is pinned against the same blend the theme builds.
         pin(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memox/core/theme/foundations/app_colors.dart';
 import 'package:memox/core/theme/foundations/app_decorations.dart';
+import 'package:memox/core/theme/foundations/app_derived_colors.dart';
 import 'package:memox/core/theme/foundations/app_material_roles.dart';
 import 'package:memox/core/theme/foundations/app_surface_colors.dart';
 import 'package:memox/core/theme/foundations/app_border_colors.dart';
@@ -108,6 +109,11 @@ final List<Color> lightPaletteTokens = <Color>[
   // from the treatment rather than restated as a hex, so the palette cannot
   // close over a value the app no longer paints.
   AppDecorations.hairlineEdge(lightColorScheme).color,
+  // v3's `chrome-glass` (M100.105): `MxNavigationBar`'s fill, `surface` at
+  // 84%. Declared translucent on purpose — it composites over the blurred
+  // backdrop at paint time — so it is an exact token here rather than a
+  // blend the raster check would have to explain.
+  AppDerivedColors.chromeGlass(lightColorScheme),
 ];
 
 /// A list, not a set: several roles deliberately share a token — white is the
@@ -212,4 +218,9 @@ final List<Color> darkPaletteTokens = <Color>[
   // from the treatment rather than restated as a hex, so the palette cannot
   // close over a value the app no longer paints.
   AppDecorations.hairlineEdge(darkColorScheme).color,
+  // v3's `chrome-glass` (M100.105): `MxNavigationBar`'s fill, `surface` at
+  // 84%. Declared translucent on purpose — it composites over the blurred
+  // backdrop at paint time — so it is an exact token here rather than a
+  // blend the raster check would have to explain.
+  AppDerivedColors.chromeGlass(darkColorScheme),
 ];

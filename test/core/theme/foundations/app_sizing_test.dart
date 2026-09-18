@@ -29,6 +29,7 @@ void main() {
         ('touchTarget', AppSizing.touchTarget),
         ('controlCompact', AppSizing.controlCompact),
         ('floatingAction', AppSizing.floatingAction),
+        ('fab', AppSizing.fab),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
         // Not a control, and on the grid all the same: the rhythm is what
         // keeps a mark aligned with the text it sits beside.

@@ -79,6 +79,11 @@ void main() {
         'the glyph colour is the tile\'s own computed tint (`primary` or a '
         'caller `seed`), never a nameable AppInk — the same exception '
         'mx_pill_button.dart already carries.',
+    'mx_breadcrumb_step.dart':
+        'the plain-mode separator paints the theme\'s own outline role '
+        'directly on a chevron_right — AppInk has no member for that '
+        'boundary-only M3 slot, and one call site does not justify adding one '
+        '(docs/superpowers/plans/2026-09-18-breadcrumb-v3-geometry.md).',
   };
 
   Iterable<File> dartFilesUnder(String root) => Directory(root)
