@@ -26,7 +26,7 @@ void main() {
     home: Scaffold(body: Center(child: child)),
   );
 
-  group('the tonal pair reads M3 tonal roles, and only those', () {
+  group('the tonal pair reads the v3 secondary-tone roles, and only those', () {
     // `surfaceContainer` / `onSurface` is the v3 Button handoff's binding for
     // the "secondary" tone (`themeRoleUsage`, M3_COLOR/DIRECT/FULL_STRENGTH),
     // superseding M100.73's choice of M3's own `FilledButton.tonal` pair

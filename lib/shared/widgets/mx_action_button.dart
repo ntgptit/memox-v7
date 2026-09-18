@@ -445,8 +445,8 @@ class MxActionButton extends StatelessWidget {
     final (Color fill, Color label) = switch (variant) {
       MxActionButtonVariant.primary => (colors.primary, colors.onPrimary),
       MxActionButtonVariant.tonal => (
-        colors.secondaryContainer,
-        colors.onSecondaryContainer,
+        colors.surfaceContainer,
+        colors.onSurface,
       ),
       MxActionButtonVariant.secondary ||
       MxActionButtonVariant.destructive => (colors.error, colors.onError),

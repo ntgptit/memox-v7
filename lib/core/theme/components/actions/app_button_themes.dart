@@ -88,17 +88,15 @@ ButtonStyle buildSharedButtonStyle(
 /// see it. The builder now resolves the pair itself, so the only way to reach
 /// a filled button is to name one of the pairs the design system admits.
 ///
-/// Each member is a canonical M3 pair, and the fill, its `on` colour and the
-/// state layer travel together — passing one without the others is the
+/// Each member is a fixed role pair — `brand` and `destructive` are canonical
+/// M3 pairs, `tonal` is the v3 handoff's own — and the fill, its `on` colour
+/// and the state layer travel together; passing one without the others is the
 /// mismatch this closes. `m3_role_binding_guard_test.dart` reads each arm
 /// below at source level, so a swap to a role that happens to share a hex
 /// still fails.
 ///
-/// **`tonal` left at M100.36.** It had no production caller since #384 took
-/// Card Detail's Edit back to an icon, and the study grading hierarchy (4B)
-/// was settled with `secondary` for the lower-emphasis grades. A variant kept
-/// for a use it might someday have is exactly what a closed API is for
-/// refusing.
+/// **`tonal` is live:** `DeckStudyButtonWidget`'s deck-row verb uses it (it
+/// was dropped at M100.36 while unused and re-admitted at M100.73).
 enum MxFilledPair {
   /// `primary` / `onPrimary` — `_FilledButtonDefaultsM3`'s own pair, and the
   /// screen's one call to action.

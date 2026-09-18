@@ -305,6 +305,34 @@ void main() {
       });
     }
 
+    for (final themeEntry in themes.entries) {
+      testWidgets('${themeEntry.key} · tonal keeps its resting pair while '
+          'loading', (tester) async {
+        // `_busyStyle` restates the tonal pair, so it drifted when the pair
+        // moved to the v3 secondary tone: a saving tonal button flipped back
+        // to `secondaryContainer` for the duration of the save.
+        await pump(
+          tester,
+          themeEntry.value,
+          MxActionButtonVariant.tonal,
+          isLoading: true,
+          shouldKeepLabelWhileLoading: true,
+        );
+
+        final scheme = themeEntry.value.colorScheme;
+        expect(
+          resolved(tester, (s) => s.backgroundColor, disabled),
+          scheme.surfaceContainer,
+          reason: '${themeEntry.key}: the loading tonal fill drifted',
+        );
+        expect(
+          resolved(tester, (s) => s.foregroundColor, disabled),
+          scheme.onSurface,
+          reason: '${themeEntry.key}: the loading tonal label drifted',
+        );
+      });
+    }
+
     testWidgets('keeping the label drops the icon, and only then', (
       tester,
     ) async {
