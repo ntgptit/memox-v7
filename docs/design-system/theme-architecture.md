@@ -7,8 +7,8 @@
 | **Scope** | Cấu trúc thư mục, trách nhiệm từng tầng, public API của theme. Ngoài phạm vi: *giá trị* của token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" · ma trận dịch Tokyo → MemoX |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-23) |
-| **Updated by task** | M100.98 |
-| **Last updated** | 2026-09-18 |
+| **Updated by task** | M100.112 |
+| **Last updated** | 2026-09-19 |
 
 ---
 
@@ -342,9 +342,9 @@ này trước khi tự đoán role.
 | Component | Slot | Target semantic role |
 |---|---|---|
 | `NavigationBar` | nền | `chrome-glass` — **chặn, xem bên dưới** |
-| `FilterChip` | nền + label đã chọn | `primary` / `onPrimary` — **không có caller** |
-| `FilterChip` | label chưa chọn | `onSurface` — **không có caller** |
-| `FilterChip` | viền | `border-ghost` — **không có caller** |
+| `MxFilterChip` | nền + label đã chọn | `primary` / `onPrimary` — **đã thi hành ở M100.112, ngoài `ChipThemeData`** |
+| `MxFilterChip` | label chưa chọn | `onSurface` — **đã thi hành ở M100.112, ngoài `ChipThemeData`** |
+| `MxFilterChip` | viền | `border-ghost` — **đã thi hành ở M100.112, ngoài `ChipThemeData`** |
 
 **Đợt Controls đã trả xong ở M100.101** và sáu dòng nữa rời bảng: thumb của
 `Switch`, side của `OutlinedButton`, glyph của `IconButton`, và cả ba dòng của
@@ -381,12 +381,22 @@ dời cả hai component khỏi token đó, gate vẫn xanh và không còn đo 
 `reason` của nó vẫn nói "the outlined button and the text field both draw
 borderControl". Đã thêm một group đo đúng cạnh thật, ghim theo nền yếu nhất.
 
-**Ba dòng `FilterChip` không thi hành, và không phải vì hoãn:** app **không render
-`FilterChip` nào** — chỗ duy nhất nhắc tới nó là comment giải thích vì sao
-`MxPillButton` bọc `ChoiceChip`. `ChipThemeData` lại dùng chung cho mọi biến thể
-chip, nên thi hành ba dòng đó sẽ âm thầm đổi `ChoiceChip`, thứ mà v3 xử lý riêng.
-Đúng luật R7 của chính v3: màu chưa có caller thì **ghi lại, không khai báo**, và
-nó đáp xuống cùng caller đầu tiên.
+**Ba dòng `FilterChip` giờ có caller, và caller không đi qua `ChipThemeData`:**
+`MxFilterChip` (M100.112, `lib/shared/widgets/mx_filter_chip.dart`) là control
+một-trong-N cao 28dp cố định của v3, và nó đọc trực tiếp `primary` / `onPrimary`
+(nền + label đã chọn), `onSurface` (label chưa chọn) và `border-ghost` (viền chưa
+chọn, `AppSemanticColors.borderGhost`) từ theme của ngữ cảnh. Nó **không** dựng
+trên `ChoiceChip`/`RawChip` — chúng kẹp chiều cao vẽ ra ở mức sàn ~34dp, cao hơn
+28dp của v3 — và không ghi vào `ChipThemeData`, vốn dùng chung cho mọi biến thể
+chip. Nên `ChoiceChip` và `MxPillButton` **không đổi một pixel**: đó chính là lý
+do ba dòng này bị giữ lại ở M100.101 (thi hành chúng trên `ChipThemeData` sẽ âm
+thầm đổi `ChoiceChip`) và là lý do chúng đáp xuống một caller mới thay vì sửa
+theme dùng chung. Đúng luật R7 của v3 — màu chưa có caller thì ghi lại, không
+khai báo; `border-ghost` được khai báo cùng lúc với caller đầu tiên của nó
+(`AppBorderColors.borderGhost*`, xem `v3-foundations.md` mục R7). Kế hoạch:
+`docs/superpowers/plans/2026-09-18-memox-filter-chip.md`. Các dòng vẫn nằm trong
+bảng vì slot `ChipThemeData` của chúng **vẫn chưa** đọc các vai đó — chỉ
+`MxFilterChip` đọc.
 
 **Đợt Chrome đã trả xong ở M100.100** và năm dòng nữa rời bảng: track của
 `ProgressIndicatorThemeData`, indicator + icon/label đã chọn của `NavigationBar`,
@@ -442,7 +452,10 @@ khôi phục sàn. Trả lại hình 3:1 là việc của task component cho she
 
 Ba dòng còn trong bảng cũng sẽ đi xuống dưới sàn khi tới lượt, và số đo có sẵn
 để khỏi phải đo lại: `OutlinedButton` side `outlineVariant` **1.53 / 1.58**;
-`TextField` và `FilterChip` viền `border-ghost` **1.19 / 1.28**; `Switch` thumb
+`TextField` và `FilterChip` viền `border-ghost` **1.19 / 1.28** (số ước lượng lúc
+ghi; `FilterChip` đã đo lại ở M100.112 trên `surface`: **1.14 / 1.47**, ghim bởi
+`high_contrast_figures_test.dart` — đó là số có thẩm quyền, còn `TextField` đã
+đo thật ở M100.101 là 1.17 / 1.27); `Switch` thumb
 `surfaceBright` **1.05 / 1.42** (trong light là `#FFFFFF` trên nền trang
 `#F7F9FE`). Hai dòng của `NavigationBar` thì đảo ngược quyết định có phép đo của
 M100.22 — indicator rời `secondaryContainer`, label đã chọn rời `onSurface`
