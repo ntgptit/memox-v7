@@ -39,13 +39,23 @@ abstract final class AppSizing {
   /// `MaterialTapTargetSize.padded` restores [touchTarget] around it, so the
   /// body comes down and the finger's floor does not.
   ///
-  /// **Two heights, not a five-rung ladder.** 32 / 40 / 48 / 56 / 64 is the
-  /// usual control scale and this app renders two of them; the other three
+  /// **Three heights, not a five-rung ladder.** 32 / 40 / 48 / 56 / 64 is the
+  /// usual control scale and this app renders three of them; the other two
   /// would be sizes with no screen to check them against, which is the rule
   /// the unrendered component themes in `app_theme.dart` already follow. It was a
   /// private `_kCompactHeight` in `mx_action_button.dart` until M100.30 — the
   /// one control dimension the design system could not see.
   static const double controlCompact = 40;
+
+  /// The v3 handoff's small button rung: between [controlCompact] and
+  /// [controlDense], keeping [touchTarget] around it the same way.
+  ///
+  /// The handoff names four roles for it — a reminder-time control, a
+  /// tag-management empty action and two deck-import file pickers. None is a
+  /// built button yet (the reminder time is a list tile; the tag empty state
+  /// has no action), so `MxActionButtonSize.small` is admitted ahead of its
+  /// screens because the handoff fixes its geometry.
+  static const double controlSmall = 36;
 
   /// The dense tier — a chip's content box, the compact breadcrumb line, the
   /// 32 dp icon well beside a metric or a catalog row.

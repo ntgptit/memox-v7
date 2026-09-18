@@ -27,6 +27,7 @@ void main() {
       // opacity have scales of their own and are not covered by this rule.
       for (final (String name, double value) in <(String, double)>[
         ('touchTarget', AppSizing.touchTarget),
+        ('controlSmall', AppSizing.controlSmall),
         ('controlCompact', AppSizing.controlCompact),
         ('floatingAction', AppSizing.floatingAction),
         ('buttonMinWidth', AppSizing.buttonMinWidth),

@@ -78,6 +78,15 @@ enum MxActionButtonSize {
   /// also the touch target.
   standard,
 
+  /// Drawn at 36, hit at 48 — `padded` keeps the floor, the width floor is the
+  /// standard [AppSizing.buttonMinWidth], and the radius is the shared `md`.
+  ///
+  /// The v3 handoff's small rung, for a secondary action that sits inside a
+  /// form row or an empty state. Its label is the standard `label-lg` rung
+  /// (14 at [buttonLabelWeight]) — only the box comes down — and its horizontal
+  /// padding depends on the glyph: 12 without an `icon`, 16 with one.
+  small,
+
   /// Drawn at 40, hit at 48 — `MaterialTapTargetSize.padded` keeps the floor.
   ///
   /// For a button living inside a row of chips and gauges rather than in an
@@ -358,12 +367,22 @@ class MxActionButton extends StatelessWidget {
           // Unreachable — `standard` returned above — but stated so the switch
           // stays exhaustive and a fourth size fails the build here.
           MxActionButtonSize.standard => AppSizing.touchTarget,
+          MxActionButtonSize.small => AppSizing.controlSmall,
           MxActionButtonSize.compact => AppSizing.controlCompact,
           MxActionButtonSize.dense => AppSizing.controlDense,
         }),
       ),
-      padding: const WidgetStatePropertyAll<EdgeInsets>(
-        EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: WidgetStatePropertyAll<EdgeInsets>(
+        EdgeInsets.symmetric(
+          horizontal: switch (size) {
+            // The handoff's small rung pads 12 bare and 16 with a glyph.
+            MxActionButtonSize.small =>
+              icon == null ? AppSpacing.md : AppSpacing.lg,
+            MxActionButtonSize.standard ||
+            MxActionButtonSize.compact ||
+            MxActionButtonSize.dense => AppSpacing.md,
+          },
+        ),
       ),
       shape: switch (size) {
         // The handoff's compact rung paints radius 8; the rest inherit
@@ -374,7 +393,9 @@ class MxActionButton extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(AppRadius.sm)),
             ),
           ),
-        MxActionButtonSize.standard || MxActionButtonSize.compact => null,
+        MxActionButtonSize.standard ||
+        MxActionButtonSize.small ||
+        MxActionButtonSize.compact => null,
       },
       // 40 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
       // touch target a floor, and `padded` is how a smaller body keeps it.
@@ -382,9 +403,19 @@ class MxActionButton extends StatelessWidget {
       // The compact rung, at the same weight the standard one wears
       // (M100.30). `label-md` re-weighted rather than `label-lg` shrunk: a
       // 48-button's rung on a 40 body reads as text escaping its control.
-      textStyle: WidgetStatePropertyAll<TextStyle>(
-        AppTypography.withWeight(context.texts.labelMedium!, buttonLabelWeight),
-      ),
+      //
+      // `small` states none: its label is the standard `label-lg` rung, which
+      // [base] (or the theme) already carries at `buttonLabelWeight`.
+      textStyle: switch (size) {
+        MxActionButtonSize.standard || MxActionButtonSize.small => null,
+        MxActionButtonSize.compact ||
+        MxActionButtonSize.dense => WidgetStatePropertyAll<TextStyle>(
+          AppTypography.withWeight(
+            context.texts.labelMedium!,
+            buttonLabelWeight,
+          ),
+        ),
+      },
     );
 
     return base == null ? geometry : geometry.merge(base);
