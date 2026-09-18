@@ -1203,6 +1203,7 @@ của M2.
         raw `wc -l` nhưng guard dùng `count_mode: logical` và xanh; một câu
         giải thích trong report của implementer không chính xác 100% nhưng
         không phải lỗi code).
+- **Checklist phases:** 7, 12.
 
 ### M100.103 · SearchField đọc handoff v3 riêng của nó
 
