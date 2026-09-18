@@ -108,17 +108,11 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     refuses: <String>['onSurfaceVariant'],
     because: '_AppBarDefaultsM3.foregroundColor is onSurface.',
   ),
-  RoleBinding(
-    component: 'NavigationBar',
-    slot: 'backgroundColor',
-    file: _nav,
-    scope: 'buildNavigationBarTheme',
-    requires: <String>['surfaceContainer'],
-    refuses: <String>['surface', 'surfaceContainerHigh'],
-    because:
-        '_NavigationBarDefaultsM3.backgroundColor is surfaceContainer; the '
-        'bar took the page colour until M100.22.',
-  ),
+  // No `backgroundColor` binding here since v3 (spec bottom-nav): the slot
+  // reads no `scheme.<role>` at all — it is `Colors.transparent`, and the
+  // bar's real fill (`chrome-glass`) is read DIRECT by `MxNavigationBar`
+  // itself, outside this guard's scope (theme-builder functions only). A
+  // role-identity row has nothing left to check once the slot names no role.
   RoleBinding(
     component: 'NavigationBar',
     slot: 'indicatorColor',

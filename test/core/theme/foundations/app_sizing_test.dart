@@ -29,6 +29,7 @@ void main() {
         ('touchTarget', AppSizing.touchTarget),
         ('controlCompact', AppSizing.controlCompact),
         ('floatingAction', AppSizing.floatingAction),
+        ('fab', AppSizing.fab),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
         ('iconButtonInk', AppSizing.iconButtonInk),
         // Not a control, and on the grid all the same: the rhythm is what

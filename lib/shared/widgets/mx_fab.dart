@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import 'mx_focus_ring.dart';
+
 /// The screen-level create/primary action.
 ///
 /// **Exists so no feature builds a `FloatingActionButton` again** — the guard's
@@ -20,6 +24,10 @@ import 'package:flutter/material.dart';
 /// One screen, one FAB, one verb. A screen that wants two floating actions is
 /// asking a different design question, and it should be asked in review rather
 /// than answered by a second parameter here.
+///
+/// **The keyboard-focus ring reads `onPrimary`, not `primary`.** The FAB's own
+/// fill is `primary`, so the ambient ring would sit on its own colour — see
+/// `AppInteractionStates.focusIndicatorOf`'s doc comment.
 class MxFab extends StatelessWidget {
   const MxFab({
     required this.icon,
@@ -39,10 +47,14 @@ class MxFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: onPressed,
-      tooltip: label,
-      child: Icon(icon, semanticLabel: label),
+    return MxFocusRing(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      color: context.colors.onPrimary,
+      child: FloatingActionButton(
+        onPressed: onPressed,
+        tooltip: label,
+        child: Icon(icon, semanticLabel: label),
+      ),
     );
   }
 }
