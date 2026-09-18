@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/features/trash/di/trash_repository_provider.dart';
@@ -113,13 +115,16 @@ void main() {
   /// 16 while everything above it went to 12.
   ///
   /// The third figure is the trailing residue. The row buys its right edge by
-  /// paying `xs` outside a button that centres a 24dp glyph in a 48dp box, so
-  /// 4 + 12 lands on 16 — exactly the gutter at both widths now, so the
-  /// residue is zero at both. It used to be `xs` at 320dp, when the compact
-  /// gutter was `md` (12) and the button's fixed math still landed on 16.
+  /// paying `xs` outside a button that centres a 20dp glyph in a 48dp box, so
+  /// 4 + 14 lands on 18 — 2dp past the 16 gutter at both widths. Derived from
+  /// the two sizes rather than typed, so the glyph or the box moving moves
+  /// this with it. It used to be 0 while the glyph was 24 and the inset 12.
+  const double kebabGlyphInset =
+      (AppSizing.touchTarget - AppIconSize.mdCompact) / 2;
+  const double kebabResidue = AppSpacing.xs + kebabGlyphInset - AppSpacing.lg;
   const List<(Size, double, double)> surfaces = <(Size, double, double)>[
-    (Size(320, 640), AppSpacing.lg, 0),
-    (Size(393, 852), AppSpacing.lg, 0),
+    (Size(320, 640), AppSpacing.lg, kebabResidue),
+    (Size(393, 852), AppSpacing.lg, kebabResidue),
   ];
 
   group('G1 · one left edge for the whole screen', () {
@@ -225,9 +230,9 @@ void main() {
         await pumpTrash(tester, batches: twoRows(), size: size);
 
         // The row pays `xs` outside the overflow button rather than the
-        // gutter, because the button is a 48 box around a 24 glyph and carries
-        // 12dp of its own inset. It used to pay the gutter there, which put
-        // the glyph 28dp from the edge against a 16dp left one.
+        // gutter, because the button is a 48 box around a 20 glyph and carries
+        // 14dp of its own inset. It used to pay the gutter there, which put
+        // the glyph 30dp from the edge against a 16dp left one.
         expect(
           glyphRight(tester, find.byType(TrashRowWidget).first),
           size.width - gutter - residue,
