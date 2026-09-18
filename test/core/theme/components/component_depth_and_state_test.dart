@@ -124,7 +124,25 @@ void main() {
     // `_DragHandle` is `Semantics(button: true, onTap: …)` padded to
     // `kMinInteractiveDimension`, so it is a control and 1.4.11's 3:1 applies.
     // `borderSubtle` gave 1.45 and 2.04 on the sheet it sits on.
-    test('reads as a control on the sheet it sits on', () {
+    //
+    // **The 3:1 floor is not being met, and this records that rather than
+    // hiding it** (M100.99). v3 names `outlineVariant` for this slot and the
+    // owner chose v3 over the floor with these figures in hand: on the sheet's
+    // `surfaceContainerHigh` ground the handle reads **1.30:1 in light and
+    // 1.05:1 in dark**, where `onSurfaceVariant` read 6.12 and 5.10. Dark is
+    // `#2A3267` on `#2C356E` — a handle findable only by someone who already
+    // knows it is there.
+    //
+    // So the assertion below is an **intermediate-state record**, not a
+    // standard: it pins today's numbers so a further drop still fails, and it
+    // names what would restore the floor — a different role for the slot, or a
+    // sheet ground far enough from `outlineVariant` to carry it. Restoring the
+    // 3:1 form is the sheet component task's to do; nothing here should be
+    // read as saying 1.05:1 is adequate.
+    const double pinnedLight = 1.30;
+    const double pinnedDark = 1.05;
+
+    test('is pinned where v3 left it, below the 3:1 a control owes', () {
       for (final entry in themes.entries) {
         final theme = entry.value;
         final handle = WidgetStateProperty.resolveAs<Color?>(
@@ -134,10 +152,11 @@ void main() {
 
         expect(
           contrast(handle, theme.bottomSheetTheme.backgroundColor!),
-          greaterThanOrEqualTo(3),
+          greaterThanOrEqualTo(entry.key == 'light' ? pinnedLight : pinnedDark),
           reason:
               '${entry.key}: the handle is the only thing saying this sheet '
-              'can be dragged or dismissed',
+              'can be dragged or dismissed, and it is already below the 3:1 '
+              'a control owes — it must not get quieter still',
         );
       }
     });

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../foundations/app_decorations.dart';
 import '../../foundations/app_elevation.dart';
 import '../../foundations/app_radius.dart';
-import '../../foundations/app_stroke.dart';
 
 /// The safety net for a bare or third-party `Card` — no app widget renders
 /// one. `MxCard` is the canonical card and paints itself, because its focus
@@ -18,13 +18,20 @@ import '../../foundations/app_stroke.dart';
 ///
 /// It now degrades toward `MxCard.raised`:
 ///
-/// * `surfaceContainerLow` — `_CardDefaultsM3.color`, the paper;
+/// * `surfaceContainerLowest` — v3's `surface-raised`, the raised paper.
+///   **Not `_CardDefaultsM3.color`, which is `surfaceContainerLow`**: the v3
+///   ladder moved the raised rung one step, so the SDK default now names
+///   this app's *muted* surface (M100.99);
 /// * `AppElevation.card` with `materialShadowColor`, so Material paints the
 ///   depth in the mode that has one and nothing in the mode that does not;
 /// * no neutral outline **in light**. A page-level card there separates by its
 ///   surface step and its shadow, not by a decorative frame (M99.94);
-/// * a hairline `outlineVariant` side **in dark**, because that mode has no
-///   shadow to separate with and the surface step alone is 1.09:1. This is the
+/// * a `border-ghost` hairline **in dark** (`AppDecorations.hairlineEdge`),
+///   because that mode has no shadow to separate with. **It is much fainter
+///   than the `outlineVariant` it replaces:** `primary` at 16% over the new
+///   `#131A3A` fill composites to `#262E5A`, 1.31:1 against that fill where
+///   `outlineVariant` gave a crisp step. v3 asks for the ghost by name and
+///   the owner took that trade knowingly (M100.99). This is the
 ///   same cue `MxCard` paints there (`_darkDepth`) — drawn on the shape rather
 ///   than as a ring outside it, which is the difference between a widget that
 ///   composes its own layers and a `CardThemeData` slot. §5 of the M100.35
@@ -37,7 +44,7 @@ import '../../foundations/app_stroke.dart';
 /// `margin: zero` because inter-card spacing belongs to the screen's layout,
 /// which is the one place that knows what sits between two cards.
 CardThemeData buildCardTheme(ColorScheme scheme) => CardThemeData(
-  color: scheme.surfaceContainerLow,
+  color: scheme.surfaceContainerLowest,
   shadowColor: materialShadowColor(scheme),
   elevation: AppElevation.card,
   margin: EdgeInsets.zero,
@@ -58,5 +65,5 @@ BorderSide _neutralSide(ColorScheme scheme) =>
     // width is one *because the stroke scale says a hairline is one*, not
     // because `BorderSide` happens to agree today.
     // ignore: avoid_redundant_argument_values
-    ? BorderSide(color: scheme.outlineVariant, width: AppStroke.hairline)
+    ? AppDecorations.hairlineEdge(scheme)
     : BorderSide.none;

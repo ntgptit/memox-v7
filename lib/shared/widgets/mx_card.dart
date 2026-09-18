@@ -127,7 +127,9 @@ class _MxCardSpec {
 /// **Each mode paints depth in its own idiom, by measurement** (AD-14). Light
 /// draws Tokyo's two-layer shade. Dark cannot: its page is at L\* 4.11 and the
 /// darkest ink in the palette is L\* 1.18, so a shade there has under three
-/// L\* to work in. It draws a crisp `outlineVariant` hairline instead, and
+/// L\* to work in. It draws a `border-ghost` hairline instead — much fainter
+/// than the `outlineVariant` it replaced at M100.99, 1.31:1 on the card's own
+/// fill — and
 /// above `card` adds a real drop — see [shadowsFor]. What it no longer draws,
 /// since M100.35, is the bright blurred rim that made a resting neutral card
 /// glow. The *role* is the same in both modes either way (M100.33); only the
@@ -555,22 +557,24 @@ class _MxCardState extends State<MxCard> {
   /// `.flat` picks for two of the three, so in dark `.raised` and `.flat`
   /// were the same rendered box.
   ///
-  /// **A rung of the ladder, not a new colour.** `_MxCardFill.surface`
-  /// resolves to `surfaceContainerLow` today, which in dark is `#1B2249`
-  /// against the page's `#0A0E27` — 9.98 L\* above it, the direction
-  /// Material's dark-elevation convention lifts a surface: nearer the light,
-  /// not farther.
+  /// **A rung of the ladder, not a new colour, and the two rungs swapped at
+  /// M100.99.** `_MxCardFill.surface` now resolves to
+  /// `surfaceContainerLowest` — v3's `surface-raised` — and `.recessed` to
+  /// `surfaceContainerLow`, v3's `surface-muted`. That is the pairing the v3
+  /// ladder names, and it is what makes the light reading come out the right
+  /// way up: the raised card is `#FFFFFF`, **2.09 L\* above** the page's
+  /// `#F7F9FE`, while `.recessed` at `#F1F4FB` sits **1.76 L\* below** it.
   ///
-  /// **In light that reading is currently inverted, and it is known.** The v3
-  /// ladder reassigned these rungs: `surfaceContainerLowest` is the raised
-  /// paper (`surface-raised`, `#FFFFFF`) and `surfaceContainerLow` is the
-  /// muted one (`surface-muted`, `#F1F4FB`) — so `.surface` sits *below* the
-  /// page while `.recessed`, which reads `surfaceContainerLowest`, sits above
-  /// it. One rung carrying "sunken" on one recipe and "raised" on another is
-  /// exactly the ambiguity this file argues against everywhere else; the swap
-  /// belongs to Card's own component task and is listed under
-  /// COMPONENT_MIGRATION_PENDING in `docs/design-system/theme-architecture.md`
-  /// §7, not to a theme-layer change.
+  /// **The swap is smaller in dark and still correct there.** `.surface` is
+  /// `#131A3A`, 5.69 L\* above the page's `#0A0E27`; it used to be `#1B2249`
+  /// at 9.98. A raised card in dark therefore lifts less than it did — the
+  /// direction Material's dark-elevation convention asks for is unchanged
+  /// (nearer the light, not farther), the distance is shorter, and
+  /// `_darkDepth`'s hairline is what carries the rest.
+  ///
+  /// Before the swap one rung carried "sunken" on one recipe and "raised" on
+  /// another, which is exactly the ambiguity this file argues against
+  /// everywhere else.
   ///
   /// **Light keeps `scheme.surface` unconditionally.** The shadow already
   /// separates elevation there — see [shadowsFor]'s own alpha derivation —
@@ -596,8 +600,8 @@ class _MxCardState extends State<MxCard> {
     }
 
     return switch (widget._spec.fill) {
-      _MxCardFill.surface => scheme.surfaceContainerLow,
-      _MxCardFill.recessed => scheme.surfaceContainerLowest,
+      _MxCardFill.surface => scheme.surfaceContainerLowest,
+      _MxCardFill.recessed => scheme.surfaceContainerLow,
       _MxCardFill.muted => scheme.surfaceContainerHigh,
       _MxCardFill.tonal => semantic.surfaceEmphasis,
       // Exhaustive over the tone so a second tone fails the build here

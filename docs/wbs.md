@@ -1033,6 +1033,49 @@ của M2.
 - **Tests required:** các test đã sửa ở Scope; không thêm file test.
 - **Checklist phases:** 7.
 
+### M100.99 · V3 component pass, đợt 1 — Surfaces đọc đúng vai v3
+
+- **Status:** **done** — analyze sạch, host suite 5251 pass, guard 0, architecture
+  sạch, `check_docs` xanh, golden vẽ lại trên Linux.
+- **Goal:** Mười một dòng nhóm Surfaces của `COMPONENT_MIGRATION_PENDING` thôi
+  trỏ sai vai. Bảng đó do M100.98 lập ra và cố ý hoãn; đây là task component đầu
+  tiên thu nó về.
+- **Scope:** `mx_card.dart` (đổi chỗ `.surface` ↔ `.recessed`),
+  `app_card_theme.dart` (`color` + viền dark), `app_elevation.dart`
+  (rim `_darkDepth` → `border-ghost`), `app_theme.dart` (`canvasColor`),
+  `app_bottom_sheet_theme.dart` (nền + grabber), `app_chip_theme.dart`
+  (fill nghỉ), `app_button_themes.dart` + `app_input_theme.dart` (nền hai phép
+  blend disabled), `guess_option_item_widget.dart`, `match_tile_widget.dart`;
+  mười file test ghim giá trị cũ; bảng §7 của `theme-architecture.md`.
+- **Out of scope:** mười lăm dòng còn lại của bảng — `NavigationBar`, FAB,
+  `MxNavigationBar`, `FilterChip`, `Switch`, `OutlinedButton`, `IconButton`,
+  `ProgressIndicator`, `TextField` — thuộc đợt Chrome và đợt Controls.
+- **Dependencies:** M100.98 (bảng và cơ chế `AppDecorations.hairlineEdge`).
+- **Tests required:** các test đã sửa ở Scope; không thêm file test.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/theme-architecture.md`
+- **Output:** `lib/core/theme/`, `lib/shared/widgets/mx_card.dart`,
+  `lib/features/study/presentation/widgets/items/`
+- **Acceptance criteria:**
+  - [x] `_MxCardFill.surface` → `surfaceContainerLowest`, `.recessed` →
+        `surfaceContainerLow`; light thôi đảo ngược — card nâng +2.09 L\* trên
+        trang, `.recessed` −1.76 L\*.
+  - [x] Viền dark của card và rim `_darkDepth` cùng đọc
+        `AppDecorations.hairlineEdge` (`border-ghost`).
+  - [x] `CardTheme.color`, `canvasColor`, `ChoiceChip` nghỉ, nền guess-option,
+        nền match tile, nền hai blend disabled đều là `surfaceContainerLowest`.
+  - [x] `BottomSheetThemeData.backgroundColor` là `surfaceContainerHigh`, grabber
+        là `outlineVariant`.
+  - [x] **Sàn 3:1 của grabber bị nới, có hồ sơ.** 1.30:1 sáng / 1.05:1 tối, ghim
+        lại trong `component_depth_and_state_test.dart` như bản ghi trạng thái
+        trung gian nêu tên thứ sẽ khôi phục sàn — không phải như một chuẩn.
+  - [x] Hai phép đo trỏ sai rung được sửa chứ không nới: `app_theme_test` đo
+        `surfaceContainerLowest` (rung card thật sự mặc) và composite rim trong
+        suốt lên card trước khi lấy tỷ số.
+  - [x] Bảng `COMPONENT_MIGRATION_PENDING` còn đúng mười lăm dòng, kèm số đo sẵn
+        cho những dòng sẽ xuống dưới sàn.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 

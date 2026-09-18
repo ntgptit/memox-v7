@@ -106,7 +106,7 @@ void main() {
         pin(
           'unselected fill',
           t.color!.resolve(resting),
-          scheme.surfaceContainerLow,
+          scheme.surfaceContainerLowest,
         );
         pin(
           'selected label',
@@ -287,11 +287,14 @@ void main() {
       test('BottomSheet', () {
         final t = theme.bottomSheetTheme;
 
-        pin('backgroundColor', t.backgroundColor, scheme.surfaceContainerLow);
+        pin('backgroundColor', t.backgroundColor, scheme.surfaceContainerHigh);
+        // v3 moved this slot off M3's `onSurfaceVariant` to `outlineVariant`
+        // (M100.99). It is a deliberate deviation, not a drift, and the cost
+        // is measured in `component_depth_and_state_test.dart`.
         pin(
           'drag handle',
           (t.dragHandleColor! as WidgetStateProperty<Color?>).resolve(resting),
-          scheme.onSurfaceVariant,
+          scheme.outlineVariant,
         );
       });
 

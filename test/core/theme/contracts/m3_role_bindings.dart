@@ -60,12 +60,15 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'color',
     file: _card,
     scope: 'buildCardTheme',
-    requires: <String>['surfaceContainerLow'],
-    refuses: <String>['surface', 'surfaceContainerLowest', 'surfaceContainer'],
+    requires: <String>['surfaceContainerLowest'],
+    refuses: <String>['surface', 'surfaceContainer'],
     because:
-        '_CardDefaultsM3.color is surfaceContainerLow. `surface` passed for as '
-        'long as the app read `surface` as the paper; it is the page since '
-        'M100.32, and the paper has its own rung.',
+        'v3 names surface-raised for a card, and that role is '
+        'surfaceContainerLowest (M100.99). It deliberately leaves '
+        '_CardDefaultsM3.color, which is surfaceContainerLow — the v3 ladder '
+        'moved the raised rung one step, so the SDK default now names this '
+        "app's muted surface. `surface` passed for as long as the app read "
+        '`surface` as the paper; it is the page since M100.32.',
   ),
   RoleBinding(
     component: 'AppBar',
@@ -149,11 +152,12 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: '_restingFill',
     file: _chip,
     scope: '_restingFill',
-    requires: <String>['secondaryContainer', 'surfaceContainerLow'],
+    requires: <String>['secondaryContainer', 'surfaceContainerLowest'],
     refuses: <String>['primaryContainer'],
     because:
         '_ChoiceChipDefaultsM3.color fills a selected chip with '
-        'secondaryContainer.',
+        'secondaryContainer. The resting fill is v3 surface-raised '
+        '(surfaceContainerLowest) since M100.99.',
   ),
   RoleBinding(
     component: 'ChoiceChip',

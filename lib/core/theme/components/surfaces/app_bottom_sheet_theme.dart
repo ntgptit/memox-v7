@@ -10,7 +10,7 @@ import '../../foundations/app_elevation.dart';
 BottomSheetThemeData buildBottomSheetTheme(ColorScheme scheme) =>
     BottomSheetThemeData(
       modalBarrierColor: modalBarrierColor(scheme),
-      backgroundColor: scheme.surfaceContainerLow,
+      backgroundColor: scheme.surfaceContainerHigh,
       surfaceTintColor: Colors.transparent,
       elevation: AppElevation.none,
       showDragHandle: true,
@@ -22,13 +22,23 @@ BottomSheetThemeData buildBottomSheetTheme(ColorScheme scheme) =>
       // **1.45:1** in light and **2.04:1** in dark. It is the only thing on the
       // sheet that says the sheet can be dragged or dismissed.
       //
-      // **`onSurfaceVariant`, the slot's canonical role, and the history of
-      // how it got there is below.** `borderControl` was argued for once —
-      // it reads as an affordance at 3.19 and 3.00 without competing with
-      // the heading — and superseded at M100.22/23 by the role M3 gives the
-      // slot with the grab as a state layer over it; the paragraph that
-      // still argued for `borderControl` while the code returned
-      // `onSurfaceVariant` was A20.1 P3-05.
+      // **`outlineVariant`, because v3 names that role for this slot**
+      // (M100.99, COMPONENT_MIGRATION_PENDING). It is a large step down in
+      // visibility and the number is here so nobody has to rediscover it: on
+      // the sheet's new `surfaceContainerHigh` ground the handle reads
+      // **1.30:1 in light and 1.05:1 in dark**, where `onSurfaceVariant` read
+      // 6.12:1 and 5.10:1. In dark that is `#2A3267` on `#2C356E` — a handle
+      // you can only find by knowing it is there. The owner took this trade
+      // with these figures in front of them; it is a decision, not a drift,
+      // and it is the first thing to revisit if the grab stops being found.
+      //
+      // The history of the slot, kept because it is still what the state
+      // layer below is built on: `borderControl` was argued for once — it
+      // reads as an affordance at 3.19 and 3.00 without competing with the
+      // heading — and superseded at M100.22/23 by the role M3 gives the slot
+      // with the grab as a state layer over it; the paragraph that still
+      // argued for `borderControl` while the code returned `onSurfaceVariant`
+      // was A20.1 P3-05.
       dragHandleColor: WidgetStateColor.resolveWith((states) {
         // **Two states, because two is all the SDK ever sets here** — it adds
         // `hovered` from its own `MouseRegion` and `dragged` while the sheet is
@@ -39,7 +49,7 @@ BottomSheetThemeData buildBottomSheetTheme(ColorScheme scheme) =>
         // not exist on a phone; the grab does, and until now it looked exactly
         // like the rest.
         //
-        // **The role is `onSurfaceVariant` in every state, and the grab is a
+        // **The role is `outlineVariant` in every state, and the grab is a
         // state layer over it rather than a second role.**
         // `_BottomSheetDefaultsM3.dragHandleColor` is that role and does not
         // vary; the SDK still resolves this slot against states, which is the
@@ -58,11 +68,11 @@ BottomSheetThemeData buildBottomSheetTheme(ColorScheme scheme) =>
             states.contains(WidgetState.hovered)) {
           return Color.alphaBlend(
             scheme.onSurface.withValues(alpha: AppStateOpacity.pressed),
-            scheme.onSurfaceVariant,
+            scheme.outlineVariant,
           );
         }
 
-        return scheme.onSurfaceVariant;
+        return scheme.outlineVariant;
       }),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),

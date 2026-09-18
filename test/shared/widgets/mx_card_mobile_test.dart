@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_decorations.dart';
 import 'package:memox/core/theme/foundations/app_elevation.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
@@ -214,7 +215,7 @@ void main() {
       final shadows = shadowsFor(AppElevation.card, dark);
 
       expect(shadows, hasLength(1));
-      expect(shadows.single.color, dark.outlineVariant);
+      expect(shadows.single.color, AppDecorations.hairlineEdge(dark).color);
       expect(shadows.single.blurRadius, 0);
     });
   });

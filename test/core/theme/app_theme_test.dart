@@ -220,7 +220,7 @@ void main() {
       double liftOf(ThemeData theme) {
         final page = theme.scaffoldBackgroundColor;
         final surfaceStep =
-            (lightnessStar(theme.colorScheme.surfaceContainerLow) -
+            (lightnessStar(theme.colorScheme.surfaceContainerLowest) -
                     lightnessStar(page))
                 .abs();
 
@@ -262,7 +262,7 @@ void main() {
       final dark = themes['dark']!;
       final darkPage = dark.scaffoldBackgroundColor;
       final darkStep =
-          lightnessStar(dark.colorScheme.surfaceContainerLow) -
+          lightnessStar(dark.colorScheme.surfaceContainerLowest) -
           lightnessStar(darkPage);
       expect(
         darkStep,
@@ -282,8 +282,17 @@ void main() {
       // ten of them down a phone column read as ten cards rather than ten
       // outlines, and quiet enough that the edges which *do* carry state stay
       // obviously louder. So the floor moves to those.
-      final rim = shadowsFor(AppElevation.card, dark.colorScheme).first.color;
-      final darkCard = dark.colorScheme.surfaceContainerLow;
+      // **Composited before it is measured, because the rim is translucent
+      // now.** v3 made this edge `border-ghost` — `primary` at 16% — and a
+      // ratio taken on the raw colour reads the brand violet at full strength
+      // (5.95:1) for a line that paints at `#262E5A`. The rim is drawn *on*
+      // the card, so the card is what it must be composited over; anything
+      // else measures a colour that never reaches a pixel.
+      final darkCard = dark.colorScheme.surfaceContainerLowest;
+      final rim = Color.alphaBlend(
+        shadowsFor(AppElevation.card, dark.colorScheme).first.color,
+        darkCard,
+      );
       expect(
         contrast(rim, darkCard),
         lessThan(2.0),

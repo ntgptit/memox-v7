@@ -88,7 +88,7 @@ void main() {
     // 1.24:1 against the paper is accepted (#434 P2-4): the pill is identified
     // by shape, label, group and tick, the exemption a card's edge takes.
     final scheme = buildLightTheme().colorScheme;
-    await pump(tester, ground: scheme.surfaceContainerLow);
+    await pump(tester, ground: scheme.surfaceContainerHigh);
 
     final chip = Theme.of(tester.element(find.byType(ChoiceChip))).chipTheme;
     final BorderSide side = (chip.side! as WidgetStateBorderSide).resolve(
@@ -96,10 +96,10 @@ void main() {
     )!;
     expect(
       chip.color!.resolve(const <WidgetState>{}),
-      scheme.surfaceContainerLow,
+      scheme.surfaceContainerLowest,
     );
     expect(side.color, scheme.outlineVariant);
-    expect(side.color, isNot(scheme.surfaceContainerLow));
+    expect(side.color, isNot(scheme.surfaceContainerLowest));
     expect(side.width, greaterThan(0));
   });
 }

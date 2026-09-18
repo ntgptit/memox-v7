@@ -239,7 +239,7 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     // `theme_coverage_test.dart` cannot reach this pair — its whole mechanism
     // is a widget-to-slot map, and there is no slot — so the gap is closed
     // here and named in that file's blind-spot list.
-    canvasColor: scheme.surfaceContainerLow,
+    canvasColor: scheme.surfaceContainerLowest,
     disabledColor: semantic.onDisabled,
 
     // A bare `Icon` outside every themed component. Material's fallback is a

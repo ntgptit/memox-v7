@@ -99,16 +99,21 @@ void main() {
       ContrastFloorAllowance(
         itemId: 'shell',
         foreground: AppColors.successLight,
-        background: AppMaterialRoles.surfaceContainerLowLight,
-        floor: 2.70,
+        background: AppMaterialRoles.surfaceContainerLowestLight,
+        floor: 2.97,
         rationale:
             'Owner decision 5 (2026-09-13) keeps success as the timeline '
-            'action-tone border; pinned at the measured 2.70:1 on '
-            'surfaceContainerLow — the rounded form (this audit rule '
-            'compares ratio.toStringAsFixed(2)) of the same measurement '
-            'app_theme_test.dart floors at 2.69 for light success (its '
-            '2.69 / 2.81 pair). The audit rounds, the host test floors; '
-            '2.70 and 2.69 are the same settlement, not two.',
+            'action-tone border. The ground moved at M100.99: v3 made the '
+            'card surfaceContainerLowest, so the same border is measured on '
+            'white rather than on surfaceContainerLow. **The swap improved '
+            'it** — 2.70:1 became 2.97:1 — and the floor is re-pinned at the '
+            'better figure so the gain cannot be given back silently. It is '
+            'still under 3.0, so this stays an allowance and not a pass: what '
+            'would close it is a darker success ink for graphic use, which is '
+            'a palette decision the v3 hexes do not currently offer. The '
+            'audit rounds (ratio.toStringAsFixed(2)) where '
+            'app_theme_test.dart floors, which is why that file carries a '
+            'neighbouring figure rather than this exact one.',
       ),
     ],
     allowances: const <AuditSkipAllowance>[
