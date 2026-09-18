@@ -3,10 +3,13 @@ import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_icon_tile.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
+import 'package:memox/shared/widgets/mx_list_row.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
+import 'package:memox/shared/widgets/mx_option_row.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -622,6 +625,60 @@ WidgetbookComponent listTileComponent() {
   );
 }
 
+WidgetbookComponent listRowComponent() {
+  return WidgetbookComponent(
+    name: 'MxListRow',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final title = context.knobs.string(
+            label: 'title',
+            initialValue: 'Academic Word List',
+          );
+          final subtitle = context.knobs.stringOrNull(
+            label: 'subtitle',
+            initialValue: '120 cards · 8 due',
+          );
+          final hasLeading = context.knobs.boolean(
+            label: 'with leading tile',
+            initialValue: true,
+          );
+          final isSeeded = context.knobs.boolean(label: 'seeded leading tile');
+          final hasTrailing = context.knobs.boolean(
+            label: 'with trailing chevron',
+            initialValue: true,
+          );
+          final isInteractive = context.knobs.boolean(
+            label: 'has onTap',
+            initialValue: true,
+          );
+          final hasDivider = context.knobs.boolean(
+            label: 'show divider',
+            initialValue: true,
+          );
+
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: MxListRow(
+                  title: title,
+                  subtitle: subtitle,
+                  leadingIcon: hasLeading ? Icons.layers_outlined : null,
+                  seed: isSeeded ? const Color(0xFF5265F5) : null,
+                  trailingIcon: hasTrailing ? Icons.chevron_right : null,
+                  onTap: isInteractive ? _noop : null,
+                  hasDivider: hasDivider,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
 /// The two binary toggles, side by side and in every state.
 ///
 /// **Raw `Switch` and `Checkbox`, not an `Mx` wrapper, because that is what the
@@ -677,6 +734,43 @@ WidgetbookComponent selectionRowsComponent() {
             labelOf: (int value) => 'Choice ${String.fromCharCode(65 + value)}',
           ),
         ),
+      ),
+      WidgetbookUseCase(
+        name: 'MxOptionRow',
+        builder: (BuildContext context) {
+          final selected = context.knobs.object.dropdown<int>(
+            label: 'selected',
+            options: const <int>[0, 1, 2],
+            labelBuilder: (int value) => 'Row $value',
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              MxOptionRow(
+                title: 'SM-2',
+                subtitle: 'Adaptive spacing — reviews stretch as you remember.',
+                isSelected: selected == 0,
+                onSelect: isEnabled ? _noop : null,
+              ),
+              MxOptionRow(
+                title: 'Leitner',
+                subtitle: 'Fixed boxes — a wrong answer resets the box.',
+                isSelected: selected == 1,
+                onSelect: isEnabled ? _noop : null,
+              ),
+              MxOptionRow(
+                title: 'Plain repetition',
+                isSelected: selected == 2,
+                onSelect: isEnabled ? _noop : null,
+                isLast: true,
+              ),
+            ],
+          );
+        },
       ),
       WidgetbookUseCase(
         name: 'MxDropdown',
@@ -800,6 +894,52 @@ WidgetbookComponent badgeComponent() {
             ),
           );
         },
+      ),
+    ],
+  );
+}
+
+/// The tinted square that leads a row, at its three sizes and both tint
+/// variants — default `primary` and a caller `seed`.
+WidgetbookComponent iconTileComponent() {
+  return WidgetbookComponent(
+    name: 'MxIconTile',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final size = context.knobs.object.dropdown<MxIconTileSize>(
+            label: 'size',
+            options: MxIconTileSize.values,
+            initialOption: MxIconTileSize.md,
+            labelBuilder: (MxIconTileSize value) => value.name,
+          );
+          final seeded = context.knobs.boolean(label: 'seeded');
+
+          return CatalogCenterPage(
+            child: MxIconTile(
+              icon: Icons.folder,
+              size: size,
+              seed: seeded ? Colors.teal : null,
+            ),
+          );
+        },
+      ),
+      // The three sizes side by side, default tint.
+      WidgetbookUseCase(
+        name: 'Sizes',
+        builder: (BuildContext context) => const CatalogCenterPage(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              MxIconTile(icon: Icons.style, size: MxIconTileSize.sm),
+              SizedBox(width: AppSpacing.md),
+              MxIconTile(icon: Icons.settings),
+              SizedBox(width: AppSpacing.md),
+              MxIconTile(icon: Icons.folder, size: MxIconTileSize.lg),
+            ],
+          ),
+        ),
       ),
     ],
   );
