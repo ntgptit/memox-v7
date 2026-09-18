@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/components/actions/app_icon_button_theme.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
@@ -222,6 +224,73 @@ void main() {
       ).side!.resolve(<WidgetState>{})!;
 
       expect(side.width, AppStroke.hairline);
+    });
+  });
+
+  group('the plain icon button', () {
+    testWidgets('draws 36, hands a finger 48, and stays fully round', (
+      tester,
+    ) async {
+      // The v3 IconButton contract this task ships: a 36 painted circle
+      // centred inside the unchanged 48 touch target — the same drawn-vs-hit
+      // split the outlined variant already has (`draws 40 and still hands a
+      // finger 48`, above), at its own component-owned size.
+      await tester.pumpWidget(
+        host(
+          light,
+          const MxIconButton(
+            icon: Icons.search,
+            semanticLabel: 'Search',
+            onPressed: _noop,
+          ),
+        ),
+      );
+
+      final drawnFinder = find
+          .descendant(
+            of: find.byType(IconButton),
+            matching: find.byType(Material),
+          )
+          .first;
+      final drawn = tester.getRect(drawnFinder);
+      expect(drawn.width, AppSizing.iconButtonInk);
+      expect(drawn.height, AppSizing.iconButtonInk);
+
+      expect(
+        tester.getRect(find.byType(IconButton)).height,
+        greaterThanOrEqualTo(AppSizing.touchTarget),
+        reason: 'the body came down; the floor must not have',
+      );
+
+      final material = tester.widget<Material>(drawnFinder);
+      expect(
+        material.shape,
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+        ),
+        reason: 'fully round — the old AppRadius.md squircle no longer applies',
+      );
+    });
+
+    testWidgets('the glyph is mdCompact even when not isCompact', (
+      tester,
+    ) async {
+      // The v3 spec fixes the glyph at 20 with no compact/non-compact split —
+      // `isCompact`'s only remaining job is the 48×48 box constraint for
+      // `MxSessionTopBar`.
+      await tester.pumpWidget(
+        host(
+          light,
+          const MxIconButton(
+            icon: Icons.search,
+            semanticLabel: 'Search',
+            onPressed: _noop,
+          ),
+        ),
+      );
+
+      final icon = tester.widget<Icon>(find.byType(Icon));
+      expect(icon.size, AppIconSize.mdCompact);
     });
   });
 }

@@ -59,6 +59,24 @@ abstract final class AppSizing {
   /// the two apart.
   static const double controlDense = 32;
 
+  /// The plain `IconButton`'s own painted ink circle — 36, not
+  /// [controlCompact]'s 40.
+  ///
+  /// **A third component-owned value, not a third rung on [controlCompact]'s
+  /// ladder.** [controlCompact] answers "a control living in a row of chips
+  /// and gauges rather than an action bar" (the deck tile's Study verb); this
+  /// answers one specific control's own kit dimension. The MemoX v3 IconButton
+  /// component spec (Actions & controls, 2026-09-18) fixes the ink box at 36,
+  /// independently of whatever the outlined variant draws — reusing
+  /// [controlCompact] here would tie two unrelated components to one number
+  /// that only coincidentally isn't 40, and the day either spec moves the two
+  /// would drift apart silently.
+  ///
+  /// [touchTarget] still centres around it via
+  /// `MaterialTapTargetSize.padded` — the same drawn-vs-hit technique
+  /// `buildOutlinedIconButtonStyle` already uses for its own 40.
+  static const double iconButtonInk = 36;
+
   /// The scrollbar's thumb — Material's own 4, stated (A20.1 P3-09).
   static const double scrollbarThickness = 4;
 

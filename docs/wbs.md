@@ -1153,6 +1153,54 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.102 · IconButton (plain) đọc đúng hình học v3 — 36 vẽ, 48 chạm, bo tròn, glyph 20
+
+- **Status:** **done** (phần code) — analyze, host suite và guard xanh trên
+  worktree này; golden là việc của controller, xem Dependencies.
+- **Goal:** Style plain của `IconButton` (`buildIconButtonTheme`) đổi từ vẽ trọn
+  ô 48×48 squircle `AppRadius.md`, glyph 24 sang đúng hợp đồng handoff kit
+  MemoX v3 (Actions & controls, 2026-09-18): một hình tròn sơn 36×36, đặt giữa
+  vùng chạm tối thiểu 48×48 không đổi (không bao giờ phóng to hình tròn để lấp
+  đầy vùng chạm), glyph cố định 20 (`AppIconSize.mdCompact`) bất kể `isCompact`.
+  Màu đã đúng từ M100.101 — task này chỉ đổi hình học.
+- **Scope:** `app_sizing.dart` (hằng số mới `AppSizing.iconButtonInk = 36`,
+  công dụng riêng cho ô sơn của style plain, không dùng chung với
+  `controlCompact` = 40 của style outlined), `app_icon_button_theme.dart`
+  (`buildIconButtonTheme`: `minimumSize` đổi sang `iconButtonInk`, thêm
+  `tapTargetSize: MaterialTapTargetSize.padded`, `shape` đổi
+  `AppRadius.md` → `AppRadius.pill`), `mx_icon_button.dart` (glyph luôn
+  `AppIconSize.mdCompact`, bỏ nhánh `isCompact ? mdCompact : md`).
+- **Out of scope:** style outlined (`buildOutlinedIconButtonStyle`, hợp đồng
+  "40 vẽ, 48 chạm" của nó) — không đổi. `isCompact` vẫn giữ, chỉ còn tác dụng
+  siết `BoxConstraints.tightFor(48,48)` cho `MxSessionTopBar`, không còn đổi
+  glyph. Không đụng màu, overlay, focus ring, disabled — tất cả đã đúng từ
+  M100.101.
+- **Dependencies:** M100.101 (màu đã xong). **Golden chưa vẽ lại** — worktree
+  này chạy Windows, và goldens chỉ author trên Linux (xem quy tắc gallery ở
+  đầu file này); controller vẽ lại và republish gallery sau khi review xong.
+- **Tests required:** `app_sizing_test.dart` (hằng số mới vào bảng lưới 4dp,
+  assertion `iconButtonInk < touchTarget`, pin `iconButtonTheme.minimumSize`
+  đổi từ `touchTarget` sang `iconButtonInk`); nhóm mới "the plain icon button"
+  trong `mx_tonal_and_outlined_test.dart` đo ô vẽ 36, ô chạm ≥48, shape tròn
+  (`RoundedRectangleBorder(AppRadius.pill)`), và glyph `mdCompact` kể cả khi
+  không `isCompact`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/core/theme/foundations/app_sizing.dart`,
+  `lib/core/theme/components/actions/app_icon_button_theme.dart`,
+  `lib/shared/widgets/mx_icon_button.dart`.
+- **Acceptance criteria:**
+  - [x] `iconButtonTheme` (style plain) vẽ ô tròn 36×36, vùng chạm ≥48×48 —
+        chứng minh bằng test đo widget đã render, không phải suy luận.
+  - [x] Hợp đồng 40/48 của style outlined không đổi một byte.
+  - [x] Glyph của `MxIconButton` (plain, không `isCompact`) là `mdCompact`
+        (20); trường hợp `isCompact` cũng 20, ô vẫn đúng 48×48.
+  - [x] Hằng số mới nằm trong bảng lưới 4dp và có assertion thứ tự so với
+        `touchTarget`.
+  - [x] Không đổi màu, overlay, focus ring, hay binding disabled.
+  - [x] `dart format`, `flutter analyze --no-fatal-infos`, full host suite
+        (`--exclude-tags golden`), guard Python đều xanh.
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 
