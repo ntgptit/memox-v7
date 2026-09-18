@@ -1153,6 +1153,58 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.102 · Breadcrumb đọc dimension table v3 — chỉ ở dải scroll thường
+
+- **Status:** **done** — analyze sạch, 449/449 test đích pass (gồm
+  `breadcrumb_grammar_test.dart` không sửa), guard 0 violation.
+- **Goal:** Áp bảng dimension Breadcrumb của v3 handoff (padding 2/16/8, gap 4,
+  kiểu chữ 12/500 ancestor · 12/700 current, tracking 0.1, separator
+  chevron-right màu `outline`) lên MỘT trong hai ngữ pháp của `MxBreadcrumb` —
+  dải scroll từng-bước-tap-được (không `onUp`) — không đụng ngữ pháp header
+  một-target mà mọi màn hình thật đang dùng.
+- **Scope:** `mx_breadcrumb.dart`, `mx_breadcrumb_step.dart`,
+  `mx_breadcrumb_test.dart` (2 assertion đổi theo giá trị mới),
+  `icon_ink_boundary_test.dart` (thêm `allowedInKit` cho
+  `mx_breadcrumb_step.dart`).
+- **Out of scope:** ngữ pháp header (`onUp`, separator `/`, fold-into-ellipsis
+  ở cả hai mode) — chủ dự án chọn "cosmetic only, keep grammar" qua
+  AskUserQuestion khi phát hiện xung đột với `breadcrumb_grammar_test.dart`
+  (owner review 2026-08-21). Không màn hình sản phẩm nào dùng dải scroll
+  thường nên rủi ro rò rỉ sang ngữ pháp header bằng 0 — đã verify `_padding`/
+  `_MxBreadcrumbSeparator` không được `_buildSingleTarget`/`_stepsThatFit`
+  đọc, ở cả task review và final review.
+- **Dependencies:** kế thừa theme roles `onSurface`/`onSurfaceVariant`/
+  `outline` đã có sẵn từ M100.99–101; không cần thay đổi theme.
+- **Tests required:** `mx_breadcrumb_test.dart`, `mx_breadcrumb_focus_test.dart`,
+  `mx_stress_test.dart`, `breadcrumb_grammar_test.dart` (phải xanh KHÔNG sửa),
+  `icon_ink_boundary_test.dart`, `deck_path_test.dart`,
+  `card_editor_up_navigation_test.dart`, `card_import_up_navigation_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_breadcrumb.dart`,
+  `lib/shared/widgets/mx_breadcrumb_step.dart`.
+- **Acceptance criteria:**
+  - [x] padding 2 top · 16 sides · 8 bottom quanh dải scroll — hằng số cục bộ
+        `_kBreadcrumbPadding` (không token mới; `2` không có bậc `AppSpacing`).
+  - [x] gap 4 giữa segment và chevron — `AppSpacing.xs` đã sẵn = 4.
+  - [x] segment ancestor 12/500 `onSurfaceVariant`; current 12/700
+        `onSurface`, tracking 0.1 (hằng số cục bộ `_kSegmentTracking`) — đảo
+        màu current so với comment cũ ("a breadcrumb is chrome"); comment đã
+        viết lại lý do mới thay vì để mâu thuẫn với code.
+  - [x] separator đổi từ `/` sang icon `chevron_right` màu `outline`, cỡ
+        `AppIconSize.sm` — CHỈ ở dải scroll thường; dải header vẫn `/` vì lý
+        do 2026-08-21 (hai chevron ngược hướng cạnh nút back) vẫn còn đúng,
+        không liên quan v1-freeze mà redesign v3 thay thế.
+  - [x] `context.colors.outline` không có thành viên `AppInk` — đọc trực
+        tiếp trên `Icon`, thêm entry `allowedInKit` trong
+        `icon_ink_boundary_test.dart` (tiền lệ: `mx_search_field.dart:173`).
+  - [x] Không golden nào bị đụng — widget này chưa có golden nào.
+  - [x] Task review + final whole-branch review: cả hai "Approved"/"Ready to
+        merge: Yes", 0 Critical/Important; 2 Minor đã park (line-count trên
+        raw `wc -l` nhưng guard dùng `count_mode: logical` và xanh; một câu
+        giải thích trong report của implementer không chính xác 100% nhưng
+        không phải lỗi code).
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 
