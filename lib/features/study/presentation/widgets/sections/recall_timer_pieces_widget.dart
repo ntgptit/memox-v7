@@ -198,6 +198,7 @@ class _RecallActionArea extends StatelessWidget {
       RecallPhase.countdownRunning => Align(
         child: MxActionButton(
           label: l10n.studyRevealAnswer,
+          size: MxActionButtonSize.study,
           onPressed: isLocked ? null : onReveal,
         ),
       ),
@@ -259,6 +260,7 @@ class _RecallActionArea extends StatelessWidget {
       RecallPhase.timedOutReview => Align(
         child: MxActionButton(
           label: l10n.studyContinueAction,
+          size: MxActionButtonSize.study,
           onPressed: isLocked ? null : onNext,
         ),
       ),
@@ -266,6 +268,7 @@ class _RecallActionArea extends StatelessWidget {
       RecallPhase.timedOutUnrecorded => Align(
         child: MxActionButton(
           label: l10n.retryAction,
+          size: MxActionButtonSize.study,
           onPressed: isLocked ? null : onRetry,
         ),
       ),
@@ -278,7 +281,11 @@ class _RecallActionArea extends StatelessWidget {
       // a flicker rather than information, and an indefinite one is a widget
       // that never settles.
       RecallPhase.timedOutSubmitting || RecallPhase.advancing => Align(
-        child: MxActionButton(label: l10n.studyContinueAction, onPressed: null),
+        child: MxActionButton(
+          label: l10n.studyContinueAction,
+          size: MxActionButtonSize.study,
+          onPressed: null,
+        ),
       ),
     };
   }
