@@ -24,6 +24,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.stateChipLabel,
     required this.listHeading,
     required this.heroNumeral,
+    required this.listRowTitle,
     required this.optionRowTitle,
     required this.optionRowDescription,
   });
@@ -66,6 +67,13 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       heroNumeral: (texts.displayLarge ?? const TextStyle()).copyWith(
         height: AppTypography.heroNumeralCapTrim,
         fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+      ),
+      listRowTitle: AppTypography.withWeight(
+        (texts.bodyMedium ?? const TextStyle()).copyWith(
+          height: AppTypography.listRowTitleHeight,
+          letterSpacing: AppTypography.listRowTitleTracking,
+        ),
+        FontWeight.w600,
       ),
       // OptionRow's title: `titleSmall` (body-14 at semibold, GC-4) tracked at
       // the kit's own -0.1 — a value no scale rung carries.
@@ -113,6 +121,11 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// declared the weight and painted the rung's default.
   final TextStyle heroNumeral;
 
+  /// The title of a content row (`MxListRow`): `body-md` at the emphatic 600,
+  /// closed up by `listRowTitleTracking` and set on the row's own leading.
+  /// Colour stays with the caller — `AppInk.stated` at the row.
+  final TextStyle listRowTitle;
+
   /// The option row's title — see [AppTypography.optionRowTitleTracking].
   final TextStyle optionRowTitle;
 
@@ -128,6 +141,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     TextStyle? stateChipLabel,
     TextStyle? listHeading,
     TextStyle? heroNumeral,
+    TextStyle? listRowTitle,
     TextStyle? optionRowTitle,
     TextStyle? optionRowDescription,
   }) => AppTextStyles(
@@ -137,6 +151,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     stateChipLabel: stateChipLabel ?? this.stateChipLabel,
     listHeading: listHeading ?? this.listHeading,
     heroNumeral: heroNumeral ?? this.heroNumeral,
+    listRowTitle: listRowTitle ?? this.listRowTitle,
     optionRowTitle: optionRowTitle ?? this.optionRowTitle,
     optionRowDescription: optionRowDescription ?? this.optionRowDescription,
   );
@@ -156,6 +171,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       stateChipLabel: TextStyle.lerp(stateChipLabel, other.stateChipLabel, t)!,
       listHeading: TextStyle.lerp(listHeading, other.listHeading, t)!,
       heroNumeral: TextStyle.lerp(heroNumeral, other.heroNumeral, t)!,
+      listRowTitle: TextStyle.lerp(listRowTitle, other.listRowTitle, t)!,
       optionRowTitle: TextStyle.lerp(optionRowTitle, other.optionRowTitle, t)!,
       optionRowDescription: TextStyle.lerp(
         optionRowDescription,

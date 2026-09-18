@@ -278,17 +278,27 @@ void main() {
 
       // **G2 asks for these to be equal, and they still are not — but the
       // remainder is no longer the row's.** The row's half is fixed by the
-      // cases above; what is left is Material's `AppBar` action padding, which
-      // every screen in the app shares, so moving it is a kit-wide decision
-      // and not part of giving Trash its measurements.
+      // cases above; what moved is the `AppBar`'s own inset, which every
+      // screen in the app shares, so this stays a kit-wide number rather than
+      // something Trash owns.
+      //
+      // **The sign flipped at the `MxAppBar` extraction (task-1).** Material's
+      // own action padding used to hold the bar's trailing glyph 4dp *short*
+      // of the row's gutter (`barOverflow - rowOverflow == 4.0`). `MxAppBar`
+      // now owns that edge with its own `AppSpacing.sm` padding — a single
+      // symmetric inset for the whole row rather than Material's asymmetric
+      // action padding — which puts the glyph 4dp *past* the row's gutter
+      // instead: `barOverflow - rowOverflow == -4.0`. The row is unchanged;
+      // only the bar's inset moved, in the other direction.
       //
       // Kept as an assertion rather than deleted, so the open half of G2 stays
       // visible the way `app_high_contrast_test.dart` pins "the normal theme
-      // still cannot". When someone aligns the AppBar this fails, and the fix
-      // is to invert it into `expect(rowOverflow, barOverflow)`.
+      // still cannot". When someone aligns the AppBar exactly to the row's
+      // gutter, this fails, and the fix is to invert it into
+      // `expect(rowOverflow, barOverflow)`.
       expect(
         barOverflow - rowOverflow,
-        4.0,
+        -4.0,
         reason:
             'G2 is still open by 4dp, and all of it is the AppBar\'s '
             '(row=$rowOverflow, bar=$barOverflow). If this number changed, '
