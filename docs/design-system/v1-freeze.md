@@ -182,7 +182,7 @@ vừa, vì cách thứ hai làm mọi điều kiện mất nghĩa.
 | Hợp đồng §2 | Đổi | Không đổi |
 |---|---|---|
 | 6 — public contract của shared primitive | `MxActionButtonVariant` thêm `tonal`; `MxIconButton` thêm trục `MxIconButtonShape` | `shared_api_closure_test` không phải nới: allowlist của nó vốn nhận **enum do chính component khai báo**, nên cả hai giá trị mới đi qua mà không sửa test |
-| 1, 2 — role identity và role ngữ nghĩa | không | `tonal` đọc `secondaryContainer` / `onSecondaryContainer`, đúng cặp `_FilledButtonDefaultsM3` cấp cho `FilledButton.tonal`. Không role nào bị thay bằng role khác, không hex nào mới |
+| 1, 2 — role identity và role ngữ nghĩa | không | `tonal` đọc `secondaryContainer` / `onSecondaryContainer`, đúng cặp `_FilledButtonDefaultsM3` cấp cho `FilledButton.tonal`. (Ghi lại lịch sử M100.73; đến M100.109 `tonal` đọc `surfaceContainer` / `onSurface` — xem WBS.) Không role nào bị thay bằng role khác, không hex nào mới |
 | 5 — foundation | **có, ở M100.76**: `AppSizing.statusDot = 8` | Ở M100.73 thì không: viền tròn dùng `AppRadius.pill` đã có; độ dày là default của `BorderSide`, và `mx_tonal_and_outlined_test.dart` ghim sự trùng khớp giữa nó với `AppStroke.hairline` — đã kiểm bằng tiêm lỗi (dời token lên 1.5 thì test đỏ). Xem §3b |
 | 8 — ripple / state | không | Cả hai variant đi qua `buildFilledStyle` / resolver dùng chung, không qua `styleFrom`. Đây đúng là điều `MxIconButton` đã tự ghi lại sau hai lần gỡ variant filled: *"build its colours from the shared resolvers, not from `styleFrom`"* |
 | 11 — chrome của `MxContentShell` | không | Shell không bị chạm. Nút bar là widget do feature truyền vào `actions:`, nên đổi hình dạng của chúng là việc của feature |
