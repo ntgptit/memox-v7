@@ -128,7 +128,7 @@ void main() {
         holds('thumb', thumb, <Set<WidgetState>>[
           resting,
           focused,
-        ], scheme.outline);
+        ], scheme.surfaceBright);
         holds('track', track, <Set<WidgetState>>[
           resting,
           focused,
@@ -256,7 +256,7 @@ void main() {
         holds('side', side, <Set<WidgetState>>[
           resting,
           hovered,
-        ], scheme.outline);
+        ], scheme.outlineVariant);
         holds('side', side, <Set<WidgetState>>[focused], scheme.primary);
       });
 

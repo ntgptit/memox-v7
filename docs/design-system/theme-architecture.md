@@ -342,15 +342,51 @@ này trước khi tự đoán role.
 | Component | Slot | Target semantic role |
 |---|---|---|
 | `NavigationBar` | nền | `chrome-glass` — **chặn, xem bên dưới** |
-| `FilterChip` | nền + label đã chọn | `primary` / `onPrimary` |
-| `FilterChip` | label chưa chọn | `onSurface` |
-| `FilterChip` | viền | `border-ghost` |
-| `Switch` | thumb | `surfaceBright` |
-| `OutlinedButton` | side | `outlineVariant` |
-| `IconButton` | glyph | `onSurface` |
-| `TextField` (`InputDecorationTheme`) | fill lúc nghỉ | `surface-muted` |
-| `TextField` (`InputDecorationTheme`) | fill lúc focus | `surface-raised` |
-| `TextField` (`InputDecorationTheme`) | viền | `border-ghost` / `primary` / `error`, hairline |
+| `FilterChip` | nền + label đã chọn | `primary` / `onPrimary` — **không có caller** |
+| `FilterChip` | label chưa chọn | `onSurface` — **không có caller** |
+| `FilterChip` | viền | `border-ghost` — **không có caller** |
+
+**Đợt Controls đã trả xong ở M100.101** và sáu dòng nữa rời bảng: thumb của
+`Switch`, side của `OutlinedButton`, glyph của `IconButton`, và cả ba dòng của
+`TextField` (hai fill cộng viền).
+
+**`IconButton` lợi lớn:** glyph rời `onSurfaceVariant` sang `onSurface` —
+**7.20 → 16.72** trong light, **8.50 → 15.59** trong dark.
+
+**Ba cạnh control cùng đi xuống dưới sàn 3:1**, và đây là số đo ở nền *yếu nhất*
+chứ không phải ở trang:
+
+| Cạnh | Trước | Sau | Nền yếu nhất |
+|---|---|---|---|
+| `OutlinedButton` side | 3.44 / 3.75 | **1.30 / 1.05** | `surfaceContainerHigh` (dialog) |
+| `TextField` viền | 2.92–3.44 / 2.25–3.75 | **1.17 / 1.27** | mọi nền, gần như phẳng |
+| `Switch` thumb (trên track) | 2.74 / 1.96 | **1.32 / 1.36** | track |
+
+**Ô nhập là chỗ nặng nhất, vì fill cũng không gánh nổi ranh giới.** v3 cho field
+một fill cùng lúc với việc làm mờ viền, nhưng fill lúc nghỉ chỉ cách trang
+**1.05:1** (ΔL\* 1.76) trong light — nên một ô nhập sáng trên trang **không còn
+ranh giới nào vượt bất kỳ ngưỡng nào**. Nó đọc được là nhờ *chữ* trong nó
+(16.00:1), không nhờ cạnh. Dark khá hơn: fill cách trang ΔL\* 9.98.
+
+**Một nghịch đảo phải nói rõ:** switch **disabled giờ đậm hơn switch đang tắt** ở
+cả hai theme — 2.30 so với 1.32 (light), 3.00 so với 1.36 (dark). Dark đã nghịch
+đảo từ khi v3 dời `outline`; light theo sau ở M100.101. Một control người dùng
+không chạm được lại dễ thấy hơn control họ chạm được, tức là ngược hẳn nghĩa của
+trạng thái. `app_toggle_themes_test.dart` ghi lại nguyên văn nghịch đảo đó và sẽ
+**đỏ có chủ ý** vào ngày spec Switch đổi binding.
+
+**Một gate xanh giả đã bị bắt trong lúc làm.** `control_border_grounds_test.dart`
+đo *token* `borderControl`, không đo thứ button và field thật sự vẽ — nên khi v3
+dời cả hai component khỏi token đó, gate vẫn xanh và không còn đo gì cả, dù câu
+`reason` của nó vẫn nói "the outlined button and the text field both draw
+borderControl". Đã thêm một group đo đúng cạnh thật, ghim theo nền yếu nhất.
+
+**Ba dòng `FilterChip` không thi hành, và không phải vì hoãn:** app **không render
+`FilterChip` nào** — chỗ duy nhất nhắc tới nó là comment giải thích vì sao
+`MxPillButton` bọc `ChoiceChip`. `ChipThemeData` lại dùng chung cho mọi biến thể
+chip, nên thi hành ba dòng đó sẽ âm thầm đổi `ChoiceChip`, thứ mà v3 xử lý riêng.
+Đúng luật R7 của chính v3: màu chưa có caller thì **ghi lại, không khai báo**, và
+nó đáp xuống cùng caller đầu tiên.
 
 **Đợt Chrome đã trả xong ở M100.100** và năm dòng nữa rời bảng: track của
 `ProgressIndicatorThemeData`, indicator + icon/label đã chọn của `NavigationBar`,

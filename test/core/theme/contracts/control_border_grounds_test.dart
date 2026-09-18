@@ -92,11 +92,12 @@ void main() {
             measured,
             greaterThanOrEqualTo(graphic),
             reason:
-                '${entry.key}: the outlined button and the text field both draw '
-                'borderControl, and on ${ground.$1} it is under the 3:1 floor '
-                'WCAG 1.4.11 sets for a component boundary. This is the check '
-                'that was missing when the dark value shipped at 2.76:1 on '
-                'surfaceContainer.',
+                '${entry.key}: borderControl on ${ground.$1} is under the '
+                '3:1 floor WCAG 1.4.11 sets for a component boundary. This is '
+                'the check that was missing when the dark value shipped at '
+                '2.76:1 on surfaceContainer. Since M100.101 the outlined '
+                'button and the text field no longer draw this token — see '
+                'the group below, which measures what they do draw.',
           );
         });
       }
@@ -126,6 +127,93 @@ void main() {
       }
     });
   });
+
+  group(
+    'what the controls actually draw, since v3 moved them off the token',
+    () {
+      // **The group above went green while describing a state the app had left,
+      // and that is the failure mode this one closes** (M100.101). It measures
+      // `borderControl`; v3 moved the outlined button to `outlineVariant` and
+      // the text field to `border-ghost`, so neither component was being
+      // measured any more and the gate could not have caught a further drop.
+      //
+      // Both are under 3:1 on every ground. The owner chose v3 with these
+      // figures in hand; they are pinned here so the next move is visible, and
+      // the floor returns when a component task gives either edge a louder role.
+      //
+      // **The field is the worse of the two**, because a button keeps a label
+      // inside it and an empty field has nothing else: the field also gained a
+      // fill in the same change, and that fill is 1.05:1 against the page in
+      // light — so a light field on the page has no boundary that clears any
+      // threshold at all.
+      // The weakest ground each edge reaches, floored to two decimals (R12).
+      // The page is the *best* case for the button (1.53 / 1.58); the worst is
+      // a dialog, where `surfaceContainerHigh` gives **1.30 in light and 1.05
+      // in dark** — an outlined button on a dialog is a shape with almost no
+      // edge. The field is flatter and lower throughout: 1.17–1.19 and
+      // 1.27–1.32.
+      const Map<String, double> buttonPins = <String, double>{
+        'light': 1.30,
+        'dark': 1.05,
+      };
+      const Map<String, double> fieldPins = <String, double>{
+        'light': 1.17,
+        'dark': 1.27,
+      };
+
+      for (final MapEntry<String, ThemeData> entry in themes.entries) {
+        final ThemeData theme = entry.value;
+
+        test('${entry.key} · the outlined button edge', () {
+          final Color side = theme.outlinedButtonTheme.style!.side!
+              .resolve(const <WidgetState>{})!
+              .color;
+
+          expect(side, theme.colorScheme.outlineVariant);
+          for (final (String, Color) ground in groundsOf(theme)) {
+            expect(
+              contrast(side, ground.$2),
+              greaterThanOrEqualTo(buttonPins[entry.key]!),
+              reason:
+                  '${entry.key}: the button edge on ${ground.$1} is already '
+                  'below 3:1 — it must not get quieter still',
+            );
+          }
+        });
+
+        test('${entry.key} · the text field edge', () {
+          final Color border =
+              theme.inputDecorationTheme.enabledBorder!.borderSide.color;
+
+          // border-ghost is translucent, so it is composited over each ground
+          // before measuring — a raw ratio would read `primary` at full
+          // strength for a line that never paints that way.
+          for (final (String, Color) ground in groundsOf(theme)) {
+            final double measured = contrast(
+              Color.alphaBlend(border, ground.$2),
+              ground.$2,
+            );
+
+            expect(
+              measured,
+              lessThan(3.0),
+              reason:
+                  '${entry.key}: the field edge on ${ground.$1} now clears 3:1 '
+                  '— has a component task given it a louder role? Then this '
+                  'group folds back into the floor above.',
+            );
+            expect(
+              measured,
+              greaterThanOrEqualTo(fieldPins[entry.key]!),
+              reason:
+                  '${entry.key}: the field edge on ${ground.$1} dropped below '
+                  'what v3 left it at',
+            );
+          }
+        });
+      }
+    },
+  );
 
   group('a brand mark is inked, not filled', () {
     // The other half of M100.3. `primary` is the fill of a filled button and is

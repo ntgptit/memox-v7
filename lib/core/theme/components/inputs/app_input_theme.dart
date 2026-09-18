@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../foundations/app_decorations.dart';
 import '../../foundations/app_radius.dart';
 import '../../foundations/app_semantic_colors.dart';
 import '../../foundations/app_spacing.dart';
@@ -36,11 +37,41 @@ InputDecorationTheme buildInputDecorationTheme(
   AppSemanticColors semantic,
   TextTheme texts,
 ) => InputDecorationTheme(
-  // Outlined, not filled. A fill makes the field a block that competes with
-  // the cards around it; the reference defines the field with a stroke alone
-  // and lets the page show through, so the field reads as an opening rather
-  // than an object, and sits correctly on page or card with no override.
-  filled: false,
+  // **Filled since M100.101, because v3 names a fill for both states** —
+  // `surface-muted` at rest and `surface-raised` on focus. It reverses the
+  // decision below, which is kept because it is still the argument on the
+  // other side: a fill makes the field a block that competes with the cards
+  // around it, where a stroke alone lets the page show through and the field
+  // reads as an opening rather than an object.
+  //
+  // **What the numbers say about the pair, and it is not comfortable.** With
+  // the border moving to `border-ghost` at the same time, neither cue
+  // separates the field from the page in light: the resting fill `#F1F4FB` is
+  // **1.05:1** against the page (ΔL\* 1.76) and the ghost border is
+  // **1.19:1**. A light field on the page therefore has no boundary that
+  // clears any threshold — it is legible because its *text* is (16.00:1), not
+  // because its edge is. Dark fares better: the resting fill is ΔL\* 9.98 off
+  // the page and reads as a real step.
+  //
+  // The owner chose v3 with those figures in hand.
+  // `control_border_grounds_test.dart` pins the border and this file's own
+  // measurements are the record for the fill; restoring a boundary means a
+  // fill further from the page, a stroke above ghost, or both, and belongs to
+  // whichever task takes that on.
+  filled: true,
+  fillColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    // Focus is the only state that moves the fill: v3 lifts the field to
+    // `surface-raised` while it holds the caret and leaves it on
+    // `surface-muted` otherwise. Disabled deliberately keeps the resting fill
+    // — the disabled cue is the hairline and the ink, both already faded, and
+    // a third channel saying the same thing is how one state ends up spelled
+    // three ways.
+    if (states.contains(WidgetState.focused)) {
+      return scheme.surfaceContainerLowest;
+    }
+
+    return scheme.surfaceContainerLow;
+  }),
   // 16 named, 20 drawn: `OutlineInputBorder.gapPadding` (4.0) is added to both
   // horizontal insets by `input_decorator.dart:2639-2645` under M3, so a
   // field's text sits 4dp further in than a `Text` padded to `AppSpacing.lg`
@@ -61,8 +92,8 @@ InputDecorationTheme buildInputDecorationTheme(
   // verbatim (M100.84). A card's edge stays subtle because a card is
   // identified by its content. `control_border_grounds_test.dart` holds this
   // on every ground a field is drawn on.
-  border: _inputBorder(scheme.outline),
-  enabledBorder: _inputBorder(scheme.outline),
+  border: _inputBorder(AppDecorations.hairlineEdge(scheme).color),
+  enabledBorder: _inputBorder(AppDecorations.hairlineEdge(scheme).color),
   focusedBorder: _inputBorder(scheme.primary),
   errorBorder: _inputBorder(scheme.error),
   focusedErrorBorder: _inputBorderAt(scheme.error, AppStroke.focus),
@@ -120,8 +151,11 @@ InputDecorationTheme buildInputDecorationTheme(
 );
 
 /// Same geometry in every state — only the colour speaks.
+/// **A hairline since M100.101**, because v3 states this edge at one dp. It
+/// was [AppStroke.control]; the focused-error case keeps its heavier stroke
+/// below, which is the one place the field still argues with a line.
 OutlineInputBorder _inputBorder(Color color) =>
-    _inputBorderAt(color, AppStroke.control);
+    _inputBorderAt(color, AppStroke.hairline);
 
 /// The one state whose stroke differs: focused error, at [AppStroke.focus].
 OutlineInputBorder _inputBorderAt(Color color, double width) =>

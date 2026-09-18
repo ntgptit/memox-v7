@@ -435,10 +435,16 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
       // `surfaceContainer`, all clear of the 3:1 WCAG 1.4.11 asks of a control
       // boundary.
       //
-      // Chips take `outlineVariant` instead, and that is M3's split rather than
-      // this app's: a filter row of eight pills at 3:1 competes with the content
-      // it filters, and a chip carries a fill and a label as well as an edge.
-      return BorderSide(color: scheme.outline);
+      // Chips take `outlineVariant` too, and that used to be M3's split rather
+      // than this app's: a filter row of eight pills at 3:1 competes with the
+      // content it filters, and a chip carries a fill and a label as well as an
+      // edge. **v3 gives the button the chip's answer** (M100.101), so the
+      // split is gone and so is the 3:1: `outlineVariant` reads **1.53:1** on
+      // the page in light and **1.58:1** in dark, where `outline` read 3.44 and
+      // 3.75. A button keeps its label, which a bare field does not —
+      // `control_border_grounds_test.dart` carries the figures and the
+      // consequence.
+      return BorderSide(color: scheme.outlineVariant);
     }),
   ),
 );

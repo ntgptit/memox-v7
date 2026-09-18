@@ -85,7 +85,13 @@ SwitchThemeData buildSwitchTheme(
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
     if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
-    return scheme.outline;
+    // **`surfaceBright`, which v3 names for this slot** (M100.101), replacing
+    // `outline`. It is quieter: the resting knob reads **1.32:1** on its track
+    // in light and **1.36:1** in dark, where `outline` read 2.74 and 1.96.
+    // Neither figure met the 3:1 of 1.4.11 — the old one did not either — but
+    // this is a further drop and the owner took it with both numbers in hand.
+    // `toggle_contrast_test.dart` pins them.
+    return scheme.surfaceBright;
   }),
   trackColor: WidgetStateProperty.resolveWith((states) {
     if (states.contains(WidgetState.disabled)) return semantic.disabledSurface;

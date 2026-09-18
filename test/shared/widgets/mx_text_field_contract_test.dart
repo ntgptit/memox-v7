@@ -274,7 +274,10 @@ void main() {
 
       final atRest = painted()! as OutlineInputBorder;
       expect(atRest.borderSide.color, scheme.error);
-      expect(atRest.borderSide.width, AppStroke.control);
+      // The input stroke is a hairline since M100.101 (v3 states this edge at
+      // one dp); focused error still steps up to AppStroke.focus, which is the
+      // relation this test exists for.
+      expect(atRest.borderSide.width, AppStroke.hairline);
 
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();

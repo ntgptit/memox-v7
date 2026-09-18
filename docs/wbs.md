@@ -1111,6 +1111,48 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.101 · V3 component pass, đợt 3 — Controls đọc đúng vai v3
+
+- **Status:** **done** — analyze sạch, host suite 5256 pass, guard 0, architecture
+  sạch, `check_docs` xanh, golden vẽ lại trên Linux.
+- **Goal:** Sáu dòng nhóm Controls của `COMPONENT_MIGRATION_PENDING`. Bảng còn
+  bốn dòng, mỗi dòng có lý do nêu tên chứ không phải "để sau".
+- **Scope:** `app_toggle_themes.dart` (thumb lúc nghỉ), `app_button_themes.dart`
+  (side của OutlinedButton), `app_icon_button_theme.dart` (glyph),
+  `app_input_theme.dart` (fill hai trạng thái + viền hairline),
+  `mx_action_button.dart` (`_busyStyle` đọc lại side của theme); tám file test;
+  bảng §7.
+- **Out of scope:** ba dòng `FilterChip` — app không render `FilterChip` nào, và
+  `ChipThemeData` dùng chung nên thi hành chúng sẽ đổi `ChoiceChip`; theo luật R7
+  của v3 chúng đáp xuống cùng caller đầu tiên. Nền `NavigationBar` vẫn chặn từ
+  M100.100.
+- **Dependencies:** M100.100.
+- **Tests required:** các test đã sửa ở Scope, cộng group mới trong
+  `control_border_grounds_test.dart` đo cạnh thật.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/theme-architecture.md`
+- **Output:** `lib/core/theme/components/`, `lib/shared/widgets/mx_action_button.dart`
+- **Acceptance criteria:**
+  - [x] `IconButton` glyph là `onSurface`: **7.20 → 16.72** light, **8.50 →
+        15.59** dark.
+  - [x] `OutlinedButton` side là `outlineVariant`; ghim theo nền yếu nhất
+        (**1.30** light / **1.05** dark trên `surfaceContainerHigh`), không phải
+        theo trang.
+  - [x] `TextField` có fill hai trạng thái và viền `border-ghost` ở hairline;
+        ghim **1.17 / 1.27**. Ghi rõ rằng **fill cũng không gánh ranh giới**:
+        1.05:1 so với trang trong light.
+  - [x] `Switch` thumb là `surfaceBright` (**1.32 / 1.36** trên track).
+  - [x] **Nghịch đảo disabled/live được ghi lại ở cả hai theme**, không làm mờ
+        đi: 2.30 vs 1.32 (light), 3.00 vs 1.36 (dark).
+        `app_toggle_themes_test.dart` sẽ đỏ có chủ ý khi spec Switch đổi binding.
+  - [x] **Một gate xanh giả bị bắt và sửa:** `control_border_grounds_test.dart`
+        đo token `borderControl` chứ không đo cạnh mà button và field thật sự
+        vẽ, nên nó xanh trong khi không còn đo gì. Thêm group đo cạnh thật.
+  - [x] `_busyStyle` của `MxActionButton` thôi chép lại câu trả lời của theme —
+        đọc lại `outlinedButtonTheme` resting side. Comment ở đó đã than rằng
+        bản sao sai ba lần; lần này là lần thứ tư.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 

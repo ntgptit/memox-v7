@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
@@ -195,10 +194,8 @@ void main() {
       // are single-state — a compact button that lost its state resolvers
       // would fail this, not the drawn-40 test in mx_components_test.
       for (final size in MxActionButtonSize.values) {
-        testWidgets('secondary · ${size.name} · edge is borderControl at rest '
+        testWidgets('secondary · ${size.name} · edge is outlineVariant at rest '
             'and while loading, focus ring when focused', (tester) async {
-          final semantic = theme.extension<AppSemanticColors>()!;
-
           await pump(
             tester,
             theme,
@@ -208,12 +205,17 @@ void main() {
 
           final restSide = resolved(tester, (s) => s.side, rest);
           expect(restSide, isNotNull);
+          // **`outlineVariant` since M100.101**, where it was `borderControl`
+          // (`colorScheme.outline`) from M99.63. v3 gives the outlined button
+          // the chip's edge; the relation this matrix protects — one edge at
+          // rest and while loading, the focus ring only on focus — is
+          // unchanged, and so is the label's own 4.5:1 below.
           expect(
             restSide!.color,
-            semantic.borderControl,
+            theme.colorScheme.outlineVariant,
             reason:
                 '$themeName: the resting secondary edge moved off '
-                'borderControl (M99.63)',
+                'outlineVariant (M100.101, was borderControl at M99.63)',
           );
 
           final restInk = resolved(tester, (s) => s.foregroundColor, rest);
@@ -260,7 +262,7 @@ void main() {
           expect(loadingSide, isNotNull);
           expect(
             loadingSide!.color,
-            semantic.borderControl,
+            theme.colorScheme.outlineVariant,
             reason: '$themeName: the loading secondary edge drifted (M99.75)',
           );
         });

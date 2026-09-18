@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_decorations.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
@@ -166,13 +167,15 @@ void main() {
         final s = theme.outlinedButtonTheme.style!;
 
         pin('foreground', s.foregroundColor!.resolve(resting), brandText);
-        pin('side', s.side!.resolve(resting)!.color, scheme.outline);
+        // v3 gives the button the chip's edge (M100.101).
+        pin('side', s.side!.resolve(resting)!.color, scheme.outlineVariant);
       });
 
       test('Switch', () {
         final t = theme.switchTheme;
 
-        pin('off thumb', t.thumbColor!.resolve(resting), scheme.outline);
+        // v3 rests the thumb on surfaceBright (M100.101).
+        pin('off thumb', t.thumbColor!.resolve(resting), scheme.surfaceBright);
         pin('on thumb', t.thumbColor!.resolve(selected), scheme.onPrimary);
         pin(
           'off track',
@@ -249,10 +252,12 @@ void main() {
       test('TextField', () {
         final t = theme.inputDecorationTheme;
 
+        // v3's border-ghost (M100.101) — a translucent derived treatment, so
+        // it is pinned against its one source rather than a scheme role.
         pin(
           'enabled border',
           t.enabledBorder!.borderSide.color,
-          scheme.outline,
+          AppDecorations.hairlineEdge(scheme).color,
         );
         pin(
           'focused border',
