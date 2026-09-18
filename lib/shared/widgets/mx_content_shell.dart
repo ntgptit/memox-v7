@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/foundations/app_breakpoints.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
+import 'mx_app_bar.dart';
 import 'mx_breadcrumb.dart';
 import 'mx_scroll_end_inset.dart';
 
@@ -271,21 +272,36 @@ class _MxContentShellState extends State<MxContentShell> {
       return null;
     }
 
+    // **`MxAppBar` carries the common case.** With no subline the whole
+    // row — leading, title, actions — is one `MxAppBar` living in `title:`,
+    // so `AppBar`'s own `leading:`/`actions:` stay null and the widget's own
+    // edge padding is the only padding (`titleSpacing: 0`). Only the subline
+    // branch below still builds its title, leading and actions the old way;
+    // none of `automaticallyImplyLeading`, the hairline `shape:` or the
+    // back-affordance check moved — both branches share this one `AppBar(...)`
+    // and those params are computed exactly as before.
     return AppBar(
-      title: _buildTitle(context, subline),
-      leading: widget.leading,
+      title: subline == null
+          ? MxAppBar(
+              title: widget.title == null ? null : Text(widget.title!),
+              leading: widget.leading,
+              actions: widget.actions,
+            )
+          : _buildTitle(context, subline),
+      leading: subline == null ? null : widget.leading,
       // **A subline owns the way back.** The path's own chevron is the up
       // affordance where there is one, so the bar must not also draw the
       // platform arrow beside a title that already has a line under it
       // (owner review, 2026-08-20).
       automaticallyImplyLeading: widget.leading == null && subline == null,
+      titleSpacing: subline == null ? 0 : null,
       // Only when a subline is present: the row is sized to the block it
       // holds rather than to Material's one-line default. It never goes below
       // the touch floor — the row carries the bar's icon buttons — and it
       // grows with the text scale, because a title clipped by a fixed bar is
       // the failure this number exists to avoid.
       toolbarHeight: subline == null ? null : _toolbarHeight(context),
-      actions: widget.actions,
+      actions: subline == null ? null : widget.actions,
       // Below the whole chrome block rather than between bar and subheader: the
       // subheader is chrome too, and the line is there to say where chrome ends
       // and scrolled content begins.

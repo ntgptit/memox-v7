@@ -136,6 +136,9 @@ abstract final class AppTypography {
   /// sits inside a pill, not over a list.
   static const double stateChipTracking = 0.6;
 
+  /// The v3 Breadcrumb current-segment weight.
+  static const FontWeight breadcrumbCurrentWeight = FontWeight.w700;
+
   /// The hero numeral's line box, as a multiple of its own size.
   ///
   /// **Not a leading adjustment — a cap-height trim, and the number is
@@ -161,6 +164,20 @@ abstract final class AppTypography {
   /// it again rather than to regenerate and move on.
   static const double heroNumeralCapTrim = 0.481;
 
+  /// `MxAppBar`'s compact-density title — every existing `MxContentShell`
+  /// call site. A component-level trio, not a `TextTheme` rung (GC-4's seven
+  /// roles have no slot for it), built through [_role] the same way
+  /// [cardPromptSize] is (R6).
+  static const double appBarContentTitleSize = 16;
+  static const FontWeight appBarContentTitleWeight = FontWeight.w700;
+  static const double appBarContentTitleTracking = -0.3;
+
+  /// `MxAppBar`'s large-density title. No call site yet — `large` ships as a
+  /// complete, tested variant without a screen inventing a reason to use it.
+  static const double appBarScreenTitleSize = 24;
+  static const FontWeight appBarScreenTitleWeight = FontWeight.w700;
+  static const double appBarScreenTitleTracking = -0.5;
+
   /// The deck list's heading, which is tracked tighter than the rest.
   ///
   /// **0.06em at `label-md`'s 12px, which is 0.72** (owner review, 2026-08-25).
@@ -179,6 +196,14 @@ abstract final class AppTypography {
   /// The content row's title leading — tighter than [bodyHeight] because the
   /// row is exactly one line and its height comes from the row, not the text.
   static const double listRowTitleHeight = 1.35;
+
+  /// The option row's title — `-0.1` at `title-sm` (body-14 semibold, GC-4).
+  /// No scale rung carries this tracking; the kit states it for this row.
+  static const double optionRowTitleTracking = -0.1;
+
+  /// The option row's description leading — `1.45` at `body-sm` (caption-12
+  /// at body weight, GC-4), which otherwise leads at [captionHeight] (1.4).
+  static const double optionRowDescriptionHeight = 1.45;
 
   /// Pairs a [FontWeight] with the matching variable-axis setting.
   static List<FontVariation> _wght(FontWeight weight) => <FontVariation>[
@@ -221,6 +246,24 @@ abstract final class AppTypography {
     fontSize: size,
     height: height,
     letterSpacing: tracking,
+  );
+
+  /// `MxAppBar`'s compact title style — [_role], not a `TextTheme` rung.
+  static TextStyle get appBarContentTitleStyle => _role(
+    null,
+    appBarContentTitleWeight,
+    size: appBarContentTitleSize,
+    height: headingHeight,
+    tracking: appBarContentTitleTracking,
+  );
+
+  /// `MxAppBar`'s large title style. See [appBarContentTitleStyle].
+  static TextStyle get appBarScreenTitleStyle => _role(
+    null,
+    appBarScreenTitleWeight,
+    size: appBarScreenTitleSize,
+    height: headingHeight,
+    tracking: appBarScreenTitleTracking,
   );
 
   static TextTheme buildTextTheme(TextTheme base) {

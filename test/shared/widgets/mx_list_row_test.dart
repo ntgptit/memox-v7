@@ -82,7 +82,9 @@ void main() {
         ),
       );
 
-      expect(find.byType(MxIconTile), findsOneWidget);
+      final MxIconTile tile = tester.widget(find.byType(MxIconTile));
+      expect(tile.size, MxIconTileSize.sm);
+      expect(tester.getSize(find.byType(MxIconTile)), const Size(28, 28));
     });
 
     testWidgets('leading overrides the default tile entirely', (tester) async {
@@ -190,12 +192,12 @@ void main() {
       expect(decoration.border, isNotNull);
     });
 
-    testWidgets('omits the hairline when showDivider is false', (tester) async {
+    testWidgets('omits the hairline when hasDivider is false', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: buildLightTheme(),
           home: const Scaffold(
-            body: MxListRow(title: 'Academic Word List', showDivider: false),
+            body: MxListRow(title: 'Academic Word List', hasDivider: false),
           ),
         ),
       );

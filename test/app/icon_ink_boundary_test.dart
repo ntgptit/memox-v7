@@ -76,11 +76,14 @@ void main() {
         'AppInk member for "whatever the chip decided", and naming one would '
         'drop the selected and disabled states the theme resolves.',
     'mx_icon_tile.dart':
-        'the glyph is inked with the tile seed, a caller-owned per-instance '
-        'colour (a per-deck tint) — an explicit COMPONENT_INPUT with no AppInk '
-        'member, since AppInk is a closed list of theme roles. With no seed '
-        'the default tone is theme primary at full strength, which the fill '
-        'tint is derived from, so the two must share one source colour.',
+        'the glyph colour is the tile\'s own computed tint (`primary` or a '
+        'caller `seed`), never a nameable AppInk — the same exception '
+        'mx_pill_button.dart already carries.',
+    'mx_breadcrumb_step.dart':
+        'the plain-mode separator paints the theme\'s own outline role '
+        'directly on a chevron_right — AppInk has no member for that '
+        'boundary-only M3 slot, and one call site does not justify adding one '
+        '(docs/superpowers/plans/2026-09-18-breadcrumb-v3-geometry.md).',
   };
 
   Iterable<File> dartFilesUnder(String root) => Directory(root)

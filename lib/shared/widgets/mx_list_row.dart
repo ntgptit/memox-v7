@@ -41,7 +41,7 @@ class MxListRow extends StatelessWidget {
     this.trailing,
     this.trailingIcon,
     this.onTap,
-    this.showDivider = true,
+    this.hasDivider = true,
     this.semanticLabel,
     super.key,
   });
@@ -57,7 +57,7 @@ class MxListRow extends StatelessWidget {
   /// it" is the contract's own wording. Takes priority over [leadingIcon].
   final Widget? leading;
 
-  /// Builds the default leading tile as `MxIconTile(icon: leadingIcon, seed:
+  /// Builds the default leading tile as `MxIconTile(size: sm, icon: leadingIcon, seed:
   /// seed)`. Ignored when [leading] is supplied. `null` (with no [leading]
   /// either) renders no leading slot.
   final IconData? leadingIcon;
@@ -86,7 +86,7 @@ class MxListRow extends StatelessWidget {
   /// `false` omits the bottom hairline — pass it for the last row in a
   /// list. The row does not know its own position in a list, so the caller
   /// decides.
-  final bool showDivider;
+  final bool hasDivider;
 
   /// `null` lets the title (and subtitle, if present) be read as separate
   /// nodes. Set it when the tappable row's target needs one merged
@@ -100,7 +100,7 @@ class MxListRow extends StatelessWidget {
     final Widget? leadingWidget =
         leading ??
         (leadingIcon != null
-            ? MxIconTile(icon: leadingIcon!, seed: seed)
+            ? MxIconTile(icon: leadingIcon, seed: seed, size: MxIconTileSize.sm)
             : null);
     final Widget? trailingWidget =
         trailing ??
@@ -159,7 +159,7 @@ class MxListRow extends StatelessWidget {
       ),
     );
 
-    final Widget bordered = showDivider
+    final Widget bordered = hasDivider
         ? DecoratedBox(
             decoration: BoxDecoration(
               border: Border(bottom: AppDecorations.hairlineEdge(scheme)),
