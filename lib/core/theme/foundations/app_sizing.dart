@@ -78,10 +78,16 @@ abstract final class AppSizing {
   /// its own size.
   ///
   /// Read only to derive clearances — `AppSpacing.fabScrollClearance` — and
-  /// never to size a FAB: `FloatingActionButton` sizes itself, and a widget
-  /// that restated this number would be a second answer able to drift from the
-  /// SDK's.
+  /// not to size a FAB: [fab] states the FAB's own painted size now, so this
+  /// constant's one remaining job is feeding the clearance arithmetic.
   static const double floatingAction = 56;
+
+  /// The v3 Fab contract's own size — the actual painted box, fixed at 52×52
+  /// (never [floatingAction], which backs `AppSpacing.fabScrollClearance`
+  /// only). Two constants because they answer two different questions: this
+  /// one is what the FAB *is*; [floatingAction] is what the scroll tail
+  /// clears, and shrinking the FAB does not need to shrink the clearance.
+  static const double fab = 52;
 
   /// The narrowest a button is allowed to be, label notwithstanding.
   ///
