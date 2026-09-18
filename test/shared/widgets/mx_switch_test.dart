@@ -42,7 +42,7 @@ void main() {
       tester,
     ) async {
       final changes = <bool>[];
-      await pump(tester, MxSwitch(value: false, onChanged: changes.add));
+      await pump(tester, MxSwitch(isOn: false, onChanged: changes.add));
 
       // The corner of the touch target, deliberately outside the painted
       // 44×26 track it centres — the whole box is the target.
@@ -54,7 +54,7 @@ void main() {
     });
 
     testWidgets('a disabled switch does not move when tapped', (tester) async {
-      await pump(tester, const MxSwitch(value: true, onChanged: null));
+      await pump(tester, const MxSwitch(isOn: true, onChanged: null));
 
       await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
@@ -76,12 +76,12 @@ void main() {
           )
           .opacity;
 
-      await pump(tester, const MxSwitch(value: true, onChanged: null));
+      await pump(tester, const MxSwitch(isOn: true, onChanged: null));
       expect(opacityOf(), AppStateOpacity.disabled);
     });
 
     testWidgets('enabled paints at full opacity', (tester) async {
-      await pump(tester, MxSwitch(value: true, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: true, onChanged: (_) {}));
       final opacity = tester.widget<Opacity>(
         find.descendant(
           of: find.byType(MxSwitch),
@@ -95,7 +95,7 @@ void main() {
       tester,
     ) async {
       final changes = <bool>[];
-      await pump(tester, MxSwitch(value: false, onChanged: changes.add));
+      await pump(tester, MxSwitch(isOn: false, onChanged: changes.add));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
@@ -109,7 +109,7 @@ void main() {
       tester,
     ) async {
       final changes = <bool>[];
-      await pump(tester, MxSwitch(value: true, onChanged: changes.add));
+      await pump(tester, MxSwitch(isOn: true, onChanged: changes.add));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
@@ -125,8 +125,8 @@ void main() {
         tester,
         Column(
           children: <Widget>[
-            const MxSwitch(value: false, onChanged: null),
-            MxSwitch(value: false, onChanged: (_) => toggled = true),
+            const MxSwitch(isOn: false, onChanged: null),
+            MxSwitch(isOn: false, onChanged: (_) => toggled = true),
           ],
         ),
       );
@@ -148,7 +148,7 @@ void main() {
       final handle = tester.ensureSemantics();
       await pump(
         tester,
-        MxSwitch(value: false, onChanged: (_) {}, semanticLabel: 'Reminders'),
+        MxSwitch(isOn: false, onChanged: (_) {}, semanticLabel: 'Reminders'),
       );
 
       final node = tester.getSemantics(find.byType(MxSwitch));
@@ -160,7 +160,7 @@ void main() {
 
     testWidgets('on: toggled', (tester) async {
       final handle = tester.ensureSemantics();
-      await pump(tester, MxSwitch(value: true, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: true, onChanged: (_) {}));
 
       final node = tester.getSemantics(find.byType(MxSwitch));
       expect(node.flagsCollection.isToggled, Tristate.isTrue);
@@ -169,7 +169,7 @@ void main() {
 
     testWidgets('a null onChanged reports disabled', (tester) async {
       final handle = tester.ensureSemantics();
-      await pump(tester, const MxSwitch(value: true, onChanged: null));
+      await pump(tester, const MxSwitch(isOn: true, onChanged: null));
 
       final node = tester.getSemantics(find.byType(MxSwitch));
       expect(node.flagsCollection.isEnabled, Tristate.isFalse);
@@ -178,7 +178,7 @@ void main() {
 
     testWidgets('an enabled switch offers the tap action', (tester) async {
       final handle = tester.ensureSemantics();
-      await pump(tester, MxSwitch(value: true, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: true, onChanged: (_) {}));
       expect(
         tester
             .getSemantics(find.byType(MxSwitch))
@@ -191,7 +191,7 @@ void main() {
 
     testWidgets('a disabled switch offers no tap action', (tester) async {
       final handle = tester.ensureSemantics();
-      await pump(tester, const MxSwitch(value: true, onChanged: null));
+      await pump(tester, const MxSwitch(isOn: true, onChanged: null));
       expect(
         tester
             .getSemantics(find.byType(MxSwitch))
@@ -206,7 +206,7 @@ void main() {
       tester,
     ) async {
       final handle = tester.ensureSemantics();
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
 
       final node = tester.getSemantics(find.byType(MxSwitch));
       expect(node.label, isEmpty);
@@ -218,7 +218,7 @@ void main() {
     testWidgets('the touch target floors at 48×48 around a 44×26 track', (
       tester,
     ) async {
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
 
       expect(
         tester.getSize(find.byType(MxSwitch)),
@@ -231,7 +231,7 @@ void main() {
     testWidgets('off: the thumb rests 3dp from the track\'s left edge', (
       tester,
     ) async {
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
 
       final trackLeft = tester.getTopLeft(find.byKey(kMxSwitchTrackKey)).dx;
       final thumbLeft = tester.getTopLeft(find.byKey(kMxSwitchThumbKey)).dx;
@@ -241,7 +241,7 @@ void main() {
     testWidgets('on: the thumb travels to 21dp from the track\'s left edge', (
       tester,
     ) async {
-      await pump(tester, MxSwitch(value: true, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: true, onChanged: (_) {}));
 
       final trackLeft = tester.getTopLeft(find.byKey(kMxSwitchTrackKey)).dx;
       final thumbLeft = tester.getTopLeft(find.byKey(kMxSwitchThumbKey)).dx;
@@ -275,7 +275,7 @@ void main() {
     testWidgets('the ring stands focusRingOffset clear of the track', (
       tester,
     ) async {
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
@@ -299,7 +299,7 @@ void main() {
     testWidgets('the ring overflows without changing the 48×48 box', (
       tester,
     ) async {
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
@@ -319,7 +319,7 @@ void main() {
 
   group('colour — the registry, not app_toggle_themes.dart', () {
     testWidgets('off track is surfaceContainerHighest', (tester) async {
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
       expect(
         decorationOf(tester, kMxSwitchTrackKey).color,
         colors.surfaceContainerHighest,
@@ -331,12 +331,12 @@ void main() {
       // controller starts at its target value in `initState`, where updating
       // an existing `MxSwitch` in place would animate to it over 160ms
       // instead.
-      await pump(tester, MxSwitch(value: true, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: true, onChanged: (_) {}));
       expect(decorationOf(tester, kMxSwitchTrackKey).color, colors.primary);
     });
 
     testWidgets('the thumb is surfaceBright off', (tester) async {
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
       expect(
         decorationOf(tester, kMxSwitchThumbKey).color,
         colors.surfaceBright,
@@ -346,7 +346,7 @@ void main() {
     testWidgets('the thumb is surfaceBright on — no on/off split', (
       tester,
     ) async {
-      await pump(tester, MxSwitch(value: true, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: true, onChanged: (_) {}));
       expect(
         decorationOf(tester, kMxSwitchThumbKey).color,
         colors.surfaceBright,
@@ -358,7 +358,7 @@ void main() {
     Widget host({required bool value, required bool reduceMotion}) => Builder(
       builder: (context) => MediaQuery(
         data: MediaQuery.of(context).copyWith(disableAnimations: reduceMotion),
-        child: MxSwitch(value: value, onChanged: (_) {}),
+        child: MxSwitch(isOn: value, onChanged: (_) {}),
       ),
     );
 
@@ -390,7 +390,7 @@ void main() {
   group('right-to-left', () {
     Widget rtl(bool value) => Directionality(
       textDirection: TextDirection.rtl,
-      child: MxSwitch(value: value, onChanged: (_) {}),
+      child: MxSwitch(isOn: value, onChanged: (_) {}),
     );
 
     double thumbOffset(WidgetTester tester) =>
@@ -426,7 +426,7 @@ void main() {
       final expected = AppInteractionStates.controlOverlay(
         colors,
       ).resolve(<WidgetState>{WidgetState.pressed})!;
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
       expect(overlayFinder(expected), findsNothing, reason: 'at rest');
 
       final gesture = await tester.startGesture(
@@ -444,7 +444,7 @@ void main() {
       final pressed = AppInteractionStates.controlOverlay(
         colors,
       ).resolve(<WidgetState>{WidgetState.pressed})!;
-      await pump(tester, const MxSwitch(value: false, onChanged: null));
+      await pump(tester, const MxSwitch(isOn: false, onChanged: null));
 
       final gesture = await tester.startGesture(
         tester.getCenter(find.byType(MxSwitch)),
@@ -460,7 +460,7 @@ void main() {
       final expected = AppInteractionStates.controlOverlay(
         colors,
       ).resolve(<WidgetState>{WidgetState.hovered})!;
-      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await pump(tester, MxSwitch(isOn: false, onChanged: (_) {}));
 
       // `FocusableActionDetector` only shows a hover highlight in
       // `FocusHighlightMode.traditional` — a mouse move alone never switches

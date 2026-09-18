@@ -45,14 +45,14 @@ import 'mx_focus_ring.dart';
 /// v3 Toggle contract's own dimension table.
 class MxSwitch extends StatefulWidget {
   const MxSwitch({
-    required this.value,
+    required this.isOn,
     required this.onChanged,
     this.semanticLabel,
     super.key,
   });
 
   /// Whether the switch is on.
-  final bool value;
+  final bool isOn;
 
   /// Called with the requested value on tap, Space or Enter; the caller owns
   /// the state. `null` disables the control: no tap, no keyboard activation,
@@ -86,7 +86,7 @@ class _MxSwitchState extends State<MxSwitch>
     _controller = AnimationController(
       vsync: this,
       duration: _kToggleDuration,
-      value: widget.value ? 1 : 0,
+      value: widget.isOn ? 1 : 0,
     );
     // `AppDurations.standard` is this app's one "starts and stops on screen"
     // curve; the 160ms duration is this component's own decision, the easing
@@ -111,9 +111,9 @@ class _MxSwitchState extends State<MxSwitch>
   @override
   void didUpdateWidget(covariant MxSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value == widget.value) return;
+    if (oldWidget.isOn == widget.isOn) return;
 
-    unawaited(widget.value ? _controller.forward() : _controller.reverse());
+    unawaited(widget.isOn ? _controller.forward() : _controller.reverse());
   }
 
   @override
@@ -128,7 +128,7 @@ class _MxSwitchState extends State<MxSwitch>
     final onChanged = widget.onChanged;
     if (onChanged == null) return;
 
-    onChanged(!widget.value);
+    onChanged(!widget.isOn);
   }
 
   void _handleTapDown(TapDownDetails details) =>
@@ -142,7 +142,7 @@ class _MxSwitchState extends State<MxSwitch>
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Semantics(
-      toggled: widget.value,
+      toggled: widget.isOn,
       enabled: _isEnabled,
       label: widget.semanticLabel,
       onTap: _isEnabled ? _handleToggle : null,

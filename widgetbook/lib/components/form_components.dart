@@ -663,7 +663,7 @@ WidgetbookComponent selectionRowsComponent() {
 
           return CatalogCenterPage(
             child: MxSwitch(
-              value: isOn,
+              isOn: isOn,
               onChanged: isEnabled ? _noopBool : null,
             ),
           );

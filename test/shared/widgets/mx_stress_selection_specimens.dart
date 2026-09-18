@@ -41,7 +41,7 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
     // Label-less and fixed-size: nothing wraps, so the stress is the 48dp
     // tap target the guideline checks at every text scale.
     name: 'MxSwitch',
-    build: () => const MxSwitch(value: true, onChanged: _noopBool),
+    build: () => const MxSwitch(isOn: true, onChanged: _noopBool),
     isInteractive: true,
   ),
   MxStressSpecimen(
