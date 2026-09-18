@@ -4,24 +4,32 @@ import '../../foundations/app_elevation.dart';
 import '../../foundations/app_radius.dart';
 import '../../states/app_interaction_states.dart';
 
-/// **`primaryContainer`/`onPrimaryContainer` — `_FABDefaultsM3`'s own pair.**
+/// **`primary`/`onPrimary`, because the v3 registry names that pair** — and
+/// this is the third time this slot has moved, so the history is worth having.
 ///
-/// It was `primary`/`onPrimary` from an owner mockup (2026-08-20), on the
-/// argument that the screen's one create action should wear the brand rather
-/// than the same clothes as the navigation bar's active tab. The argument was
-/// sound and the fix was in the wrong layer: it swapped one accent pair for
-/// another on the component, which is exactly the substitution #426/#427
-/// removed from five other components. AD-14's invariant is that the palette
-/// moves and the binding does not.
+/// It was `primary`/`onPrimary` once before, from an owner mockup
+/// (2026-08-20), on the argument that the screen's one create action should
+/// wear the brand rather than the same clothes as the navigation bar's active
+/// tab. #426/#427 reverted it to `_FABDefaultsM3`'s own pair, and correctly:
+/// the argument was sound but the fix was in the wrong layer — it swapped one
+/// accent pair for another on the component, the substitution those PRs
+/// removed from five other components.
 ///
-/// So the binding is canonical again. If the FAB reads as insufficiently
-/// branded, the answers are the `primaryContainer` family's tone, or depth,
-/// geometry and placement — not this slot.
+/// What is different now is where the instruction comes from. v3 states the
+/// pair in the registry, so the binding *is* the design system's rather than a
+/// component's local preference, and AD-14's invariant is intact.
+///
+/// **It also fixes a measurement nobody had taken.** `primaryContainer`
+/// against the page is **1.19:1 in light and 1.64:1 in dark** — the app's one
+/// create action was a shape you found by knowing where it was. `primary`
+/// reads **4.39:1 and 7.39:1** there. The glyph gives some of that back
+/// (10.37 → 4.63 in light, 8.81 → 6.76 in dark) and stays above the 4.5:1 a
+/// label owes (M100.100).
 FloatingActionButtonThemeData buildFloatingActionButtonTheme(
   ColorScheme scheme,
 ) => FloatingActionButtonThemeData(
-  backgroundColor: scheme.primaryContainer,
-  foregroundColor: scheme.onPrimaryContainer,
+  backgroundColor: scheme.primary,
+  foregroundColor: scheme.onPrimary,
   // The house corner, stated here rather than at the one call site it
   // used to live on (deck list): a FAB shape is component grammar, and
   // M3's default is the 16dp large-component squircle this app does not
@@ -36,16 +44,10 @@ FloatingActionButtonThemeData buildFloatingActionButtonTheme(
   // another system's ink over this system's fill (theme-composition
   // review, 2026-08). The rule Chip and the buttons already follow: change
   // a component's resting pair, and every state default it owns is yours
-  // to restate.
-  hoverColor: scheme.onPrimaryContainer.withValues(
-    alpha: AppStateOpacity.hoverControl,
-  ),
-  focusColor: scheme.onPrimaryContainer.withValues(
-    alpha: AppStateOpacity.focus,
-  ),
-  splashColor: scheme.onPrimaryContainer.withValues(
-    alpha: AppStateOpacity.pressed,
-  ),
+  // to restate — which is why these three move with the pair above.
+  hoverColor: scheme.onPrimary.withValues(alpha: AppStateOpacity.hoverControl),
+  focusColor: scheme.onPrimary.withValues(alpha: AppStateOpacity.focus),
+  splashColor: scheme.onPrimary.withValues(alpha: AppStateOpacity.pressed),
   // **One dp in both modes since M100.35.** These four read
   // `overlayElevationFor(scheme)`, which returned zero in dark — so the FAB
   // *claimed* to be flush with the page in one theme and eight dp above it in

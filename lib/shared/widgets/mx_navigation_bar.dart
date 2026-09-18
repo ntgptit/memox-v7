@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/foundations/app_decorations.dart';
 
 /// How much width one destination may claim before the row stops growing.
 ///
@@ -98,7 +98,12 @@ class MxNavigationBar extends StatelessWidget {
       position: DecorationPosition.foreground,
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: context.semanticColors.borderSubtle),
+          // v3's `border-ghost` (M100.100). Fainter than the `borderSubtle`
+          // it replaces — 1.19:1 against the page in light, 1.28:1 in dark,
+          // where `borderSubtle` gave 1.53 and 1.58 — but this edge is
+          // decoration: the bar is identified by its destinations, not by
+          // its line, so no 1.4.11 floor applies to it.
+          top: AppDecorations.hairlineEdge(Theme.of(context).colorScheme),
         ),
       ),
       child: Row(

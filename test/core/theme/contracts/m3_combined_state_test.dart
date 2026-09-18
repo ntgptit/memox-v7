@@ -275,17 +275,20 @@ void main() {
       final bar = theme.navigationBarTheme;
 
       test('the active glyph and label keep their own roles under focus', () {
+        // Both are `primary` since M100.100 — v3 states the pair, and the
+        // point of this test is unchanged: focus must not move either ink off
+        // the role it resolves at rest.
         holds(
           'icon',
           (s) => bar.iconTheme!.resolve(s)?.color,
           <Set<WidgetState>>[selected, selectedFocused],
-          scheme.onSecondaryContainer,
+          scheme.primary,
         );
         holds(
           'label',
           (s) => bar.labelTextStyle!.resolve(s)?.color,
           <Set<WidgetState>>[selected, selectedFocused],
-          scheme.onSurface,
+          scheme.primary,
         );
       });
     });

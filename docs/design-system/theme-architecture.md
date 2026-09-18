@@ -341,12 +341,7 @@ này trước khi tự đoán role.
 
 | Component | Slot | Target semantic role |
 |---|---|---|
-| `ProgressIndicatorThemeData` | `linearTrackColor` | `progress-track` (`surfaceContainerHigh`) |
-| `NavigationBar` | nền | `chrome-glass` |
-| `NavigationBar` | indicator | `primary` TINT 14% light / 20% dark |
-| `NavigationBar` | icon + label đã chọn | `primary` |
-| `FloatingActionButton` | nền / glyph | `primary` / `onPrimary` |
-| `MxNavigationBar` | viền trên | `border-ghost` (hôm nay: `borderSubtle`) |
+| `NavigationBar` | nền | `chrome-glass` — **chặn, xem bên dưới** |
 | `FilterChip` | nền + label đã chọn | `primary` / `onPrimary` |
 | `FilterChip` | label chưa chọn | `onSurface` |
 | `FilterChip` | viền | `border-ghost` |
@@ -356,6 +351,42 @@ này trước khi tự đoán role.
 | `TextField` (`InputDecorationTheme`) | fill lúc nghỉ | `surface-muted` |
 | `TextField` (`InputDecorationTheme`) | fill lúc focus | `surface-raised` |
 | `TextField` (`InputDecorationTheme`) | viền | `border-ghost` / `primary` / `error`, hairline |
+
+**Đợt Chrome đã trả xong ở M100.100** và năm dòng nữa rời bảng: track của
+`ProgressIndicatorThemeData`, indicator + icon/label đã chọn của `NavigationBar`,
+cặp màu của `FloatingActionButton`, và viền trên của `MxNavigationBar`.
+
+**FAB là chỗ được lợi nhiều nhất.** `primaryContainer` đọc **1.19:1** so với
+trang trong light và **1.64:1** trong dark — hành động tạo duy nhất của app là
+một hình chỉ tìm thấy nếu đã biết nó ở đâu. `primary` đọc **4.39:1 / 7.39:1**.
+Glyph trả lại một phần (10.37 → 4.63 light, 8.81 → 6.76 dark) nhưng vẫn trên sàn
+4.5.
+
+**Nhãn nav đã chọn là cái giá thật của đợt này:** 15.03:1 → **3.95:1** trong
+light, dưới sàn 4.5 của chữ nhỏ, trên đúng chữ báo người dùng đang ở tab nào.
+`component_depth_and_state_test.dart` ghim nó (floor 3.94 theo R12) như bản ghi
+trạng thái trung gian. Thứ còn gánh lựa chọn khi màu không gánh nổi: cặp icon
+outlined/filled — không dùng màu chút nào — cùng weight w600 và
+`Semantics(selected:)`.
+
+**Hai va chạm phải báo chứ không tự quyết:**
+
+- **`NavigationBar` nền → `chrome-glass`: chặn, không phải hoãn cho vui.**
+  `chrome-glass` là `surface @ 0.84`, mà `surface` trong palette này **chính là
+  màu trang**. Shell không đặt `extendBody`, nên phía sau thanh nav không có gì
+  ngoài nền Scaffold: đặt màu đó vào là thanh nav composite ra đúng màu trang và
+  biến mất — đúng thứ M100.22 đã sửa. Làm glass thật cần `extendBody: true` cộng
+  `BackdropFilter` ở `AppEffects.glassBlurSigma` (18), tức là đảo quyết định bố
+  cục mà `app_navigation_shell.dart` ghi rõ ("the last row of a list ends above
+  the bar rather than under it") và buộc mọi màn tự khai bottom padding. Đó là
+  quyết định **bố cục**, không phải sàn contrast, nên nó cần chủ dự án chốt
+  riêng.
+- **`SegmentedButton` rời khỏi "house pair".** `app_unrendered_component_themes_test.dart`
+  ghim rằng segment đang chọn bằng `navigationBarTheme.indicatorColor`. v3 dời
+  indicator nhưng **không nhắc `SegmentedButton`** trong registry, nên hai bên
+  giờ lệch nhau. Không tự bịa binding: test đã đổi sang ghim `secondaryContainer`
+  trực tiếp và nêu rằng hợp nhất lại cần registry gọi tên component này, hoặc
+  chủ dự án chốt rằng segment đi theo thanh nav.
 
 **Đợt Surfaces đã trả xong ở M100.99** và mười một dòng của nó rời bảng: hai fill
 của `MxCard` (đổi chỗ, `.surface` → `surfaceContainerLowest`, `.recessed` →

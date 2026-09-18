@@ -315,4 +315,63 @@ void main() {
       );
     });
   });
+
+  group('NavigationBar selected ink', () {
+    // **The v3 brand ink on the active tab, and the floor it does not meet**
+    // (M100.100). `onSurface` gave 15.03:1 in light and 11.01:1 in dark on the
+    // bar; `primary` gives 3.95:1 and 5.22:1. Small text owes 4.5:1, so light
+    // is **under the floor** — on the one word that says which tab a user is
+    // in. The owner chose v3 with that figure in hand.
+    //
+    // Pinned as an intermediate-state record, the same shape the bottom
+    // sheet's grabber carries above: it blocks a further drop and names what
+    // would close it — a darker `primary` for ink use, or a bar ground further
+    // from it. It is not a statement that 3.95 is adequate.
+    //
+    // What still carries the selection when the colour does not: the
+    // outlined/filled icon pair (no colour at all), the w600 weight, and
+    // `Semantics(selected:)`.
+    // Floored to two decimals, not rounded (R12): the light measurement is
+    // 3.9485, which *rounds* to 3.95 and is below it. The prose above quotes
+    // the rounded figure because that is how the number is discussed; the
+    // assertion uses the floor so it cannot fail on its own reading.
+    const double pinnedLabelLight = 3.94;
+    const double pinnedLabelDark = 5.21;
+
+    test('the label is pinned where v3 left it, under the 4.5 text owes', () {
+      for (final entry in themes.entries) {
+        final ThemeData theme = entry.value;
+        final Color label = theme.navigationBarTheme.labelTextStyle!.resolve(
+          const <WidgetState>{WidgetState.selected},
+        )!.color!;
+
+        expect(
+          contrast(label, theme.navigationBarTheme.backgroundColor!),
+          greaterThanOrEqualTo(
+            entry.key == 'light' ? pinnedLabelLight : pinnedLabelDark,
+          ),
+          reason:
+              '${entry.key}: the active tab label must not get quieter than '
+              'v3 left it — light is already below the 4.5:1 small text owes',
+        );
+      }
+    });
+
+    test('the glyph clears the 3:1 a graphic owes, on the pill it sits in', () {
+      for (final entry in themes.entries) {
+        final ThemeData theme = entry.value;
+        final Color glyph = theme.navigationBarTheme.iconTheme!.resolve(
+          const <WidgetState>{WidgetState.selected},
+        )!.color!;
+
+        expect(
+          contrast(glyph, theme.navigationBarTheme.indicatorColor!),
+          greaterThanOrEqualTo(3),
+          reason:
+              '${entry.key}: the active glyph sits inside the indicator, so '
+              'the pill is the ground it must separate from',
+        );
+      }
+    });
+  });
 }

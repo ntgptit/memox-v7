@@ -71,11 +71,22 @@ void main() {
         final t = theme.navigationBarTheme;
 
         pin('backgroundColor', t.backgroundColor, scheme.surfaceContainer);
-        pin('indicatorColor', t.indicatorColor, scheme.secondaryContainer);
+        // v3's primary tint, composited (M100.100). Not a scheme role, so it
+        // is pinned against the same blend the theme builds.
+        pin(
+          'indicatorColor',
+          t.indicatorColor,
+          Color.alphaBlend(
+            scheme.primary.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.20 : 0.14,
+            ),
+            scheme.surfaceContainer,
+          ),
+        );
         pin(
           'selected icon',
           t.iconTheme!.resolve(selected)!.color,
-          scheme.onSecondaryContainer,
+          scheme.primary,
         );
         pin(
           'unselected icon',
@@ -85,7 +96,7 @@ void main() {
         pin(
           'selected label',
           t.labelTextStyle!.resolve(selected)!.color,
-          scheme.onSurface,
+          scheme.primary,
         );
         pin(
           'unselected label',
@@ -232,7 +243,7 @@ void main() {
         final t = theme.progressIndicatorTheme;
 
         pin('color', t.color, scheme.primary);
-        pin('linear track', t.linearTrackColor, scheme.secondaryContainer);
+        pin('linear track', t.linearTrackColor, scheme.surfaceContainerHigh);
       });
 
       test('TextField', () {
@@ -399,16 +410,26 @@ void main() {
           .resolve(selected)!
           .color;
 
+      // **The nav pair deliberately collapsed at M100.100, and the rule this
+      // test protects is narrower now.** v3 inks both the active glyph and the
+      // active label with `primary`, so the assertion that they differ has
+      // been repealed by the design system rather than broken by a change —
+      // and the pairing is stated, not drifted into.
+      //
+      // What has NOT been repealed is the part that matters: a component does
+      // not borrow another component's selected ink for consistency. The chip
+      // keeps M3's `onSecondaryContainer`; the nav bar wears the brand. If a
+      // future change collapses those two onto one token, this still fails.
       expect(chipLabel, scheme.onSecondaryContainer);
-      expect(navGlyph, scheme.onSecondaryContainer);
+      expect(navGlyph, scheme.primary);
+      expect(navLabel, scheme.primary);
       expect(
-        navLabel,
-        isNot(navGlyph),
+        chipLabel,
+        isNot(navLabel),
         reason:
-            'the active tab label sits on the bar, not in the indicator — M3 '
-            'inks it `onSurface` and the glyph `onSecondaryContainer`',
+            'a selected chip and a selected tab mean different things; one '
+            'ink for both is the collapse this file exists to catch',
       );
-      expect(navLabel, scheme.onSurface);
     });
   });
 }
