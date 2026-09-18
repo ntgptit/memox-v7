@@ -252,6 +252,7 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
               valueListenable: _input,
               builder: (context, value, _) => MxActionButton(
                 label: context.l10n.studyFillSubmit,
+                size: MxActionButtonSize.study,
                 // Disabled rather than silently refusing: an empty answer is not
                 // a turn (BR-137), and a button that accepts a tap and does
                 // nothing is the same screen as one that dropped the write.
