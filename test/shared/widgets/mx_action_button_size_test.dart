@@ -41,9 +41,10 @@ void main() {
     return (tester.getRect(ink).height, tester.getRect(button).height);
   }
 
-  test('the four bodies are the four tokens, in order', () {
+  test('the five bodies are the five tokens, in order', () {
     // Stated as an ordering rather than four numbers: what the enum promises
     // is a ladder, and a ladder that stops descending is the bug.
+    expect(AppSizing.controlChip, lessThan(AppSizing.controlDense));
     expect(AppSizing.controlDense, lessThan(AppSizing.controlSmall));
     expect(AppSizing.controlSmall, lessThan(AppSizing.controlCompact));
     expect(AppSizing.controlCompact, lessThan(AppSizing.touchTarget));

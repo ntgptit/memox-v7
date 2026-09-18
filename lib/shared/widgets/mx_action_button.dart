@@ -8,6 +8,8 @@ import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/foundations/app_stroke.dart';
+import '../../core/theme/states/app_interaction_states.dart'
+    show AppStateOpacity;
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 
@@ -117,6 +119,18 @@ enum MxActionButtonSize {
   /// fourth one; every other size keeps the shared [AppRadius.md]. The one
   /// live caller, `DeckStudyButtonWidget`, therefore gets an 8dp corner.
   dense,
+
+  /// Drawn at 28, hit at 48 — `padded` keeps the floor — as a pill with 8 of
+  /// horizontal padding and a `label-md` label.
+  ///
+  /// **The one rung whose look is not a tone.** Its fill
+  /// (`surfaceContainerLowest`), edge (`border-ghost`) and label colour
+  /// (`onSurfaceVariant`) are fixed, and `variant` is ignored: the v3 handoff's
+  /// `themeRoleUsage` table gives it one container binding and one border
+  /// binding and no per-tone row, so there is no destructive or tonal chip to
+  /// paint. Disabled dims the whole control at `AppStateOpacity.disabled`
+  /// instead of swapping to the solid disabled pair.
+  chip,
 }
 
 /// The app's button.
@@ -244,7 +258,13 @@ class MxActionButton extends StatelessWidget {
     final child = _buildChild(context);
     final busyStyle = _busyStyle(context);
 
-    final button = _buildButton(context, effectiveOnPressed, child, busyStyle);
+    final built = _buildButton(context, effectiveOnPressed, child, busyStyle);
+    // The handoff's `op-disabled` covers the whole chip, so a disabled one is
+    // dimmed here and its `ButtonStyle` keeps the enabled colours. `Opacity`
+    // keeps the child's semantics, so the wrapper below still sees one node.
+    final button = _dimsWhole(effectiveOnPressed)
+        ? Opacity(opacity: AppStateOpacity.disabled, child: built)
+        : built;
     final name = semanticLabel;
     if (name == null) return button;
 
@@ -273,12 +293,31 @@ class MxActionButton extends StatelessWidget {
     );
   }
 
+  /// Whether a disabled button is dimmed as a whole rather than recoloured —
+  /// only the chip, see [MxActionButtonSize.chip].
+  bool _dimsWhole(VoidCallback? effectiveOnPressed) =>
+      size == MxActionButtonSize.chip && effectiveOnPressed == null;
+
+  /// **`.chip` deliberately bypasses the variant ladder below.** It is always a
+  /// `FilledButton` in [buildChipButtonStyle]'s fixed look, whatever [variant]
+  /// says: the v3 handoff's `themeRoleUsage` table has no per-tone row for it,
+  /// so there is no destructive, tonal or outlined chip to build. Do not "fix"
+  /// it back onto the tone ladder.
   Widget _buildButton(
     BuildContext context,
     VoidCallback? effectiveOnPressed,
     Widget child,
     ButtonStyle? busyStyle,
   ) {
+    if (size == MxActionButtonSize.chip) {
+      return FilledButton(
+        onPressed: effectiveOnPressed,
+        autofocus: _takesFocus(),
+        style: _sized(context, buildChipButtonStyle(context.colors)),
+        child: child,
+      );
+    }
+
     final ButtonStyle? styled = _sized(context, busyStyle);
 
     return switch (variant) {
@@ -370,6 +409,7 @@ class MxActionButton extends StatelessWidget {
           MxActionButtonSize.small => AppSizing.controlSmall,
           MxActionButtonSize.compact => AppSizing.controlCompact,
           MxActionButtonSize.dense => AppSizing.controlDense,
+          MxActionButtonSize.chip => AppSizing.controlChip,
         }),
       ),
       padding: WidgetStatePropertyAll<EdgeInsets>(
@@ -378,6 +418,7 @@ class MxActionButton extends StatelessWidget {
             // The handoff's small rung pads 12 bare and 16 with a glyph.
             MxActionButtonSize.small =>
               icon == null ? AppSpacing.md : AppSpacing.lg,
+            MxActionButtonSize.chip => AppSpacing.sm,
             MxActionButtonSize.standard ||
             MxActionButtonSize.compact ||
             MxActionButtonSize.dense => AppSpacing.md,
@@ -393,23 +434,29 @@ class MxActionButton extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(AppRadius.sm)),
             ),
           ),
+        MxActionButtonSize.chip => const WidgetStatePropertyAll<OutlinedBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(AppRadius.pill)),
+          ),
+        ),
         MxActionButtonSize.standard ||
         MxActionButtonSize.small ||
         MxActionButtonSize.compact => null,
       },
-      // 40 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
-      // touch target a floor, and `padded` is how a smaller body keeps it.
+      // The body is [size]'s token; 48 is what a finger gets. `AppSpacing` calls
+      // the touch target a floor, and `padded` is how a smaller body keeps it.
       tapTargetSize: MaterialTapTargetSize.padded,
-      // The compact rung, at the same weight the standard one wears
-      // (M100.30). `label-md` re-weighted rather than `label-lg` shrunk: a
-      // 48-button's rung on a 40 body reads as text escaping its control.
+      // The smaller rungs' label: `label-md` at `buttonLabelWeight` (M100.30)
+      // rather than `label-lg` shrunk, because a 48-button's rung on a body this
+      // short reads as text escaping its control.
       //
       // `small` states none: its label is the standard `label-lg` rung, which
       // [base] (or the theme) already carries at `buttonLabelWeight`.
       textStyle: switch (size) {
         MxActionButtonSize.standard || MxActionButtonSize.small => null,
         MxActionButtonSize.compact ||
-        MxActionButtonSize.dense => WidgetStatePropertyAll<TextStyle>(
+        MxActionButtonSize.dense ||
+        MxActionButtonSize.chip => WidgetStatePropertyAll<TextStyle>(
           AppTypography.withWeight(
             context.texts.labelMedium!,
             buttonLabelWeight,
@@ -447,6 +494,10 @@ class MxActionButton extends StatelessWidget {
   /// state.
   ButtonStyle? _busyStyle(BuildContext context) {
     if (!isLoading || !shouldKeepLabelWhileLoading) return null;
+
+    // A chip's colours are fixed and it never reads this style — see
+    // [_buildButton] — so it must not be repainted with a variant's fill.
+    if (size == MxActionButtonSize.chip) return null;
 
     final colors = context.colors;
 

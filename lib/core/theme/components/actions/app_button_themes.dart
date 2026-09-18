@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../foundations/app_decorations.dart';
 import '../../foundations/app_sizing.dart';
 import '../../states/app_interaction_states.dart';
 import '../../foundations/app_radius.dart';
@@ -269,6 +270,60 @@ ButtonStyle buildFilledStyle(
       }
 
       return null;
+    }),
+  );
+}
+
+/// The chip-sized button's colours: `MxActionButtonSize.chip`, which ignores
+/// `variant`.
+///
+/// **A fixed look, not a fifth tone.** The v3 handoff's `themeRoleUsage` table
+/// binds this rung to one container (`surfaceContainerLowest`) and one border
+/// (`border-ghost`, [AppDecorations.hairlineEdge]) and has no per-tone row, so
+/// nothing here takes a pair. The label is `onSurfaceVariant` — the ink
+/// `app_chip_theme.dart` already puts on that same fill for an unselected pill,
+/// so the two answers for one pairing cannot part.
+///
+/// **No disabled branch, on purpose.** The handoff applies `op-disabled` over
+/// the *whole* control; `MxActionButton` wraps a disabled chip in that
+/// `Opacity`, so the fill, edge and label keep their enabled values here.
+/// Resolving to the solid `disabledSurface` / `onDisabled` pair as well would
+/// dim it twice.
+///
+/// Geometry (28 tall, pill, padding 8, `label-md`) is `MxActionButton`'s `_sized`
+/// and is merged over this; only colour, edge and state layer live here.
+ButtonStyle buildChipButtonStyle(ColorScheme scheme) {
+  final Color ink = scheme.onSurfaceVariant;
+
+  return ButtonStyle(
+    backgroundColor: WidgetStatePropertyAll<Color>(
+      scheme.surfaceContainerLowest,
+    ),
+    foregroundColor: WidgetStatePropertyAll<Color>(scheme.onSurfaceVariant),
+    // Pressed → focused → hovered, as in `buildFilledStyle`.
+    overlayColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.pressed)) {
+        return ink.withValues(alpha: AppStateOpacity.stateLayerPressed);
+      }
+      if (states.contains(WidgetState.focused)) {
+        return ink.withValues(alpha: AppStateOpacity.stateLayerFocus);
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return ink.withValues(alpha: AppStateOpacity.stateLayerHover);
+      }
+
+      return null;
+    }),
+    // **The ring replaces the ghost edge rather than sitting outside it**, so
+    // focus costs no layout. `primary` clears 3:1 on this near-white fill,
+    // which is why this can use `focusIndicator` where `buildFilledStyle` had
+    // to draw its ring in the label colour.
+    side: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.focused)) {
+        return AppInteractionStates.focusIndicator(scheme);
+      }
+
+      return AppDecorations.hairlineEdge(scheme);
     }),
   );
 }

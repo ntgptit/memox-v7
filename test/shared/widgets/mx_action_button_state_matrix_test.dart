@@ -90,6 +90,10 @@ void main() {
     return themeStyle == null ? null : select(themeStyle)?.resolve(states);
   }
 
+  // `chip` ignores `variant` and dims whole when disabled, so these per-variant
+  // assertions do not apply; `mx_action_button_chip_test.dart` measures it.
+  final tones = MxActionButtonSize.values.where((s) => s != .chip);
+
   const rest = <WidgetState>{};
   const hovered = <WidgetState>{WidgetState.hovered};
   const pressed = <WidgetState>{WidgetState.pressed};
@@ -102,7 +106,7 @@ void main() {
 
     group(themeName, () {
       for (final variantEntry in filledVariants.entries) {
-        for (final size in MxActionButtonSize.values) {
+        for (final size in tones) {
           final variantName = '${variantEntry.key} · ${size.name}';
           final variant = variantEntry.value;
 
@@ -194,7 +198,7 @@ void main() {
       // Both sizes here too: compact swaps geometry, and geometry properties
       // are single-state — a compact button that lost its state resolvers
       // would fail this, not the drawn-40 test in mx_components_test.
-      for (final size in MxActionButtonSize.values) {
+      for (final size in tones) {
         testWidgets('secondary · ${size.name} · edge is outlineVariant at rest '
             'and while loading, focus ring when focused', (tester) async {
           await pump(

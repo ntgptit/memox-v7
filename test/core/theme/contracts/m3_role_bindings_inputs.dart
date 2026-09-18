@@ -101,6 +101,31 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
         '`errorFill` is `onErrorFill`. `primary` here painted indigo '
         'over red and rotated the fill 345.7° → 338.5° on every press.',
   ),
+  // The chip-sized button (Task 5, v3 Button): a fixed look, so one row per
+  // slot rather than one per pair. The edge is `border-ghost` and names no
+  // ColorScheme role at the slot.
+  RoleBinding(
+    component: 'Chip button fill',
+    slot: 'backgroundColor',
+    file: _buttons,
+    scope: 'buildChipButtonStyle',
+    requires: <String>['surfaceContainerLowest'],
+    refuses: <String>['primary', 'surfaceContainer', 'error'],
+    because:
+        'The handoff binds the chip rung to surfaceContainerLowest and gives '
+        'it no per-tone row.',
+  ),
+  RoleBinding(
+    component: 'Chip button label',
+    slot: 'foregroundColor',
+    file: _buttons,
+    scope: 'buildChipButtonStyle',
+    requires: <String>['onSurfaceVariant'],
+    refuses: <String>['onSurface', 'onPrimary', 'onError'],
+    because:
+        'onSurfaceVariant is what app_chip_theme.dart puts on the same fill '
+        'for an unselected pill; two answers for one pairing would drift.',
+  ),
   RoleBinding(
     component: 'TextField',
     slot: 'enabledBorder',

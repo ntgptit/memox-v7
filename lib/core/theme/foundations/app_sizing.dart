@@ -39,12 +39,13 @@ abstract final class AppSizing {
   /// `MaterialTapTargetSize.padded` restores [touchTarget] around it, so the
   /// body comes down and the finger's floor does not.
   ///
-  /// **Three heights, not a five-rung ladder.** 32 / 40 / 48 / 56 / 64 is the
-  /// usual control scale and this app renders three of them; the other two
-  /// would be sizes with no screen to check them against, which is the rule
-  /// the unrendered component themes in `app_theme.dart` already follow. It was a
-  /// private `_kCompactHeight` in `mx_action_button.dart` until M100.30 — the
-  /// one control dimension the design system could not see.
+  /// **A short ladder, not the usual 32 / 40 / 48 / 56 / 64 scale.** The
+  /// rungs here are the ones the v3 handoff fixes ([controlChip], [controlDense],
+  /// [controlSmall], this one and [touchTarget]) — each a size the button enum
+  /// names, and none invented for a screen that does not exist, which is the
+  /// rule the unrendered component themes in `app_theme.dart` already follow.
+  /// It was a private `_kCompactHeight` in `mx_action_button.dart` until
+  /// M100.30 — the one control dimension the design system could not see.
   static const double controlCompact = 40;
 
   /// The v3 handoff's small button rung: between [controlCompact] and
@@ -68,6 +69,14 @@ abstract final class AppSizing {
   /// dimension, and dimensions live here. `spacing_is_a_gap_test.dart` keeps
   /// the two apart.
   static const double controlDense = 32;
+
+  /// The v3 handoff's chip-sized button: the shortest control body, keeping
+  /// [touchTarget] around it through `MaterialTapTargetSize.padded`.
+  ///
+  /// The one rung whose look is not a tone: `MxActionButtonSize.chip` paints a
+  /// fixed ghost-edged pill whatever `variant` says, because the handoff's
+  /// `themeRoleUsage` table has no per-tone row for it.
+  static const double controlChip = 28;
 
   /// The scrollbar's thumb — Material's own 4, stated (A20.1 P3-09).
   static const double scrollbarThickness = 4;
