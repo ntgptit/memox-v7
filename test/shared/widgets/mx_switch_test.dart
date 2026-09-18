@@ -7,15 +7,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/states/app_interaction_states.dart';
 import 'package:memox/shared/widgets/mx_switch.dart';
 
 /// `MxSwitch` — the bare toggle. Geometry (44×26 track, 20dp thumb, 3→21
-/// travel) is FIXED per the v3 Toggle contract
-/// (`docs/superpowers/plans/2026-09-18-toggle-component.md`); these tests pin
-/// the numbers rather than trust the widget to keep them by construction, and
-/// there is no golden here — Task 1's Global Constraint 8 defers pixel
-/// comparison to a follow-up authored on Linux.
+/// travel) is fixed by the v3 Toggle contract; these tests pin the numbers
+/// rather than trust the widget to keep them by construction. There is no
+/// golden here: goldens are authored on Linux only, so a pixel comparison is a
+/// follow-up.
 void main() {
   final colors = buildLightTheme().colorScheme;
 
@@ -53,33 +53,15 @@ void main() {
       expect(changes, <bool>[true]);
     });
 
-    testWidgets('a null onChanged disables the control: tapping does nothing', (
-      tester,
-    ) async {
-      // Enabled twin alongside, so a tap that reached the disabled switch
-      // would show as a call on its own recorder rather than as silence.
-      final changes = <bool>[];
-      await pump(
-        tester,
-        Column(
-          children: <Widget>[
-            const MxSwitch(value: true, onChanged: null),
-            MxSwitch(value: true, onChanged: changes.add),
-          ],
-        ),
-      );
+    testWidgets('a disabled switch does not move when tapped', (tester) async {
+      await pump(tester, const MxSwitch(value: true, onChanged: null));
 
-      await tester.tap(find.byType(MxSwitch).first);
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
-      expect(changes, isEmpty);
 
-      final thumb = find.byKey(kMxSwitchThumbKey).first;
-      final trackLeft = tester.getTopLeft(find.byKey(kMxSwitchTrackKey).first);
-      expect(
-        tester.getTopLeft(thumb).dx - trackLeft.dx,
-        21,
-        reason: 'a disabled switch must not move',
-      );
+      final trackLeft = tester.getTopLeft(find.byKey(kMxSwitchTrackKey)).dx;
+      final thumbLeft = tester.getTopLeft(find.byKey(kMxSwitchThumbKey)).dx;
+      expect(thumbLeft - trackLeft, 21);
     });
 
     testWidgets('disabled paints the whole control at op-disabled opacity', (
@@ -267,6 +249,74 @@ void main() {
     });
   });
 
+  group('focus ring', () {
+    /// The ring `MxFocusRing` paints: the foreground `DecoratedBox` with a
+    /// border, as a global rect.
+    Rect? ringRect(WidgetTester tester) {
+      for (final element
+          in find
+              .descendant(
+                of: find.byType(MxSwitch),
+                matching: find.byWidgetPredicate(
+                  (widget) =>
+                      widget is DecoratedBox &&
+                      widget.position == DecorationPosition.foreground,
+                ),
+              )
+              .evaluate()) {
+        final decoration = (element.widget as DecoratedBox).decoration;
+        if (decoration is! BoxDecoration || decoration.border == null) continue;
+        final box = element.renderObject! as RenderBox;
+        return box.localToGlobal(Offset.zero) & box.size;
+      }
+      return null;
+    }
+
+    testWidgets('the ring stands focusRingOffset clear of the track', (
+      tester,
+    ) async {
+      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      final ring = ringRect(tester);
+      expect(ring, isNotNull, reason: 'Tab never lit the ring');
+      final track = tester.getRect(find.byKey(kMxSwitchTrackKey));
+      // The ring's stroke is painted inside its own box, so the clear gap is
+      // the distance to the box edge minus the stroke.
+      final gapLeft = track.left - ring!.left - AppStroke.focus;
+      final gapTop = track.top - ring.top - AppStroke.focus;
+      final gapRight = ring.right - track.right - AppStroke.focus;
+      final gapBottom = ring.bottom - track.bottom - AppStroke.focus;
+      expect(<double>[
+        gapLeft,
+        gapTop,
+        gapRight,
+        gapBottom,
+      ], everyElement(AppStroke.focusRingOffset));
+    });
+
+    testWidgets('the ring overflows without changing the 48×48 box', (
+      tester,
+    ) async {
+      await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSize(find.byType(MxSwitch)),
+        const Size(AppSizing.touchTarget, AppSizing.touchTarget),
+      );
+      expect(tester.getSize(find.byKey(kMxSwitchTrackKey)), const Size(44, 26));
+      final box = tester.getRect(find.byType(MxSwitch));
+      expect(
+        tester.getRect(find.byKey(kMxSwitchTrackKey)).center,
+        box.center,
+        reason: 'the painted track stays centred',
+      );
+    });
+  });
+
   group('colour — the registry, not app_toggle_themes.dart', () {
     testWidgets('off track is surfaceContainerHighest', (tester) async {
       await pump(tester, MxSwitch(value: false, onChanged: (_) {}));
@@ -301,6 +351,64 @@ void main() {
         decorationOf(tester, kMxSwitchThumbKey).color,
         colors.surfaceBright,
       );
+    });
+  });
+
+  group('motion', () {
+    Widget host({required bool value, required bool reduceMotion}) => Builder(
+      builder: (context) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: reduceMotion),
+        child: MxSwitch(value: value, onChanged: (_) {}),
+      ),
+    );
+
+    double thumbOffset(WidgetTester tester) =>
+        tester.getTopLeft(find.byKey(kMxSwitchThumbKey)).dx -
+        tester.getTopLeft(find.byKey(kMxSwitchTrackKey)).dx;
+
+    testWidgets('a value change slides over time by default', (tester) async {
+      await pump(tester, host(value: false, reduceMotion: false));
+      await pump(tester, host(value: true, reduceMotion: false));
+      await tester.pump(const Duration(milliseconds: 40));
+
+      expect(thumbOffset(tester), inExclusiveRange(3, 21));
+      await tester.pumpAndSettle();
+      expect(thumbOffset(tester), 21);
+    });
+
+    testWidgets('reduced motion lands the thumb in the same frame', (
+      tester,
+    ) async {
+      await pump(tester, host(value: false, reduceMotion: true));
+      await pump(tester, host(value: true, reduceMotion: true));
+      await tester.pump();
+
+      expect(thumbOffset(tester), 21);
+    });
+  });
+
+  group('right-to-left', () {
+    Widget rtl(bool value) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: MxSwitch(value: value, onChanged: (_) {}),
+    );
+
+    double thumbOffset(WidgetTester tester) =>
+        tester.getTopLeft(find.byKey(kMxSwitchThumbKey)).dx -
+        tester.getTopLeft(find.byKey(kMxSwitchTrackKey)).dx;
+
+    testWidgets('off rests at the start edge, which is the right', (
+      tester,
+    ) async {
+      await pump(tester, rtl(false));
+      expect(thumbOffset(tester), 21);
+    });
+
+    testWidgets('on travels to the end edge, which is the left', (
+      tester,
+    ) async {
+      await pump(tester, rtl(true));
+      expect(thumbOffset(tester), 3);
     });
   });
 

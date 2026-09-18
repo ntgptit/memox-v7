@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/foundations/app_decorations.dart';
 import '../../core/theme/foundations/app_durations.dart';
+import '../../core/theme/foundations/app_motion_policy.dart';
 import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_stroke.dart';
@@ -16,6 +17,11 @@ import 'mx_focus_ring.dart';
 /// its words"; this is the control underneath, for a caller that composes its
 /// own label — or needs none.
 ///
+/// **Occupies 48×48.** The painted track is 44×26, centred in a 48×48 layout
+/// and hit-test box (`AppSizing.touchTarget`), so a caller must not add its
+/// own 48dp padding around it. The keyboard focus ring paints *outside* that
+/// box (52×34) and adds no layout.
+///
 /// **Custom-painted, not a themed stock `Switch`.** `SwitchThemeData` exposes
 /// colours only; it has no hook for this control's fixed 44×26 track and
 /// fixed 20dp non-morphing thumb (`switch.dart`'s `_SwitchConfig` bakes both
@@ -25,16 +31,14 @@ import 'mx_focus_ring.dart';
 /// paint their own layers instead of asking Material for a size it will not
 /// give.
 ///
-/// **The thumb is one colour in both states, and that is a recorded,
-/// deliberate split from `app_toggle_themes.dart`.** The v3 role registry
+/// **The thumb is one colour in both states, and that deliberately differs
+/// from `app_toggle_themes.dart`.** The v3 role registry
+/// (`docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md`)
 /// binds `Toggle.thumb` to `surfaceBright` with no on/off split, which is what
-/// this widget renders. The already-shipped `buildSwitchTheme` instead
-/// resolves the *selected* thumb of the stock `Switch`/`SwitchListTile` (the
-/// one `MxSwitchRow` renders through) to `onPrimary` — a different rendering
-/// path this widget does not touch or correct. See
-/// `docs/superpowers/plans/2026-09-18-toggle-component.md`'s Global
-/// Constraint 2 for the ruling: build to the registry here, report the
-/// mismatch upstream.
+/// this widget renders. `buildSwitchTheme` instead resolves the *selected*
+/// thumb of the stock `Switch`/`SwitchListTile` (the one `MxSwitchRow` renders
+/// through) to `onPrimary` — a different rendering path this widget does not
+/// consume or correct.
 ///
 /// **Geometry is fixed, not themed.** One size, no caller-supplied colours —
 /// a bare control has nothing else to compose, and every value below is the
@@ -47,9 +51,12 @@ class MxSwitch extends StatefulWidget {
     super.key,
   });
 
+  /// Whether the switch is on.
   final bool value;
 
-  /// `null` disables the control: no tap, no keyboard activation, no focus.
+  /// Called with the requested value on tap, Space or Enter; the caller owns
+  /// the state. `null` disables the control: no tap, no keyboard activation,
+  /// no focus, painted at `AppStateOpacity.disabled`.
   final ValueChanged<bool>? onChanged;
 
   /// For standalone use, since this bare control carries no visible text of
@@ -65,7 +72,7 @@ class MxSwitch extends StatefulWidget {
 class _MxSwitchState extends State<MxSwitch>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _animation;
+  late final CurvedAnimation _animation;
   final FocusNode _focusNode = FocusNode(debugLabel: 'MxSwitch');
 
   bool _hovered = false;
@@ -82,11 +89,22 @@ class _MxSwitchState extends State<MxSwitch>
       value: widget.value ? 1 : 0,
     );
     // `AppDurations.standard` is this app's one "starts and stops on screen"
-    // curve (Global Constraint 4) — the duration is the component's own
-    // decision, the easing is not.
+    // curve; the 160ms duration is this component's own decision, the easing
+    // is not.
     _animation = CurvedAnimation(
       parent: _controller,
       curve: AppDurations.standard,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reduced motion removes the slide rather than hurrying it: a zero
+    // duration lands on the final value in the frame the change arrives.
+    _controller.duration = AppMotionPolicy.durationOf(
+      context,
+      _kToggleDuration,
     );
   }
 
@@ -100,6 +118,7 @@ class _MxSwitchState extends State<MxSwitch>
 
   @override
   void dispose() {
+    _animation.dispose();
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -112,10 +131,8 @@ class _MxSwitchState extends State<MxSwitch>
     onChanged(!widget.value);
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    _focusNode.requestFocus();
-    setState(() => _pressed = true);
-  }
+  void _handleTapDown(TapDownDetails details) =>
+      setState(() => _pressed = true);
 
   void _handleTapEnd() => setState(() => _pressed = false);
 
@@ -142,41 +159,51 @@ class _MxSwitchState extends State<MxSwitch>
           onTapUp: _isEnabled ? (_) => _handleTapEnd() : null,
           onTapCancel: _isEnabled ? _handleTapEnd : null,
           child: Center(
-            // **`MxFocusRing` wraps the real focus node as its ancestor, on
-            // purpose.** `FocusNode.hasFocus` bubbles from a focused
-            // descendant up to its ancestors; nesting the ring's own
-            // (non-focusable) `Focus` node outside `FocusableActionDetector`
-            // is what lets it light up when the control inside it is
-            // actually focused — the same shape `MxPressable` already uses
-            // around `InkWell`.
-            child: MxFocusRing(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              child: Padding(
-                // 2dp of transparent space before the ring, so it does not
-                // sit flush on the track it is marking (Global Constraint 3).
-                padding: const EdgeInsets.all(AppStroke.focusRingOffset),
-                child: FocusableActionDetector(
-                  focusNode: _focusNode,
-                  enabled: _isEnabled,
-                  mouseCursor: SystemMouseCursors.click,
-                  onShowHoverHighlight: (hovering) =>
-                      setState(() => _hovered = hovering),
-                  actions: <Type, Action<Intent>>{
-                    ActivateIntent: CallbackAction<ActivateIntent>(
-                      onInvoke: (_) {
-                        _handleToggle();
-                        return null;
-                      },
-                    ),
-                  },
-                  child: Opacity(
-                    // The v3 global `op-disabled` rule: 0.38 over the whole
-                    // control, applied once here — not on the touch target,
-                    // which stays invisible either way.
-                    opacity: _isEnabled ? 1 : AppStateOpacity.disabled,
-                    child: AnimatedBuilder(
-                      animation: _animation,
-                      builder: (context, _) => _buildTrack(colors, isRtl),
+            // The ring layer is 52×34 (track + 2 × (offset + stroke)), wider
+            // than the 48×48 box, so it overflows it: paint only, the layout
+            // and hit-test box stay 48×48 and the track stays centred.
+            child: OverflowBox(
+              maxWidth: double.infinity,
+              maxHeight: double.infinity,
+              // **`MxFocusRing` wraps the real focus node as its ancestor, on
+              // purpose.** `FocusNode.hasFocus` bubbles from a focused
+              // descendant up to its ancestors; nesting the ring's own
+              // (non-focusable) `Focus` node outside `FocusableActionDetector`
+              // is what lets it light up when the control inside it is
+              // actually focused — the same shape `MxPressable` already uses
+              // around `InkWell`.
+              child: MxFocusRing(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                child: Padding(
+                  // The ring's stroke is painted *inside* its own box, so the
+                  // clear gap of `AppStroke.focusRingOffset` between track and
+                  // ring is only real if the padding also covers the stroke.
+                  padding: const EdgeInsets.all(_kRingInset),
+                  child: FocusableActionDetector(
+                    focusNode: _focusNode,
+                    enabled: _isEnabled,
+                    mouseCursor: _isEnabled
+                        ? SystemMouseCursors.click
+                        : SystemMouseCursors.basic,
+                    onShowHoverHighlight: (hovering) =>
+                        setState(() => _hovered = hovering),
+                    actions: <Type, Action<Intent>>{
+                      ActivateIntent: CallbackAction<ActivateIntent>(
+                        onInvoke: (_) {
+                          _handleToggle();
+                          return null;
+                        },
+                      ),
+                    },
+                    child: Opacity(
+                      // The v3 global `op-disabled` rule: 0.38 over the whole
+                      // painted control, applied once here — not on the touch
+                      // target, which paints nothing.
+                      opacity: _isEnabled ? 1 : AppStateOpacity.disabled,
+                      child: AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, _) => _buildTrack(colors, isRtl),
+                      ),
                     ),
                   ),
                 ),
@@ -266,6 +293,10 @@ class _MxSwitchState extends State<MxSwitch>
   /// the true state (the same ordering `AppInteractionStates._overlay`
   /// itself keeps).
   Color? _resolveOverlayColor(ColorScheme colors) {
+    // A press or hover still latched when the control became disabled must
+    // not paint.
+    if (!_isEnabled) return null;
+
     final overlay = AppInteractionStates.controlOverlay(colors);
     if (_pressed) return overlay.resolve(<WidgetState>{WidgetState.pressed});
     if (_hovered) return overlay.resolve(<WidgetState>{WidgetState.hovered});
@@ -284,8 +315,8 @@ const Key kMxSwitchTrackKey = ValueKey<String>('mx_switch_track');
 @visibleForTesting
 const Key kMxSwitchThumbKey = ValueKey<String>('mx_switch_thumb');
 
-/// 160ms: this component's own motion decision, not a `AppDurations` rung —
-/// none of `fast`/`normal`/`slow` is 160ms (Global Constraint 4).
+/// 160ms: this component's own motion decision, not an `AppDurations` rung —
+/// none of `fast`/`normal`/`slow` is 160ms.
 const Duration _kToggleDuration = Duration(milliseconds: 160);
 
 const double _kTrackWidth = 44;
@@ -297,3 +328,7 @@ const double _kThumbDiameter = 20;
 const double _kThumbInset = 3;
 const double _kThumbOffsetOff = _kThumbInset;
 const double _kThumbOffsetOn = _kTrackWidth - _kThumbDiameter - _kThumbInset;
+
+/// Padding between the track and the ring's box: the clear gap plus the
+/// stroke painted inside that box.
+const double _kRingInset = AppStroke.focusRingOffset + AppStroke.focus;
