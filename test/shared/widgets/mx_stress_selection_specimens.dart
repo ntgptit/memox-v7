@@ -6,6 +6,7 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
+import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 
 import 'mx_stress_specimens.dart';
@@ -33,6 +34,13 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
         MxMenuAction(label: kLongLabel, onSelected: _noop),
       ],
     ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Label-less and fixed-size: nothing wraps, so the stress is the 48dp
+    // tap target the guideline checks at every text scale.
+    name: 'MxSwitch',
+    build: () => const MxSwitch(value: true, onChanged: _noopBool),
     isInteractive: true,
   ),
   MxStressSpecimen(
