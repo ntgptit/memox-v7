@@ -2,7 +2,7 @@
 ///
 /// **Not a scale, and deliberately not one.** [AppSpacing], [AppRadius] and
 /// [AppIconSize] are ladders — pick a rung, and the neighbouring rung is the
-/// answer when this one is wrong. These three are floors and fixed extents: a
+/// answer when this one is wrong. These are floors and fixed extents: a
 /// touch target is not "one step below" anything, and a generic `controlSm` /
 /// `controlMd` / `controlLg` ladder would be decisions made without a screen to
 /// check them against. What the control rungs below hold instead is the sizes
