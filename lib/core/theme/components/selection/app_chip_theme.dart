@@ -44,8 +44,9 @@ import '../../typography/app_typography.dart';
 /// "this one is active" looks the same whether it is a tab, a segment or a
 /// filter.
 ///
-/// **Unselected is `surfaceContainerLow` — the paper — and this theme is what
-/// paints it** (M100.36, correcting M100.32). `_ChoiceChipDefaultsM3.color` is
+/// **Unselected is `surfaceContainerLowest` — v3's `surface-raised` — and this
+/// theme is what paints it** (M100.99; it was `surfaceContainerLow` from
+/// M100.36, correcting M100.32). `_ChoiceChipDefaultsM3.color` is
 /// variant-dependent — a flat `ChoiceChip` has no unselected fill, the elevated
 /// one fills with `surfaceContainerLow` — and M100.32 reasoned that building
 /// the elevated variant would "take the role from the SDK". It does not:
@@ -67,7 +68,7 @@ import '../../typography/app_typography.dart';
 /// (`AppMaterialRoles.secondaryContainerLight`), so the role now gives 10.50 and
 /// the chip can say what it is.
 Color _restingFill(ColorScheme scheme, {required bool isSelected}) =>
-    isSelected ? scheme.secondaryContainer : scheme.surfaceContainerLow;
+    isSelected ? scheme.secondaryContainer : scheme.surfaceContainerLowest;
 
 /// The fill for [states], resolved to a solid colour over the ground that state
 /// actually has.

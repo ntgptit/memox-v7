@@ -68,14 +68,14 @@ InputDecorationTheme buildInputDecorationTheme(
   focusedErrorBorder: _inputBorderAt(scheme.error, AppStroke.focus),
   // Solid, per MX-VIS-002 rule R7. Blended here rather than read from
   // `disabledSurface`: this is the *hairline* faded, that is the *ink*. The
-  // blend base is the paper (`surfaceContainerLow`); a disabled field on the
-  // page or in a dialog is blended against a slightly wrong ground: the blend
-  // is `#B6BCD3` in light, which reads 1.79:1 on the page against 1.52:1 in a
-  // dialog. Contrast-exempt either way, so it stays one value (#433 §5.4).
+  // blend base is the raised paper (`surfaceContainerLowest`, v3's
+  // `surface-raised`, M100.99); a disabled field on the page or in a dialog is
+  // blended against a slightly wrong ground: the blend is `#BEC2D5` in light,
+  // which reads 1.68:1 on the page against 1.43:1 in a dialog. Contrast-exempt either way, so it stays one value (#433 §5.4).
   disabledBorder: _inputBorder(
     Color.alphaBlend(
       scheme.outline.withValues(alpha: 0.5),
-      scheme.surfaceContainerLow,
+      scheme.surfaceContainerLowest,
     ),
   ),
   // **The value's own rung, `body-lg`, and resolved per state** (M100.36 4F).

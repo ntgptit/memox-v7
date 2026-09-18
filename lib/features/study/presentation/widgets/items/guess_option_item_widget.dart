@@ -67,7 +67,7 @@ class GuessOptionItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = context.colors;
-    final ground = scheme.surfaceContainerLow;
+    final ground = scheme.surfaceContainerLowest;
 
     final AppInk? accent = switch (state) {
       GuessOptionState.correct => AppInk.success,

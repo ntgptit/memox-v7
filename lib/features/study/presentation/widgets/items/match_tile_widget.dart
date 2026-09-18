@@ -224,7 +224,7 @@ class _TileSkin {
   factory _TileSkin.of(BuildContext context, MatchTileState state) {
     final scheme = context.colors;
     final semantic = context.semanticColors;
-    final ground = scheme.surfaceContainerLow;
+    final ground = scheme.surfaceContainerLowest;
     // **The page, read from the scaffold rather than guessed at.** `surface` is
     // not it: measured in dark, the page is `(10, 8, 45)`, `surface` is
     // `(26, 24, 56)` and `surfaceContainerLowest` — the tile's own fill — is

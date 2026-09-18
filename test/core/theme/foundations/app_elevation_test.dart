@@ -1,6 +1,7 @@
 // ignore: unnecessary_import
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_decorations.dart';
 import 'package:memox/core/theme/foundations/app_elevation.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -56,7 +57,7 @@ void main() {
       expect(soft.color.a, lessThan(0.5), reason: 'a resting card stays soft');
     });
 
-    test('a dark card gets a crisp rim, never a glow', () {
+    test('a dark card gets a ghost rim, never a glow', () {
       // **The rim used to be Tokyo's `shadows.card` verbatim** — `#6A7199` at
       // `blurRadius: 2` with a spread that climbed by level. It measured
       // 3.74:1 against the card it outlined, which is a *control* boundary's
@@ -65,11 +66,18 @@ void main() {
       // stripes, and the owner rejected the look on sight (M100.35).
       final card = shadowsFor(AppElevation.card, dark).single;
 
+      // **`border-ghost`, not `outlineVariant`, since M100.99.** v3 names the
+      // ghost for this edge, and it is a long way quieter: `primary` at 16%
+      // composites to `#262E5A` on the card's `#131A3A`, 1.31:1, where
+      // `outlineVariant` drew a solid step. The edge is decorative — a card is
+      // identified by its content — so no contrast floor is crossed here; what
+      // changed is how much line is left, and the owner chose v3 with that
+      // figure in hand.
       expect(
         card.color,
-        dark.outlineVariant,
+        AppDecorations.hairlineEdge(dark).color,
         reason:
-            'the resting dark edge is M3\'s decorative boundary role, '
+            'the resting dark edge is v3 border-ghost, a decorative boundary '
             'which is explicitly not held to 3:1',
       );
       expect(

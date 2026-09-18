@@ -341,17 +341,6 @@ này trước khi tự đoán role.
 
 | Component | Slot | Target semantic role |
 |---|---|---|
-| `MxCard` | container fill (`_MxCardFill.surface`) | `surface-raised` (`surfaceContainerLowest`) |
-| `MxCard` | recessed fill (`_MxCardFill.recessed`) | `surface-muted` (`surfaceContainerLow`) |
-| `MxCard` | viền dark | `border-ghost` (hôm nay: `outlineVariant`) |
-| `CardTheme` | `color` | `surface-raised` |
-| `ChoiceChip` | fill lúc nghỉ | `surfaceContainerLowest` |
-| `BottomSheetThemeData` | `backgroundColor` | `surfaceContainerHigh` (hôm nay: `surfaceContainerLow`) |
-| `BottomSheetThemeData` | grabber (`dragHandleColor`) | `outlineVariant` (hôm nay: `onSurfaceVariant`) |
-| `ThemeData` | `canvasColor` (menu dropdown) | `surface-raised` |
-| guess-option row | nền | `surface-raised` |
-| match tile | nền | `surface-raised` |
-| hai chỗ blend disabled | nền | `surface-raised` |
 | `ProgressIndicatorThemeData` | `linearTrackColor` | `progress-track` (`surfaceContainerHigh`) |
 | `NavigationBar` | nền | `chrome-glass` |
 | `NavigationBar` | indicator | `primary` TINT 14% light / 20% dark |
@@ -367,6 +356,30 @@ này trước khi tự đoán role.
 | `TextField` (`InputDecorationTheme`) | fill lúc nghỉ | `surface-muted` |
 | `TextField` (`InputDecorationTheme`) | fill lúc focus | `surface-raised` |
 | `TextField` (`InputDecorationTheme`) | viền | `border-ghost` / `primary` / `error`, hairline |
+
+**Đợt Surfaces đã trả xong ở M100.99** và mười một dòng của nó rời bảng: hai fill
+của `MxCard` (đổi chỗ, `.surface` → `surfaceContainerLowest`, `.recessed` →
+`surfaceContainerLow`), viền dark của `MxCard` và rim của `_darkDepth` →
+`border-ghost`, `CardTheme.color`, `ChoiceChip` lúc nghỉ, `canvasColor`, nền +
+grabber của `BottomSheetThemeData`, nền hàng guess-option, nền match tile, và
+nền của hai phép blend disabled (`disabledSurfaceTint`, hairline disabled của
+`InputDecorationTheme`).
+
+**Một sàn accessibility đã bị nới, có chủ ý và có hồ sơ.** Grabber của bottom
+sheet đọc **1.30:1 sáng / 1.05:1 tối** trên nền `surfaceContainerHigh` mới, so
+với 6.12 / 5.10 khi nó còn là `onSurfaceVariant` — dưới sàn 3:1 mà WCAG 1.4.11
+đòi ở một control. Chủ dự án chọn v3 với đúng hai con số này trước mặt.
+`component_depth_and_state_test.dart` ghim lại chúng như một **bản ghi trạng thái
+trung gian**, không phải một chuẩn: nó chặn mọi lần tụt thêm và nêu tên thứ sẽ
+khôi phục sàn. Trả lại hình 3:1 là việc của task component cho sheet.
+
+Ba dòng còn trong bảng cũng sẽ đi xuống dưới sàn khi tới lượt, và số đo có sẵn
+để khỏi phải đo lại: `OutlinedButton` side `outlineVariant` **1.53 / 1.58**;
+`TextField` và `FilterChip` viền `border-ghost` **1.19 / 1.28**; `Switch` thumb
+`surfaceBright` **1.05 / 1.42** (trong light là `#FFFFFF` trên nền trang
+`#F7F9FE`). Hai dòng của `NavigationBar` thì đảo ngược quyết định có phép đo của
+M100.22 — indicator rời `secondaryContainer`, label đã chọn rời `onSurface`
+(15.03 / 11.01) về `primary` (**3.95** trong light, dưới sàn 4.5:1 của chữ nhỏ).
 
 Hai điều liên quan nhưng không phải một binding component · slot, nên đứng
 ngoài bảng thay vì kéo dãn cột "Target semantic role": `AppDecorations

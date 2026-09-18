@@ -84,15 +84,18 @@ List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
 /// Dark depth: the hairline rim at every level, and above `card` the v3
 /// block's own drop underneath it.
 ///
-/// The rim is a crisp `outlineVariant` hairline, painted as a zero-blur
-/// `BoxShadow` rather than a `Border` — the border box belongs to *state*
+/// The rim is a `border-ghost` hairline — `AppDecorations.hairlineEdge`, the
+/// role v3 names for this edge (M100.99). It was a crisp `outlineVariant`;
+/// `primary` at 16% over the card's `#131A3A` composites to `#262E5A`, which
+/// is 1.31:1 against that fill, so the rim is now a suggestion rather than a
+/// line. It is painted as a zero-blur `BoxShadow` rather than a `Border` — the border box belongs to *state*
 /// (selection, option, focus), and a depth cue that shared it would make one
 /// channel carry two facts again (M100.33). `card` alone stays rim-only: the
 /// dark block's `--memox-shadow-soft` is `none`, so
 /// [AppDecorations.cardWhisperShadow] is never asked to paint dark here.
 List<BoxShadow> _darkDepth(double level, ColorScheme scheme) {
   final BoxShadow rim = BoxShadow(
-    color: scheme.outlineVariant,
+    color: AppDecorations.hairlineEdge(scheme).color,
     spreadRadius: AppStroke.hairline,
   );
   if (level <= AppElevation.card) return <BoxShadow>[rim];

@@ -102,7 +102,7 @@ void main() {
         holds('fill', fill, <Set<WidgetState>>[
           resting,
           focused,
-        ], scheme.surfaceContainerLow);
+        ], scheme.surfaceContainerLowest);
       });
 
       test('the label ink stays with its container in every combination', () {

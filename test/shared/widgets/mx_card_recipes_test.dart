@@ -95,7 +95,7 @@ void main() {
         await pump(tester, const MxCard.flat(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surfaceContainerLow);
+        expect(decoration.color, scheme.surfaceContainerLowest);
         // **No edge, and that is M99.94.** Every card used to wear a
         // `borderSubtle` hairline — 1.45:1 on its own fill in light — so a
         // screen of cards read as a stack of frames. The reference concept
@@ -122,7 +122,7 @@ void main() {
           // identities and which one you got depended on the theme. Dark still
           // needs the step — it paints no shadow — but it takes it from the rim
           // thickening with the level, which is paint rather than meaning.
-          expect(decoration.color, scheme.surfaceContainerLow);
+          expect(decoration.color, scheme.surfaceContainerLowest);
           expect(hasVisibleBorder(tester), isFalse);
           expect(radiusOf(decoration), AppRadius.lg);
           // Since M100.27 dark paints Tokyo's rim, so every lifted recipe
@@ -139,7 +139,7 @@ void main() {
         final decoration = decorationOf(tester);
         // Same role as `raised`, in both modes; the depth between them is
         // carried by the shadow in light and by the rim's width in dark.
-        expect(decoration.color, scheme.surfaceContainerLow);
+        expect(decoration.color, scheme.surfaceContainerLowest);
         expect(radiusOf(decoration), AppRadius.xl);
         expect(hasShadow(decoration), isTrue);
       });
@@ -157,7 +157,7 @@ void main() {
         // One rung *below* the paper. It read `surfaceContainerLow` until
         // M100.32; that rung is the paper now, so the recess moved down to
         // `surfaceContainerLowest` and renders the colour it always did.
-        expect(decoration.color, scheme.surfaceContainerLowest);
+        expect(decoration.color, scheme.surfaceContainerLow);
         // At rest it draws no edge either; the edge is what its *states* use,
         // asserted by the case below.
         expect(hasVisibleBorder(tester), isFalse);
@@ -255,7 +255,7 @@ void main() {
         final decoration = decorationOf(tester);
         // The same role as `raised`/`focal`; `accent` is told apart by its
         // edge, and its depth by the same shadow-or-rim the others use.
-        expect(decoration.color, scheme.surfaceContainerLow);
+        expect(decoration.color, scheme.surfaceContainerLowest);
         expect(borderColorOf(tester), semantic.borderAccent);
         expect(hasShadow(decoration), isTrue);
       });
@@ -267,7 +267,7 @@ void main() {
         final decoration = decorationOf(tester);
         // One role in both modes, as for `.raised`: dark says "above the
         // page" with the rim it paints, not by moving to another fill.
-        expect(decoration.color, scheme.surfaceContainerLow);
+        expect(decoration.color, scheme.surfaceContainerLowest);
         expect(radiusOf(decoration), AppRadius.md);
         // **It was `flat`, and that stopped being survivable when the hairline
         // went** (M99.94). A tile is a card on a page — the study-history
@@ -292,7 +292,7 @@ void main() {
         );
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surfaceContainerLow);
+        expect(decoration.color, scheme.surfaceContainerLowest);
         // **`borderOption`** (M100.2). An option card had been borrowing the
         // *input* border, which `app_palette_test.dart` keeps untinted by a
         // recorded rule — "the light canvas carries no lavender tint" names
@@ -384,7 +384,7 @@ void main() {
       );
 
       final decoration = decorationOf(tester);
-      expect(decoration.color, theme.colorScheme.surfaceContainerLow);
+      expect(decoration.color, theme.colorScheme.surfaceContainerLowest);
       // **`borderSelected`, not `secondary`** (M99.99). The slate edge carried
       // chroma 0.0337 — a fifth of the brand family — around a fill M99.98 had
       // just made brand-tinted, so the card said two different things about one
@@ -427,7 +427,10 @@ void main() {
         ),
         theme: theme,
       );
-      expect(decorationOf(tester).color, theme.colorScheme.surfaceContainerLow);
+      expect(
+        decorationOf(tester).color,
+        theme.colorScheme.surfaceContainerLowest,
+      );
     });
   });
 }
