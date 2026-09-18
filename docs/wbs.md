@@ -1153,7 +1153,7 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
-### M100.104 · V3 component pass — BottomNav đọc đúng hợp đồng v3
+### M100.105 · V3 component pass — BottomNav đọc đúng hợp đồng v3
 
 - **Status:** **done** — analyze sạch, host suite xanh, golden vẽ lại trên Linux
   (47 PNG đổi), gallery republish tại URL ghim.
