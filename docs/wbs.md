@@ -1186,6 +1186,7 @@ của M2.
 
 - **Status:** **done** — analyze sạch, unit test xanh, golden vẽ lại trên Linux
   `TZ=UTC`, gallery republish tại URL ghim.
+- **Checklist phases:** 14.3
 - **Goal:** `MxSearchField` có spec component riêng (không nằm trong ba đợt
   M100.99–101, mà `app_input_theme.dart` đã ghi rõ "MxSearchField is its own
   composition and reads none of this — see its file"). Đưa hình học và màu của
@@ -1233,7 +1234,7 @@ của M2.
         field không còn đổi chiều rộng nhìn thấy khi gõ ký tự đầu tiên.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 
-### M100.104 · `MxAppBar`
+### M100.105 · `MxAppBar`
 
 - **Status:** **in progress** — widget, wiring, Widgetbook use cases and unit
   tests land in this task; goldens under `test/demo/` moved (compact title
