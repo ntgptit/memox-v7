@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../core/theme/extensions/app_ink.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import '../../core/theme/foundations/app_radius.dart';
-import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import 'mx_focus_ring.dart';
 import 'mx_icon.dart';
+import 'mx_tap_target.dart';
 
 /// A compact chip that opens a menu instead of holding a selection —
 /// "Newest first", "Manual · Due only".
@@ -69,59 +69,47 @@ class MxChipTrigger extends StatelessWidget {
         button: true,
         enabled: onPressed != null,
         onTap: onPressed,
-        // The 48 touch target on both axes, centred around the 28dp band —
-        // the same reasoning `AppSizing.touchTarget`'s own doc gives for
-        // `MxPillButton`. `Center` only *offers* the extra room: it hands the
-        // shape below loose constraints, so the shape stays its own natural
-        // size instead of being stretched to fill the 48 box.
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: AppSizing.touchTarget,
-            minHeight: AppSizing.touchTarget,
-          ),
-          child: Center(
-            // `MxFocusRing` has to be the *ancestor* of the `InkWell` it
-            // rings — a `Focus` node's `hasFocus` is true only for itself or
-            // an ancestor of the focused node, never a descendant — so this
-            // is also what keeps the ring traced to the 28dp shape rather
-            // than the 48dp box: it sizes to its child (the shape), and the
-            // 48dp box is the separate, outer `ConstrainedBox` above.
-            child: MxFocusRing(
-              borderRadius: shape,
-              child: Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  onTap: onPressed,
-                  borderRadius: shape,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                    ),
-                    child: SizedBox(
-                      height: _contentHeight,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: AppSpacing.xs,
-                        children: <Widget>[
-                          if (leadingIcon != null)
-                            MxIcon(leadingIcon!, size: MxIconSize.sm, ink: ink),
-                          Text(
-                            label,
-                            semanticsLabel: semanticLabel,
-                            maxLines: 1,
-                            softWrap: false,
-                            style: context.texts.labelMedium!.inked(
-                              context,
-                              ink,
-                            ),
-                          ),
-                          MxIcon(
-                            Icons.expand_more,
-                            size: MxIconSize.sm,
-                            ink: ink,
-                          ),
-                        ],
-                      ),
+        // The 48 touch target on both axes, centred around the 28dp band and
+        // redirecting hits in its padding to the band — the repo's one
+        // technique for a target larger than the painted shape (the same one
+        // `MxPillButton` uses). It sits *outside* the ring, so the ring and
+        // the `InkWell` stay at the painted band.
+        child: MxTapTarget(
+          // `MxFocusRing` has to be the *ancestor* of the `InkWell` it rings:
+          // a `Focus` node's `hasFocus` is true only for itself or an
+          // ancestor of the focused node, never a descendant.
+          child: MxFocusRing(
+            borderRadius: shape,
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: onPressed,
+                borderRadius: shape,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
+                  child: SizedBox(
+                    height: _contentHeight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: AppSpacing.xs,
+                      children: <Widget>[
+                        if (leadingIcon != null)
+                          MxIcon(leadingIcon!, size: MxIconSize.sm, ink: ink),
+                        Text(
+                          label,
+                          semanticsLabel: semanticLabel,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: context.texts.labelMedium!.inked(context, ink),
+                        ),
+                        MxIcon(
+                          Icons.expand_more,
+                          size: MxIconSize.sm,
+                          ink: ink,
+                        ),
+                      ],
                     ),
                   ),
                 ),

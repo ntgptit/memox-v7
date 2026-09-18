@@ -29,6 +29,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  // The one foreground `DecoratedBox` is `MxFocusRing`'s: it exists whether or
+  // not it is focused, and sizes to whatever it wraps.
+  final Finder ringFinder = find.byWidgetPredicate(
+    (Widget w) =>
+        w is DecoratedBox && w.position == DecorationPosition.foreground,
+  );
+
   group('interaction', () {
     testWidgets('reports a press', (tester) async {
       var presses = 0;
@@ -191,6 +198,57 @@ void main() {
     });
   });
 
+  group('touch target', () {
+    // The 48 box has to be a *hit* area, not only a layout one: a bare
+    // `ConstrainedBox` + `Center` sizes the box and leaves the padding inert.
+    testWidgets('a press in the vertical padding fires', (tester) async {
+      var presses = 0;
+      await pump(
+        tester,
+        MxChipTrigger(label: 'Newest first', onPressed: () => presses += 1),
+      );
+
+      final Rect target = tester.getRect(find.byType(MxChipTrigger));
+      final Rect band = tester.getRect(ringFinder);
+      expect(band.top - target.top, greaterThan(8), reason: 'no padding');
+
+      await tester.tapAt(Offset(target.center.dx, target.center.dy - 22));
+      await tester.tapAt(Offset(target.center.dx, target.center.dy + 22));
+
+      expect(presses, 2);
+    });
+
+    testWidgets('a press in the horizontal padding fires', (tester) async {
+      var presses = 0;
+      await pump(
+        tester,
+        MxChipTrigger(label: 'X', onPressed: () => presses += 1),
+      );
+
+      final Rect target = tester.getRect(find.byType(MxChipTrigger));
+      final Rect band = tester.getRect(ringFinder);
+      expect(band.left - target.left, greaterThan(0.5), reason: 'no padding');
+
+      await tester.tapAt(Offset(target.left + 0.5, target.center.dy));
+      await tester.tapAt(Offset(target.right - 0.5, target.center.dy));
+
+      expect(presses, 2);
+    });
+
+    testWidgets('a disabled trigger ignores the padding too', (tester) async {
+      await pump(
+        tester,
+        const MxChipTrigger(label: 'Newest first', onPressed: null),
+      );
+
+      final Rect target = tester.getRect(find.byType(MxChipTrigger));
+
+      await tester.tapAt(Offset(target.center.dx, target.center.dy - 22));
+
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('theming', () {
     testWidgets('the ink is onSurfaceVariant in both themes', (tester) async {
       for (final isDark in <bool>[false, true]) {
@@ -271,14 +329,11 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      final Rect ring = tester.getRect(
-        find.byWidgetPredicate(
-          (Widget w) =>
-              w is DecoratedBox && w.position == DecorationPosition.foreground,
-        ),
-      );
+      expect(ringFinder, findsOneWidget);
+      final Rect ring = tester.getRect(ringFinder);
       final Rect target = tester.getRect(find.byType(MxChipTrigger));
 
+      expect(ring.height, 28);
       expect(target.height, greaterThan(ring.height));
     });
   });
