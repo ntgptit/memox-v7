@@ -18,6 +18,16 @@ part 'mx_breadcrumb_step.dart';
 /// and `core/theme/` has no home for a stroke width.
 const double _kFocusUnderlineThickness = 2;
 
+/// The strip's own outer box — v3's Breadcrumb padding row (2 top · 16
+/// sides · 8 bottom). `2` has no `AppSpacing` step; declared here for the
+/// same reason `_kFocusUnderlineThickness` is.
+const EdgeInsetsDirectional _kBreadcrumbPadding = EdgeInsetsDirectional.only(
+  top: 2,
+  start: AppSpacing.lg,
+  end: AppSpacing.lg,
+  bottom: AppSpacing.sm,
+);
+
 /// One step in an [MxBreadcrumb].
 ///
 /// A plain value with no domain type in it: the widget is told a name and what to
@@ -319,51 +329,54 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
     final isFolded = !_isExpanded && items.length > widget.collapseAfter;
     final hiddenCount = items.length - 3;
 
-    return Semantics(
-      container: true,
-      explicitChildNodes: true,
-      label: widget.semanticLabel,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: widget.lineHeight),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: isFolded
-                ? <Widget>[
-                    _MxBreadcrumbStep(
-                      lineHeight: widget.lineHeight,
-                      item: items.first,
-                      icon: widget.rootIcon,
-                      isFirst: true,
-                    ),
-                    const _MxBreadcrumbSeparator(),
-                    _MxBreadcrumbFold(
-                      hiddenCount: hiddenCount,
-                      onExpand: () => setState(() => _isExpanded = true),
-                    ),
-                    for (final item in items.sublist(
-                      items.length - 2,
-                    )) ...<Widget>[
+    return Padding(
+      padding: _kBreadcrumbPadding,
+      child: Semantics(
+        container: true,
+        explicitChildNodes: true,
+        label: widget.semanticLabel,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: widget.lineHeight),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: isFolded
+                  ? <Widget>[
+                      _MxBreadcrumbStep(
+                        lineHeight: widget.lineHeight,
+                        item: items.first,
+                        icon: widget.rootIcon,
+                        isFirst: true,
+                      ),
                       const _MxBreadcrumbSeparator(),
-                      _MxBreadcrumbStep(
-                        item: item,
-                        lineHeight: widget.lineHeight,
+                      _MxBreadcrumbFold(
+                        hiddenCount: hiddenCount,
+                        onExpand: () => setState(() => _isExpanded = true),
                       ),
+                      for (final item in items.sublist(
+                        items.length - 2,
+                      )) ...<Widget>[
+                        const _MxBreadcrumbSeparator(),
+                        _MxBreadcrumbStep(
+                          item: item,
+                          lineHeight: widget.lineHeight,
+                        ),
+                      ],
+                    ]
+                  : <Widget>[
+                      for (final (int index, MxBreadcrumbItem item)
+                          in items.indexed) ...<Widget>[
+                        if (index > 0) const _MxBreadcrumbSeparator(),
+                        _MxBreadcrumbStep(
+                          lineHeight: widget.lineHeight,
+                          item: item,
+                          icon: index == 0 ? widget.rootIcon : null,
+                          isFirst: index == 0,
+                        ),
+                      ],
                     ],
-                  ]
-                : <Widget>[
-                    for (final (int index, MxBreadcrumbItem item)
-                        in items.indexed) ...<Widget>[
-                      if (index > 0) const _MxBreadcrumbSeparator(),
-                      _MxBreadcrumbStep(
-                        lineHeight: widget.lineHeight,
-                        item: item,
-                        icon: index == 0 ? widget.rootIcon : null,
-                        isFirst: index == 0,
-                      ),
-                    ],
-                  ],
+            ),
           ),
         ),
       ),
