@@ -112,7 +112,16 @@ class MxFilterChip extends StatelessWidget {
         button: true,
         selected: isSelected,
         enabled: isEnabled,
+        // Focusable follows enabled, because the `Focus` under the excluded
+        // subtree does: the chip stays keyboard-reachable, and a node that
+        // omitted the flag described a control the tree could not explain
+        // (same reasoning as `MxActionButton`).
+        focusable: isEnabled,
         label: semanticLabel ?? label,
+        // The count rides as the node's value ("Due, 3"): `ExcludeSemantics`
+        // drops its `Text`, and composing it into the label would be a
+        // user-visible string built inside a component.
+        value: count?.toString(),
         onTap: onPressed,
         child: ExcludeSemantics(
           child: _TapTarget(

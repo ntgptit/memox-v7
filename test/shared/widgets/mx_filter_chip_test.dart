@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
@@ -109,6 +110,7 @@ void main() {
           isEnabled: true,
           hasEnabledState: true,
           hasTapAction: true,
+          isFocusable: true,
           label: 'Due only',
         ),
       );
@@ -118,6 +120,8 @@ void main() {
       handle.dispose();
     });
 
+    // `isFocusable` is left at matchesSemantics' default (false) on purpose:
+    // a disabled chip must not advertise focusability.
     testWidgets('a disabled pill reports enabled: false and no tap action', (
       tester,
     ) async {
@@ -141,6 +145,35 @@ void main() {
           label: 'Due only',
         ),
       );
+      handle.dispose();
+    });
+
+    testWidgets('the count is the node value; the label stays announced once', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+
+      await pump(
+        tester,
+        MxFilterChip(
+          label: 'Due',
+          count: 3,
+          isSelected: false,
+          onPressed: () {},
+        ),
+      );
+      SemanticsNode node = tester.getSemantics(find.byType(MxFilterChip));
+      expect(node.value, '3');
+      expect(node.label, 'Due');
+      expect(find.bySemanticsLabel('Due'), findsOneWidget);
+
+      await pump(
+        tester,
+        MxFilterChip(label: 'Due', isSelected: false, onPressed: () {}),
+      );
+      node = tester.getSemantics(find.byType(MxFilterChip));
+      expect(node.value, isEmpty);
+      expect(node.label, 'Due');
       handle.dispose();
     });
 
@@ -318,32 +351,49 @@ void main() {
     testWidgets(
       'a long label and a large count neither wrap, ellipsize nor shrink',
       (tester) async {
+        const String shortLabel = 'All';
         const String longLabel =
             'A very long filter label that would never fit in a chip';
 
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: buildLightTheme(),
-            home: Scaffold(
-              body: SizedBox(
-                width: 100,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: MxFilterChip(
-                    label: longLabel,
-                    count: 999999,
-                    isSelected: true,
-                    onPressed: () {},
+        Future<void> pumpScrolling(String label, int count) =>
+            tester.pumpWidget(
+              MaterialApp(
+                theme: buildLightTheme(),
+                home: Scaffold(
+                  body: SizedBox(
+                    width: 100,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: MxFilterChip(
+                        label: label,
+                        count: count,
+                        isSelected: true,
+                        onPressed: () {},
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-        );
+            );
+
+        await pumpScrolling(shortLabel, 1);
+        final double shortChipWidth = tester.getSize(paintedMaterial()).width;
+        final double oneLineHeight = tester
+            .getSize(find.text(shortLabel))
+            .height;
+
+        await pumpScrolling(longLabel, 999999);
 
         expect(tester.takeException(), isNull);
         expect(find.text(longLabel), findsOneWidget);
         expect(find.text('999999'), findsOneWidget);
+        // Not shrunk or ellipsized: the chip grew past the 100dp viewport
+        // instead of squeezing into it.
+        final double longChipWidth = tester.getSize(paintedMaterial()).width;
+        expect(longChipWidth, greaterThan(shortChipWidth));
+        expect(longChipWidth, greaterThan(100));
+        // Not wrapped: the label is still exactly one line tall.
+        expect(tester.getSize(find.text(longLabel)).height, oneLineHeight);
       },
     );
   });
