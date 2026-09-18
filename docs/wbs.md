@@ -1295,7 +1295,7 @@ của M2.
         `copyWith` tại chỗ) — tracking −0.1 và leading 1.45 là giá trị của kit.
 - **Checklist phases:** 7, 12.
 
-### M100.105 · TextField — dòng lỗi có glyph `alert-circle`
+### M100.106 · TextField — dòng lỗi có glyph `alert-circle`
 
 - **Status:** **done** — analyze sạch (chỉ còn lỗi của gói `widgetbook/` do chưa `pub get`), host suite xanh,
   guard sạch, sáu golden lỗi vẽ lại trên Linux `TZ=UTC`.
