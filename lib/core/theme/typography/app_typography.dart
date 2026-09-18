@@ -136,6 +136,9 @@ abstract final class AppTypography {
   /// sits inside a pill, not over a list.
   static const double stateChipTracking = 0.6;
 
+  /// The v3 Breadcrumb current-segment weight.
+  static const FontWeight breadcrumbCurrentWeight = FontWeight.w700;
+
   /// The hero numeral's line box, as a multiple of its own size.
   ///
   /// **Not a leading adjustment — a cap-height trim, and the number is

@@ -61,10 +61,13 @@ void main() {
     ) async {
       await pump(tester, path(3));
 
-      // A slash, not a chevron (owner review, 2026-08-21): the header's back
-      // affordance owns the only arrow on the line.
-      expect(find.text('/'), findsNWidgets(2));
-      expect(find.byIcon(Icons.chevron_right), findsNothing);
+      // This mode's separator is now v3's chevron-right; the header mode (a
+      // different `pumpHeader` helper lower in this same file) still uses
+      // `/`, unaffected — the old "the header's back affordance owns the
+      // only arrow on the line" reasoning still holds, just for that other
+      // mode now.
+      expect(find.byIcon(Icons.chevron_right), findsNWidgets(2));
+      expect(find.text('/'), findsNothing);
     });
 
     testWidgets('an empty path renders nothing at all', (tester) async {
@@ -159,7 +162,13 @@ void main() {
 
       final style = styleOf(tester, 'Level 2');
       expect(style.decoration, isNot(TextDecoration.underline));
-      expect(style.color, buildLightTheme().colorScheme.onSurfaceVariant);
+      expect(
+        style.color,
+        buildLightTheme().colorScheme.onSurface,
+        reason:
+            'the step the user is on reads as the bold current-location '
+            "marker v3's dimension table specifies",
+      );
     });
   });
 

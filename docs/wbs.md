@@ -1153,6 +1153,92 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.107 · Breadcrumb đọc dimension table v3 — chỉ ở dải scroll thường
+
+- **Status:** **done** — analyze sạch, 449/449 test đích pass (gồm
+  `breadcrumb_grammar_test.dart` không sửa), guard 0 violation.
+- **Goal:** Áp bảng dimension Breadcrumb của v3 handoff (padding 2/16/8, gap 4,
+  kiểu chữ 12/500 ancestor · 12/700 current, tracking 0.1, separator
+  chevron-right màu `outline`) lên MỘT trong hai ngữ pháp của `MxBreadcrumb` —
+  dải scroll từng-bước-tap-được (không `onUp`) — không đụng ngữ pháp header
+  một-target mà mọi màn hình thật đang dùng.
+- **Scope:** `mx_breadcrumb.dart`, `mx_breadcrumb_step.dart`,
+  `mx_breadcrumb_test.dart` (2 assertion đổi theo giá trị mới),
+  `icon_ink_boundary_test.dart` (thêm `allowedInKit` cho
+  `mx_breadcrumb_step.dart`).
+- **Out of scope:** ngữ pháp header (`onUp`, separator `/`, fold-into-ellipsis
+  ở cả hai mode) — chủ dự án chọn "cosmetic only, keep grammar" qua
+  AskUserQuestion khi phát hiện xung đột với `breadcrumb_grammar_test.dart`
+  (owner review 2026-08-21). Không màn hình sản phẩm nào dùng dải scroll
+  thường nên rủi ro rò rỉ sang ngữ pháp header bằng 0 — đã verify `_padding`/
+  `_MxBreadcrumbSeparator` không được `_buildSingleTarget`/`_stepsThatFit`
+  đọc, ở cả task review và final review.
+- **Dependencies:** kế thừa theme roles `onSurface`/`onSurfaceVariant`/
+  `outline` đã có sẵn từ M100.99–101; không cần thay đổi theme.
+- **Tests required:** `mx_breadcrumb_test.dart`, `mx_breadcrumb_focus_test.dart`,
+  `mx_stress_test.dart`, `breadcrumb_grammar_test.dart` (phải xanh KHÔNG sửa),
+  `icon_ink_boundary_test.dart`, `deck_path_test.dart`,
+  `card_editor_up_navigation_test.dart`, `card_import_up_navigation_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_breadcrumb.dart`,
+  `lib/shared/widgets/mx_breadcrumb_step.dart`.
+- **Acceptance criteria:**
+  - [x] padding 2 top · 16 sides · 8 bottom quanh dải scroll — hằng số cục bộ
+        `_kBreadcrumbPadding` (không token mới; `2` không có bậc `AppSpacing`).
+  - [x] gap 4 giữa segment và chevron — `AppSpacing.xs` đã sẵn = 4.
+  - [x] segment ancestor 12/500 `onSurfaceVariant`; current 12/700
+        `onSurface`, tracking 0.1 (hằng số cục bộ `_kSegmentTracking`) — đảo
+        màu current so với comment cũ ("a breadcrumb is chrome"); comment đã
+        viết lại lý do mới thay vì để mâu thuẫn với code.
+  - [x] separator đổi từ `/` sang icon `chevron_right` màu `outline`, cỡ
+        `AppIconSize.sm` — CHỈ ở dải scroll thường; dải header vẫn `/` vì lý
+        do 2026-08-21 (hai chevron ngược hướng cạnh nút back) vẫn còn đúng,
+        không liên quan v1-freeze mà redesign v3 thay thế.
+  - [x] `context.colors.outline` không có thành viên `AppInk` — đọc trực
+        tiếp trên `Icon`, thêm entry `allowedInKit` trong
+        `icon_ink_boundary_test.dart` (tiền lệ: `mx_search_field.dart:173`).
+  - [x] Không golden nào bị đụng — widget này chưa có golden nào.
+  - [x] Task review + final whole-branch review: cả hai "Approved"/"Ready to
+        merge: Yes", 0 Critical/Important; 2 Minor đã park (line-count trên
+        raw `wc -l` nhưng guard dùng `count_mode: logical` và xanh; một câu
+        giải thích trong report của implementer không chính xác 100% nhưng
+        không phải lỗi code).
+- **Checklist phases:** 7, 12.
+
+### M100.105 · V3 component pass — BottomNav đọc đúng hợp đồng v3
+
+- **Status:** **done** — analyze sạch, host suite xanh, golden vẽ lại trên Linux
+  (47 PNG đổi), gallery republish tại URL ghim.
+- **Goal:** `MxNavigationBar` thôi là dải opaque sát mép; nó là một thẻ kính nổi
+  trong luồng, đúng hợp đồng BottomNav của v3.
+- **Scope:** `mx_navigation_bar.dart` (wrapper 4/8/12 + inset cử chỉ, `ClipRRect`
+  `AppRadius.lg`, `BackdropFilter` `glassBlurSigma`, fill `chrome-glass`, viền
+  `border-ghost` cả bốn cạnh, `NavigationBar.height` cố định),
+  `app_navigation_bar_theme.dart` (nền trong suốt, glyph 20dp),
+  `app_sizing.dart` (`bottomBarHeight` 64), `app_navigation_shell.dart` (ba glyph
+  theo nghĩa: `layers` / `play_circle` / `bar_chart`), hai file ghim role cũ.
+- **Out of scope:** `extendBody` của shell — vẫn là quyết định bố cục của caller,
+  đúng như M100.100 đã chặn: bật nó thì Scaffold thôi trừ chiều cao bar khỏi
+  `MediaQuery` của body và mọi branch phải tự chừa chỗ. Hôm nay blur làm mờ nền
+  phẳng của Scaffold, tức fallback "solid chrome-glass" mà hợp đồng cho phép.
+  Icon rỗng của `_ProgressEmptyView` (`insights_outlined`) chưa đổi theo glyph
+  Progress mới; đó là nội dung màn hình của feature.
+- **Dependencies:** M100.101.
+- **Tests required:** group `v3 glass geometry` trong `mx_navigation_bar_test.dart`;
+  `m3_role_contract_test.dart` và `m3_role_bindings.dart` đã sửa.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/shared/widgets/mx_navigation_bar.dart`
+- **Acceptance criteria:**
+  - [x] Bar vẽ cố định 64dp bất kể inset; wrapper cao 4 + 64 + 12 = 80 và lớn thêm
+        đúng bằng inset cử chỉ. `NavigationBar` bị bỏ `SafeArea` nội bộ bằng
+        `MediaQuery.removePadding`, nên inset chỉ được tính một lần.
+  - [x] `backgroundColor` của theme là trong suốt; hai guard từng ghim
+        `surfaceContainer` được nới có chủ đích vì role đã chuyển sang
+        `chrome-glass`, đọc trực tiếp bởi component.
+  - [x] Focus ring và ripple giữ hành vi toàn cục/canonical, không thêm quy ước.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
 ### M100.102 · Fab — hộp 52×52, glyph 20 và vòng focus `onPrimary`
 
 - **Status:** **done** — analyze sạch, host suite 5258 pass, guard 0, golden vẽ
@@ -1234,7 +1320,7 @@ của M2.
         field không còn đổi chiều rộng nhìn thấy khi gõ ký tự đầu tiên.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 
-### M100.105 · `MxAppBar`
+### M100.108 · `MxAppBar`
 
 - **Status:** **in progress** — widget, wiring, Widgetbook use cases and unit
   tests land in this task; goldens under `test/demo/` moved (compact title
@@ -1318,6 +1404,45 @@ của M2.
   - [x] Tap target qua `MxPressable` (sàn 48, vòng focus dùng chung).
   - [x] Title/description đi qua role có tên (guard `no_text_restyle` cấm
         `copyWith` tại chỗ) — tracking −0.1 và leading 1.45 là giá trị của kit.
+- **Checklist phases:** 7, 12.
+
+### M100.106 · TextField — dòng lỗi có glyph `alert-circle`
+
+- **Status:** **done** — analyze sạch (chỉ còn lỗi của gói `widgetbook/` do chưa `pub get`), host suite xanh,
+  guard sạch, sáu golden lỗi vẽ lại trên Linux `TZ=UTC`.
+- **Goal:** Handoff v3 của TextField ghi dòng lỗi gồm glyph 16 + chữ, và registry
+  (`docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md:340`) liệt
+  kê "message text + glyph". Theme của field đã đúng v3 từ M100.101; chỗ hở còn
+  lại là widget vẽ lỗi bằng `errorText` thuần chữ, không có chỗ cho icon.
+- **Scope:** `lib/shared/widgets/mx_text_field.dart` (lỗi đi qua
+  `InputDecoration.error` thay cho `errorText`), test hợp đồng và test
+  editor-surface, sáu golden `mx_text_field_{error,focused_error,suffix_error}`.
+- **Out of scope:** `app_input_theme.dart` và mọi token — không đụng. API công
+  khai của `MxTextField` không đổi (`errorText` vẫn là `String?`).
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_text_field_contract_test.dart`,
+  `mx_editor_surface_test.dart`, `mx_text_field_counter_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_text_field.dart`.
+- **Acceptance criteria:**
+  - [x] Glyph `Icons.error_outline` (một glyph duy nhất của app cho nghĩa này),
+        `MxIconSize.sm` = 16, cách chữ `AppSpacing.xs` = 4, trang trí (không
+        `semanticLabel`).
+  - [x] Màu glyph là `AppInk.error` (→ `dangerInk`), khớp chữ bên cạnh — nối tiếp
+        phán quyết GC-3 trong `app_input_theme.dart`, không dùng `scheme.error`
+        (viền vẫn dùng `error`).
+  - [x] **Đảo phán quyết của audit trước v3** (`docs/reviews/mx-text-field-deep-audit.md`
+        ghi "không có error icon by design"): audit đó dựa trên baseline
+        `filled: false` mà M100.101 đã đảo; handoff và registry v3 đều đòi glyph.
+  - [x] Chiều cao dòng lỗi không đổi khi lỗi xuất hiện; test layout-stability cũ
+        chạy nguyên bản.
+  - [x] `errorMaxLines` không còn tác dụng với lỗi dạng widget; test ghim nó chuyển
+        sang `Text.maxLines == 3` của chính dòng lỗi.
+  - [x] Trường hợp text vượt `maxLength` + có lỗi **không** nổ assert
+        "error và errorText cùng khai báo": `buildCounter` luôn được truyền nên SDK
+        return sớm trước nhánh thêm `errorText`. Có test ghim; bỏ `buildCounter`
+        thì test đỏ.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; chỉ sáu PNG lỗi đổi khi chạy 44 file test golden.
 - **Checklist phases:** 7, 12.
 
 
