@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memox/shared/widgets/mx_app_bar.dart';
 import 'package:memox/shared/widgets/mx_async_view.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_sheet_insets.dart';
@@ -82,6 +84,111 @@ WidgetbookComponent contentShellComponent() {
             ),
           );
         },
+      ),
+    ],
+  );
+}
+
+/// The bar row alone — leading, title and actions — without `MxContentShell`'s
+/// padding, subheader or body around it. Added at Task 1 of the `MxAppBar`
+/// extraction, when the bar became a leaf component in its own right rather
+/// than something only visible inline inside the shell above.
+WidgetbookComponent appBarComponent() {
+  return WidgetbookComponent(
+    name: 'MxAppBar',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final density = context.knobs.object.dropdown<MxAppBarDensity>(
+            label: 'density',
+            options: MxAppBarDensity.values,
+            labelBuilder: (MxAppBarDensity value) => value.name,
+          );
+          final hasLeading = context.knobs.boolean(
+            label: 'leading',
+            initialValue: true,
+          );
+          final actionCount = context.knobs.int.slider(
+            label: 'actions',
+            initialValue: 1,
+            max: 3,
+          );
+
+          return Scaffold(
+            appBar: MxAppBar(
+              title: const Text('Library'),
+              density: density,
+              leading: hasLeading
+                  ? const MxIconButton(
+                      icon: Icons.arrow_back,
+                      semanticLabel: 'Back',
+                      onPressed: _noop,
+                    )
+                  : null,
+              actions: actionCount == 0
+                  ? null
+                  : <Widget>[
+                      for (var i = 0; i < actionCount; i++)
+                        const MxIconButton(
+                          icon: Icons.search,
+                          semanticLabel: 'Search',
+                          onPressed: _noop,
+                        ),
+                    ],
+            ),
+            body: const SizedBox.shrink(),
+          );
+        },
+      ),
+      // The shell's own common case: a back affordance and a couple of
+      // actions, at the density every current call site uses.
+      WidgetbookUseCase(
+        name: 'compact, with back + actions',
+        builder: (BuildContext context) => const Scaffold(
+          appBar: MxAppBar(
+            title: Text('Deck details'),
+            leading: MxIconButton(
+              icon: Icons.arrow_back,
+              semanticLabel: 'Back',
+              onPressed: _noop,
+            ),
+            actions: <Widget>[
+              MxIconButton(
+                icon: Icons.search,
+                semanticLabel: 'Search',
+                onPressed: _noop,
+              ),
+              MxIconButton(
+                icon: Icons.more_vert,
+                semanticLabel: 'More options',
+                onPressed: _noop,
+              ),
+            ],
+          ),
+          body: SizedBox.shrink(),
+        ),
+      ),
+      // No call site consumes `large` yet (task-1-brief) — this is what it
+      // looks like on its own, so the rung is reviewable without inventing
+      // a screen to carry it.
+      WidgetbookUseCase(
+        name: 'large, screen title only',
+        builder: (BuildContext context) => const Scaffold(
+          appBar: MxAppBar(
+            title: Text('Progress'),
+            density: MxAppBarDensity.large,
+          ),
+          body: SizedBox.shrink(),
+        ),
+      ),
+      // The title keeps the full row (Requirement 4's "falls out for free").
+      WidgetbookUseCase(
+        name: 'no actions',
+        builder: (BuildContext context) => const Scaffold(
+          appBar: MxAppBar(title: Text('Library')),
+          body: SizedBox.shrink(),
+        ),
       ),
     ],
   );

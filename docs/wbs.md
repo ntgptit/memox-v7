@@ -1153,6 +1153,62 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.102 · `MxAppBar` — Task 1 (widget, `MxContentShell` wiring, Widgetbook, tests)
+
+- **Status:** **in progress** — widget, wiring, Widgetbook use cases and unit
+  tests land in this task; goldens under `test/demo/` moved (compact title
+  16/700/−0.3 replaces `titleLarge` 20/700/−0.64) and are regenerated on Linux
+  `TZ=UTC` in a follow-up pass, not by this task.
+- **Goal:** Close the `MxAppBar` row of `.claude/skills/flutter-theme-design/
+  references/chrome-navigation.md`'s "Shared widget: `MxAppBar`" checklist —
+  extract the bar `MxContentShell` built inline into its own leaf component.
+- **Scope:** `lib/shared/widgets/mx_app_bar.dart` (new — two densities,
+  `PreferredSizeWidget`, fixed 56dp); `mx_content_shell.dart`'s `_buildAppBar`
+  wired to it for the no-`titleSubline` case; two new `AppTypography` title
+  trios (`appBarContentTitle*`, `appBarScreenTitle*`) plus their `_role`-built
+  styles; `widgetbook/lib/components/structure_components.dart`'s new
+  `appBarComponent()`; `test/shared/widgets/mx_app_bar_test.dart`.
+- **Out of scope:** `titleSubline` redesign (that branch of `_buildAppBar` is
+  untouched), `MxSessionTopBar` convergence, a `selectionMode` enum, a
+  `sizeAppBar` token, `dio`/network, auth.
+- **Dependencies:** none — a leaf extraction of existing `MxContentShell`
+  chrome.
+- **Tests required:** `mx_app_bar_test.dart` (preferredSize, slot order,
+  ellipsis under a narrow width, density padding/typography, no-actions full
+  width); existing `mx_content_shell_bar_test.dart`,
+  `mx_content_shell_chrome_test.dart`, `mx_content_shell_geometry_test.dart`
+  pass unmodified — the regression proof that the hairline, back affordance
+  and `automaticallyImplyLeading` did not move.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_app_bar.dart`,
+  `lib/shared/widgets/mx_content_shell.dart`,
+  `lib/core/theme/typography/app_typography.dart`,
+  `widgetbook/lib/components/structure_components.dart`, `widgetbook/lib/main.dart`.
+- **Acceptance criteria:**
+  - [x] `MxAppBar` takes `Widget? title`, `Widget? leading`,
+        `List<Widget>? actions`, `MxAppBarDensity density = compact`; paints no
+        background of its own.
+  - [x] Compact padding `AppSpacing.sm` (8), large `AppSpacing.lg` (16);
+        compact title 16/w700/−0.3, large 24/w700/−0.5, both through
+        `AppTypography`'s `_role`-shaped helper, not a `TextTheme` rung.
+  - [x] Row: leading → `xs` gap → `Expanded(title)` → (if actions) `xs` gap +
+        actions, each pair `xs` apart; no actions leaves the title the full
+        width via `Expanded` alone.
+  - [x] `preferredSize == Size.fromHeight(kToolbarHeight)` (56).
+  - [x] `MxContentShell._buildAppBar` delegates to `MxAppBar` (via `AppBar`'s
+        own `title:`/`leading:`/`actions:` slots) when `titleSubline == null`;
+        `automaticallyImplyLeading`, the scrolled hairline `shape:` and the
+        back-affordance check stay exactly where they were — proven by the
+        three existing `mx_content_shell_*_test.dart` files passing unmodified.
+  - [x] Widgetbook: `appBarComponent()` — Playground (density/leading/action
+        count knobs) plus `compact, with back + actions`, `large, screen title
+        only`, `no actions`.
+  - [x] `mx_app_bar_test.dart`: 8 tests covering every acceptance point above.
+  - [ ] Goldens under `test/demo/` regenerated on Linux `TZ=UTC` and the screen
+        gallery republished at its pinned Artifact URL — deferred to the
+        controller per this task's brief (Windows cannot author goldens).
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 
