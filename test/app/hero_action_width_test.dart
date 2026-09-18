@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_breakpoints.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
@@ -38,6 +39,9 @@ void main() {
   /// file exists rather than a comment.
   const double referenceWidth = 393;
   const double crampedWidth = 320;
+  // Both sides of the card's standard padding, which is what the primary's
+  // width is measured inside.
+  const double cardInset = AppSpacing.card * 2;
 
   Widget host({required double width, required Widget child}) => MediaQuery(
     data: MediaQueryData(size: Size(width, 900)),
@@ -100,7 +104,7 @@ void main() {
 
       expect(
         width,
-        lessThan(referenceWidth - 32 - 32),
+        lessThan(referenceWidth - 32 - cardInset),
         reason:
             'The Library hero primary is filling its card at $referenceWidth. '
             'Either the rule was removed, or the LayoutBuilder moved inside the '
@@ -112,7 +116,7 @@ void main() {
     testWidgets('Study Home', (tester) async {
       final width = await primaryWidth(tester, studyHero(), referenceWidth);
 
-      expect(width, lessThan(referenceWidth - 32 - 32));
+      expect(width, lessThan(referenceWidth - 32 - cardInset));
     });
   });
 
@@ -122,7 +126,7 @@ void main() {
 
       expect(
         width,
-        greaterThan(crampedWidth - 32 - 32 - 1),
+        greaterThan(crampedWidth - 32 - cardInset - 1),
         reason:
             'At $crampedWidth the card is ${crampedWidth - 32}dp, under the '
             '${AppBreakpoints.compact} tier, so the primary should run the full '
@@ -133,7 +137,7 @@ void main() {
     testWidgets('Study Home', (tester) async {
       final width = await primaryWidth(tester, studyHero(), crampedWidth);
 
-      expect(width, greaterThan(crampedWidth - 32 - 32 - 1));
+      expect(width, greaterThan(crampedWidth - 32 - cardInset - 1));
     });
   });
 

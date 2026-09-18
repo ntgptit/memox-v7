@@ -345,6 +345,11 @@ void main() {
         findsWidgets,
         reason: 'the first row never scrolled into view',
       );
+      // Built is not visible: the sliver builds a row just past the fold, and
+      // a long press on it misses the screen. With the 20dp card padding
+      // (M100.110) the first row lands there at this scale.
+      await tester.ensureVisible(find.byType(CardTileWidget).first);
+      await tester.pumpAndSettle();
       await tester.longPress(find.byType(CardTileWidget).first);
       await tester.pumpAndSettle();
       // A RenderFlex overflow throws into the binding, so reaching here with

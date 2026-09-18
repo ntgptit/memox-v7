@@ -314,7 +314,7 @@ void main() {
 
     final Rect bar = tester.getRect(find.byType(ProgressWeekBarWidget).first);
     final double content =
-        rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
+        rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.card;
 
     // The v3 type scale dropped `bodyMedium`'s tracking (0.25 to 0), and both
     // `IntrinsicColumnWidth` label columns narrowed: 1234 cards now clears the
@@ -328,7 +328,12 @@ void main() {
     // 8dp (264 -> 256), and both the bar and its floor move with it: now
     // 44.67dp against 64.0. Still a breach, so debt 5 is still open — the
     // witness below is what keeps holding that, not the absolute figure.
-    expect(bar.width, closeTo(44.67, 1));
+    //
+    // **Re-measured for the 20dp card padding (M100.110).** The card's own
+    // padding grew by 4dp a side, so this content column is 8dp narrower
+    // (256 -> 248) and the bar follows it one for one: 36.67dp against the
+    // same 64.0 floor. A wider breach, the same open debt 5.
+    expect(bar.width, closeTo(36.67, 1));
     expect(bar.width, lessThan(content / 4));
     expect(tester.takeException(), isNull);
   });
