@@ -1477,7 +1477,7 @@ của M2.
   - [x] `rows` rỗng bị assert (fail fast).
 - **Checklist phases:** 7, 12.
 
-### M100.110 · MxSwitch — công tắc trần, không nhãn, của v3
+### M100.111 · MxSwitch — công tắc trần, không nhãn, của v3
 
 - **Status:** **done** — analyze sạch, `mx_switch_test.dart` + `mx_stress_test.dart`
   xanh; chưa màn nào dùng.
