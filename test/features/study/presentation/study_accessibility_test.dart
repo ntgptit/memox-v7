@@ -115,24 +115,25 @@ void main() {
       );
       final scheme = Theme.of(element).colorScheme;
 
-      // The context line, the hint line, and now the counter too: the three
-      // the frame writes in `onSurfaceVariant` (StudyTopBar's counter binding
-      // moved it off `onSurface`, task-1 of the studytopbar-component plan).
+      // The context line, the hint line and the counter/clock: the three texts
+      // the frame writes in `onSurfaceVariant` (the StudyTopBar contract's
+      // counter binding).
       expect(
         contrast(scheme.onSurfaceVariant, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
 
-      // The counter and the clock (`onSurface` was its ink until the StudyTopBar
-      // contract moved it to `onSurfaceVariant`, asserted above; kept because
-      // `onSurface` on the page is still the frame's primary-ink floor).
+      // `onSurface` on the page: the counter and clock wore it before the
+      // StudyTopBar contract moved them to `onSurfaceVariant` (asserted above).
+      // It no longer draws any text in this frame; this measures the token pair
+      // itself and stays as a regression check on it.
       expect(
         contrast(scheme.onSurface, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
-      // `accentInk` (GC-3) is no longer what the mode pill paints — the
-      // StudyTopBar contract paints the accent itself, measured by the skipped
-      // test below — but the ink's own pair is still the token's contract.
+      // `accentInk` (GC-3) on `surfaceMuted`: the mode pill used to draw this
+      // pair; it now draws the accent itself (see the light-mode AA test at the
+      // end of this file). This measures the ink token's own pair, not the pill.
       final semantic = Theme.of(element).extension<AppSemanticColors>()!;
       expect(
         contrast(semantic.accentInk, semantic.surfaceMuted),
@@ -301,13 +302,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // **Known debt, skipped on purpose.** The StudyTopBar contract paints the mode
-  // pill's label in the accent at full strength over the accent tinted 10% into
-  // the page. Measured, that is 3.87:1 (primary) and 3.65:1 (mastery) in light —
-  // below AA — while dark passes (6.43:1 primary). The owner has ruled to keep
-  // the contract's colour for now; docs/wbs.md "Known technical debt" row
-  // "Nhãn mode pill của MxSessionTopBar" records it. Remove the skip when the
-  // label gets an accentInk-style ink and this test goes green.
+  // **Known debt: light is skipped on purpose, dark stays live.** The StudyTopBar
+  // contract paints the mode pill's label in the accent at full strength over the
+  // accent tinted 10% into the page. Measured, that is 3.87:1 (primary) and
+  // 3.65:1 (mastery) in light — below AA — while dark passes (6.43:1 primary).
+  // Kept as the contract states, pending an owner decision (docs/wbs.md, Known
+  // technical debt, row "Nhãn mode pill của MxSessionTopBar"). Drop the light
+  // skip when the label gets an accentInk-style ink and that test goes green.
   for (final brightness in Brightness.values) {
     test(
       'the mode pill label clears AA for both accents in ${brightness.name}',
@@ -333,7 +334,7 @@ void main() {
           );
         }
       },
-      skip: _kPillContrastDebt,
+      skip: brightness == Brightness.light ? _kPillContrastDebt : null,
     );
   }
 }
