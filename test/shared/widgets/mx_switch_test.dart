@@ -2,6 +2,7 @@ import 'dart:ui' show Tristate;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -55,12 +56,57 @@ void main() {
     testWidgets('a null onChanged disables the control: tapping does nothing', (
       tester,
     ) async {
-      // Proves the widget survives a tap with no callback to call, and pairs
-      // with the semantics test below for the accessible half of "disabled".
-      await pump(tester, const MxSwitch(value: true, onChanged: null));
+      // Enabled twin alongside, so a tap that reached the disabled switch
+      // would show as a call on its own recorder rather than as silence.
+      final changes = <bool>[];
+      await pump(
+        tester,
+        Column(
+          children: <Widget>[
+            const MxSwitch(value: true, onChanged: null),
+            MxSwitch(value: true, onChanged: changes.add),
+          ],
+        ),
+      );
 
-      await tester.tap(find.byType(MxSwitch));
-      await tester.pump();
+      await tester.tap(find.byType(MxSwitch).first);
+      await tester.pumpAndSettle();
+      expect(changes, isEmpty);
+
+      final thumb = find.byKey(kMxSwitchThumbKey).first;
+      final trackLeft = tester.getTopLeft(find.byKey(kMxSwitchTrackKey).first);
+      expect(
+        tester.getTopLeft(thumb).dx - trackLeft.dx,
+        21,
+        reason: 'a disabled switch must not move',
+      );
+    });
+
+    testWidgets('disabled paints the whole control at op-disabled opacity', (
+      tester,
+    ) async {
+      double opacityOf() => tester
+          .widget<Opacity>(
+            find.descendant(
+              of: find.byType(MxSwitch),
+              matching: find.byType(Opacity),
+            ),
+          )
+          .opacity;
+
+      await pump(tester, const MxSwitch(value: true, onChanged: null));
+      expect(opacityOf(), AppStateOpacity.disabled);
+    });
+
+    testWidgets('enabled paints at full opacity', (tester) async {
+      await pump(tester, MxSwitch(value: true, onChanged: (_) {}));
+      final opacity = tester.widget<Opacity>(
+        find.descendant(
+          of: find.byType(MxSwitch),
+          matching: find.byType(Opacity),
+        ),
+      );
+      expect(opacity.opacity, 1);
     });
 
     testWidgets('Space activates a focused switch the same way a tap does', (
@@ -145,6 +191,32 @@ void main() {
 
       final node = tester.getSemantics(find.byType(MxSwitch));
       expect(node.flagsCollection.isEnabled, Tristate.isFalse);
+      handle.dispose();
+    });
+
+    testWidgets('an enabled switch offers the tap action', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester, MxSwitch(value: true, onChanged: (_) {}));
+      expect(
+        tester
+            .getSemantics(find.byType(MxSwitch))
+            .getSemanticsData()
+            .hasAction(SemanticsAction.tap),
+        isTrue,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('a disabled switch offers no tap action', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester, const MxSwitch(value: true, onChanged: null));
+      expect(
+        tester
+            .getSemantics(find.byType(MxSwitch))
+            .getSemanticsData()
+            .hasAction(SemanticsAction.tap),
+        isFalse,
+      );
       handle.dispose();
     });
 
@@ -258,6 +330,20 @@ void main() {
       await gesture.up();
       await tester.pump();
       expect(overlayFinder(expected), findsNothing, reason: 'after release');
+    });
+
+    testWidgets('pressing a disabled switch paints no wash', (tester) async {
+      final pressed = AppInteractionStates.controlOverlay(
+        colors,
+      ).resolve(<WidgetState>{WidgetState.pressed})!;
+      await pump(tester, const MxSwitch(value: false, onChanged: null));
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(MxSwitch)),
+      );
+      await tester.pump();
+      expect(overlayFinder(pressed), findsNothing);
+      await gesture.up();
     });
 
     testWidgets('hovering washes the thumb with the control overlay', (
