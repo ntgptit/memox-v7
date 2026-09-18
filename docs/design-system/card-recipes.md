@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | active |
-| **Purpose** | Ghi lại mười recipe của `MxCard`: mỗi cái nghĩa là gì, ai gọi, vẽ ra sao, và vì sao nó tồn tại riêng |
+| **Purpose** | Ghi lại mười một recipe của `MxCard`: mỗi cái nghĩa là gì, ai gọi, vẽ ra sao, và vì sao nó tồn tại riêng |
 | **Scope** | Taxonomy và hợp đồng công khai của `MxCard`. Ngoài phạm vi: *giá trị* token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), binding component→role M3 (`tokyo-component-mapping.md`) |
 | **Source of truth for** | Ma trận recipe `MxCard` · hợp đồng `MxCard.option` · quyết định tên `tonal` |
 | **Depends on** | `document-conventions.md` · `theme-architecture.md` · `architecture.md` (AD-14, AD-15) |
@@ -36,6 +36,7 @@ Số caller đếm trong `lib/` (không tính test, Widgetbook, tài liệu).
 | `muted` | Chú thích đặt cạnh nội dung | 5 | `surfaceContainerHigh` | không | `none` | `xl` 20 | `compact` 12 |
 | `tonal` | Callout nhấn — xem §4 | 2 | `semantic.surfaceEmphasis` | không | `none` | `xl` 20 | `standard` 20 |
 | `accent` | Card được đánh dấu bằng viền thương hiệu | 4 | `surfaceContainerLow` | `borderAccent` | `raised` 3 | `xl` 20 | `standard` 20 |
+| `hero` | Card hero nhuộm màu — fill `surface-hero` do theme dẫn xuất, viền `border-ghost` ở cả hai theme | 0 | `surface-hero` (`AppDerivedColors`) | `border-ghost` | `card` 1 | `xl` 20 | `standard` 20 |
 | `tile` | Hàng trong dòng thời gian | 2 | `surfaceContainerLow` | không | `card` 1 | `md` 12 | `compact` 12 |
 | `option` | Một lựa chọn bấm được — xem §3 | 4 | `surfaceContainerLow` | `borderOption` | `none` | `lg` 16 | `compact` 12 |
 

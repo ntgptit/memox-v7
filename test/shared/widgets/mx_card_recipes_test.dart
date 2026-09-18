@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_decorations.dart';
+import 'package:memox/core/theme/foundations/app_derived_colors.dart';
 import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
@@ -259,6 +261,27 @@ void main() {
         expect(borderColorOf(tester), semantic.borderAccent);
         expect(hasShadow(decoration), isTrue);
       });
+
+      testWidgets(
+        '$themeName · hero: surface-hero, ghost edge in both themes',
+        (tester) async {
+          await pump(tester, const MxCard.hero(child: Text('x')), theme: theme);
+
+          final decoration = decorationOf(tester);
+          // The theme derives the tint once; the card applies no percentage of
+          // its own, so the fill is exactly what the derivation returns.
+          expect(decoration.color, AppDerivedColors.surfaceHero(scheme));
+          // **The edge is the point of the variant, in light as much as dark**:
+          // a hero without it dissolves into the page.
+          expect(hasVisibleBorder(tester), isTrue);
+          expect(
+            borderColorOf(tester),
+            AppDecorations.hairlineEdge(scheme).color,
+          );
+          expect(radiusOf(decoration), AppRadius.xl);
+          expect(hasShadow(decoration), isTrue);
+        },
+      );
 
       testWidgets('$themeName · tile: control corner, lifted like any '
           'page card', (tester) async {

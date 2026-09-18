@@ -247,6 +247,7 @@ WidgetbookComponent cardComponent() {
               'muted',
               'tonal',
               'accent',
+              'hero',
               'tile',
               'option',
             ],
@@ -283,6 +284,7 @@ WidgetbookComponent cardComponent() {
             'muted' => MxCard.muted(child: child),
             'tonal' => MxCard.tonal(padding: padding, child: child),
             'accent' => MxCard.accent(padding: padding, child: child),
+            'hero' => MxCard.hero(padding: padding, child: child),
             'tile' => MxCard.tile(child: child),
             'option' => MxCard.option(
               isSelected: isSelected ?? false,

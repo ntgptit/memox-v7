@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_decorations.dart';
+import '../../core/theme/foundations/app_derived_colors.dart';
 import '../../core/theme/foundations/app_elevation.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/states/app_interaction_states.dart';
@@ -86,7 +88,7 @@ enum MxCardFeedbackTone {
 }
 
 /// The surface a recipe fills with, named as a role.
-enum _MxCardFill { surface, recessed, muted, tonal, feedback }
+enum _MxCardFill { surface, recessed, muted, tonal, hero, feedback }
 
 /// The edge a recipe rests at, named as a role.
 /// The edge a recipe rests at, named as a role.
@@ -94,7 +96,7 @@ enum _MxCardFill { surface, recessed, muted, tonal, feedback }
 /// `option` was `control` until M100.2, and the rename came with the token: an
 /// option card had been borrowing the *input* border, which a recorded rule
 /// keeps untinted because a text field is canvas. A card is not canvas.
-enum _MxCardRestingEdge { subtle, option, accent }
+enum _MxCardRestingEdge { subtle, option, accent, ghost }
 
 /// One recipe, one spec. Private and immutable: a feature picks a named
 /// constructor and everything below — fill, edge, radius, elevation — is this
@@ -365,6 +367,33 @@ class MxCard extends StatefulWidget {
        onTap = null,
        onLongPress = null;
 
+  /// The tinted hero surface: `surface-hero` as the fill, raised like
+  /// [MxCard.raised], and the `border-ghost` hairline **in both themes**.
+  ///
+  /// The tint is the theme's to derive — `primary` over `surfaceBright` in
+  /// light, over `surface` in dark — so this recipe applies no percentage of
+  /// its own. The edge is unconditional because a tint that light-mode reads
+  /// as 5% of the brand colour is too close to the page to hold a boundary by
+  /// itself: without the line a hero dissolves into the page in light. No
+  /// caller yet — the deck summary and Study Home's resume card still say
+  /// `.accent` / `.tonal`, and moving each is its own change.
+  const MxCard.hero({
+    required this.child,
+    this.padding = MxCardPadding.standard,
+    super.key,
+  }) : _spec = const _MxCardSpec(
+         elevation: AppElevation.card,
+         radius: AppRadius.xl,
+         fill: _MxCardFill.hero,
+         edge: _MxCardRestingEdge.ghost,
+       ),
+       isSelected = null,
+       _selectionTreatment = MxCardSelectionTreatment.edge,
+       _recessedEdge = MxCardRecessedEdge.none,
+       _tone = null,
+       onTap = null,
+       onLongPress = null;
+
   /// A small card at the control corner ([AppRadius.md]) for a dense item row —
   /// the card-detail history event is the caller. A list-row card at the card
   /// corner reads as a shrunken panel; at the control corner it reads as an
@@ -604,6 +633,7 @@ class _MxCardState extends State<MxCard> {
       _MxCardFill.recessed => scheme.surfaceContainerLow,
       _MxCardFill.muted => scheme.surfaceContainerHigh,
       _MxCardFill.tonal => semantic.surfaceEmphasis,
+      _MxCardFill.hero => AppDerivedColors.surfaceHero(scheme),
       // Exhaustive over the tone so a second tone fails the build here
       // rather than silently rendering as danger.
       _MxCardFill.feedback => switch (widget._tone!) {
@@ -665,6 +695,7 @@ class _MxCardState extends State<MxCard> {
       _MxCardRestingEdge.subtle => null,
       _MxCardRestingEdge.option => semantic.borderOption,
       _MxCardRestingEdge.accent => semantic.borderAccent,
+      _MxCardRestingEdge.ghost => AppDecorations.hairlineEdge(colors).color,
     };
   }
 
