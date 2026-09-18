@@ -555,15 +555,22 @@ class _MxCardState extends State<MxCard> {
   /// `.flat` picks for two of the three, so in dark `.raised` and `.flat`
   /// were the same rendered box.
   ///
-  /// **`surfaceContainer`, not a new colour.** It is already one rung of the
-  /// ladder `.recessed` and `.muted` read from, sitting lighter than
-  /// `surface` in dark by construction — `#221E44` against `#1A1838`
-  /// (`app_material_roles.dart`) — which is the direction Material's own
-  /// dark-elevation convention lifts a surface: nearer the light, not
-  /// farther. `surfaceContainerLow` was not a candidate: `.recessed` already
-  /// spends it on the opposite meaning, one step *down*, and a colour
-  /// carrying "sunken" on one recipe and "raised" on another would be the
-  /// kind of ambiguity this file argues against everywhere else.
+  /// **A rung of the ladder, not a new colour.** `_MxCardFill.surface`
+  /// resolves to `surfaceContainerLow` today, which in dark is `#1B2249`
+  /// against the page's `#0A0E27` — 9.98 L\* above it, the direction
+  /// Material's dark-elevation convention lifts a surface: nearer the light,
+  /// not farther.
+  ///
+  /// **In light that reading is currently inverted, and it is known.** The v3
+  /// ladder reassigned these rungs: `surfaceContainerLowest` is the raised
+  /// paper (`surface-raised`, `#FFFFFF`) and `surfaceContainerLow` is the
+  /// muted one (`surface-muted`, `#F1F4FB`) — so `.surface` sits *below* the
+  /// page while `.recessed`, which reads `surfaceContainerLowest`, sits above
+  /// it. One rung carrying "sunken" on one recipe and "raised" on another is
+  /// exactly the ambiguity this file argues against everywhere else; the swap
+  /// belongs to Card's own component task and is listed under
+  /// COMPONENT_MIGRATION_PENDING in `docs/design-system/theme-architecture.md`
+  /// §7, not to a theme-layer change.
   ///
   /// **Light keeps `scheme.surface` unconditionally.** The shadow already
   /// separates elevation there — see [shadowsFor]'s own alpha derivation —
