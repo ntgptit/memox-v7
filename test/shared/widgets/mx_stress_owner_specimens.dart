@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_icon_tile.dart';
+import 'package:memox/shared/widgets/mx_list_row.dart';
 import 'package:memox/shared/widgets/mx_reading_column.dart';
 import 'package:memox/shared/widgets/mx_section_label.dart';
 import 'package:memox/shared/widgets/mx_sheet.dart';
@@ -26,5 +27,16 @@ List<MxStressSpecimen> ownerStressSpecimens() => <MxStressSpecimen>[
   MxStressSpecimen(
     name: 'MxIconTile',
     build: () => const MxIconTile(icon: Icons.layers_outlined),
+  ),
+  MxStressSpecimen(
+    name: 'MxListRow',
+    isInteractive: true,
+    build: () => MxListRow(
+      title: kLongTitle,
+      subtitle: kLongMessage,
+      leadingIcon: Icons.layers_outlined,
+      trailingIcon: Icons.chevron_right,
+      onTap: () {},
+    ),
   ),
 ];
