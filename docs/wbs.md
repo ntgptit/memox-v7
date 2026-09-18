@@ -1236,7 +1236,7 @@ của M2.
 
 ### M100.104 · TextField — dòng lỗi có glyph `alert-circle`
 
-- **Status:** **done** — analyze sạch ngoài gói `widgetbook/`, host suite xanh,
+- **Status:** **done** — analyze sạch (chỉ còn lỗi của gói `widgetbook/` do chưa `pub get`), host suite xanh,
   guard sạch, sáu golden lỗi vẽ lại trên Linux `TZ=UTC`.
 - **Goal:** Handoff v3 của TextField ghi dòng lỗi gồm glyph 16 + chữ, và registry
   (`docs/superpowers/specs/2026-09-18-memox-v3-theme-prerequisite.md:340`) liệt
@@ -1270,7 +1270,7 @@ của M2.
         "error và errorText cùng khai báo": `buildCounter` luôn được truyền nên SDK
         return sớm trước nhánh thêm `errorText`. Có test ghim; bỏ `buildCounter`
         thì test đỏ.
-  - [x] Golden vẽ lại trên Linux `TZ=UTC`; chỉ sáu PNG lỗi đổi trong 44 file.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; chỉ sáu PNG lỗi đổi khi chạy 44 file test golden.
 - **Checklist phases:** 7, 12.
 
 
