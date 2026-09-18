@@ -40,15 +40,50 @@ void main() {
     ]) {
       test(name, () {
         final scheme = theme.colorScheme;
+        final semantic = theme.extension<AppSemanticColors>()!;
 
-        expect(MxFilledPair.tonal.fillOf(scheme), scheme.surfaceContainer);
-        expect(MxFilledPair.tonal.labelOf(scheme), scheme.onSurface);
         expect(
-          MxFilledPair.tonal.stateLayerOf(scheme),
+          MxFilledPair.tonal.fillOf(scheme, semantic),
+          scheme.surfaceContainer,
+        );
+        expect(MxFilledPair.tonal.labelOf(scheme, semantic), scheme.onSurface);
+        expect(
+          MxFilledPair.tonal.stateLayerOf(scheme, semantic),
           scheme.onSurface,
           reason:
               'the state layer is the pair\'s own `on` role for every pair — a '
               'layer in some other role rotates the hue on press',
+        );
+      });
+    }
+  });
+
+  group('the destructive pair reads the v3 error-fill tokens, not error', () {
+    // The handoff's `themeRoleUsage` binds the destructive container to
+    // `error-fill` — "the SOLID destructive fill, deeper than `error`, which is
+    // the error text colour". `scheme.error` / `onError` stay the text/icon
+    // "this is an error" colour; a button painted with them would be the wrong
+    // red, and both reds are plausible on screen, hence the exact pin.
+    for (final (String name, ThemeData theme) in <(String, ThemeData)>[
+      ('light', light),
+      ('dark', dark),
+    ]) {
+      test(name, () {
+        final scheme = theme.colorScheme;
+        final semantic = theme.extension<AppSemanticColors>()!;
+
+        expect(
+          MxFilledPair.destructive.fillOf(scheme, semantic),
+          semantic.errorFill,
+        );
+        expect(
+          MxFilledPair.destructive.labelOf(scheme, semantic),
+          semantic.onErrorFill,
+        );
+        expect(
+          MxFilledPair.destructive.stateLayerOf(scheme, semantic),
+          semantic.onErrorFill,
+          reason: 'the state layer is the pair\'s own `on` token',
         );
       });
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
@@ -292,11 +293,13 @@ void main() {
           disabled,
         );
         final Color? ink = resolved(tester, (s) => s.foregroundColor, disabled);
-        expect(
-          fill,
-          themeEntry.value.colorScheme.error,
-          reason: themeEntry.key,
-        );
+        // Repinned from `scheme.error`: the destructive tone paints the v3
+        // `errorFill` / `onErrorFill`, not `error` (the text colour). Both
+        // halves are pinned because `_busyStyle` restates the pair, and a
+        // saving button flipping colour is how it drifts.
+        final semantic = themeEntry.value.extension<AppSemanticColors>()!;
+        expect(fill, semantic.errorFill, reason: themeEntry.key);
+        expect(ink, semantic.onErrorFill, reason: themeEntry.key);
         expect(
           contrast(ink!, fill!),
           greaterThanOrEqualTo(4.5),
