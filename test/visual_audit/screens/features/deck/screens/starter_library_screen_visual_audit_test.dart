@@ -131,6 +131,7 @@ void main() {
             'navigationBarTheme and pinned by m3_role_contract_test.dart; the '
             'states are pinned by the mx_navigation_bar_* goldens.',
       ),
+      ...navigationBarGlassAllowances,
       // The starter screen's own Material layers: its Scaffold, its AppBar
       // (title + automatic back), and the one tappable template card.
       const AuditSkipAllowance(
