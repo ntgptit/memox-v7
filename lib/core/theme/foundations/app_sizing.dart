@@ -3,12 +3,13 @@
 /// **Not a scale, and deliberately not one.** [AppSpacing], [AppRadius] and
 /// [AppIconSize] are ladders — pick a rung, and the neighbouring rung is the
 /// answer when this one is wrong. These three are floors and fixed extents: a
-/// touch target is not "one step below" anything, and inventing `controlSm` /
-/// `controlMd` / `controlLg` rungs nothing renders would be three decisions
-/// made without a screen to check them against, which is the rule the
-/// unrendered component themes in `app_theme.dart` already follow.
+/// touch target is not "one step below" anything, and a generic `controlSm` /
+/// `controlMd` / `controlLg` ladder would be decisions made without a screen to
+/// check them against. What the control rungs below hold instead is the sizes
+/// the v3 Button handoff fixes (48 / 40 / 36 / 32 / 28), each named for the
+/// button size that paints it.
 ///
-/// **Every value here already existed; none is new** (M100.29). Two were on
+/// **Every value in the first group already existed** (M100.29). Two were on
 /// `AppSpacing`, whose own header says it holds "every gap, pad and inset" —
 /// and then immediately had to disclaim [touchTarget] as "a floor, not a step".
 /// A class that has to argue a member is not what the class is for is a member
@@ -42,8 +43,9 @@ abstract final class AppSizing {
   /// **A short ladder, not the usual 32 / 40 / 48 / 56 / 64 scale.** The
   /// rungs here are the ones the v3 handoff fixes ([controlChip], [controlDense],
   /// [controlSmall], this one and [touchTarget]) — each a size the button enum
-  /// names, and none invented for a screen that does not exist, which is the
-  /// rule the unrendered component themes in `app_theme.dart` already follow.
+  /// names. [controlSmall] and [controlChip] have no live caller yet; they are
+  /// admitted because the handoff fixes their geometry, not because a screen
+  /// needs them today.
   /// It was a private `_kCompactHeight` in `mx_action_button.dart` until
   /// M100.30 — the one control dimension the design system could not see.
   static const double controlCompact = 40;

@@ -28,8 +28,10 @@ enum MxActionButtonVariant {
   /// The action a screen wants taken, where a filled button would be the
   /// third or fourth accent in one viewport.
   ///
-  /// **A weight, not a colour.** M3's tonal button sits between filled and
-  /// outlined precisely here: a list whose every row carries the same verb.
+  /// **A weight, not a colour.** Paints the v3 handoff's `surfaceContainer` /
+  /// `onSurface` pair (not M3's `secondaryContainer`), but it sits where M3's
+  /// tonal button sits, between filled and outlined: a list whose every row
+  /// carries the same verb.
   /// Filled, the accent repeats until it stops reading as emphasis; outlined,
   /// the verb reads as an alternative, and on a row with nothing to be an
   /// alternative to that is a lie about the hierarchy.
@@ -412,8 +414,8 @@ class MxActionButton extends StatelessWidget {
   /// from `buildSharedButtonStyle`, which already states the standard 48
   /// `minimumSize` — merged the other way, `compact` would silently stay 48.
   /// Colour and every state resolver still come from [base] (or, when both are
-  /// null, from the theme): the four geometry properties are single-state, so
-  /// flat values shadow nothing that resolves.
+  /// null, from the theme): the geometry properties [_sized] sets are
+  /// single-state, so flat values shadow nothing that resolves.
   ButtonStyle? _sized(BuildContext context, ButtonStyle? base) {
     if (size == MxActionButtonSize.standard) return base;
 
