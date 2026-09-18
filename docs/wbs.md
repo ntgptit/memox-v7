@@ -1153,6 +1153,40 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
+### M100.102 · V3 component pass — BottomNav đọc đúng hợp đồng v3
+
+- **Status:** **done** — analyze sạch, host suite xanh, golden vẽ lại trên Linux
+  (47 PNG đổi), gallery republish tại URL ghim.
+- **Goal:** `MxNavigationBar` thôi là dải opaque sát mép; nó là một thẻ kính nổi
+  trong luồng, đúng hợp đồng BottomNav của v3.
+- **Scope:** `mx_navigation_bar.dart` (wrapper 4/8/12 + inset cử chỉ, `ClipRRect`
+  `AppRadius.lg`, `BackdropFilter` `glassBlurSigma`, fill `chrome-glass`, viền
+  `border-ghost` cả bốn cạnh, `NavigationBar.height` cố định),
+  `app_navigation_bar_theme.dart` (nền trong suốt, glyph 20dp),
+  `app_sizing.dart` (`bottomBarHeight` 64), `app_navigation_shell.dart` (ba glyph
+  theo nghĩa: `layers` / `play_circle` / `bar_chart`), hai file ghim role cũ.
+- **Out of scope:** `extendBody` của shell — vẫn là quyết định bố cục của caller,
+  đúng như M100.100 đã chặn: bật nó thì Scaffold thôi trừ chiều cao bar khỏi
+  `MediaQuery` của body và mọi branch phải tự chừa chỗ. Hôm nay blur làm mờ nền
+  phẳng của Scaffold, tức fallback "solid chrome-glass" mà hợp đồng cho phép.
+  Icon rỗng của `_ProgressEmptyView` (`insights_outlined`) chưa đổi theo glyph
+  Progress mới; đó là nội dung màn hình của feature.
+- **Dependencies:** M100.101.
+- **Tests required:** group `v3 glass geometry` trong `mx_navigation_bar_test.dart`;
+  `m3_role_contract_test.dart` và `m3_role_bindings.dart` đã sửa.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/shared/widgets/mx_navigation_bar.dart`
+- **Acceptance criteria:**
+  - [x] Bar vẽ cố định 64dp bất kể inset; wrapper cao 4 + 64 + 12 = 80 và lớn thêm
+        đúng bằng inset cử chỉ. `NavigationBar` bị bỏ `SafeArea` nội bộ bằng
+        `MediaQuery.removePadding`, nên inset chỉ được tính một lần.
+  - [x] `backgroundColor` của theme là trong suốt; hai guard từng ghim
+        `surfaceContainer` được nới có chủ đích vì role đã chuyển sang
+        `chrome-glass`, đọc trực tiếp bởi component.
+  - [x] Focus ring và ripple giữ hành vi toàn cục/canonical, không thêm quy ước.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 
