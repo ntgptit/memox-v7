@@ -40,10 +40,15 @@ import '../../core/theme/extensions/theme_context_extension.dart';
 /// `traditional` on the first key event, so a phone with a keyboard plugged in
 /// gets the ring the moment it is used. One gate, in the one ring, so
 /// `MxListTile`, `MxPressable` and `MxPillButton` cannot answer three ways.
+///
+/// **[color] is for the one control whose own ground is not a surface** — see
+/// `AppInteractionStates.focusIndicatorOf`'s doc comment for why that control
+/// cannot use the ambient `primary` ring.
 class MxFocusRing extends StatefulWidget {
   const MxFocusRing({
     required this.child,
     required this.borderRadius,
+    this.color,
     super.key,
   });
 
@@ -53,6 +58,10 @@ class MxFocusRing extends StatefulWidget {
   /// the shape being marked — a pill for `MxPillButton`, `AppRadius.md` for a
   /// rectangular control, zero for a full-bleed row.
   final BorderRadius borderRadius;
+
+  /// Overrides the ambient `primary` ring with [AppInteractionStates.focusIndicatorOf].
+  /// `null` (every current caller) keeps [AppInteractionStates.focusIndicator].
+  final Color? color;
 
   @override
   State<MxFocusRing> createState() => _MxFocusRingState();
@@ -99,7 +108,9 @@ class _MxFocusRingState extends State<MxFocusRing> {
           borderRadius: widget.borderRadius,
           border: _showsRing
               ? Border.fromBorderSide(
-                  AppInteractionStates.focusIndicator(context.colors),
+                  widget.color != null
+                      ? AppInteractionStates.focusIndicatorOf(widget.color!)
+                      : AppInteractionStates.focusIndicator(context.colors),
                 )
               : null,
         ),
