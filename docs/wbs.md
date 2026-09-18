@@ -7,8 +7,8 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.98 |
-| **Last updated** | 2026-09-18 |
+| **Updated by task** | M100.109 |
+| **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -1151,6 +1151,87 @@ của M2.
         đọc lại `outlinedButtonTheme` resting side. Comment ở đó đã than rằng
         bản sao sai ba lần; lần này là lần thứ tư.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
+- **Checklist phases:** 7, 12.
+
+### M100.109 · Button — v3: hai tone đổi màu, ba nấc kích thước mới
+
+- **Status:** **in-progress** — code, test đích và comment/doc đã xong; còn chờ
+  controller: vẽ lại golden trên Linux (WSL, `TZ=UTC`), full host suite một lần,
+  gallery. Chưa có gate nào trong ba việc đó được ghi là đã chạy.
+- **Goal:** `MxActionButton` đọc đúng hợp đồng Button của v3 handoff: hai tone
+  đổi cặp màu, ba nấc kích thước mới, và các nút study đổi sang pill.
+- **Scope:**
+  - `tonal` đọc `surfaceContainer` / `onSurface` (trước là `secondaryContainer`
+    / `onSecondaryContainer`) qua `MxFilledPair.tonal`, kể cả `_busyStyle`.
+  - `destructive` đọc `errorFill` / `onErrorFill` (`AppSemanticColors`) thay cho
+    `error` / `onError`, kể cả `_busyStyle`.
+  - `dense` bo góc 8.
+  - Ba nấc mới của `MxActionButtonSize`: `small` (36), `chip` (28, pill viền
+    ghost, bỏ qua `variant`) và `study` (48, pill). `AppSizing` thêm
+    `controlSmall` và `controlChip`.
+  - Nối `study` vào Reveal / Continue / Retry của Recall, Check của Fill và
+    Reveal answer của self-assess. Cặp Forgot / Remembered và Show hint cố ý ở
+    lại `standard`: handoff định nghĩa study action là một động từ đứng giữa, còn
+    cặp kia là hai control ngang hàng trong `StudyCtaRowWidget`, nơi 2×36 padding
+    sẽ ăn hết hàng ở 320dp.
+- **Out of scope:** không `small` / `chip` nào có caller thật (handoff cố định
+  hình học của chúng, màn hình chưa dựng nút); không đổi token dùng chung ngoài
+  hai cặp màu ở trên; không đổi cặp Forgot / Remembered.
+- **Dependencies:** M100.99–101 (theme role v3), `errorFill` / `onErrorFill` đã
+  khai báo ở `v3-foundations.md`.
+- **Tests required:** `test/shared/widgets/mx_action_button_*_test.dart` (size,
+  study, chip, state matrix, composite state), `mx_tonal_and_outlined_test.dart`,
+  `study_action_size_test.dart`,
+  `study_card_face_test.dart`, `deck_workload_role_test.dart` (repin).
+- **Editable documents:** `docs/wbs.md`,
+  `docs/design-system/tokyo-component-mapping.md`,
+  `docs/design-system/v3-foundations.md`, `docs/design-system/v1-freeze.md`
+  (một dòng ghi chú lịch sử).
+- **Output:** `lib/shared/widgets/mx_action_button.dart`,
+  `lib/core/theme/components/actions/app_button_themes.dart`,
+  `lib/core/theme/foundations/app_sizing.dart`, các nút study.
+- **Acceptance criteria:**
+  - [x] `tonal` và `destructive` đổi cặp màu ở cả trạng thái nghỉ lẫn `_busyStyle`
+        (loading không còn đổi màu giữa chừng).
+  - [x] Reveal answer của self-assess là `study`, khớp Reveal của Recall; hai nút
+        chấm điểm sau khi lật vẫn `standard` (test ở `study_card_face_test.dart`).
+  - [x] **Sàn pressed dưới AA được chấp nhận có chủ ý:** nhãn destructive ở dark
+        và high-contrast dark đạt 4.28:1 (< 4.5) khi nhấn. Giá trị fill
+        (`#B0485C`) và nhãn (trắng) do theme handoff cố định; chỉnh chúng là việc
+        của bước theme, không phải của Button. Ghi vào `acceptedSubAAPressedFloors` (`mx_action_button_composite_state_test.dart`).
+        Mở lại nếu chủ dự án muốn `onErrorFill` sáng hơn hoặc state layer khác.
+  - [ ] Golden vẽ lại trên Linux `TZ=UTC`: `study_recall_states`,
+        `study_fill_states`, `study_modes`, `study_session_faces`, golden
+        list/row của deck và golden confirm dialog (mọi nút destructive).
+  - [ ] Full non-golden host suite xanh một lần (chưa chạy: máy nặng, mỗi lần
+        >10 phút; các task chỉ chạy test đích + guard + analyze).
+  - [ ] Gallery: ảnh <digest>
+- **Màn hình đổi diện mạo:** nút Study trên hàng deck (pill tonal `surfaceContainer`),
+  nút destructive của mọi confirm dialog (`errorFill`), các nút study của
+  Recall / Fill / self-assess (pill 48).
+- **Hai quyết định chủ dự án có thể muốn xem lại:**
+  - Nhãn chip dùng `onSurfaceVariant`: handoff không có hàng label cho chip;
+    `app_chip_theme.dart` đã ghép `onSurfaceVariant` với `surfaceContainerLowest`
+    cho chip chưa chọn. Đổi thành `onSurface` nếu design muốn vậy.
+  - Chip disabled = `Opacity` 0.38 phủ cả control (đọc nguyên văn "op-disabled
+    over the whole control"), không dùng `disabledSurface` đặc như nút khác; nên
+    chip disabled trông khác các nút disabled còn lại.
+- **Nợ còn lại (minor hoãn từ review, chưa sửa):**
+  - Chip: chưa có test tương phản bốn theme (gồm high-contrast: nhãn ≥ 4.5, vòng
+    focus ≥ 3) và test semantics cho chip disabled có `semanticLabel`.
+  - `mx_tonal_and_outlined_test.dart`: khẳng định disabled bằng
+    `isNot(surfaceContainer)` quá yếu.
+  - Test bo góc `dense` chỉ phủ `primary`; đường `merge` của tonal / destructive
+    chưa được ghim.
+  - Chưa có test giữ chiều rộng cho `study` + `isLoading`; test Check ở 320dp chỉ
+    khẳng định không exception, chưa đo bố cục.
+  - `_iconGap` đọc thang `labelLarge` cho `chip` / `dense` (nhãn thật là
+    `labelMedium`); chênh không đáng kể.
+  - Nhánh `secondary` của `_busyStyle` (không với tới được) vẫn mang
+    `error` / `onError`.
+  - Thứ tự import trong `mx_action_button_size_test.dart`.
+  - `mx_action_button.dart` đã vượt 700 dòng; guard chưa cắt nhưng nên tách khi
+    chạm lần sau.
 - **Checklist phases:** 7, 12.
 
 ### M100.107 · Breadcrumb đọc dimension table v3 — chỉ ở dải scroll thường
