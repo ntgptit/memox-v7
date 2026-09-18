@@ -121,10 +121,46 @@ void main() {
     );
 
     final paragraph = tester.renderObject<RenderParagraph>(
-      find.byType(RichText).first,
+      find.text('A title with enough words to overflow a narrow compact bar'),
     );
     expect(paragraph.maxLines, 1);
     expect(paragraph.didExceedMaxLines, isTrue);
+  });
+
+  testWidgets('narrow bar keeps leading and both actions, ellipsizes title', (
+    tester,
+  ) async {
+    const leadingKey = Key('leading');
+    const action1Key = Key('action1');
+    const action2Key = Key('action2');
+    const title = 'A very long title that cannot possibly fit in two hundred';
+
+    await tester.pumpWidget(
+      host(
+        const MxAppBar(
+          leading: Icon(Icons.arrow_back, key: leadingKey),
+          title: Text(title),
+          actions: <Widget>[
+            Icon(Icons.search, key: action1Key),
+            Icon(Icons.more_vert, key: action2Key),
+          ],
+        ),
+        width: 200,
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(leadingKey), findsOneWidget);
+    expect(find.byKey(action1Key), findsOneWidget);
+    expect(find.byKey(action2Key), findsOneWidget);
+    expect(
+      tester.getRect(find.byKey(action2Key)).right,
+      lessThanOrEqualTo(200),
+    );
+    expect(
+      tester.renderObject<RenderParagraph>(find.text(title)).didExceedMaxLines,
+      isTrue,
+    );
   });
 
   group('density', () {

@@ -89,8 +89,23 @@ WidgetbookComponent contentShellComponent() {
   );
 }
 
+/// `MxAppBar` paints no surface and adds no status-bar inset, so the catalog
+/// supplies both, the way `MxContentShell` does around it in the app.
+Widget _appBarFrame(BuildContext context, MxAppBar bar) {
+  return Scaffold(
+    body: Column(
+      children: <Widget>[
+        Material(
+          color: Theme.of(context).colorScheme.surface,
+          child: SafeArea(bottom: false, child: bar),
+        ),
+      ],
+    ),
+  );
+}
+
 /// The bar row alone — leading, title and actions — without `MxContentShell`'s
-/// padding, subheader or body around it. Added at Task 1 of the `MxAppBar`
+/// padding, subheader or body around it. Added with the `MxAppBar`
 /// extraction, when the bar became a leaf component in its own right rather
 /// than something only visible inline inside the shell above.
 WidgetbookComponent appBarComponent() {
@@ -115,8 +130,9 @@ WidgetbookComponent appBarComponent() {
             max: 3,
           );
 
-          return Scaffold(
-            appBar: MxAppBar(
+          return _appBarFrame(
+            context,
+            MxAppBar(
               title: const Text('Library'),
               density: density,
               leading: hasLeading
@@ -137,7 +153,6 @@ WidgetbookComponent appBarComponent() {
                         ),
                     ],
             ),
-            body: const SizedBox.shrink(),
           );
         },
       ),
@@ -145,8 +160,9 @@ WidgetbookComponent appBarComponent() {
       // actions, at the density every current call site uses.
       WidgetbookUseCase(
         name: 'compact, with back + actions',
-        builder: (BuildContext context) => const Scaffold(
-          appBar: MxAppBar(
+        builder: (BuildContext context) => _appBarFrame(
+          context,
+          const MxAppBar(
             title: Text('Deck details'),
             leading: MxIconButton(
               icon: Icons.arrow_back,
@@ -166,29 +182,26 @@ WidgetbookComponent appBarComponent() {
               ),
             ],
           ),
-          body: SizedBox.shrink(),
         ),
       ),
-      // No call site consumes `large` yet (task-1-brief) — this is what it
+      // No call site consumes `large` yet — this is what it
       // looks like on its own, so the rung is reviewable without inventing
       // a screen to carry it.
       WidgetbookUseCase(
         name: 'large, screen title only',
-        builder: (BuildContext context) => const Scaffold(
-          appBar: MxAppBar(
+        builder: (BuildContext context) => _appBarFrame(
+          context,
+          const MxAppBar(
             title: Text('Progress'),
             density: MxAppBarDensity.large,
           ),
-          body: SizedBox.shrink(),
         ),
       ),
       // The title keeps the full row (Requirement 4's "falls out for free").
       WidgetbookUseCase(
         name: 'no actions',
-        builder: (BuildContext context) => const Scaffold(
-          appBar: MxAppBar(title: Text('Library')),
-          body: SizedBox.shrink(),
-        ),
+        builder: (BuildContext context) =>
+            _appBarFrame(context, const MxAppBar(title: Text('Library'))),
       ),
     ],
   );

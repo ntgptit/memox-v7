@@ -1153,7 +1153,7 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
-### M100.102 · `MxAppBar` — Task 1 (widget, `MxContentShell` wiring, Widgetbook, tests)
+### M100.102 · `MxAppBar`
 
 - **Status:** **in progress** — widget, wiring, Widgetbook use cases and unit
   tests land in this task; goldens under `test/demo/` moved (compact title
@@ -1178,7 +1178,9 @@ của M2.
   width); existing `mx_content_shell_bar_test.dart`,
   `mx_content_shell_chrome_test.dart`, `mx_content_shell_geometry_test.dart`
   pass unmodified — the regression proof that the hairline, back affordance
-  and `automaticallyImplyLeading` did not move.
+  and `automaticallyImplyLeading` did not move. `study_options_geometry_test`
+  and trash `geometry_test` G2 were changed in the same commit, because the bar
+  title now sits at the 8dp compact inset.
 - **Editable documents:** `docs/wbs.md`.
 - **Output:** `lib/shared/widgets/mx_app_bar.dart`,
   `lib/shared/widgets/mx_content_shell.dart`,

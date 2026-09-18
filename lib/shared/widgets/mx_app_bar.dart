@@ -9,7 +9,8 @@ import '../../core/theme/typography/app_typography.dart';
 /// site — a content-title bar over a list or a form. `large` reads the
 /// screen-title rung (24/w700/−0.5) for a bar that has to carry more weight
 /// than a content bar, and ships fully built even though nothing in the app
-/// calls it yet (task-1-brief: "NOT PART OF CURRENT V3 CONTRACT").
+/// calls it yet (MemoX v3 kit, A · Chrome & navigation, AppBar contract; see
+/// `.claude/skills/flutter-theme-design/references/chrome-navigation.md` §8).
 enum MxAppBarDensity {
   /// 16/w700/−0.3 title, [AppSpacing.sm] edge padding. Every existing
   /// `MxContentShell` call site.
@@ -28,6 +29,10 @@ enum MxAppBarDensity {
 /// `app_app_bar_theme.dart` already binds that role globally — so this
 /// widget is a [SizedBox] and a [Row], never a [Container] with its own
 /// colour.
+///
+/// It also adds no status-bar inset. It is valid as `AppBar.title` content or
+/// inside `MxContentShell`; used bare it must be wrapped in `Material` +
+/// `SafeArea` (as the Widgetbook use cases do).
 ///
 /// **A fixed 56dp bar, always** ([kToolbarHeight]). The two-line
 /// `titleSubline` bar `MxContentShell` still builds inline is the one shape
