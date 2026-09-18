@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 
@@ -72,6 +73,36 @@ void main() {
       greaterThanOrEqualTo(AppSizing.touchTarget),
       reason: 'a smaller body must never mean a smaller target',
     );
+  });
+
+  testWidgets('dense paints the handoff compact radius, the rest keep md', (
+    tester,
+  ) async {
+    // The v3 handoff's "compact" rung is 32 with radius 8 — the box `dense`
+    // already draws — so the radius lives on `dense`. Every other size keeps
+    // the shared `AppRadius.md`; asserting both pins the branching.
+    for (final (size, radius) in <(MxActionButtonSize, double)>[
+      (MxActionButtonSize.standard, AppRadius.md),
+      (MxActionButtonSize.compact, AppRadius.md),
+      (MxActionButtonSize.dense, AppRadius.sm),
+    ]) {
+      await pump(tester, size);
+
+      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      final Set<WidgetState> none = <WidgetState>{};
+      final OutlinedBorder? shape = (button.style ?? const ButtonStyle()).shape
+          ?.resolve(none);
+      final OutlinedBorder effective =
+          shape ??
+          (light.filledButtonTheme.style!.shape!.resolve(none)
+              as OutlinedBorder);
+
+      expect(
+        effective,
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+        reason: '$size radius',
+      );
+    }
   });
 
   testWidgets('every size keeps the floor at 2.0x text scale', (tester) async {

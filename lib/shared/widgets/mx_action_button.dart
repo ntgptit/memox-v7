@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/components/actions/app_button_themes.dart';
 import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/foundations/app_stroke.dart';
@@ -101,6 +102,11 @@ enum MxActionButtonSize {
   /// 40 keep it, and the one that wants 32 says so at the call site. What is
   /// not optional is the floor — 32 is a body, 48 is still what a finger gets,
   /// and `mx_stress_test` measures that rather than trusting this sentence.
+  ///
+  /// **Also the v3 handoff's "compact" rung: 32 tall, radius 8
+  /// ([AppRadius.sm]).** Same painted box, so it is this member and not a
+  /// fourth one; every other size keeps the shared [AppRadius.md]. The one
+  /// live caller, `DeckStudyButtonWidget`, therefore gets an 8dp corner.
   dense,
 }
 
@@ -298,9 +304,9 @@ class MxActionButton extends StatelessWidget {
         ),
         child: child,
       ),
-      // `error` / `onError`, not a token read directly: the scheme pair is
-      // already contrast-checked against each other in `app_theme_test.dart`,
-      // and A2 maps `error` onto the `danger` token so the two cannot diverge.
+      // `MxFilledPair.destructive` (`errorFill` / `onErrorFill`), not a token
+      // read directly: the pair is the one place the destructive fill and its
+      // on-colour are stated, so the button cannot diverge from the theme.
       //
       // **`buildFilledStyle`, not `FilledButton.styleFrom`.** `styleFrom` builds
       // a flat `WidgetStatePropertyAll`, and a non-null property on the widget
@@ -308,7 +314,7 @@ class MxActionButton extends StatelessWidget {
       // did not darken on press and stayed fully red when disabled while its
       // label faded to 38%. A control that looks armed and is inert is worse
       // than one that looks disabled. The same builder the primary variant
-      // resolves through, with the error pair substituted for the accent.
+      // resolves through, with the `errorFill` pair substituted for the accent.
       //
       // **`busyStyle` first** (M100.36). This branch built its style straight
       // from `buildFilledStyle` and never read `busyStyle`, so the destructive
@@ -359,6 +365,17 @@ class MxActionButton extends StatelessWidget {
       padding: const WidgetStatePropertyAll<EdgeInsets>(
         EdgeInsets.symmetric(horizontal: AppSpacing.md),
       ),
+      shape: switch (size) {
+        // The handoff's compact rung paints radius 8; the rest inherit
+        // `AppRadius.md` from the shared style by stating no shape.
+        MxActionButtonSize.dense =>
+          const WidgetStatePropertyAll<OutlinedBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.sm)),
+            ),
+          ),
+        MxActionButtonSize.standard || MxActionButtonSize.compact => null,
+      },
       // 40 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
       // touch target a floor, and `padded` is how a smaller body keeps it.
       tapTargetSize: MaterialTapTargetSize.padded,

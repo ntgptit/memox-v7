@@ -96,7 +96,7 @@ void main() {
     'high-contrast light primary': 3.77,
     'high-contrast light destructive': 4.00,
     // Added with the destructive tone's move onto `errorFill` (Task 2, v3
-    // Button): dark `errorFill` #B0485C under white at 10% white wash measures
+    // Button): dark `errorFill` #B0485C under white at the 12% pressed wash measures
     // 4.28. Same precedent as above — the v3 fill is verbatim, the lightening
     // is Material's — and the cell is pinned at what it measures.
     'dark destructive': 4.28,
