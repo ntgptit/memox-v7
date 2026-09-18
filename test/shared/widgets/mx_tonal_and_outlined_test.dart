@@ -27,10 +27,12 @@ void main() {
   );
 
   group('the tonal pair reads M3 tonal roles, and only those', () {
-    // `secondaryContainer` / `onSecondaryContainer` is what
-    // `_FilledButtonDefaultsM3` gives `FilledButton.tonal`. Reading anything
-    // else here would make the app's tonal button a fourth colour rather than
-    // M3's third weight — and it would do it invisibly, because any container
+    // `surfaceContainer` / `onSurface` is the v3 Button handoff's binding for
+    // the "secondary" tone (`themeRoleUsage`, M3_COLOR/DIRECT/FULL_STRENGTH),
+    // superseding M100.73's choice of M3's own `FilledButton.tonal` pair
+    // (`secondaryContainer` / `onSecondaryContainer`). Reading anything else
+    // here would make the app's tonal button some other colour than the
+    // handoff names — and it would do it invisibly, because any container
     // role looks plausible on screen.
     for (final (String name, ThemeData theme) in <(String, ThemeData)>[
       ('light', light),
@@ -39,11 +41,11 @@ void main() {
       test(name, () {
         final scheme = theme.colorScheme;
 
-        expect(MxFilledPair.tonal.fillOf(scheme), scheme.secondaryContainer);
-        expect(MxFilledPair.tonal.labelOf(scheme), scheme.onSecondaryContainer);
+        expect(MxFilledPair.tonal.fillOf(scheme), scheme.surfaceContainer);
+        expect(MxFilledPair.tonal.labelOf(scheme), scheme.onSurface);
         expect(
           MxFilledPair.tonal.stateLayerOf(scheme),
-          scheme.onSecondaryContainer,
+          scheme.onSurface,
           reason:
               'the state layer is the pair\'s own `on` role for every pair — a '
               'layer in some other role rotates the hue on press',
@@ -77,11 +79,11 @@ void main() {
 
     expect(
       button.style?.backgroundColor?.resolve(<WidgetState>{}),
-      scheme.secondaryContainer,
+      scheme.surfaceContainer,
     );
     expect(
       button.style?.foregroundColor?.resolve(<WidgetState>{}),
-      scheme.onSecondaryContainer,
+      scheme.onSurface,
     );
   });
 
@@ -114,7 +116,7 @@ void main() {
     );
     expect(
       style.backgroundColor?.resolve(<WidgetState>{WidgetState.disabled}),
-      isNot(light.colorScheme.secondaryContainer),
+      isNot(light.colorScheme.surfaceContainer),
       reason: 'a disabled button that keeps its fill looks armed and is inert',
     );
   });
