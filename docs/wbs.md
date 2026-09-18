@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.111 |
+| **Updated by task** | M100.112 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1153,7 +1153,7 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
-### M100.111 · Button — v3: hai tone đổi màu, ba nấc kích thước mới
+### M100.112 · Button — v3: hai tone đổi màu, ba nấc kích thước mới
 
 - **Status:** **in-progress** — code, test, golden Linux, full host suite và gallery
   đã xong (xem checklist); còn bộ integration trên thiết bị chưa chạy vì máy
