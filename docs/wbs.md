@@ -1234,7 +1234,34 @@ của M2.
   - [x] Golden vẽ lại trên Linux `TZ=UTC`; gallery republish tại URL ghim.
 - **Checklist phases:** 7, 12.
 
-### M100.104 · TextField — dòng lỗi có glyph `alert-circle`
+### M100.104 · MxOptionRow — hàng chọn một của v3 (#578)
+
+- **Status:** **done** — merged (#578), CI xanh; chưa màn nào dùng.
+- **Goal:** shared component cho hợp đồng OptionRow của v3: vòng radio 20dp dày
+  lên 2px → 6px primary khi chọn (không có chấm), min-height 48, padding 12/16,
+  divider `border-ghost`, dim `op-disabled` khi khoá.
+- **Scope:** `lib/shared/widgets/mx_option_row.dart`, hai role `optionRowTitle` /
+  `optionRowDescription` trong `AppTextStyles` (+ hằng số ở `AppTypography`),
+  test riêng, specimen stress, entry Widgetbook.
+- **Out of scope:** chuyển caller sang dùng nó (`study_direction_chooser_widget`,
+  picker thuật toán, thứ tự thẻ mới, reset) — mỗi màn là một thay đổi riêng.
+  Không sửa `MxRadioRows`: `RadioListTile` bị buộc vào `ListTileTheme` (56/4/16)
+  và `Radio` M3 vẽ cố định 16dp chấm-trong-vòng, nên hợp đồng này không đạt được
+  qua nó.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_option_row_test.dart`, `mx_stress_test.dart`, test theme
+  typography.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_option_row.dart`.
+- **Acceptance criteria:**
+  - [x] Vòng 20dp, viền `AppStroke.selectionControl` (2) khi chưa chọn và 6 khi
+        chọn, màu `outline` / `primary`; sáng và tối.
+  - [x] Tap target qua `MxPressable` (sàn 48, vòng focus dùng chung).
+  - [x] Title/description đi qua role có tên (guard `no_text_restyle` cấm
+        `copyWith` tại chỗ) — tracking −0.1 và leading 1.45 là giá trị của kit.
+- **Checklist phases:** 7, 12.
+
+### M100.105 · TextField — dòng lỗi có glyph `alert-circle`
 
 - **Status:** **done** — analyze sạch (chỉ còn lỗi của gói `widgetbook/` do chưa `pub get`), host suite xanh,
   guard sạch, sáu golden lỗi vẽ lại trên Linux `TZ=UTC`.
