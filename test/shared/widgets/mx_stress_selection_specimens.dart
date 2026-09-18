@@ -4,6 +4,7 @@ import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
+import 'package:memox/shared/widgets/mx_option_row.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
@@ -70,6 +71,19 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
       onChanged: _noopIndex,
       labelOf: (int value) => kLongLabel,
       subtitleOf: (int value) => 'Hai hộp, tám bậc ôn tập',
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Title and description both wrap freely and the row grows; the trailing
+    // slot must not be pushed off a squeezed row.
+    name: 'MxOptionRow',
+    build: () => const MxOptionRow(
+      title: kLongTitle,
+      subtitle: kLongMessage,
+      isSelected: true,
+      onSelect: _noop,
+      trailing: Icon(Icons.info_outline),
     ),
     isInteractive: true,
   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/extensions/app_ink.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import '../../core/theme/foundations/app_decorations.dart';
 import '../../core/theme/foundations/app_spacing.dart';
@@ -61,20 +62,12 @@ class MxOptionRow extends StatelessWidget {
   /// one to reuse.
   static const double _selectedRingWidth = 6;
 
-  /// The title's tracking. `titleSmall` (GC-4's body-14 at semibold) carries
-  /// no tracking of its own; the kit states -0.1 for this row specifically.
-  static const double _titleTracking = -0.1;
-
-  /// The subtitle's line-height. `bodySmall` (GC-4's caption-12 at body
-  /// weight) leads at 1.4; the kit states 1.45 for this row specifically.
-  static const double _subtitleHeight = 1.45;
-
   static const double _titleSubtitleGap = 2;
 
   @override
   Widget build(BuildContext context) {
     final scheme = context.colors;
-    final texts = context.texts;
+    final textStyles = context.textStyles;
     final subtitle = this.subtitle;
     final trailing = this.trailing;
     final isEnabled = onSelect != null;
@@ -112,18 +105,18 @@ class MxOptionRow extends StatelessWidget {
               children: <Widget>[
                 Text(
                   title,
-                  style: texts.titleSmall!.copyWith(
-                    color: scheme.onSurface,
-                    letterSpacing: _titleTracking,
+                  style: textStyles.optionRowTitle.inked(
+                    context,
+                    AppInk.stated,
                   ),
                 ),
                 if (subtitle != null) ...<Widget>[
                   const SizedBox(height: _titleSubtitleGap),
                   Text(
                     subtitle,
-                    style: texts.bodySmall!.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      height: _subtitleHeight,
+                    style: textStyles.optionRowDescription.inked(
+                      context,
+                      AppInk.quiet,
                     ),
                   ),
                 ],
