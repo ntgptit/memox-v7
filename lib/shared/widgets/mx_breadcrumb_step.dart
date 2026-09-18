@@ -102,7 +102,7 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
               style:
                   AppTypography.withWeight(
                         context.texts.labelMedium!,
-                        FontWeight.w700,
+                        AppTypography.breadcrumbCurrentWeight,
                       )
                       .inked(context, AppInk.stated)
                       .copyWith(letterSpacing: _kSegmentTracking),
