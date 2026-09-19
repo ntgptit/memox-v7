@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_decorations.dart';
+import 'package:memox/core/theme/foundations/app_derived_colors.dart';
 import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
@@ -89,7 +91,7 @@ void main() {
       final semantic = theme.extension<AppSemanticColors>()!;
       final isDark = scheme.brightness == Brightness.dark;
 
-      testWidgets('$themeName · flat: surface, no edge, lg, no shadow', (
+      testWidgets('$themeName · flat: surface, no edge, xl, no shadow', (
         tester,
       ) async {
         await pump(tester, const MxCard.flat(child: Text('x')), theme: theme);
@@ -102,12 +104,12 @@ void main() {
         // draws none: its cards are pure white on a tinted page, and the
         // boundary is a colour edge rather than a drawn line.
         expect(hasVisibleBorder(tester), isFalse);
-        expect(radiusOf(decoration), AppRadius.lg);
+        expect(radiusOf(decoration), AppRadius.xl);
         expect(hasShadow(decoration), isFalse);
       });
 
       testWidgets(
-        '$themeName · raised: surface, lg, shadow in light, surfaceContainer in dark',
+        '$themeName · raised: surface, xl, shadow in light, surfaceContainer in dark',
         (tester) async {
           await pump(
             tester,
@@ -124,7 +126,7 @@ void main() {
           // thickening with the level, which is paint rather than meaning.
           expect(decoration.color, scheme.surfaceContainerLowest);
           expect(hasVisibleBorder(tester), isFalse);
-          expect(radiusOf(decoration), AppRadius.lg);
+          expect(radiusOf(decoration), AppRadius.xl);
           // Since M100.27 dark paints Tokyo's rim, so every lifted recipe
           // carries a BoxShadow in both modes.
           expect(hasShadow(decoration), isTrue);
@@ -202,7 +204,7 @@ void main() {
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.errorContainer);
         expect(hasShadow(decoration), isFalse);
-        expect(radiusOf(decoration), AppRadius.lg);
+        expect(radiusOf(decoration), AppRadius.xl);
       });
 
       testWidgets('$themeName · muted: surfaceContainerHigh aside', (
@@ -212,7 +214,7 @@ void main() {
 
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surfaceContainerHigh);
-        expect(radiusOf(decoration), AppRadius.lg);
+        expect(radiusOf(decoration), AppRadius.xl);
         // **Flat, and it carried card-level depth until M99.95.** The fill sits
         // 3.16 L* *below* the page, so a shadow under it had the card claiming
         // "lifted" and "sunken" at once — visible on `card_import_source_light`
@@ -259,6 +261,27 @@ void main() {
         expect(borderColorOf(tester), semantic.borderAccent);
         expect(hasShadow(decoration), isTrue);
       });
+
+      testWidgets(
+        '$themeName · hero: surface-hero, ghost edge in both themes',
+        (tester) async {
+          await pump(tester, const MxCard.hero(child: Text('x')), theme: theme);
+
+          final decoration = decorationOf(tester);
+          // The theme derives the tint once; the card applies no percentage of
+          // its own, so the fill is exactly what the derivation returns.
+          expect(decoration.color, AppDerivedColors.surfaceHero(scheme));
+          // **The edge is the point of the variant, in light as much as dark**:
+          // a hero without it dissolves into the page.
+          expect(hasVisibleBorder(tester), isTrue);
+          expect(
+            borderColorOf(tester),
+            AppDecorations.hairlineEdge(scheme).color,
+          );
+          expect(radiusOf(decoration), AppRadius.xl);
+          expect(hasShadow(decoration), isTrue);
+        },
+      );
 
       testWidgets('$themeName · tile: control corner, lifted like any '
           'page card', (tester) async {
@@ -326,7 +349,7 @@ void main() {
     final expectations = <MxCardPadding, double>{
       MxCardPadding.none: 0,
       MxCardPadding.compact: AppSpacing.md,
-      MxCardPadding.standard: AppSpacing.lg,
+      MxCardPadding.standard: AppSpacing.card,
     };
 
     for (final step in expectations.entries) {
