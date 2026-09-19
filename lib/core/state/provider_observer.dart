@@ -2,6 +2,9 @@ import 'dart:developer' as developer;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../error/drift_error_mapper.dart';
+import '../error/failure.dart';
+
 /// Where observer output goes. Injected so a test can read what was written.
 ///
 /// Positional, nullable trailing arguments rather than a named-argument record:
@@ -61,7 +64,11 @@ final class MemoxProviderObserver extends ProviderObserver {
     ProviderObserverContext context,
     Object error,
     StackTrace stackTrace,
-  ) => _sink('${_describe(context)} failed', error, stackTrace);
+  ) => _sink(
+    '${_describe(context)} failed${_causeOf(error)}',
+    error,
+    stackTrace,
+  );
 
   @override
   void didUpdateProvider(
@@ -78,6 +85,15 @@ final class MemoxProviderObserver extends ProviderObserver {
       null,
     );
   }
+
+  /// Why a [Failure] failed, in the one form that is safe to print.
+  ///
+  /// The repository boundary turns every persistence error into a [Failure]
+  /// whose `toString()` is `Instance of 'UnknownFailure'`, so without this the
+  /// line says *that* a provider failed and never *why*. Anything that is not a
+  /// [Failure] already arrives as itself through the sink's `error` argument.
+  String _causeOf(Object error) =>
+      error is Failure ? ' (cause: ${describeFailureCause(error.cause)})' : '';
 
   /// The provider's name, or its type when it has none.
   ///

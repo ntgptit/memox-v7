@@ -51,6 +51,28 @@ Failure mapDatabaseError(Object error) {
   return UnknownFailure(message: _genericMessage, cause: error);
 }
 
+/// What a [Failure]'s [Failure.cause] may say in a log line.
+///
+/// A [Failure] keeps the original error so the log can explain it, and that is
+/// exactly what a provider observer used to lose: it printed
+/// `Instance of 'UnknownFailure'` and the cause never reached the console. One
+/// bad migration then read as thirteen seconds of spinner with nothing naming it.
+///
+/// **Only the SQLite result code and message, and the exception type otherwise.**
+/// `SqliteException.toString()` appends the causing statement *and its
+/// parameters*, and a parameter can be card content (AD-08). The message itself
+/// is SQLite's own prose — `duplicate column name: sibling_position`,
+/// `UNIQUE constraint failed: decks.name` — which names schema objects and never
+/// a bound value. Any other cause is reduced to its type, because an arbitrary
+/// exception's text is the one place a value gets pasted in while debugging.
+String describeFailureCause(Object? cause) {
+  if (cause == null) return 'no cause';
+  final sqlite = _sqliteExceptionOf(cause);
+  if (sqlite == null) return cause.runtimeType.toString();
+
+  return 'SqliteException(${sqlite.extendedResultCode}): ${sqlite.message}';
+}
+
 /// The three kinds of constraint violation, separated because the user's next
 /// move differs for each.
 enum _ConstraintKind {
