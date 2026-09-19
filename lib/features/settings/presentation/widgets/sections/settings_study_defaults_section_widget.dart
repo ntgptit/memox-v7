@@ -11,7 +11,7 @@ import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../../study/domain/models/new_card_order_model.dart';
 import '../../../../study/domain/models/study_card_limit_model.dart';
-import '../items/settings_choice_rows_widget.dart';
+import '../../../../../shared/widgets/mx_segmented_tray.dart';
 import '../items/settings_error_band_widget.dart';
 import '../support/settings_labels_widget.dart';
 import 'settings_section_widget.dart';
@@ -207,23 +207,24 @@ class _SettingsStudyDefaultsSectionWidgetState
                 style: context.texts.titleSmall,
               ),
               const SizedBox(height: AppSpacing.xs),
-              // **Radio rows, not the pills `StudyOptionsSectionWidget`
-              // uses.** W6 requires a selected state not to rest on colour,
-              // and a `ChoiceChip` under `buildChipTheme` differs when
-              // selected only in fill and label colour — `showCheckmark` is
-              // false and `side` is resolved for disabled and focused only.
-              // The three groups on this screen therefore share one control,
-              // which is also what W1 draws.
-              //
-              // `contentPadding: zero` because this card already pads its
-              // content — the rows must start on the same x as the label
-              // above them (W5).
-              SettingsChoiceRowsWidget<NewCardOrder>(
-                values: NewCardOrder.values,
-                selected: _order,
-                labelOf: context.newCardOrderLabel,
-                onChanged: (order) => setState(() => _order = order),
-                isSubmitting: widget.isSubmitting,
+              Semantics(
+                enabled: !widget.isSubmitting,
+                label: widget.isSubmitting ? l10n.settingsSavingLabel : null,
+                container: widget.isSubmitting,
+                child: MxSegmentedTray<NewCardOrder>(
+                  options: <MxSegmentedTrayOption<NewCardOrder>>[
+                    for (final NewCardOrder order in NewCardOrder.values)
+                      MxSegmentedTrayOption<NewCardOrder>(
+                        value: order,
+                        label: context.newCardOrderLabel(order),
+                      ),
+                  ],
+                  selected: _order,
+                  variant: MxSegmentedTrayVariant.settings,
+                  onChanged: widget.isSubmitting
+                      ? null
+                      : (order) => setState(() => _order = order),
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               // BR-213 in one line. Without it the change reads as one that did

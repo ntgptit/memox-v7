@@ -1894,6 +1894,33 @@ của M2.
         RTL, semantics and tap-target accessibility.
 - **Checklist phases:** 7, 12, 13, 15.
 
+### M100.123 · MxSegmentedTray — exclusive selector dùng chung cho Settings và Progress
+
+- **Status:** **done** — focused component, Settings, Progress và Widgetbook
+  coverage xanh; xem concern verification trong task report.
+- **Goal:** Thay radio/pill rời rạc bằng một segmented tray typed cho 2–3 lựa
+  chọn loại trừ nhau.
+- **Scope:** `MxSegmentedTray`, migration chọn 7/30 ngày ở Progress, theme và
+  thứ tự thẻ mới ở Settings, Widgetbook và focused widget coverage.
+- **Out of scope:** palette/theme foundation, `MxPillButton`, ngôn ngữ Settings
+  ba lựa chọn, controller/domain/persistence và golden Windows.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_segmented_tray.dart` và các caller/catalog
+  trực tiếp.
+- **Acceptance criteria:**
+  - [x] Tray typed chỉ nhận 2 hoặc 3 option, công bố selection exclusive, thumb
+        32dp trong target 48dp và giữ geometry 4/2/12/32/8.
+  - [x] Progress, Settings theme và thứ tự thẻ mới giữ nguyên state transition,
+        failure/submitting behavior và localized labels.
+  - [x] Widgetbook có knobs 2/3 option, selection, enabled, variant; focused
+        non-golden verification xanh. Full gate concern được ghi riêng vì
+        verifier profile không có trên disk và một geometry assertion Progress
+        ngoài scope đã đỏ.
+- **Dependencies:** M100.118 (`MxTapTarget`), M100.119 (v3 shared controls).
+- **Tests required:** `mx_segmented_tray_test.dart`, focused Settings/Progress
+  presentation tests, Widgetbook coverage and non-golden suite.
+- **Checklist phases:** 7, 12, 15.
+
 ### M100.119 · MxSettingsRow — hàng cài đặt của v3 (label 16/600, sub, control cuối hàng)
 
 - **Status:** **done** — analyze sạch, `mx_settings_row_test.dart` +

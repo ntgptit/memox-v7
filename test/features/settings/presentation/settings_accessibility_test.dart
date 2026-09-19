@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' show CheckedState;
+import 'dart:ui' show Tristate;
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
-import 'package:memox/features/settings/domain/models/app_theme_mode_model.dart';
 import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
@@ -101,33 +100,25 @@ void main() {
   });
 
   group('roles and values', () {
-    testWidgets('each choice row is announced as a radio with its selected '
-        'state', (tester) async {
+    testWidgets('each theme option announces its exclusive selected state', (
+      tester,
+    ) async {
       // W6: the selected state must not rest on colour. The flag is what a
       // screen reader reads, and it is what proves the wiring rather than the
       // widget's reputation.
       final handle = tester.ensureSemantics();
       await pumpSettings(tester, FakeAppSettingsRepository());
 
-      // **`getSemanticsData()`, not the node's own flags.** `RadioListTile` is
-      // a merge boundary: the label and the tap sit on the boundary node while
-      // the checked state sits on the control node inside it, and only the
-      // merged data is what the platform — and therefore the user — receives.
       final selected = tester
-          .getSemantics(find.byType(RadioListTile<AppThemeMode>).first)
+          .getSemantics(find.text(english.settingsThemeSystem).first)
           .getSemanticsData();
       final unselected = tester
-          .getSemantics(find.byType(RadioListTile<AppThemeMode>).at(1))
+          .getSemantics(find.text(english.settingsThemeLight))
           .getSemanticsData();
 
-      // `CheckedState`, not a boolean: the engine distinguishes "checked",
-      // "not checked" and "has no check state at all", and only the third
-      // would mean the row never announced itself as a choice.
-      expect(selected.flagsCollection.isChecked, CheckedState.isTrue);
-      expect(unselected.flagsCollection.isChecked, CheckedState.isFalse);
+      expect(selected.flagsCollection.isSelected, Tristate.isTrue);
+      expect(unselected.flagsCollection.isSelected, Tristate.isFalse);
 
-      // The row itself is tappable and labelled, so the whole 48dp target —
-      // not just the glyph — reaches the choice.
       expect(selected.label, english.settingsThemeSystem);
       expect(selected.hasAction(SemanticsAction.tap), isTrue);
 
