@@ -3,6 +3,7 @@ import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
+import 'package:memox/shared/widgets/mx_filter_chip.dart';
 import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
@@ -562,6 +563,99 @@ WidgetbookComponent pillButtonComponent() {
               children: <Widget>[
                 MxPillButton(label: 'All', isSelected: false, onPressed: null),
                 MxPillButton(label: 'Due', isSelected: true, onPressed: null),
+              ],
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent filterChipComponent() {
+  return WidgetbookComponent(
+    name: 'MxFilterChip',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: 'Cards',
+          );
+          final count = context.knobs.intOrNull.slider(
+            label: 'count',
+            description: 'Off renders nothing; 0 still renders',
+            max: 999,
+          );
+          final isSelected = context.knobs.boolean(
+            label: 'isSelected',
+            initialValue: true,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+          final hasIcon = context.knobs.boolean(label: 'with icon');
+          final semanticLabel = context.knobs.stringOrNull(
+            label: 'semanticLabel',
+            description: 'For abbreviations — what the label cannot say',
+          );
+
+          return CatalogCenterPage(
+            child: MxFilterChip(
+              label: label,
+              count: count,
+              isSelected: isSelected,
+              onPressed: isEnabled ? _noop : null,
+              icon: hasIcon ? Icons.filter_list : null,
+              semanticLabel: semanticLabel,
+            ),
+          );
+        },
+      ),
+      // One of N, with the tick moving between them and the counts holding
+      // their place.
+      WidgetbookUseCase(
+        name: 'Group',
+        builder: (BuildContext context) {
+          const options = <String>['All', 'Cards', 'Decks'];
+          final selected = context.knobs.object.dropdown<String>(
+            label: 'selected',
+            options: options,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                for (final option in options)
+                  MxFilterChip(
+                    label: option,
+                    count: option.length,
+                    isSelected: option == selected,
+                    onPressed: isEnabled ? _noop : null,
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+      WidgetbookUseCase(
+        name: 'Disabled pair',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                MxFilterChip(label: 'All', isSelected: false, onPressed: null),
+                MxFilterChip(label: 'Cards', isSelected: true, onPressed: null),
               ],
             ),
           );

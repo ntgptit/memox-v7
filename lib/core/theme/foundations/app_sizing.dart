@@ -78,6 +78,12 @@ abstract final class AppSizing {
   /// The one rung whose look is not a tone: `MxActionButtonSize.chip` paints a
   /// fixed ghost-edged pill whatever `variant` says, because the handoff's
   /// `themeRoleUsage` table has no per-tone row for it.
+  ///
+  /// Also `MxFilterChip`'s fixed painted height — the same v3 "chip" size
+  /// (docs/design-system/v3-foundations.md, "chip cỡ cố định 28"), so one
+  /// number serves both rather than two tokens that must agree. Below
+  /// `RawChip`'s own painted floor, which is why `MxFilterChip` does not wrap
+  /// `ChoiceChip`.
   static const double controlChip = 28;
 
   /// The plain `IconButton`'s own painted ink circle — 36, not

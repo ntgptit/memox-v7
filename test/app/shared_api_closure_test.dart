@@ -43,7 +43,7 @@ const List<String> kClosedApiFiles = <String>[
   'lib/shared/widgets/mx_section_label.dart',
   'lib/shared/widgets/mx_loading_state.dart',
   // The menu trigger: label, glyph and callback cross the constructor; no
-  // colour, padding or style does (M100.116).
+  // colour, padding or style does (M100.117).
   'lib/shared/widgets/mx_chip_trigger.dart',
 ];
 

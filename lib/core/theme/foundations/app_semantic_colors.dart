@@ -43,6 +43,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.surfaceSelected,
     required this.surfaceMuted,
     required this.borderAccent,
+    required this.borderGhost,
     required this.borderSubtle,
     required this.borderControl,
     required this.disabledSurface,
@@ -86,6 +87,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceSelected = AppSurfaceColors.surfaceSelectedLight,
       surfaceMuted = AppSurfaceColors.surfaceMutedLight,
       borderAccent = AppBorderColors.borderAccentLight,
+      borderGhost = AppBorderColors.borderGhostLight,
       borderSubtle = AppBorderColors.borderSubtleLight,
       borderControl = AppBorderColors.borderControlLight,
       disabledSurface = AppColors.disabledSurfaceLight,
@@ -128,6 +130,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceSelected = AppSurfaceColors.surfaceSelectedDark,
       surfaceMuted = AppSurfaceColors.surfaceMutedDark,
       borderAccent = AppBorderColors.borderAccentDark,
+      borderGhost = AppBorderColors.borderGhostDark,
       borderSubtle = AppBorderColors.borderSubtleDark,
       borderControl = AppBorderColors.borderControlDark,
       disabledSurface = AppColors.disabledSurfaceDark,
@@ -229,6 +232,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// The accent hairline — see [AppBorderColors.borderAccentLight].
   final Color borderAccent;
 
+  /// The hairline a `MxFilterChip` wears unselected — see
+  /// [AppBorderColors.borderGhostLight].
+  final Color borderGhost;
+
   final Color borderSubtle;
 
   /// The edge of something a finger acts on — a text field, a tappable row, a
@@ -312,6 +319,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? surfaceSelected,
     Color? surfaceMuted,
     Color? borderAccent,
+    Color? borderGhost,
     Color? borderSubtle,
     Color? borderControl,
     Color? disabledSurface,
@@ -354,6 +362,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceSelected: surfaceSelected ?? this.surfaceSelected,
       surfaceMuted: surfaceMuted ?? this.surfaceMuted,
       borderAccent: borderAccent ?? this.borderAccent,
+      borderGhost: borderGhost ?? this.borderGhost,
       borderSubtle: borderSubtle ?? this.borderSubtle,
       borderControl: borderControl ?? this.borderControl,
       disabledSurface: disabledSurface ?? this.disabledSurface,
@@ -436,6 +445,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceSelected: Color.lerp(surfaceSelected, other.surfaceSelected, t)!,
       surfaceMuted: Color.lerp(surfaceMuted, other.surfaceMuted, t)!,
       borderAccent: Color.lerp(borderAccent, other.borderAccent, t)!,
+      borderGhost: Color.lerp(borderGhost, other.borderGhost, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       borderControl: Color.lerp(borderControl, other.borderControl, t)!,
       disabledSurface: Color.lerp(disabledSurface, other.disabledSurface, t)!,

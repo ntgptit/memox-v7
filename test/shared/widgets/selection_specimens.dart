@@ -3,6 +3,7 @@ import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_filter_chip.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 
 /// The selection-control specimens — pills and the quiet badge — split from
@@ -130,6 +131,134 @@ class PillStatesSpecimen extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void _noop() {}
+}
+
+/// The filter chip group, over the hint it sits beside.
+///
+/// **Counts are the specimen**: one chip is selected and every chip but one
+/// carries a count, so the picture pins the trailing numeral's weight and
+/// dimming in both states, and the chip without one shows that a missing count
+/// adds no gap. The reference line is the same as the pill's — a control must
+/// not out-shout the text it belongs to.
+class FilterChipGroupSpecimen extends StatelessWidget {
+  const FilterChipGroupSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Filter your library',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            const Wrap(
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                MxFilterChip(
+                  label: 'All',
+                  count: 128,
+                  isSelected: true,
+                  onPressed: _noop,
+                ),
+                MxFilterChip(
+                  label: 'Due',
+                  count: 12,
+                  isSelected: false,
+                  onPressed: _noop,
+                ),
+                MxFilterChip(
+                  label: 'New',
+                  count: 0,
+                  isSelected: false,
+                  onPressed: _noop,
+                ),
+                MxFilterChip(
+                  label: 'Flagged',
+                  isSelected: false,
+                  onPressed: _noop,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void _noop() {}
+}
+
+/// Every filter chip state on the page: unselected, selected and disabled, with
+/// and without a leading glyph and a count.
+///
+/// The unselected row is the only place `border-ghost` is drawn, so it is the
+/// row that answers whether the hairline is visible on the page in each theme.
+class FilterChipStatesSpecimen extends StatelessWidget {
+  const FilterChipStatesSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: AppSpacing.md,
+          children: <Widget>[
+            Row(
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                MxFilterChip(label: 'All', isSelected: false, onPressed: _noop),
+                MxFilterChip(
+                  label: 'Due',
+                  count: 12,
+                  isSelected: true,
+                  onPressed: _noop,
+                ),
+                MxFilterChip(
+                  label: 'New',
+                  count: 3,
+                  icon: Icons.circle_outlined,
+                  isSelected: false,
+                  onPressed: _noop,
+                ),
+              ],
+            ),
+            Row(
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                MxFilterChip(label: 'All', isSelected: false, onPressed: null),
+                MxFilterChip(
+                  label: 'Due',
+                  count: 12,
+                  isSelected: true,
+                  onPressed: null,
+                ),
+                MxFilterChip(
+                  label: 'New',
+                  count: 3,
+                  icon: Icons.circle_outlined,
+                  isSelected: false,
+                  onPressed: null,
+                ),
+              ],
             ),
           ],
         ),
