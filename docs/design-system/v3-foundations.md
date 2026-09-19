@@ -268,7 +268,7 @@ its first caller"):
 | `danger-soft` | error 8%/16% trộn trong suốt | ErrorState tile tint; chưa có caller |
 | `danger-border` | error 22%/32% trộn trong suốt | Viền destructive; chưa có caller |
 | `border-ghost` | `rgba(82,101,245,.14)` / `rgba(139,154,255,.16)` | Hairline "ghost" nhạt hơn `primary-border`; kit vẽ trên hàng Guess của Match — spec đó sẽ khai báo |
-| `error-fill` | `#DC2D4E` / `#B0485C` | Fill **đặc** cho nút destructive — khác `error` ở dark; spec Button sẽ khai báo |
+| `error-fill` | `#DC2D4E` / `#B0485C` | Fill **đặc** cho nút destructive — khác `error` ở dark; spec Button đã khai báo (M100.112) |
 | `on-error-fill` | `#FFFFFF` cả hai | Nhãn trên `error-fill`; đi cùng ở trên |
 | `mastery` | `#1F8A5B` / `#6FE0BD` | Không có `masteryInk` riêng — khái niệm mastery dùng `success`/`successInk` (ruling R4); hex này chỉ để tra cứu |
 | `mastery-fixed` | `#C7F2D8` / `#1F4A37` | Tint mastery bất biến theo theme; chưa có caller |

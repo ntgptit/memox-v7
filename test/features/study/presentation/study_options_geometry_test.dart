@@ -68,21 +68,30 @@ void main() {
     expect(field.left - screen.left, AppSpacing.lg);
   });
 
-  testWidgets('the body starts on the same left edge as the app-bar title', (
-    tester,
-  ) async {
-    await pumpOptions(tester, surface: const Size(393, 852));
+  testWidgets(
+    'the app-bar title sits one control-gap in, the body one screen-gutter',
+    (tester) async {
+      await pumpOptions(tester, surface: const Size(393, 852));
 
-    final title = tester.getRect(
-      find.descendant(
-        of: find.byType(AppBar),
-        matching: find.text(english.studyOptionsTitle),
-      ),
-    );
-    final field = tester.getRect(find.byType(MxTextField));
+      final title = tester.getRect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.text(english.studyOptionsTitle),
+        ),
+      );
+      final field = tester.getRect(find.byType(MxTextField));
 
-    // One content column. A body inset differently from the bar above it reads
-    // as two screens stacked.
-    expect(field.left, title.left);
-  });
+      // **The two edges stopped being the same number at the `MxAppBar`
+      // extraction (task-1).** The bar used to inherit `AppBar`'s default
+      // `titleSpacing` (16, `kMiddleSpacing`), which happened to equal the
+      // body's own `AppSpacing.lg` gutter — one content column by
+      // coincidence, not by a shared token. `MxAppBar`'s own compact padding
+      // is `AppSpacing.sm` (Requirement 2), a *control*-internal gap rather
+      // than a *screen* gutter, so the title now sits 8dp in and the body
+      // still sits 16dp in. The gap between them is exactly `lg - sm`.
+      expect(title.left, AppSpacing.sm);
+      expect(field.left, AppSpacing.lg);
+      expect(field.left - title.left, AppSpacing.lg - AppSpacing.sm);
+    },
+  );
 }

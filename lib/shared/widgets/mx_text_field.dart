@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
+import 'mx_icon.dart';
 import 'mx_icon_button.dart';
 import '../../core/theme/extensions/app_ink.dart';
 
@@ -284,8 +286,7 @@ class MxTextField extends StatelessWidget {
         // replaces the helper in the same row, so its arrival moves nothing.
         helperText: helperText ?? _reservedHelper,
         helperMaxLines: _maxMessageLines,
-        errorText: errorText,
-        errorMaxLines: _maxMessageLines,
+        error: _buildError(context),
         suffixIcon: _buildSuffix(),
         // **Stated, because the default is 48 wide and 48 tall only by
         // accident.** `InputDecorator` gives a suffix the field's own height
@@ -300,6 +301,34 @@ class MxTextField extends StatelessWidget {
                 minHeight: AppSizing.touchTarget,
               ),
       ),
+    );
+  }
+
+  /// The message with its glyph. `InputDecoration.error` stands in for
+  /// `errorText` because only a widget can carry the icon; the border and
+  /// suffix error states key off "either is non-null", so nothing else moves.
+  Widget? _buildError(BuildContext context) {
+    final message = errorText;
+    if (message == null) return null;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const MxIcon(
+          Icons.error_outline,
+          ink: AppInk.error,
+          size: MxIconSize.sm,
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(
+          child: Text(
+            message,
+            maxLines: _maxMessageLines,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).inputDecorationTheme.errorStyle,
+          ),
+        ),
+      ],
     );
   }
 

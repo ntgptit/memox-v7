@@ -234,6 +234,30 @@ void main() {
       expect(find.text('Remembered'), findsOneWidget);
     });
 
+    testWidgets('Reveal answer is a study pill; the grades stay standard', (
+      tester,
+    ) async {
+      MxActionButton buttonOf(String label) => tester.widget<MxActionButton>(
+        find.ancestor(
+          of: find.text(label),
+          matching: find.byType(MxActionButton),
+        ),
+      );
+
+      await pump(tester, actions: eightBox);
+      expect(buttonOf('Show answer').size, MxActionButtonSize.study);
+
+      await tester.tap(find.text('Show answer'));
+      await tester.pump();
+      for (final String label in <String>['Forgot', 'Remembered']) {
+        expect(
+          buttonOf(label).size,
+          MxActionButtonSize.standard,
+          reason: label,
+        );
+      }
+    });
+
     testWidgets('renders two buttons for eight_box and four for sm2 (BR-30)', (
       tester,
     ) async {

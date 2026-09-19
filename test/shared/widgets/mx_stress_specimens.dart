@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_alert_dialog.dart';
+import 'package:memox/shared/widgets/mx_app_bar.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
@@ -415,6 +416,34 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       label: 'Tên bộ thẻ từ vựng',
       helperText: kLongMessage,
       errorText: 'Tên bộ thẻ không được để trống hoặc chỉ chứa khoảng trắng',
+    ),
+    isInteractive: true,
+  ),
+  // The row alone, at every slot filled: long title under ellipsis, a
+  // leading back affordance and two actions. `MxContentShell`'s own
+  // specimens below stress the row inside the shell; this one stresses the
+  // leaf component `MxContentShell` now delegates to.
+  MxStressSpecimen(
+    name: 'MxAppBar',
+    build: () => const MxAppBar(
+      title: Text(kLongTitle),
+      leading: MxIconButton(
+        icon: Icons.arrow_back,
+        semanticLabel: 'Quay lại',
+        onPressed: _noop,
+      ),
+      actions: <Widget>[
+        MxIconButton(
+          icon: Icons.add,
+          semanticLabel: 'Thêm bộ thẻ con mới',
+          onPressed: _noop,
+        ),
+        MxIconButton(
+          icon: Icons.more_vert,
+          semanticLabel: 'Thao tác khác với bộ thẻ',
+          onPressed: _noop,
+        ),
+      ],
     ),
     isInteractive: true,
   ),

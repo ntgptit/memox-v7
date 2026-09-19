@@ -300,7 +300,25 @@ void main() {
           .widget<TextField>(find.byType(TextField))
           .decoration!;
       expect(decoration.helperMaxLines, 3);
-      expect(decoration.errorMaxLines, 3);
+
+      // The error is a widget since it gained its glyph, so `errorMaxLines` no
+      // longer applies; the cap now lives on the message's own `Text`.
+      await pump(
+        tester,
+        MxTextField(
+          controller: controller,
+          label: 'a field',
+          errorText: 'an error long enough to need more than one line',
+        ),
+      );
+      expect(
+        tester
+            .widget<Text>(
+              find.text('an error long enough to need more than one line'),
+            )
+            .maxLines,
+        3,
+      );
     });
   });
 }

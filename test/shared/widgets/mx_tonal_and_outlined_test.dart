@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/components/actions/app_icon_button_theme.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
@@ -26,11 +28,13 @@ void main() {
     home: Scaffold(body: Center(child: child)),
   );
 
-  group('the tonal pair reads M3 tonal roles, and only those', () {
-    // `secondaryContainer` / `onSecondaryContainer` is what
-    // `_FilledButtonDefaultsM3` gives `FilledButton.tonal`. Reading anything
-    // else here would make the app's tonal button a fourth colour rather than
-    // M3's third weight — and it would do it invisibly, because any container
+  group('the tonal pair reads the v3 secondary-tone roles, and only those', () {
+    // `surfaceContainer` / `onSurface` is the v3 Button handoff's binding for
+    // the "secondary" tone (`themeRoleUsage`, M3_COLOR/DIRECT/FULL_STRENGTH),
+    // superseding M100.73's choice of M3's own `FilledButton.tonal` pair
+    // (`secondaryContainer` / `onSecondaryContainer`). Reading anything else
+    // here would make the app's tonal button some other colour than the
+    // handoff names — and it would do it invisibly, because any container
     // role looks plausible on screen.
     for (final (String name, ThemeData theme) in <(String, ThemeData)>[
       ('light', light),
@@ -38,15 +42,50 @@ void main() {
     ]) {
       test(name, () {
         final scheme = theme.colorScheme;
+        final semantic = theme.extension<AppSemanticColors>()!;
 
-        expect(MxFilledPair.tonal.fillOf(scheme), scheme.secondaryContainer);
-        expect(MxFilledPair.tonal.labelOf(scheme), scheme.onSecondaryContainer);
         expect(
-          MxFilledPair.tonal.stateLayerOf(scheme),
-          scheme.onSecondaryContainer,
+          MxFilledPair.tonal.fillOf(scheme, semantic),
+          scheme.surfaceContainer,
+        );
+        expect(MxFilledPair.tonal.labelOf(scheme, semantic), scheme.onSurface);
+        expect(
+          MxFilledPair.tonal.stateLayerOf(scheme, semantic),
+          scheme.onSurface,
           reason:
               'the state layer is the pair\'s own `on` role for every pair — a '
               'layer in some other role rotates the hue on press',
+        );
+      });
+    }
+  });
+
+  group('the destructive pair reads the v3 error-fill tokens, not error', () {
+    // The handoff's `themeRoleUsage` binds the destructive container to
+    // `error-fill` — "the SOLID destructive fill, deeper than `error`, which is
+    // the error text colour". `scheme.error` / `onError` stay the text/icon
+    // "this is an error" colour; a button painted with them would be the wrong
+    // red, and both reds are plausible on screen, hence the exact pin.
+    for (final (String name, ThemeData theme) in <(String, ThemeData)>[
+      ('light', light),
+      ('dark', dark),
+    ]) {
+      test(name, () {
+        final scheme = theme.colorScheme;
+        final semantic = theme.extension<AppSemanticColors>()!;
+
+        expect(
+          MxFilledPair.destructive.fillOf(scheme, semantic),
+          semantic.errorFill,
+        );
+        expect(
+          MxFilledPair.destructive.labelOf(scheme, semantic),
+          semantic.onErrorFill,
+        );
+        expect(
+          MxFilledPair.destructive.stateLayerOf(scheme, semantic),
+          semantic.onErrorFill,
+          reason: 'the state layer is the pair\'s own `on` token',
         );
       });
     }
@@ -77,11 +116,11 @@ void main() {
 
     expect(
       button.style?.backgroundColor?.resolve(<WidgetState>{}),
-      scheme.secondaryContainer,
+      scheme.surfaceContainer,
     );
     expect(
       button.style?.foregroundColor?.resolve(<WidgetState>{}),
-      scheme.onSecondaryContainer,
+      scheme.onSurface,
     );
   });
 
@@ -114,7 +153,7 @@ void main() {
     );
     expect(
       style.backgroundColor?.resolve(<WidgetState>{WidgetState.disabled}),
-      isNot(light.colorScheme.secondaryContainer),
+      isNot(light.colorScheme.surfaceContainer),
       reason: 'a disabled button that keeps its fill looks armed and is inert',
     );
   });
@@ -222,6 +261,73 @@ void main() {
       ).side!.resolve(<WidgetState>{})!;
 
       expect(side.width, AppStroke.hairline);
+    });
+  });
+
+  group('the plain icon button', () {
+    testWidgets('draws 36, hands a finger 48, and stays fully round', (
+      tester,
+    ) async {
+      // The v3 IconButton contract this task ships: a 36 painted circle
+      // centred inside the unchanged 48 touch target — the same drawn-vs-hit
+      // split the outlined variant already has (`draws 40 and still hands a
+      // finger 48`, above), at its own component-owned size.
+      await tester.pumpWidget(
+        host(
+          light,
+          const MxIconButton(
+            icon: Icons.search,
+            semanticLabel: 'Search',
+            onPressed: _noop,
+          ),
+        ),
+      );
+
+      final drawnFinder = find
+          .descendant(
+            of: find.byType(IconButton),
+            matching: find.byType(Material),
+          )
+          .first;
+      final drawn = tester.getRect(drawnFinder);
+      expect(drawn.width, AppSizing.iconButtonInk);
+      expect(drawn.height, AppSizing.iconButtonInk);
+
+      expect(
+        tester.getRect(find.byType(IconButton)).height,
+        greaterThanOrEqualTo(AppSizing.touchTarget),
+        reason: 'the body came down; the floor must not have',
+      );
+
+      final material = tester.widget<Material>(drawnFinder);
+      expect(
+        material.shape,
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+        ),
+        reason: 'fully round — the old AppRadius.md squircle no longer applies',
+      );
+    });
+
+    testWidgets('the glyph is mdCompact even when not isCompact', (
+      tester,
+    ) async {
+      // The v3 spec fixes the glyph at 20 with no compact/non-compact split —
+      // `isCompact`'s only remaining job is the 48×48 box constraint for
+      // `MxSessionTopBar`.
+      await tester.pumpWidget(
+        host(
+          light,
+          const MxIconButton(
+            icon: Icons.search,
+            semanticLabel: 'Search',
+            onPressed: _noop,
+          ),
+        ),
+      );
+
+      final icon = tester.widget<Icon>(find.byType(Icon));
+      expect(icon.size, AppIconSize.mdCompact);
     });
   });
 }

@@ -5,8 +5,10 @@ import 'package:memox/shared/widgets/mx_chip_trigger.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
+import 'package:memox/shared/widgets/mx_option_row.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
+import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 
 import 'mx_stress_specimens.dart';
@@ -34,6 +36,13 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
         MxMenuAction(label: kLongLabel, onSelected: _noop),
       ],
     ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Label-less and fixed-size: nothing wraps, so the stress is the 48dp
+    // tap target the guideline checks at every text scale.
+    name: 'MxSwitch',
+    build: () => const MxSwitch(isOn: true, onChanged: _noopBool),
     isInteractive: true,
   ),
   MxStressSpecimen(
@@ -71,6 +80,19 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
       onChanged: _noopIndex,
       labelOf: (int value) => kLongLabel,
       subtitleOf: (int value) => 'Hai hộp, tám bậc ôn tập',
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Title and description both wrap freely and the row grows; the trailing
+    // slot must not be pushed off a squeezed row.
+    name: 'MxOptionRow',
+    build: () => const MxOptionRow(
+      title: kLongTitle,
+      subtitle: kLongMessage,
+      isSelected: true,
+      onSelect: _noop,
+      trailing: Icon(Icons.info_outline),
     ),
     isInteractive: true,
   ),
