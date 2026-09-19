@@ -1663,8 +1663,65 @@ của M2.
         widget được truyền.
 - **Checklist phases:** 7, 12.
 
+### M100.114 · IconButton (plain) đọc đúng hình học v3 — 36 vẽ, 48 chạm, bo tròn, glyph 20
 
-### M100.114 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
+- **Status:** **done** — analyze, host suite 5290/5290 và guard xanh; golden vẽ lại
+  trên Linux `TZ=UTC` (WSL, 44 file, 100 PNG đổi, không thêm/xoá).
+- **Goal:** Style plain của `IconButton` (`buildIconButtonTheme`) đổi từ vẽ trọn
+  ô 48×48 squircle `AppRadius.md`, glyph 24 sang đúng hợp đồng handoff kit
+  MemoX v3 (Actions & controls, 2026-09-18): một hình tròn sơn 36×36, đặt giữa
+  vùng chạm tối thiểu 48×48 không đổi (không bao giờ phóng to hình tròn để lấp
+  đầy vùng chạm), glyph cố định 20 (`AppIconSize.mdCompact`) bất kể `isCompact`.
+  Màu đã đúng từ M100.101 — task này chỉ đổi hình học.
+- **Scope:** `app_sizing.dart` (hằng số mới `AppSizing.iconButtonInk = 36`,
+  công dụng riêng cho ô sơn của style plain, không dùng chung với
+  `controlCompact` = 40 của style outlined), `app_icon_button_theme.dart`
+  (`buildIconButtonTheme`: `minimumSize` đổi sang `iconButtonInk`, thêm
+  `tapTargetSize: MaterialTapTargetSize.padded`, `shape` đổi
+  `AppRadius.md` → `AppRadius.pill`), `mx_icon_button.dart` (glyph luôn
+  `AppIconSize.mdCompact`, bỏ nhánh `isCompact ? mdCompact : md`).
+- **Out of scope:** style outlined (`buildOutlinedIconButtonStyle`, hợp đồng
+  "40 vẽ, 48 chạm" của nó) — không đổi. `isCompact` vẫn giữ, chỉ còn tác dụng
+  siết `BoxConstraints.tightFor(48,48)` cho `MxSessionTopBar`, không còn đổi
+  glyph. Không đụng màu, overlay, focus ring, disabled — tất cả đã đúng từ
+  M100.101.
+- **Dependencies:** M100.101 (màu đã xong). Gallery republish tại URL ghim theo
+  kiểu **ghép**: 19 figure lấy từ nhánh này, 40 figure còn hình IconButton cũ vì
+  bản live đang mang thay đổi chưa merge của nhánh Button/SearchField — chúng tự
+  cập nhật khi nhánh đó republish.
+- **Tests required:** `app_sizing_test.dart` (hằng số mới vào bảng lưới 4dp,
+  assertion `iconButtonInk < touchTarget`, pin `iconButtonTheme.minimumSize`
+  đổi từ `touchTarget` sang `iconButtonInk`); nhóm mới "the plain icon button"
+  trong `mx_tonal_and_outlined_test.dart` đo ô vẽ 36, ô chạm ≥48, shape tròn
+  (`RoundedRectangleBorder(AppRadius.pill)`), và glyph `mdCompact` kể cả khi
+  không `isCompact`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/core/theme/foundations/app_sizing.dart`,
+  `lib/core/theme/components/actions/app_icon_button_theme.dart`,
+  `lib/shared/widgets/mx_icon_button.dart`.
+- **Acceptance criteria:**
+  - [x] `iconButtonTheme` (style plain) vẽ ô tròn 36×36, vùng chạm ≥48×48 —
+        chứng minh bằng test đo widget đã render, không phải suy luận.
+  - [x] Hợp đồng 40/48 của style outlined không đổi một byte.
+  - [x] Glyph của `MxIconButton` (plain, không `isCompact`) là `mdCompact`
+        (20); trường hợp `isCompact` cũng 20, ô vẫn đúng 48×48.
+  - [x] Hằng số mới nằm trong bảng lưới 4dp và có assertion thứ tự so với
+        `touchTarget`.
+  - [x] Không đổi màu, overlay, focus ring, hay binding disabled.
+  - [x] **Sáu test ghim hình học cũ được trỏ lại, không nới.** Bốn test đo vùng chạm 48dp
+        qua `InkWell` nay đo `IconButton` (InkWell giờ là hình tròn sơn 36 theo thiết kế);
+        ngưỡng 47.5 giữ nguyên. Hai test G2 của trash suy `residue` từ
+        `touchTarget` và `mdCompact` thay vì gõ số.
+  - [x] **Hệ quả ghi lại, không giấu:** glyph 20 trong hộp 48 chừa 14dp mỗi bên, nên
+        glyph cuối hàng trash nằm **2dp** trong gutter thay vì đúng gutter (residue
+        0 → 2). Căn chính xác cần padding ngoài 2dp — lệch lưới 4dp và dưới `AppSpacing.xs`.
+        Các caller khác của `MxIconButton` dịch cùng 2dp nhưng chưa có test đo.
+  - [x] `dart format`, `flutter analyze --no-fatal-infos`, full host suite
+        (`--exclude-tags golden`), guard Python đều xanh.
+- **Checklist phases:** 7, 12.
+
+
+### M100.115 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
 
 - **Status:** **done** — analyze sạch, `mx_card_*` + `mx_section_test` +
   `mx_app_bar_test` xanh, golden vẽ lại trên Linux (44 file, 121 PNG; compare
