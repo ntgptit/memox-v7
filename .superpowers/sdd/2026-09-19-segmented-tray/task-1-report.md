@@ -36,3 +36,30 @@ width, focus ring, RTL/text scale, and 2-or-3-option precondition.
 
 No persistence, controller/domain, global theme, `MxPillButton`, language
 three-choice control, or golden image changes were made.
+
+## Fix round 1/5
+
+Addressed the review's six important findings:
+
+- Removed viewport-derived option sizing and the whole-tray hit target. Each
+  option now owns its own 48dp-minimum `MxTapTarget`, so padding taps route to
+  that option rather than the tray centre.
+- Kept labels intrinsic, one-line, and untruncated. Settings measures the
+  localized labels against its available width and uses its existing option-row
+  control when a segmented tray cannot fit (including 320dp at text scale 2).
+- Added a 2dp-clear external focus ring around the 32dp thumb without changing
+  content footprint, tray padding, or option spacing.
+- Added `semanticLabel` to `MxSegmentedTrayOption` and restored Progress's
+  fuller `Last 7/30 days` accessible range labels.
+- Added regression coverage for real viewport/narrow parent intrinsic sizing,
+  individual padding-target taps and semantic bounds, exact focus geometry,
+  no-ellipsis labels, dark/high-contrast roles across both variants, disabled
+  width stability, and Settings fallback behavior.
+
+### Fix-round verification
+
+- RED: `flutter test test/shared/widgets/mx_segmented_tray_test.dart` failed
+  as expected because `MxSegmentedTrayOption.semanticLabel` did not yet exist.
+- `flutter test test/shared/widgets/mx_segmented_tray_test.dart test/features/progress/presentation/progress_deck_screen_test.dart test/features/settings/presentation/settings_accessibility_test.dart test/features/settings/presentation/settings_screen_states_test.dart test/features/settings/presentation/settings_screen_geometry_test.dart test/app/widgetbook_coverage_test.dart` — passed, 70 tests.
+- `flutter analyze --no-pub` — passed with no issues.
+- `cd widgetbook && flutter test` — passed, 8 tests.

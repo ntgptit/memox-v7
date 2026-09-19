@@ -271,6 +271,7 @@ void main() {
           hasEnabledState: true,
           isEnabled: true,
           hasTapAction: true,
+          label: english.progressRange7SemanticLabel,
         ),
       );
       semantics.dispose();

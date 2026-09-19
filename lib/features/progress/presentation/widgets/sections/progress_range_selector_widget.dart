@@ -42,6 +42,7 @@ class ProgressRangeSelectorWidget extends StatelessWidget {
             MxSegmentedTrayOption<ProgressRange>(
               value: option,
               label: context.progressRangeLabel(option),
+              semanticLabel: context.progressRangeSemanticLabel(option),
             ),
         ],
         selected: range,

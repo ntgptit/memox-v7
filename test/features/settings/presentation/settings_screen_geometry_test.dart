@@ -240,9 +240,12 @@ void main() {
           greaterThanOrEqualTo(AppSizing.touchTarget),
         );
       }
-      final trays = find.byType(MxTapTarget);
-      expect(trays, findsNWidgets(2));
-      for (var i = 0; i < 2; i++) {
+      final trays = find.descendant(
+        of: find.byWidgetPredicate((widget) => widget is MxSegmentedTray),
+        matching: find.byType(MxTapTarget),
+      );
+      expect(trays, findsNWidgets(5));
+      for (var i = 0; i < 5; i++) {
         expect(
           tester.getRect(trays.at(i)).height,
           greaterThanOrEqualTo(AppSizing.touchTarget),
@@ -298,13 +301,14 @@ void main() {
       final cardLeft = cardRects(tester).first.left;
       final content = cardLeft + AppSpacing.lg;
 
-      // Study defaults: the field is the card's own content edge, and its
-      // `block`-shaped rows carry no gutter of their own, so both land on it.
+      // Study defaults: the field is the card's own content edge.
       expect(tester.getRect(find.byType(MxTextField).first).left, content);
-      expect(tester.getRect(traySurface<NewCardOrder>()).left, content);
-      // The choice cards get to the same x from the opposite direction: the
-      // card pads vertically only and each `list` row supplies the gutter.
-      expect(tester.getRect(traySurface<AppThemeMode>()).left, content);
+      // At this scale neither two-choice tray fits. The caller explicitly
+      // falls back to option rows rather than truncating a label.
+      expect(
+        find.byWidgetPredicate((widget) => widget is MxSegmentedTray),
+        findsNothing,
+      );
       // The reminder row's gutter comes from `applyCompactScale`'s
       // `listTileTheme.contentPadding`, which is the value the other three
       // now agree with.
@@ -337,7 +341,7 @@ void main() {
       await tester.tap(find.text(english.settingsThemeDark));
       await tester.pumpAndSettle();
 
-      final rowContentLeft = tester.getRect(traySurface<AppThemeMode>()).left;
+      final rowContentLeft = cardRects(tester)[1].left + AppSpacing.lg;
 
       expect(tester.getRect(find.byType(MxFeedbackBand)).left, rowContentLeft);
     });

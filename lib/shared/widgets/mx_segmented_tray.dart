@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../core/theme/extensions/theme_context_extension.dart';
 import '../../core/theme/extensions/app_ink.dart';
@@ -18,10 +21,21 @@ enum MxSegmentedTrayVariant { settings, progressRange }
 
 /// One typed, already-localized choice in an [MxSegmentedTray].
 class MxSegmentedTrayOption<T> {
-  const MxSegmentedTrayOption({required this.value, required this.label});
+  const MxSegmentedTrayOption({
+    required this.value,
+    required this.label,
+    this.semanticLabel,
+  });
 
   final T value;
+
+  /// The one-line visible label. Callers whose labels cannot fit side by side
+  /// must use an option-row control instead of truncating their copy here.
   final String label;
+
+  /// The fuller accessible description when the compact visible label omits
+  /// material context, such as Progress's window ending today.
+  final String? semanticLabel;
 }
 
 /// A compact, exclusive two-or-three-option selector.
@@ -61,36 +75,25 @@ class MxSegmentedTray<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double viewportWidth = MediaQuery.sizeOf(context).width;
-    final double optionMaxWidth = viewportWidth <= 0
-        ? double.infinity
-        : (viewportWidth -
-                  (AppSpacing.lg * 4) -
-                  (AppSpacing.xs * 2) -
-                  (_optionGap * (options.length - 1))) /
-              options.length;
-
     return Align(
+      alignment: AlignmentDirectional.centerStart,
       widthFactor: 1,
-      child: MxTapTarget(
-        child: _MxSegmentedTraySurface(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: _optionGap,
-              children: <Widget>[
-                for (final option in options)
-                  _SegmentedTrayOption<T>(
-                    option: option,
-                    isSelected: option.value == selected,
-                    isEnabled: onChanged != null,
-                    horizontalPadding: _horizontalPadding,
-                    maxWidth: optionMaxWidth,
-                    onChanged: onChanged,
-                  ),
-              ],
-            ),
+      child: _MxSegmentedTraySurface(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: _optionGap,
+            children: <Widget>[
+              for (final option in options)
+                _SegmentedTrayOption<T>(
+                  option: option,
+                  isSelected: option.value == selected,
+                  isEnabled: onChanged != null,
+                  horizontalPadding: _horizontalPadding,
+                  onChanged: onChanged,
+                ),
+            ],
           ),
         ),
       ),
@@ -99,9 +102,6 @@ class MxSegmentedTray<T> extends StatelessWidget {
 }
 
 /// The recessed, shared tray surface.
-///
-/// Public for direct geometry tests; callers receive it only through
-/// [MxSegmentedTray].
 class _MxSegmentedTraySurface extends StatelessWidget {
   const _MxSegmentedTraySurface({required this.child});
 
@@ -134,9 +134,6 @@ class _MxSegmentedTraySurface extends StatelessWidget {
 }
 
 /// The selected option's raised 32dp visual surface.
-///
-/// Public for direct geometry tests; callers receive it only through
-/// [MxSegmentedTray].
 class _MxSegmentedTrayThumb extends StatelessWidget {
   const _MxSegmentedTrayThumb({required this.child});
 
@@ -162,7 +159,6 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
     required this.isSelected,
     required this.isEnabled,
     required this.horizontalPadding,
-    required this.maxWidth,
     required this.onChanged,
   });
 
@@ -170,7 +166,6 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
   final bool isSelected;
   final bool isEnabled;
   final double horizontalPadding;
-  final double maxWidth;
   final ValueChanged<T>? onChanged;
 
   @override
@@ -195,10 +190,22 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
             child: Text(
               option.label,
               maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              softWrap: false,
               style: context.texts.labelSmall!.inked(context, ink),
             ),
           ),
+        ),
+      ),
+    );
+
+    final Widget visual = _MxFocusRingOffset(
+      child: MxFocusRing(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xs),
+          child: isSelected
+              ? _MxSegmentedTrayThumb(child: optionBody)
+              : SizedBox(height: AppSizing.controlDense, child: optionBody),
         ),
       ),
     );
@@ -209,31 +216,70 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
       enabled: isEnabled,
       focusable: isEnabled,
       inMutuallyExclusiveGroup: true,
-      label: option.label,
+      label: option.semanticLabel ?? option.label,
       onTap: changed,
-      child: ExcludeSemantics(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: Align(
-            widthFactor: 1,
-            child: SizedBox(
-              height: AppSizing.touchTarget,
-              child: Center(
-                widthFactor: 1,
-                child: MxFocusRing(
-                  borderRadius: radius,
-                  child: isSelected
-                      ? _MxSegmentedTrayThumb(child: optionBody)
-                      : SizedBox(
-                          height: AppSizing.controlDense,
-                          child: optionBody,
-                        ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      child: ExcludeSemantics(child: MxTapTarget(child: visual)),
     );
+  }
+}
+
+/// Lets [MxFocusRing] paint 2dp clear of the thumb without changing its
+/// content-driven footprint or pushing a neighbouring option away.
+class _MxFocusRingOffset extends SingleChildRenderObjectWidget {
+  const _MxFocusRingOffset({required super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderFocusRingOffset();
+}
+
+class _RenderFocusRingOffset extends RenderShiftedBox {
+  _RenderFocusRingOffset() : super(null);
+
+  static const double _extent = AppSpacing.xs;
+
+  Size _contentSize(Size ringSize) => Size(
+    math.max(0, ringSize.width - (_extent * 2)),
+    math.max(0, ringSize.height - (_extent * 2)),
+  );
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final child = this.child;
+    if (child == null) return constraints.constrain(Size.zero);
+
+    return constraints.constrain(
+      _contentSize(child.getDryLayout(constraints.loosen())),
+    );
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) =>
+      math.max(0, (child?.getMinIntrinsicWidth(height) ?? 0) - (_extent * 2));
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      math.max(0, (child?.getMaxIntrinsicWidth(height) ?? 0) - (_extent * 2));
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      math.max(0, (child?.getMinIntrinsicHeight(width) ?? 0) - (_extent * 2));
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      math.max(0, (child?.getMaxIntrinsicHeight(width) ?? 0) - (_extent * 2));
+
+  @override
+  void performLayout() {
+    final child = this.child;
+    if (child == null) {
+      size = constraints.constrain(Size.zero);
+      return;
+    }
+
+    child.layout(constraints.loosen(), parentUsesSize: true);
+    size = constraints.constrain(_contentSize(child.size));
+    final parentData = child.parentData! as BoxParentData;
+    parentData.offset = const Offset(-_extent, -_extent);
   }
 }

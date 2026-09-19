@@ -109,24 +109,43 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
                     horizontal: mxScreenGutter(context),
                     vertical: AppSpacing.sm,
                   ),
-                  child: Semantics(
-                    enabled: !widget.isSubmitting,
-                    label: widget.isSubmitting
-                        ? context.l10n.settingsSavingLabel
-                        : null,
-                    container: widget.isSubmitting,
-                    child: MxSegmentedTray<T>(
-                      options: <MxSegmentedTrayOption<T>>[
-                        for (final T value in widget.values)
-                          MxSegmentedTrayOption<T>(
-                            value: value,
-                            label: widget.labelOf(value),
-                          ),
-                      ],
-                      selected: widget.selected,
-                      variant: MxSegmentedTrayVariant.settings,
-                      onChanged: widget.isSubmitting ? null : _onChanged,
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (!settingsSegmentedTrayFits<T>(
+                        context: context,
+                        constraints: constraints,
+                        values: widget.values,
+                        labelOf: widget.labelOf,
+                      )) {
+                        return SettingsChoiceRowsWidget<T>(
+                          values: widget.values,
+                          selected: widget.selected,
+                          labelOf: widget.labelOf,
+                          onChanged: _onChanged,
+                          isSubmitting: widget.isSubmitting,
+                        );
+                      }
+
+                      return Semantics(
+                        enabled: !widget.isSubmitting,
+                        label: widget.isSubmitting
+                            ? context.l10n.settingsSavingLabel
+                            : null,
+                        container: widget.isSubmitting,
+                        child: MxSegmentedTray<T>(
+                          options: <MxSegmentedTrayOption<T>>[
+                            for (final T value in widget.values)
+                              MxSegmentedTrayOption<T>(
+                                value: value,
+                                label: widget.labelOf(value),
+                              ),
+                          ],
+                          selected: widget.selected,
+                          variant: MxSegmentedTrayVariant.settings,
+                          onChanged: widget.isSubmitting ? null : _onChanged,
+                        ),
+                      );
+                    },
                   ),
                 )
               else

@@ -1,5 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/foundations/app_sizing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_radio_rows.dart';
 
@@ -39,6 +43,38 @@ import '../../../../../shared/widgets/mx_radio_rows.dart';
 /// shrinks the text.
 ///
 /// **[selected] is the persisted value, never a pending one** (BR-216).
+///
+/// Returns whether compact labels fit the available one-line tray width. The
+/// fall-back is the existing option-row control: the tray never truncates or
+/// compresses labels merely to remain on one line.
+bool settingsSegmentedTrayFits<T extends Enum>({
+  required BuildContext context,
+  required BoxConstraints constraints,
+  required Iterable<T> values,
+  required String Function(T value) labelOf,
+}) {
+  if (!constraints.maxWidth.isFinite) return true;
+
+  final textStyle = Theme.of(context).textTheme.labelSmall!;
+  final textScaler = MediaQuery.textScalerOf(context);
+  final textDirection = Directionality.of(context);
+  final optionWidths = values.map((value) {
+    final painter = TextPainter(
+      text: TextSpan(text: labelOf(value), style: textStyle),
+      textScaler: textScaler,
+      textDirection: textDirection,
+      maxLines: 1,
+    )..layout();
+    return math.max(AppSizing.touchTarget, painter.width + (AppSpacing.md * 2));
+  });
+  final trayWidth =
+      (AppSpacing.xs * 2) +
+      (math.max(0, values.length - 1) * 2) +
+      optionWidths.fold<double>(0, (sum, width) => sum + width);
+
+  return trayWidth <= constraints.maxWidth;
+}
+
 class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
   const SettingsChoiceRowsWidget({
     required this.values,

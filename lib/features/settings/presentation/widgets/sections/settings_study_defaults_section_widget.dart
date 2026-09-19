@@ -13,6 +13,7 @@ import '../../../../study/domain/models/new_card_order_model.dart';
 import '../../../../study/domain/models/study_card_limit_model.dart';
 import '../../../../../shared/widgets/mx_segmented_tray.dart';
 import '../items/settings_error_band_widget.dart';
+import '../items/settings_choice_rows_widget.dart';
 import '../support/settings_labels_widget.dart';
 import 'settings_section_widget.dart';
 
@@ -207,24 +208,47 @@ class _SettingsStudyDefaultsSectionWidgetState
                 style: context.texts.titleSmall,
               ),
               const SizedBox(height: AppSpacing.xs),
-              Semantics(
-                enabled: !widget.isSubmitting,
-                label: widget.isSubmitting ? l10n.settingsSavingLabel : null,
-                container: widget.isSubmitting,
-                child: MxSegmentedTray<NewCardOrder>(
-                  options: <MxSegmentedTrayOption<NewCardOrder>>[
-                    for (final NewCardOrder order in NewCardOrder.values)
-                      MxSegmentedTrayOption<NewCardOrder>(
-                        value: order,
-                        label: context.newCardOrderLabel(order),
-                      ),
-                  ],
-                  selected: _order,
-                  variant: MxSegmentedTrayVariant.settings,
-                  onChanged: widget.isSubmitting
-                      ? null
-                      : (order) => setState(() => _order = order),
-                ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  void onChanged(NewCardOrder order) {
+                    setState(() => _order = order);
+                  }
+
+                  if (!settingsSegmentedTrayFits<NewCardOrder>(
+                    context: context,
+                    constraints: constraints,
+                    values: NewCardOrder.values,
+                    labelOf: context.newCardOrderLabel,
+                  )) {
+                    return SettingsChoiceRowsWidget<NewCardOrder>(
+                      values: NewCardOrder.values,
+                      selected: _order,
+                      labelOf: context.newCardOrderLabel,
+                      onChanged: onChanged,
+                      isSubmitting: widget.isSubmitting,
+                    );
+                  }
+
+                  return Semantics(
+                    enabled: !widget.isSubmitting,
+                    label: widget.isSubmitting
+                        ? l10n.settingsSavingLabel
+                        : null,
+                    container: widget.isSubmitting,
+                    child: MxSegmentedTray<NewCardOrder>(
+                      options: <MxSegmentedTrayOption<NewCardOrder>>[
+                        for (final NewCardOrder order in NewCardOrder.values)
+                          MxSegmentedTrayOption<NewCardOrder>(
+                            value: order,
+                            label: context.newCardOrderLabel(order),
+                          ),
+                      ],
+                      selected: _order,
+                      variant: MxSegmentedTrayVariant.settings,
+                      onChanged: widget.isSubmitting ? null : onChanged,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.lg),
               // BR-213 in one line. Without it the change reads as one that did

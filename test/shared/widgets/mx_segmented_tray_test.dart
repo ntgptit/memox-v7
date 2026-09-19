@@ -16,14 +16,19 @@ void main() {
     Widget child, {
     TextDirection textDirection = TextDirection.ltr,
     double textScale = 1,
+    ThemeData? theme,
+    Size viewport = const Size(393, 852),
   }) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: buildLightTheme(),
+        theme: theme ?? buildLightTheme(),
         home: Directionality(
           textDirection: textDirection,
           child: MediaQuery(
-            data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+            data: MediaQueryData(
+              size: viewport,
+              textScaler: TextScaler.linear(textScale),
+            ),
             child: Scaffold(body: Center(child: child)),
           ),
         ),
@@ -52,7 +57,7 @@ void main() {
     onChanged: onChanged ?? (_) {},
   );
 
-  final Finder trayFinder = find.byType(MxTapTarget);
+  final Finder trayFinder = find.byKey(MxSegmentedTray.surfaceKey);
 
   group('MxSegmentedTray', () {
     testWidgets('reports the tapped typed choice', (tester) async {
@@ -89,10 +94,7 @@ void main() {
           .getSemanticsData();
       expect(unselected.flagsCollection.isSelected, Tristate.isFalse);
       expect(unselected.hasAction(SemanticsAction.tap), isTrue);
-      expect(
-        unselected.flagsCollection.isInMutuallyExclusiveGroup,
-        isTrue,
-      );
+      expect(unselected.flagsCollection.isInMutuallyExclusiveGroup, isTrue);
       handle.dispose();
     });
 
@@ -141,6 +143,54 @@ void main() {
       expect(tester.getSize(trayFinder).width, lessThan(300));
     });
 
+    testWidgets(
+      'keeps compact labels content-driven at a real viewport width',
+      (tester) async {
+        await pump(tester, tray());
+
+        expect(tester.getSize(trayFinder).width, lessThan(200));
+      },
+    );
+
+    testWidgets(
+      'does not expand to fill a narrow parent that fits its labels',
+      (tester) async {
+        await pump(tester, SizedBox(width: 180, child: tray()));
+
+        expect(tester.getSize(trayFinder).width, lessThan(180));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('each option activates from its own vertical target padding', (
+      tester,
+    ) async {
+      _Choice? changed;
+      await pump(tester, tray(onChanged: (value) => changed = value));
+
+      for (var index = 0; index < 2; index++) {
+        final target = tester.getRect(find.byType(MxTapTarget).at(index));
+        await tester.tapAt(Offset(target.center.dx, target.bottom - 1));
+        await tester.pumpAndSettle();
+
+        expect(changed, _Choice.values[index]);
+      }
+    });
+
+    testWidgets('each option keeps a 48dp semantic hit rectangle', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, tray());
+
+      for (final label in <String>['First', 'Second']) {
+        final rect = tester.getSemantics(find.text(label)).rect;
+        expect(rect.width, greaterThanOrEqualTo(AppSizing.touchTarget));
+        expect(rect.height, AppSizing.touchTarget);
+      }
+      semantics.dispose();
+    });
+
     testWidgets('shows the canonical focus ring on keyboard focus', (
       tester,
     ) async {
@@ -159,6 +209,151 @@ void main() {
             .first,
       );
       expect((ring.decoration as BoxDecoration).border, isNotNull);
+
+      final ringRect = tester.getRect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.position == DecorationPosition.foreground &&
+              (widget.decoration as BoxDecoration).border != null,
+        ),
+      );
+      final thumbRect = tester.getRect(find.byKey(MxSegmentedTray.thumbKey));
+      expect(ringRect.width - thumbRect.width, 8);
+      expect(ringRect.height - thumbRect.height, 8);
+      expect(thumbRect.left - ringRect.left, 4);
+      expect(thumbRect.top - ringRect.top, 4);
+      final border = (ring.decoration as BoxDecoration).border! as Border;
+      expect(border.top.width, 2);
+      expect(thumbRect.left - (ringRect.left + border.left.width), 2);
+      expect(thumbRect.top - (ringRect.top + border.top.width), 2);
+    });
+
+    testWidgets('keeps labels on one intrinsic line without ellipsizing', (
+      tester,
+    ) async {
+      const longLabel = 'A deliberately long unabridged choice label';
+      await pump(
+        tester,
+        UnconstrainedBox(
+          child: tray(
+            options: const <MxSegmentedTrayOption<_Choice>>[
+              MxSegmentedTrayOption<_Choice>(
+                value: _Choice.first,
+                label: longLabel,
+              ),
+              MxSegmentedTrayOption<_Choice>(
+                value: _Choice.second,
+                label: longLabel,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final label = tester.widget<Text>(find.text(longLabel).first);
+      expect(label.maxLines, 1);
+      expect(label.softWrap, isFalse);
+      expect(label.overflow, isNull);
+      expect(tester.getSize(trayFinder).width, greaterThan(393));
+    });
+
+    testWidgets(
+      'uses surface roles in both variants, dark, and high contrast',
+      (tester) async {
+        final themes = <ThemeData>[
+          buildDarkTheme(),
+          buildHighContrastDarkTheme(),
+        ];
+
+        for (final theme in themes) {
+          for (final variant in MxSegmentedTrayVariant.values) {
+            await pump(tester, tray(variant: variant), theme: theme);
+
+            final surface = tester.widget<DecoratedBox>(
+              find
+                  .descendant(
+                    of: find.byKey(MxSegmentedTray.surfaceKey),
+                    matching: find.byType(DecoratedBox),
+                  )
+                  .first,
+            );
+            final selected = tester.widget<Material>(
+              find.descendant(
+                of: find.byKey(MxSegmentedTray.thumbKey),
+                matching: find.byType(Material),
+              ),
+            );
+
+            expect(
+              (surface.decoration as BoxDecoration).color,
+              theme.colorScheme.surfaceContainer,
+            );
+            expect(selected.color, theme.colorScheme.surfaceContainerLowest);
+            expect(
+              tester.widget<Text>(find.text('First')).style!.color,
+              theme.colorScheme.onSurface,
+            );
+            expect(
+              tester.widget<Text>(find.text('Second')).style!.color,
+              theme.colorScheme.onSurfaceVariant,
+            );
+          }
+        }
+      },
+    );
+
+    testWidgets('preserves its width while submitting is disabled', (
+      tester,
+    ) async {
+      await pump(tester, tray());
+      final enabledWidth = tester.getSize(trayFinder).width;
+
+      await pump(
+        tester,
+        MxSegmentedTray<_Choice>(
+          options: const <MxSegmentedTrayOption<_Choice>>[
+            MxSegmentedTrayOption<_Choice>(
+              value: _Choice.first,
+              label: 'First',
+            ),
+            MxSegmentedTrayOption<_Choice>(
+              value: _Choice.second,
+              label: 'Second',
+            ),
+          ],
+          selected: _Choice.first,
+          variant: MxSegmentedTrayVariant.settings,
+          onChanged: null,
+        ),
+      );
+
+      expect(tester.getSize(trayFinder).width, enabledWidth);
+    });
+
+    testWidgets('announces the supplied fuller option semantic label', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await pump(
+        tester,
+        tray(
+          options: const <MxSegmentedTrayOption<_Choice>>[
+            MxSegmentedTrayOption<_Choice>(
+              value: _Choice.first,
+              label: '7 days',
+              semanticLabel: 'Last 7 days ending today',
+            ),
+            MxSegmentedTrayOption<_Choice>(
+              value: _Choice.second,
+              label: '30 days',
+            ),
+          ],
+        ),
+      );
+
+      expect(find.bySemanticsLabel('Last 7 days ending today'), findsOneWidget);
+      semantics.dispose();
     });
 
     testWidgets('does not overflow in RTL at text scale 2', (tester) async {
