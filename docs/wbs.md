@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.115 |
+| **Updated by task** | M100.116 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1745,7 +1745,7 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
-### M100.115 · MxChipTrigger — the ghost menu-trigger chip
+### M100.116 · MxChipTrigger — the ghost menu-trigger chip
 
 - **Status:** done — đã chạy và pass: `flutter test --exclude-tags golden`
   **+5281**, `widgetbook` **+8**, `flutter analyze` `No issues found!`, guard 0
@@ -1769,8 +1769,9 @@ của M2.
   `widgetbook/lib/main.dart`.
 - **Ghi chú:** ở text scale > 1, dải nội dung 28dp là **cố định** (handoff bắt
   buộc) nên dòng chữ có thể vẽ lấn nhẹ ra ngoài dải; caller cuộn hàng chứa nó.
-  Đánh số lại từ M100.102 lên M100.115 khi merge — M100.102 đã bị hai PR khác
-  chiếm (#580, #581) trong lúc nhánh này còn mở.
+  Đánh số lại hai lần khi merge: M100.102 → M100.115 → M100.116 — M100.102 đã
+  bị hai PR khác chiếm (#580, #581), rồi M100.115 bị #594 (SelectionCheckbox)
+  chiếm tiếp trong lúc nhánh này còn mở.
 - **Out of scope:** nối `MxChipTrigger` vào bất kỳ màn hình nào (CardFilterBarWidget,
   deck toolbar, …) — handoff để ngỏ, caller sở hữu menu và quyết định khi nào dùng.
 - **Dependencies:** không — dùng token/thành phần đã có (`MxFocusRing`, `MxIcon`,
