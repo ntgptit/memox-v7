@@ -13,6 +13,7 @@ import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/features/card/presentation/screens/tag_catalog_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 
 import '../features/card/presentation/support/fake_card_repository.dart';
 import '../features/card/presentation/support/fake_tag_catalog_repository.dart';
@@ -148,10 +149,7 @@ void main() {
   /// widgets and taps the wrong one.
   Future<void> tickTag(WidgetTester tester, String tag) async {
     await tester.tap(
-      find.descendant(
-        of: find.byType(CheckboxListTile),
-        matching: find.text(tag),
-      ),
+      find.descendant(of: find.byType(MxCheckboxRow), matching: find.text(tag)),
     );
     await tester.pumpAndSettle();
   }

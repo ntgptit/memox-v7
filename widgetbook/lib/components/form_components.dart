@@ -726,17 +726,23 @@ WidgetbookComponent selectionRowsComponent() {
       ),
       WidgetbookUseCase(
         name: 'MxCheckboxRow',
-        builder: (BuildContext context) => CatalogCenterPage(
-          child: MxCheckboxRow(
-            label: 'grammar',
-            subtitle: '12 cards',
-            isChecked: context.knobs.boolean(
-              label: 'checked',
-              initialValue: true,
+        builder: (BuildContext context) {
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+          return CatalogCenterPage(
+            child: MxCheckboxRow(
+              label: 'grammar',
+              subtitle: '12 cards',
+              isChecked: context.knobs.boolean(
+                label: 'checked',
+                initialValue: true,
+              ),
+              onToggle: isEnabled ? _noop : null,
             ),
-            onToggle: _noop,
-          ),
-        ),
+          );
+        },
       ),
       WidgetbookUseCase(
         name: 'MxRadioRows',

@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.112 |
+| **Updated by task** | M100.115 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1606,6 +1606,30 @@ của M2.
         pressed/hovered từ `AppInteractionStates.controlOverlay`; RTL đảo chiều thumb.
   - [x] Semantics: `toggled`, `enabled`, `label` (`semanticLabel`), action `tap`.
 - **Checklist phases:** 7, 12.
+
+### M100.115 · SelectionCheckbox — ô chọn hàng đa lựa chọn của v3
+
+- **Status:** done — full Definition-of-Done gate xanh.
+- **Goal:** đưa hợp đồng v3 SelectionCheckbox vào shared component đang có
+  (`MxCheckboxRow`) mà không thay đổi state hay business rule của caller.
+- **Scope:** box sơn 20dp, bo 4dp, viền `outline` 2dp khi chưa chọn; khi chọn
+  dùng `primary`, glyph check 14dp `onPrimary`, row là target tối thiểu 48dp,
+  focus ring và disabled opacity theo token hiện hữu; migrate assertions của
+  tag-filter khỏi implementation `CheckboxListTile` đã bị thay thế.
+- **Out of scope:** selection count, bulk-action availability, caller offsets,
+  và thay đổi state/domain của Card.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_checkbox_row.dart` và focused tests/catalogue.
+- **Acceptance criteria:**
+  - [x] API `MxCheckboxRow` giữ nguyên; không còn phụ thuộc box stock 18dp.
+  - [x] Màu chỉ đọc từ `ColorScheme`; không thêm role/tokens cục bộ.
+  - [x] Shared and Card consumer tests assert component semantics/state thay vì
+        `CheckboxListTile` bị xoá.
+  - [x] `dod_check.sh` xanh sau khi generated sources/l10n available.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_checkbox_row_test.dart`,
+  `card_tag_filter_sheet_test.dart`, Widgetbook coverage.
+- **Checklist phases:** 7, 12, 15.
 
 
 ### M100.110 · MxIconTile — ô vuông tô màu dẫn đầu một hàng, theo hợp đồng IconTile của v3
