@@ -1831,6 +1831,36 @@ của M2.
         (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
 - **Checklist phases:** 7, 12.
 
+### M100.120 · Observer nêu nguyên nhân khi provider fail (cause của `Failure`)
+
+- **Status:** **done** — analyze sạch, `provider_observer_test.dart` +
+  `test/core` xanh.
+- **Goal:** một provider đọc DB fail phải cho thấy *vì sao* trong log, không chỉ
+  "đã fail". Ranh giới repository bọc mọi lỗi persistence thành `Failure`, mà
+  `toString()` của `Failure` là `Instance of 'UnknownFailure'`, nên một migration
+  không chạy được (`duplicate column name: sibling_position` trên IndexedDB lệch
+  schema) chỉ hiện ra là spinner rồi màn "Couldn't load your decks", không có
+  dòng nào nêu tên lỗi.
+- **Scope:** `describeFailureCause` trong `lib/core/error/drift_error_mapper.dart`
+  (chỗ duy nhất được biết hình dạng exception của Drift/SQLite);
+  `MemoxProviderObserver.providerDidFail` nối `(cause: …)` vào message khi lỗi là
+  `Failure`.
+- **Out of scope:** đổi `Failure`/`mapDatabaseError`; thêm `DatabaseFailure` cho
+  lỗi migration; tự phát hiện và dọn DB web lệch schema.
+- **Dependencies:** AD-08 (không log nội dung card ở bất kỳ mức nào).
+- **Tests required:** `test/core/state/provider_observer_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 3 file mã nguồn/test trên.
+- **Acceptance criteria:**
+  - [x] Cause là `SqliteException` (kể cả bọc trong `DriftWrappedException`) →
+        message ghi `SqliteException(<extended code>): <message>`.
+  - [x] Không bao giờ ghi câu SQL hay tham số bind:
+        `SqliteException.toString()` nối cả hai, và tham số có thể là nội dung
+        card (AD-08). Test dùng chuỗi card giả làm tham số và khẳng định nó
+        không xuất hiện.
+  - [x] Cause khác `SqliteException` chỉ ghi tên kiểu, không ghi text của nó.
+- **Checklist phases:** 12.
+
 ### M100.119 · MxSettingsRow — hàng cài đặt của v3 (label 16/600, sub, control cuối hàng)
 
 - **Status:** **done** — analyze sạch, `mx_settings_row_test.dart` +
