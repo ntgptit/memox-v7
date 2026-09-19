@@ -1666,8 +1666,8 @@ của M2.
 
 ### M100.115 · MxFilterChip — control một-trong-N 28dp, caller đầu tiên của `border-ghost`
 
-- **Status:** **in-progress** — code, test, Widgetbook và specimen đã xong; chỉ còn
-  golden Linux `TZ=UTC` và merge.
+- **Status:** **done** — code, test, Widgetbook, specimen và golden Linux `TZ=UTC`
+  đã xong; CI `goldens (linux)` là người so pixel lần cuối.
 - **Goal:** Ba dòng `FilterChip` của `COMPONENT_MIGRATION_PENDING` có caller mà
   không chạm `ChipThemeData` dùng chung, nên `ChoiceChip` và `MxPillButton`
   không đổi.
@@ -1695,10 +1695,11 @@ của M2.
         trước đó); high-contrast đẩy nó lên **7.20 / 8.50** vì với chip chưa chọn
         đây là thứ duy nhất nhận diện control (WCAG 1.4.11).
   - [x] Đã đăng ký trong Widgetbook; `widgetbook_coverage_test.dart` xanh.
-  - [ ] Golden `mx_filter_chip_group_*` / `mx_filter_chip_states_*` vẽ trên
-        Linux `TZ=UTC` rồi commit riêng — Windows không tạo được.
-  - [ ] Gate đầy đủ: analyze sạch, host suite, guard, architecture,
-        `check_docs`.
+  - [x] Golden `mx_filter_chip_group_*` / `mx_filter_chip_states_*` vẽ trên
+        Linux `TZ=UTC` (WSL), commit cùng PR; file `mx_components_golden_test`
+        vẽ lại thì chỉ bốn PNG mới xuất hiện, golden cũ không đổi byte nào.
+  - [x] Gate: analyze sạch, guard, architecture, `check_docs`, host suite
+        (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
 - **Checklist phases:** 7, 12.
 
 
