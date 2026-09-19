@@ -210,6 +210,16 @@ abstract final class AppTypography {
   /// at body weight, GC-4), which otherwise leads at [captionHeight] (1.4).
   static const double optionRowDescriptionHeight = 1.45;
 
+  /// The settings row's label — `body-lg` (16/500, GC-4) closed up to the
+  /// kit's own `-0.1` so a one-line setting name reads as the row's head
+  /// rather than as running text (SettingsRow component handoff).
+  static const double settingsRowLabelTracking = -0.1;
+
+  /// The settings row's sub line leading — `1.45` at `body-sm` (caption-12 at
+  /// body weight, GC-4), the same override [optionRowDescriptionHeight]
+  /// already states for the option row's description.
+  static const double settingsRowSubHeight = 1.45;
+
   /// Pairs a [FontWeight] with the matching variable-axis setting.
   static List<FontVariation> _wght(FontWeight weight) => <FontVariation>[
     FontVariation('wght', weight.value.toDouble()),

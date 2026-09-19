@@ -1831,6 +1831,64 @@ của M2.
         (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
 - **Checklist phases:** 7, 12.
 
+### M100.119 · MxSettingsRow — hàng cài đặt của v3 (label 16/600, sub, control cuối hàng)
+
+- **Status:** **done** — analyze sạch, `mx_settings_row_test.dart` +
+  `mx_settings_row_contract_test.dart` + `mx_stress_test.dart` +
+  `widgetbook_coverage_test.dart` xanh; chưa màn nào dùng.
+- **Goal:** shared component `MxSettingsRow`, khác `MxListTile`
+  (điều hướng/nhiều dòng của `ListTileThemeData`) và `MxListRow`
+  (nội dung một dòng): lưới 40 lead / 1fr / auto trailing, gap 16, padding
+  12×16, cao tối thiểu 48, leading là `MxIconTile` cỡ mặc định (`md` = 36),
+  label 16/600 tracking -0.1, sub 12 `onSurfaceVariant` cách label 4, leading
+  1.45, chevron `chevron-right` 20 chỉ khi hàng điều hướng và không có control,
+  control cuối hàng (`trailing`, inline) hoặc control rộng (`wideControl`, xuống
+  dòng riêng, cách 12 phía trên) — hai cái loại trừ nhau.
+- **Scope:** `lib/shared/widgets/mx_settings_row.dart`; vai chữ
+  `AppTextStyles.settingsRowLabel` (bodyLarge qua `AppTypography.withWeight`
+  600, tracking -0.1) và `settingsRowSub` (bodySmall, leading 1.45) — hai
+  hằng đặt tên ở `AppTypography`, cùng cơ chế `listRowTitle` đã dùng; test
+  riêng, specimen stress trong `mx_stress_owner_specimens.dart`, entry
+  Widgetbook (`settingsRowComponent`).
+- **Out of scope:** nối màn Settings sang dùng nó; `MxIconTile`/`MxListRow`
+  (đã có, PR #587/#588, task khác) — bài học của phiên này: base đã đổi
+  24 commit giữa lúc làm, phải dựng lại trên `origin/main` một lần
+  (`.superpowers/sdd/2026-09-18-memox-v3-settings-row/progress.md`, mục
+  "Base-shift ruling") thay vì merge tay.
+- **Dependencies:** M100.110 (`MxIconTile`).
+- **Tests required:** `mx_settings_row_test.dart`,
+  `mx_settings_row_contract_test.dart`, `mx_stress_test.dart`,
+  `widgetbook_coverage_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_settings_row.dart` (249 dòng),
+  `test/shared/widgets/mx_settings_row_test.dart` (295 dòng),
+  `test/shared/widgets/mx_settings_row_contract_test.dart` (123 dòng).
+- **Acceptance criteria:**
+  - [x] `trailing`/`wideControl` là `COMPONENT_INPUT` — widget của caller,
+        hàng không tô màu/bật-tắt chúng; assert loại trừ hai bên.
+  - [x] Một control cuối hàng (ví dụ `Switch` truyền vào `trailing`) luôn
+        tới được bằng Tab dù hàng không "điều hướng" — không có `InkWell`
+        nào bọc quanh nó khi hàng không điều hướng, nên không có gì để loại
+        focus. Đây là khiếm khuyết đã tái phát một lần trên nhánh này
+        (review cuối bắt được ở bản `MxIconTile` tự viết đã bỏ) và test
+        riêng khoá lại cho cả `trailing` và `wideControl`.
+  - [x] Hàng dạng control (`onTap` có, không `trailing`/`wideControl`) luôn
+        có `Semantics(button: true, enabled: isEnabled)` — kể cả khi
+        `isEnabled: false`; tách khỏi hàng tĩnh thật (không `onTap`) không
+        có semantics nút nào. Round sửa đầu tiên của rebuild bắt lỗi này:
+        `isEnabled: false` từng làm rớt hết semantics nút, đọc giống hàng
+        tĩnh.
+  - [x] Label/sub `maxLines: 2` + ellipsis (quy ước đã có của
+        `MxListTile`), không tràn ở 320dp/textScale 2.0.
+  - [x] Không đụng `mx_icon_tile.dart`/`mx_list_row.dart`; không đổi
+        `AppTextStyles.listRowTitle` hay field cũ nào của `copyWith`/`.lerp`.
+- **Ghi chú:** đánh số lại một lần khi merge — `M100.118` bị PR #597
+  (`MxChipTrigger`) chiếm đúng lúc nhánh này còn mở, đè thẳng vào chỗ chèn
+  entry (cả hai task cùng nối vào cuối bảng M100.11x). Không đụng file nào
+  của PR đó ngoài `docs/wbs.md` (nội dung, không phải số dòng, mới là chỗ
+  conflict).
+- **Checklist phases:** 7, 12.
+
 ### M100.118 · MxChipTrigger — the ghost menu-trigger chip
 
 - **Status:** done — đã chạy và pass: `flutter test --exclude-tags golden`

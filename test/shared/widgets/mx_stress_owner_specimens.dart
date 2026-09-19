@@ -4,6 +4,7 @@ import 'package:memox/shared/widgets/mx_list_row.dart';
 import 'package:memox/shared/widgets/mx_reading_column.dart';
 import 'package:memox/shared/widgets/mx_section.dart';
 import 'package:memox/shared/widgets/mx_section_label.dart';
+import 'package:memox/shared/widgets/mx_settings_row.dart';
 import 'package:memox/shared/widgets/mx_sheet.dart';
 
 import 'mx_stress_specimens.dart';
@@ -60,6 +61,19 @@ List<MxStressSpecimen> ownerStressSpecimens() => <MxStressSpecimen>[
       subtitle: kLongMessage,
       leadingIcon: Icons.layers_outlined,
       trailingIcon: Icons.chevron_right,
+      onTap: () {},
+    ),
+  ),
+  MxStressSpecimen(
+    // The lead tile, a long two-line label and sub, and the chevron: the
+    // stress is the text column wrapping without pushing the tile or the
+    // chevron out of the row.
+    name: 'MxSettingsRow',
+    isInteractive: true,
+    build: () => MxSettingsRow(
+      label: kLongTitle,
+      sub: kLongMessage,
+      leadingIcon: Icons.notifications_outlined,
       onTap: () {},
     ),
   ),
