@@ -15,6 +15,7 @@ import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
+import 'package:memox/shared/widgets/mx_segmented_tray.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:widgetbook/widgetbook.dart';
 
@@ -23,6 +24,10 @@ import '../support/catalog_page.dart';
 void _noop() {}
 
 void _noopSelect(int _) {}
+
+void _noopSegmentedChoice(_SegmentedTrayCatalogChoice _) {}
+
+enum _SegmentedTrayCatalogChoice { first, second, third }
 
 WidgetbookComponent actionButtonComponent() {
   return WidgetbookComponent(
@@ -564,6 +569,60 @@ WidgetbookComponent pillButtonComponent() {
                 MxPillButton(label: 'All', isSelected: false, onPressed: null),
                 MxPillButton(label: 'Due', isSelected: true, onPressed: null),
               ],
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent segmentedTrayComponent() {
+  return WidgetbookComponent(
+    name: 'MxSegmentedTray',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final hasThreeOptions = context.knobs.boolean(label: 'three options');
+          final selected = context.knobs.object
+              .dropdown<_SegmentedTrayCatalogChoice>(
+                label: 'selected',
+                options: hasThreeOptions
+                    ? _SegmentedTrayCatalogChoice.values
+                    : _SegmentedTrayCatalogChoice.values.take(2).toList(),
+                labelBuilder: (_SegmentedTrayCatalogChoice value) => value.name,
+              );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+          final variant = context.knobs.object.dropdown<MxSegmentedTrayVariant>(
+            label: 'variant',
+            options: MxSegmentedTrayVariant.values,
+            labelBuilder: (MxSegmentedTrayVariant value) => value.name,
+          );
+
+          return CatalogCenterPage(
+            child: MxSegmentedTray<_SegmentedTrayCatalogChoice>(
+              options: <MxSegmentedTrayOption<_SegmentedTrayCatalogChoice>>[
+                const MxSegmentedTrayOption<_SegmentedTrayCatalogChoice>(
+                  value: _SegmentedTrayCatalogChoice.first,
+                  label: 'System',
+                ),
+                const MxSegmentedTrayOption<_SegmentedTrayCatalogChoice>(
+                  value: _SegmentedTrayCatalogChoice.second,
+                  label: 'Dark',
+                ),
+                if (hasThreeOptions)
+                  const MxSegmentedTrayOption<_SegmentedTrayCatalogChoice>(
+                    value: _SegmentedTrayCatalogChoice.third,
+                    label: 'Light',
+                  ),
+              ],
+              selected: selected,
+              variant: variant,
+              onChanged: isEnabled ? _noopSegmentedChoice : null,
             ),
           );
         },

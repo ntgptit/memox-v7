@@ -11,6 +11,8 @@ import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_feedback_band.dart';
+import 'package:memox/shared/widgets/mx_segmented_tray.dart';
+import 'package:memox/shared/widgets/mx_tap_target.dart';
 
 import '../domain/support/fake_app_settings_repository.dart';
 import 'support/settings_widget_harness.dart';
@@ -38,6 +40,11 @@ void main() {
   /// painted form.
   Rect sectionHeading(WidgetTester tester, String label) =>
       tester.getRect(find.text(label.toUpperCase()));
+
+  Finder traySurface<T>() => find.descendant(
+    of: find.byWidgetPredicate((widget) => widget is MxSegmentedTray<T>),
+    matching: find.byKey(MxSegmentedTray.surfaceKey),
+  );
 
   group('one column', () {
     testWidgets('the five group cards share both x edges', (tester) async {
@@ -106,7 +113,7 @@ void main() {
       );
     });
 
-    testWidgets('a radio row lines up with the study card\'s own content', (
+    testWidgets('the theme tray lines up with the study card\'s own content', (
       tester,
     ) async {
       // W5: the choice cards carry only vertical padding so each row's target
@@ -124,14 +131,12 @@ void main() {
       // Typed on `AppThemeMode`, because `System` is the label of a theme row
       // *and* of a language row — the same ambiguity a screen-reader user hears
       // and the reason W6 requires the group heading in the semantics tree.
-      final rowLeft = tester
-          .getRect(find.byType(RadioListTile<AppThemeMode>).first)
-          .left;
+      final rowLeft = tester.getRect(traySurface<AppThemeMode>()).left;
 
-      expect(rowLeft + AppSpacing.lg, labelLeft);
+      expect(rowLeft, labelLeft);
     });
 
-    testWidgets('the new-card-order rows start on the study card\'s own '
+    testWidgets('the new-card-order tray starts on the study card\'s own '
         'content edge', (tester) async {
       // The other half of W5's column rule: this group's card already pads its
       // content, so its rows carry `contentPadding: zero` and land exactly on
@@ -145,9 +150,7 @@ void main() {
       // what "the card's own content edge" means, and it is what the radio
       // rows below have to agree with.
       final labelLeft = tester.getRect(find.byType(MxTextField).first).left;
-      final orderRowLeft = tester
-          .getRect(find.byType(RadioListTile<NewCardOrder>).first)
-          .left;
+      final orderRowLeft = tester.getRect(traySurface<NewCardOrder>()).left;
 
       expect(orderRowLeft, labelLeft);
     });
@@ -223,22 +226,25 @@ void main() {
   });
 
   group('touch targets', () {
-    testWidgets('every radio row clears the 48dp floor', (tester) async {
-      // `AppSizing.touchTarget`. `RadioListTile` gets there through
-      // `ListTileThemeData`, but W6 asks for it to be measured rather than
-      // assumed — the zero-horizontal-padding shape considered first is the one
-      // that would have broken it.
+    testWidgets('each remaining radio row and segmented tray clears 48dp', (
+      tester,
+    ) async {
       await pumpSettings(tester, FakeAppSettingsRepository());
 
       final rows = find.byWidgetPredicate((widget) => widget is RadioListTile);
 
-      // Eight: three themes, three languages and the two new-card orders,
-      // which stopped being pills when W6's "not by colour alone" was applied
-      // to them as well.
-      expect(rows, findsNWidgets(8));
-      for (var i = 0; i < 8; i++) {
+      expect(rows, findsNWidgets(3));
+      for (var i = 0; i < 3; i++) {
         expect(
           tester.getRect(rows.at(i)).height,
+          greaterThanOrEqualTo(AppSizing.touchTarget),
+        );
+      }
+      final trays = find.byType(MxTapTarget);
+      expect(trays, findsNWidgets(2));
+      for (var i = 0; i < 2; i++) {
+        expect(
+          tester.getRect(trays.at(i)).height,
           greaterThanOrEqualTo(AppSizing.touchTarget),
         );
       }
@@ -295,17 +301,10 @@ void main() {
       // Study defaults: the field is the card's own content edge, and its
       // `block`-shaped rows carry no gutter of their own, so both land on it.
       expect(tester.getRect(find.byType(MxTextField).first).left, content);
-      expect(
-        tester.getRect(find.byType(RadioListTile<NewCardOrder>).first).left,
-        content,
-      );
+      expect(tester.getRect(traySurface<NewCardOrder>()).left, content);
       // The choice cards get to the same x from the opposite direction: the
       // card pads vertically only and each `list` row supplies the gutter.
-      expect(
-        tester.getRect(find.byType(RadioListTile<AppThemeMode>).first).left +
-            AppSpacing.lg,
-        content,
-      );
+      expect(tester.getRect(traySurface<AppThemeMode>()).left, content);
       // The reminder row's gutter comes from `applyCompactScale`'s
       // `listTileTheme.contentPadding`, which is the value the other three
       // now agree with.
@@ -335,17 +334,10 @@ void main() {
 
       await tester.ensureVisible(find.text(english.settingsThemeDark));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.ancestor(
-          of: find.text(english.settingsThemeDark),
-          matching: find.byWidgetPredicate((widget) => widget is RadioListTile),
-        ),
-      );
+      await tester.tap(find.text(english.settingsThemeDark));
       await tester.pumpAndSettle();
 
-      final rowContentLeft =
-          tester.getRect(find.byType(RadioListTile<AppThemeMode>).first).left +
-          AppSpacing.lg;
+      final rowContentLeft = tester.getRect(traySurface<AppThemeMode>()).left;
 
       expect(tester.getRect(find.byType(MxFeedbackBand)).left, rowContentLeft);
     });

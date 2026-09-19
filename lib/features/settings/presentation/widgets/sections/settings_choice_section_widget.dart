@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../../shared/widgets/mx_segmented_tray.dart';
 import '../items/settings_choice_rows_widget.dart';
 import '../items/settings_error_band_widget.dart';
 import '../../../../../shared/widgets/mx_radio_rows.dart';
@@ -30,6 +32,7 @@ class SettingsChoiceSectionWidget<T extends Enum> extends StatefulWidget {
     required this.labelOf,
     required this.onChanged,
     required this.isSubmitting,
+    this.usesSegmentedTray = false,
     this.failure,
     super.key,
   });
@@ -50,6 +53,11 @@ class SettingsChoiceSectionWidget<T extends Enum> extends StatefulWidget {
   /// While true the whole group is locked. The other groups stay usable —
   /// three groups are three writes.
   final bool isSubmitting;
+
+  /// Appearance is the second settings caller of the compact shared control.
+  /// Language keeps its radio rows because its labels are deliberately allowed
+  /// to grow at high text scale.
+  final bool usesSegmentedTray;
 
   final Failure? failure;
 
@@ -95,20 +103,47 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              SettingsChoiceRowsWidget<T>(
-                // **A list, so its rows divide** (M100.0). These rows are the
-                // whole content of their card — nothing else is in there — so
-                // the divider is what says they belong to one list. Study
-                // defaults deliberately stays a `block`: its rows sit between
-                // a field, a note and a Save button, where a line across them
-                // cuts a group instead of dividing a list.
-                shape: MxRadioRowsShape.list,
-                values: widget.values,
-                selected: widget.selected,
-                labelOf: widget.labelOf,
-                onChanged: _onChanged,
-                isSubmitting: widget.isSubmitting,
-              ),
+              if (widget.usesSegmentedTray)
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: mxScreenGutter(context),
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Semantics(
+                    enabled: !widget.isSubmitting,
+                    label: widget.isSubmitting
+                        ? context.l10n.settingsSavingLabel
+                        : null,
+                    container: widget.isSubmitting,
+                    child: MxSegmentedTray<T>(
+                      options: <MxSegmentedTrayOption<T>>[
+                        for (final T value in widget.values)
+                          MxSegmentedTrayOption<T>(
+                            value: value,
+                            label: widget.labelOf(value),
+                          ),
+                      ],
+                      selected: widget.selected,
+                      variant: MxSegmentedTrayVariant.settings,
+                      onChanged: widget.isSubmitting ? null : _onChanged,
+                    ),
+                  ),
+                )
+              else
+                SettingsChoiceRowsWidget<T>(
+                  // **A list, so its rows divide** (M100.0). These rows are the
+                  // whole content of their card — nothing else is in there — so
+                  // the divider is what says they belong to one list. Study
+                  // defaults deliberately stays a `block`: its rows sit between
+                  // a field, a note and a Save button, where a line across them
+                  // cuts a group instead of dividing a list.
+                  shape: MxRadioRowsShape.list,
+                  values: widget.values,
+                  selected: widget.selected,
+                  labelOf: widget.labelOf,
+                  onChanged: _onChanged,
+                  isSubmitting: widget.isSubmitting,
+                ),
               if (band != null) ...<Widget>[
                 const SizedBox(height: AppSpacing.sm),
                 Padding(
