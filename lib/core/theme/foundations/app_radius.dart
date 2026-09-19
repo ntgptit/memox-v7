@@ -15,18 +15,16 @@ abstract final class AppRadius {
   /// snackbars and other small controls.
   static const double md = 12;
 
-  /// Cards and sheets today; the v3 Radius table's 16 is the FAB and the
-  /// bottom-nav bar.
+  /// Sheets today; the v3 Radius table's 16 is the FAB and the bottom-nav
+  /// bar. **No longer a card radius** — `MxCard`'s page-level recipes moved
+  /// to [xl] at the Card component pass, closing the gap this doc used to
+  /// admit ("cards and sheets today").
   static const double lg = 16;
 
-  /// The study card, which is the one surface a whole screen is built around.
-  /// The v3 Radius table's 20 also names the dialog, the bottom-sheet top
-  /// corners and the 64dp empty-state tile.
-  ///
-  /// **Four pixels above [lg], and it is the only thing at this radius.** A card
-  /// filling the screen reads tighter than the same corner does on a list row,
-  /// so the focal surface gets its own step rather than every card getting a
-  /// softer one.
+  /// `MxCard`'s own corner — every recipe except `.tile` (control corner,
+  /// [md]) and `.option` (row/control shape, [lg]). The v3 Radius table's 20
+  /// also names the dialog, the bottom-sheet top corners and the 64dp
+  /// empty-state tile.
   static const double xl = 20;
 
   /// The v3 Radius table's 24. No v3 call site claims it yet (R8) — kept on

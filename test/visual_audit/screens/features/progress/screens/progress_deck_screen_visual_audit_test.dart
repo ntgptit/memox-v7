@@ -109,18 +109,22 @@ void main() {
         // there.
         screenIconButtons: 0,
         screenItemId: 'progress_screen',
-        // **One, and it is a measurement rather than a guess.** This counts
+        // **Zero, and it is a measurement rather than a guess.** This counts
         // ink hosts the audit *reads*, and since M99.24 `/progress` renders the
         // overview's three sections above this level, so where the deck rows
-        // land depends on how tall those sections are. It was zero — every row
-        // below the 1040 fold — until the Progress headings went through
-        // `MxSectionLabel` (SC-C5-03), which took 4dp off each of the three
-        // section cards. Measured on the composed screen, at the audit's own
-        // viewport: the first row now spans 760…920.4 and the second 944.4…
-        // 1070.2, so two rows *begin* on surface where the same fixture put one
-        // at 772…936.4 and never built the second. One more `InkWell` host, one
-        // more clip: 5 `_RenderInkFeatures` and 3 `CustomPaint (no painter)`.
-        tappableCards: 1,
+        // land depends on how tall those sections are. It was one while the
+        // second row still began on surface: with 16dp card padding the rows
+        // spanned 763…924.9 and 948.9…1074.5 at the audit's own viewport, and
+        // the second — the tappable one — was built. Standard card padding is
+        // 20dp now (the v3 Card contract), which makes the three section cards
+        // and the first row 8dp taller each: the rows span 787…956.9 and the
+        // second would begin at ~981, past the bottom of the scroll viewport
+        // (the 1040 fold less the bar), so the sliver never builds it. Fewer
+        // `InkWell` hosts by exactly that one: 4 `_RenderInkFeatures` and 2
+        // `CustomPaint (no painter)`.
+        // Stated rather than defaulted: the zero is the measurement.
+        // ignore: avoid_redundant_argument_values
+        tappableCards: 0,
         pills: 2,
         // No search on this branch.
         hasSearchField: false,
