@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.117 |
+| **Updated by task** | M100.118 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1831,7 +1831,7 @@ của M2.
         (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
 - **Checklist phases:** 7, 12.
 
-### M100.117 · MxChipTrigger — the ghost menu-trigger chip
+### M100.118 · MxChipTrigger — the ghost menu-trigger chip
 
 - **Status:** done — đã chạy và pass: `flutter test --exclude-tags golden`
   **+5281**, `widgetbook` **+8**, `flutter analyze` `No issues found!`, guard 0
@@ -1855,10 +1855,11 @@ của M2.
   `widgetbook/lib/main.dart`.
 - **Ghi chú:** ở text scale > 1, dải nội dung 28dp là **cố định** (handoff bắt
   buộc) nên dòng chữ có thể vẽ lấn nhẹ ra ngoài dải; caller cuộn hàng chứa nó.
-  Đánh số lại ba lần khi merge: M100.102 → M100.115 → M100.116 → M100.117 —
-  M100.102 bị hai PR khác chiếm (#580, #581), M100.115 bị #594 (SelectionCheckbox)
-  chiếm tiếp, rồi M100.116 bị #595 (MxFilterChip) chiếm nốt, tất cả trong lúc
-  nhánh này còn mở. `MxFilterChip` (#595) và nhánh này cùng đụng
+  Đánh số lại bốn lần khi merge: M100.102 → M100.115 → M100.116 → M100.117 →
+  M100.118 — M100.102 bị hai PR khác chiếm (#580, #581), M100.115 bị #594
+  (SelectionCheckbox) chiếm tiếp, M100.116 bị #595 (MxFilterChip) chiếm nốt,
+  rồi M100.117 bị #596 (Card v3) chiếm nốt luôn, tất cả trong lúc nhánh này
+  còn mở — hàng loạt task design-system chạy song song cùng ngày. `MxFilterChip` (#595) và nhánh này cùng đụng
   `mx_stress_selection_specimens.dart` và `widgetbook/lib/components/
   control_components.dart` — merge giữ cả hai specimen/entry, không cái nào
   ghi đè cái kia. `MxFilterChip` tự chép `_TapTarget` riêng thay vì dùng
