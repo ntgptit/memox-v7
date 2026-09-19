@@ -105,6 +105,7 @@ void main() {
         tester.getSemantics(find.byType(MxFilterChip)),
         matchesSemantics(
           isButton: true,
+          isInMutuallyExclusiveGroup: true,
           isSelected: true,
           hasSelectedState: true,
           isEnabled: true,
@@ -140,6 +141,7 @@ void main() {
         tester.getSemantics(find.byType(MxFilterChip)),
         matchesSemantics(
           isButton: true,
+          isInMutuallyExclusiveGroup: true,
           hasSelectedState: true,
           hasEnabledState: true,
           label: 'Due only',

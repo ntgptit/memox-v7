@@ -24,7 +24,7 @@ import '../foundations/app_semantic_colors.dart';
 /// | token | normal | high contrast | why |
 /// |---|---|---|---|
 /// | `borderSubtle` | 1.08 / 1.32 | **unchanged** | a row separator identifies nothing; 1.4.11 exempts it, and the owner reviewed both stronger recipes and rejected them |
-/// | `borderControl` | 3.71 / 4.68 | `onSurfaceVariant` — 5.28 / 6.47 | already passed on a card; the component boundary keeps the strongest edge |
+/// | `borderControl` | 3.71 / 4.68 | `onSurfaceVariant` — 7.20 / 8.50 | already passed on a card; the component boundary keeps the strongest edge |
 /// | `borderAccent` | 1.80 / 3.88 | `primary` — 5.67 / 11.27 | the Today card's edge is decoration at 1.80 |
 /// | `borderGhost` | 1.14 / 1.47 | `onSurfaceVariant` — 7.20 / 8.50, the same edge as `borderControl` | the unselected `MxFilterChip`'s fill is `surfaceContainerLowest`, so this hairline is the only thing that identifies the control (1.4.11), not a decorative edge |
 /// | `onDisabled` | 2.11 / 2.62 | the same ink at 62% — 3.81 / 5.12 | see below |

@@ -7,7 +7,7 @@
 | **Scope** | Nền tảng thị giác toàn cục — palette hai theme, ink chữ, type scale, ladder spacing/radius/icon/state-layer, bóng đổ, composition (16 gutter, 48 scroll tail). Ngoài phạm vi: biến thể/hình học từng component (spec component riêng sẽ đọc file này — ruling R1), lý luận kiến trúc màu nói chung (`ad-14-color-and-depth.md`), layering của `lib/core/theme/` (`theme-architecture.md`) |
 | **Source of truth for** | Giá trị token v3 dưới dạng spec value → Dart symbol; bảng alias CSS → Dart; tên gọi radius/icon CSS ↔ Dart; các ruling R1–R13 đưa ra khi triển khai foundations |
 | **Depends on** | `document-conventions.md` · `docs/superpowers/specs/2026-09-17-memox-v3-foundations.md` (handoff nguyên văn) · `docs/superpowers/plans/2026-09-17-memox-v3-foundations.md` (kế hoạch và rulings gốc) |
-| **Updated by task** | M100.112 |
+| **Updated by task** | M100.115 |
 | **Last updated** | 2026-09-19 |
 
 ---
@@ -267,7 +267,7 @@ its first caller"):
 | `primary-soft` | primary 10%/20% trộn trong suốt | Tonal tint cho action/tile; chưa có caller |
 | `danger-soft` | error 8%/16% trộn trong suốt | ErrorState tile tint; chưa có caller |
 | `danger-border` | error 22%/32% trộn trong suốt | Viền destructive; chưa có caller |
-| ~~`border-ghost`~~ | `rgba(82,101,245,.14)` / `rgba(139,154,255,.16)` | **Đã khai báo ở M100.114** — `AppBorderColors.borderGhost*` / `AppSemanticColors.borderGhost`, caller đầu tiên là `MxFilterChip` (viền chưa chọn). Dòng này giữ lại làm hồ sơ của hex gốc; hàng Guess của Match vẫn chưa có caller |
+| ~~`border-ghost`~~ | `rgba(82,101,245,.14)` / `rgba(139,154,255,.16)` | **Đã khai báo ở M100.115** — `AppBorderColors.borderGhost*` / `AppSemanticColors.borderGhost`, caller đầu tiên là `MxFilterChip` (viền chưa chọn). Dòng này giữ lại làm hồ sơ của hex gốc; hàng Guess của Match vẫn chưa có caller |
 | `error-fill` | `#DC2D4E` / `#B0485C` | Fill **đặc** cho nút destructive — khác `error` ở dark; spec Button đã khai báo (M100.112) |
 | `on-error-fill` | `#FFFFFF` cả hai | Nhãn trên `error-fill`; đi cùng ở trên |
 | `mastery` | `#1F8A5B` / `#6FE0BD` | Không có `masteryInk` riêng — khái niệm mastery dùng `success`/`successInk` (ruling R4); hex này chỉ để tra cứu |

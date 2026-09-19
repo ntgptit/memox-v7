@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.114 |
+| **Updated by task** | M100.115 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1664,10 +1664,10 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
-### M100.114 · MxFilterChip — control một-trong-N 28dp, caller đầu tiên của `border-ghost`
+### M100.115 · MxFilterChip — control một-trong-N 28dp, caller đầu tiên của `border-ghost`
 
-- **Status:** **in-progress** — code, Widgetbook và specimen đã có; chờ golden
-  Linux `TZ=UTC` và gate đầy đủ.
+- **Status:** **in-progress** — code, test, Widgetbook và specimen đã xong; chỉ còn
+  golden Linux `TZ=UTC` và merge.
 - **Goal:** Ba dòng `FilterChip` của `COMPONENT_MIGRATION_PENDING` có caller mà
   không chạm `ChipThemeData` dùng chung, nên `ChoiceChip` và `MxPillButton`
   không đổi.

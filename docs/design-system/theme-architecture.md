@@ -7,7 +7,7 @@
 | **Scope** | Cấu trúc thư mục, trách nhiệm từng tầng, public API của theme. Ngoài phạm vi: *giá trị* của token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" · ma trận dịch Tokyo → MemoX |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-23) |
-| **Updated by task** | M100.114 |
+| **Updated by task** | M100.115 |
 | **Last updated** | 2026-09-19 |
 
 ---
@@ -342,9 +342,9 @@ này trước khi tự đoán role.
 | Component | Slot | Target semantic role |
 |---|---|---|
 | `NavigationBar` | nền | `chrome-glass` — **chặn, xem bên dưới** |
-| `MxFilterChip` | nền + label đã chọn | `primary` / `onPrimary` — **đã thi hành ở M100.114, ngoài `ChipThemeData`** |
-| `MxFilterChip` | label chưa chọn | `onSurface` — **đã thi hành ở M100.114, ngoài `ChipThemeData`** |
-| `MxFilterChip` | viền | `border-ghost` — **đã thi hành ở M100.114, ngoài `ChipThemeData`** |
+| `MxFilterChip` | nền + label đã chọn | `primary` / `onPrimary` — **đã thi hành ở M100.115, ngoài `ChipThemeData`** |
+| `MxFilterChip` | label chưa chọn | `onSurface` — **đã thi hành ở M100.115, ngoài `ChipThemeData`** |
+| `MxFilterChip` | viền | `border-ghost` — **đã thi hành ở M100.115, ngoài `ChipThemeData`** |
 
 **Đợt Controls đã trả xong ở M100.101** và sáu dòng nữa rời bảng: thumb của
 `Switch`, side của `OutlinedButton`, glyph của `IconButton`, và cả ba dòng của
@@ -382,7 +382,7 @@ dời cả hai component khỏi token đó, gate vẫn xanh và không còn đo 
 borderControl". Đã thêm một group đo đúng cạnh thật, ghim theo nền yếu nhất.
 
 **Ba dòng `FilterChip` giờ có caller, và caller không đi qua `ChipThemeData`:**
-`MxFilterChip` (M100.114, `lib/shared/widgets/mx_filter_chip.dart`) là control
+`MxFilterChip` (M100.115, `lib/shared/widgets/mx_filter_chip.dart`) là control
 một-trong-N cao 28dp cố định của v3, và nó đọc trực tiếp `primary` / `onPrimary`
 (nền + label đã chọn), `onSurface` (label chưa chọn) và `border-ghost` (viền chưa
 chọn, `AppSemanticColors.borderGhost`) từ theme của ngữ cảnh. Nó **không** dựng
@@ -453,7 +453,7 @@ khôi phục sàn. Trả lại hình 3:1 là việc của task component cho she
 Ba dòng còn trong bảng cũng sẽ đi xuống dưới sàn khi tới lượt, và số đo có sẵn
 để khỏi phải đo lại: `OutlinedButton` side `outlineVariant` **1.53 / 1.58**;
 `TextField` và `FilterChip` viền `border-ghost` **1.19 / 1.28** (số ước lượng lúc
-ghi; `FilterChip` đã đo lại ở M100.114 trên `surface`: **1.14 / 1.47**, ghim bởi
+ghi; `FilterChip` đã đo lại ở M100.115 trên `surface`: **1.14 / 1.47**, ghim bởi
 `high_contrast_figures_test.dart` — đó là số có thẩm quyền, còn `TextField` đã
 đo thật ở M100.101 là 1.17 / 1.27); `Switch` thumb
 `surfaceBright` **1.05 / 1.42** (trong light là `#FFFFFF` trên nền trang

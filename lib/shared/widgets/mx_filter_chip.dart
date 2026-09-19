@@ -112,6 +112,8 @@ class MxFilterChip extends StatelessWidget {
         button: true,
         selected: isSelected,
         enabled: isEnabled,
+        // One of N: the caller owns which single chip is selected.
+        inMutuallyExclusiveGroup: true,
         // Focusable follows enabled, because the `Focus` under the excluded
         // subtree does: the chip stays keyboard-reachable, and a node that
         // omitted the flag described a control the tree could not explain
@@ -144,35 +146,46 @@ class MxFilterChip extends StatelessWidget {
                       ),
                       child: SizedBox(
                         height: AppSizing.controlChip,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: AppSpacing.xs,
-                          children: <Widget>[
-                            // Always laid out, whatever it paints — the slot
-                            // is what keeps the chip's width stable across
-                            // selection toggles (mx_pill_button.dart:206-215).
-                            SizedBox.square(
-                              dimension: AppIconSize.sm,
-                              child: glyph == null
-                                  ? null
-                                  : Icon(
-                                      glyph,
-                                      size: AppIconSize.sm,
-                                      color: inkRole.resolve(context),
-                                    ),
-                            ),
-                            // No `Flexible`, no `maxLines`, no ellipsis: the
-                            // caller owns horizontal scroll for overflow.
-                            Text(label, style: labelStyle),
-                            if (count != null)
-                              Opacity(
-                                opacity: countOpacity,
-                                child: Text(
-                                  count.toString(),
-                                  style: countStyle,
-                                ),
+                        // The pill stays `controlChip` tall whatever the text
+                        // scale: the Row is laid out with an unbounded height
+                        // and centred, so a taller line overflows the pill
+                        // symmetrically instead of being clamped to it and
+                        // painted top-aligned. `deferToChild` because the
+                        // default sizes to the biggest constraint, which a
+                        // horizontally scrolling caller leaves infinite.
+                        child: OverflowBox(
+                          maxHeight: double.infinity,
+                          fit: OverflowBoxFit.deferToChild,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: AppSpacing.xs,
+                            children: <Widget>[
+                              // Always laid out, whatever it paints — the slot
+                              // is what keeps the chip's width stable across
+                              // selection toggles (mx_pill_button.dart:206-215).
+                              SizedBox.square(
+                                dimension: AppIconSize.sm,
+                                child: glyph == null
+                                    ? null
+                                    : Icon(
+                                        glyph,
+                                        size: AppIconSize.sm,
+                                        color: inkRole.resolve(context),
+                                      ),
                               ),
-                          ],
+                              // No `Flexible`, no `maxLines`, no ellipsis: the
+                              // caller owns horizontal scroll for overflow.
+                              Text(label, style: labelStyle),
+                              if (count != null)
+                                Opacity(
+                                  opacity: countOpacity,
+                                  child: Text(
+                                    count.toString(),
+                                    style: countStyle,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -193,7 +206,9 @@ class MxFilterChip extends StatelessWidget {
 /// (`mx_pill_button.dart:227-331`), not an import across files or an
 /// extraction into a shared primitive — extracting one would refactor
 /// `MxPillButton` too, which is out of this task's stated scope. Flagged as a
-/// candidate for a follow-up extraction task.
+/// candidate for a follow-up extraction task. **One deliberate difference:**
+/// the child is laid out with `constraints.loosen()`, so a tight-height parent
+/// does not override the pill's own fixed height.
 class _TapTarget extends SingleChildRenderObjectWidget {
   const _TapTarget({required super.child});
 
@@ -248,7 +263,11 @@ class _RenderTapTarget extends RenderShiftedBox {
     final child = this.child;
     if (child == null) return constraints.constrain(_minimum);
 
-    return constraints.constrain(_sizeFor(child.getDryLayout(constraints)));
+    // Loosened: a tight parent (a 48dp scroll band) must not stretch the
+    // painted shape to the box; the centring offset places it instead.
+    return constraints.constrain(
+      _sizeFor(child.getDryLayout(constraints.loosen())),
+    );
   }
 
   @override
@@ -259,7 +278,7 @@ class _RenderTapTarget extends RenderShiftedBox {
       return;
     }
 
-    child.layout(constraints, parentUsesSize: true);
+    child.layout(constraints.loosen(), parentUsesSize: true);
     size = constraints.constrain(_sizeFor(child.size));
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     childParentData.offset = Alignment.center.alongOffset(
