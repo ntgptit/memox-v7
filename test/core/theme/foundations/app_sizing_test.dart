@@ -34,6 +34,7 @@ void main() {
         ('floatingAction', AppSizing.floatingAction),
         ('fab', AppSizing.fab),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
+        ('iconButtonInk', AppSizing.iconButtonInk),
         // Not a control, and on the grid all the same: the rhythm is what
         // keeps a mark aligned with the text it sits beside.
         ('statusDot', AppSizing.statusDot),
@@ -72,6 +73,12 @@ void main() {
       expect(AppSizing.controlCompact, lessThan(AppSizing.touchTarget));
     });
 
+    test('the icon button ink circle is smaller than the target it keeps', () {
+      // The plain `IconButton`'s own component-owned dimension (36), distinct
+      // from `controlCompact` (40) — same technique, two different specs.
+      expect(AppSizing.iconButtonInk, lessThan(AppSizing.touchTarget));
+    });
+
     test('the FAB clearance is derived from the FAB, not repeated', () {
       // `AppSpacing.fabScrollClearance` is the button, an `lg` gap above it,
       // and the ordinary `xxxl` tail clearance below — the same 48 a list
@@ -102,14 +109,21 @@ void main() {
         expect(minimum.width, AppSizing.buttonMinWidth);
       });
 
-      test('$mode: an icon button cannot be built below the target', () {
-        final Size? minimum = build().iconButtonTheme.style?.minimumSize
-            ?.resolve(const <WidgetState>{});
+      test(
+        '$mode: an icon button draws its ink circle, not the touch target',
+        () {
+          // `minimumSize` pins the plain style's own 36 painted box — the 48
+          // touch floor comes from `tapTargetSize: padded` instead, which
+          // `mx_tonal_and_outlined_test.dart` measures on the rendered
+          // widget.
+          final Size? minimum = build().iconButtonTheme.style?.minimumSize
+              ?.resolve(const <WidgetState>{});
 
-        expect(minimum, isNotNull);
-        expect(minimum!.height, AppSizing.touchTarget);
-        expect(minimum.width, AppSizing.touchTarget);
-      });
+          expect(minimum, isNotNull);
+          expect(minimum!.height, AppSizing.iconButtonInk);
+          expect(minimum.width, AppSizing.iconButtonInk);
+        },
+      );
     }
   });
 }

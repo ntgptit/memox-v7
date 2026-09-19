@@ -15,17 +15,25 @@ IconButtonThemeData buildIconButtonTheme(
 ) => IconButtonThemeData(
   style:
       IconButton.styleFrom(
-        // The 48×48 minimum lives here rather than in `MxIconButton`, so no
-        // screen can pass a smaller one — there is no parameter to pass.
-        minimumSize: const Size.square(AppSizing.touchTarget),
+        // **36 drawn, 48 hit** (MemoX v3 IconButton component spec, Actions &
+        // controls, 2026-09-18). `minimumSize` states the painted ink circle,
+        // not the touch floor — `tapTargetSize: padded` below restores
+        // `AppSizing.touchTarget` around it, so no screen can pass a smaller
+        // hit area even though the circle itself is smaller than the target
+        // it keeps.
+        minimumSize: const Size.square(AppSizing.iconButtonInk),
+        tapTargetSize: MaterialTapTargetSize.padded,
         // v3's `onSurface` (M100.101). A straight gain: the glyph reads
         // **16.72:1** on the page in light and **15.59:1** in dark, where
         // `onSurfaceVariant` read 7.20 and 8.50.
         foregroundColor: scheme.onSurface,
         // Named, not left to `defaultStyleOf` where no audit can see it.
         disabledForegroundColor: semantic.onDisabled,
+        // Fully round, matching the outlined variant's shape token — the
+        // squircle `AppRadius.md` used to draw here read as a rounded box
+        // beside the outlined style's true circle.
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(AppRadius.pill),
         ),
       ).copyWith(
         // Hover, press and focus declared. Left null they came from
@@ -73,13 +81,14 @@ ButtonStyle buildOutlinedIconButtonStyle(
   ColorScheme scheme,
   AppSemanticColors semantic,
 ) => ButtonStyle(
-  // **40 drawn, 48 hit** (owner brief, 2026-09-10). The plain style takes the
-  // whole 48 because there is nothing to see: an unfilled glyph has no edge,
-  // so the box is invisible and its size is only the target. An outlined one
-  // is a visible circle, and at 48 beside a 12px subtitle it is the largest
-  // object in the header. `padded` keeps the finger's floor while the circle
-  // comes down — the same split `MxActionButtonSize.compact` has used since
-  // 2026-08-20.
+  // **40 drawn, 48 hit** (owner brief, 2026-09-10) — the plain style's own
+  // circle is a different, smaller 36 (`AppSizing.iconButtonInk`, MemoX v3
+  // IconButton component spec, 2026-09-18); the two are separate
+  // component-owned values for two different visuals, not one number reused.
+  // An outlined circle is visible, and at 48 beside a 12px subtitle it is the
+  // largest object in the header. `padded` keeps the finger's floor while the
+  // circle comes down — the same split `MxActionButtonSize.compact` has used
+  // since 2026-08-20.
   minimumSize: const WidgetStatePropertyAll<Size>(
     Size.square(AppSizing.controlCompact),
   ),
