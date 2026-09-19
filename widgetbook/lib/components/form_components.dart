@@ -11,6 +11,7 @@ import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
 import 'package:memox/shared/widgets/mx_option_row.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
+import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -702,6 +703,23 @@ WidgetbookComponent selectionRowsComponent() {
               label: 'Enable reminders',
               isOn: isOn,
               onChanged: _noopBool,
+            ),
+          );
+        },
+      ),
+      WidgetbookUseCase(
+        name: 'MxSwitch',
+        builder: (BuildContext context) {
+          final isOn = context.knobs.boolean(label: 'on', initialValue: true);
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: MxSwitch(
+              isOn: isOn,
+              onChanged: isEnabled ? _noopBool : null,
             ),
           );
         },

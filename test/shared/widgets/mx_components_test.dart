@@ -196,13 +196,16 @@ void main() {
             .style!
             .backgroundColor!;
 
-        expect(fill.resolve(const <WidgetState>{}), theme.colorScheme.error);
+        // Repinned from `scheme.error` / `onError`: the destructive tone paints
+        // the v3 `errorFill` / `onErrorFill` (the solid fill pair), while
+        // `error` stays the text/icon colour.
+        expect(fill.resolve(const <WidgetState>{}), semantic.errorFill);
         // OLD: `fill(pressed) != error` — press lerped the fill. NEW: the fill
-        // is `error` under press and the state layer is `onError`, which is
-        // `_FilledButtonDefaultsM3`'s mechanism at 3.44.8 (M100.36).
+        // is `errorFill` under press and the state layer is `onErrorFill`,
+        // which is `_FilledButtonDefaultsM3`'s mechanism at 3.44.8 (M100.36).
         expect(
           fill.resolve(const <WidgetState>{WidgetState.pressed}),
-          theme.colorScheme.error,
+          semantic.errorFill,
           reason: '${mode.$1}: a destructive press moved the fill itself',
         );
         final layer = tester
@@ -212,8 +215,8 @@ void main() {
             .resolve(const <WidgetState>{WidgetState.pressed});
         expect(
           layer?.withValues(alpha: 1),
-          theme.colorScheme.onError,
-          reason: '${mode.$1}: the destructive press layer is not onError',
+          semantic.onErrorFill,
+          reason: '${mode.$1}: the destructive press layer is not onErrorFill',
         );
         expect(
           fill.resolve(const <WidgetState>{WidgetState.disabled}),

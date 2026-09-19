@@ -382,6 +382,7 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
       return <Widget>[
         MxActionButton(
           label: context.l10n.studyRevealAnswer,
+          size: MxActionButtonSize.study,
           onPressed: widget.isLocked
               ? null
               : () => setState(() => _isRevealed = true),
