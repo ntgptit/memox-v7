@@ -95,5 +95,29 @@ void main() {
       );
       handle.dispose();
     });
+
+    testWidgets(
+      'a disabled control-shaped row still reads as a (disabled) button — '
+      'distinct from a genuinely static row',
+      (tester) async {
+        final handle = tester.ensureSemantics();
+        await pump(
+          tester,
+          MxSettingsRow(label: 'Theme', isEnabled: false, onTap: () {}),
+        );
+
+        expect(
+          tester.getSemantics(find.byType(MxSettingsRow)),
+          matchesSemantics(
+            isButton: true,
+            hasEnabledState: true,
+            // `isEnabled` defaults to `false` — left implicit here, unlike
+            // the navigable test above, which must state it explicitly.
+            label: 'Theme',
+          ),
+        );
+        handle.dispose();
+      },
+    );
   });
 }

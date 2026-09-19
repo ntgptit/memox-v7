@@ -85,13 +85,22 @@ class MxSettingsRow extends StatelessWidget {
   /// them is the caller's job.
   final bool isEnabled;
 
-  /// Draws the chevron, is tappable, and takes focus exactly when the row
-  /// has nothing else claiming the trailing slot.
-  bool get _isNavigable =>
-      isEnabled && onTap != null && trailing == null && wideControl == null;
+  /// Shaped like a control — it has one action and nothing else claiming the
+  /// trailing slot — regardless of whether that action can fire right now.
+  /// **Decides whether the row is exposed as a button at all**, so a
+  /// disabled control still reads as a disabled button rather than as inert
+  /// content indistinguishable from a genuinely static row (no [onTap]).
+  bool get _isControl =>
+      onTap != null && trailing == null && wideControl == null;
+
+  /// Draws the chevron, is tappable, and takes focus — [_isControl] and
+  /// actually enabled. **Decides only interactivity**, never whether the row
+  /// is announced as a button; see [_isControl].
+  bool get _isNavigable => isEnabled && _isControl;
 
   @override
   Widget build(BuildContext context) {
+    final isControl = _isControl;
     final isNavigable = _isNavigable;
     final labelStyle = context.textStyles.settingsRowLabel.inked(
       context,
@@ -178,29 +187,41 @@ class MxSettingsRow extends StatelessWidget {
       ),
     );
 
-    // **No tap target at all when the row does not navigate.** Never
-    // `ExcludeFocus` around [content] — that would also blind a caller's
-    // `trailing`/`wideControl` control to the keyboard. Simply not building
-    // the `InkWell` leaves any focusable descendant untouched.
-    final Widget body = isNavigable
-        ? _navigableBody(context, content)
-        : content;
+    // **Not shaped like a control at all** (a static row, or one with a
+    // `trailing`/`wideControl`): no button semantics, no tap target — just
+    // the content, dimmed when disabled.
+    if (!isControl) {
+      if (isEnabled) return content;
+      return Opacity(opacity: AppStateOpacity.disabled, child: content);
+    }
 
-    // **`Opacity` only when actually dimming, never at a standing `1.0`.**
-    // `RenderOpacity` is its own semantics boundary regardless of value, so
-    // wrapping the enabled path in it too would stop `find.byType
-    // (MxSettingsRow)` from ever reaching the button node underneath — the
-    // same reason `MxOptionRow`/`MxSwitch`/`MxFilterChip` gate this the same
-    // way (`isEnabled ? row : Opacity(...)`).
-    if (isEnabled) return body;
-
-    return Opacity(opacity: AppStateOpacity.disabled, child: body);
+    return _controlBody(context, content);
   }
 
-  Widget _navigableBody(BuildContext context, Widget content) {
+  /// Builds the interactive core and its `Semantics(button: true, enabled:)`
+  /// wrapper for a control-shaped row ([_isControl]), whether or not it can
+  /// fire right now.
+  ///
+  /// **`Semantics` is the outermost widget returned here, `Opacity` is
+  /// nested inside it — never the other way round.** `find.byType
+  /// (MxSettingsRow)` resolves to the *first* `RenderObject` the widget
+  /// builds; a plain layout object (`Opacity`, `Padding`, `Row`, …) carries
+  /// no semantics of its own and is invisible to that lookup, so putting
+  /// `Opacity` *outside* `Semantics` — as an earlier version of this method
+  /// did for the enabled path — makes the lookup climb straight past the
+  /// button node and out to the app's root. Semantics first, dimming inside
+  /// it, and the row's own semantics are reachable regardless of
+  /// [isEnabled].
+  ///
+  /// **No `ExcludeFocus`.** Disabling only nulls `InkWell.onTap`; `InkWell`
+  /// already withdraws its own focus and hover/press affordances the moment
+  /// every one of its callbacks is null, and nothing here has to reach past
+  /// this control's own tap target to do it — a caller-supplied
+  /// [trailing]/[wideControl] never appears alongside [_isControl] in the
+  /// first place, so there is nothing else in this branch to blind.
+  Widget _controlBody(BuildContext context, Widget content) {
     final overlay = AppInteractionStates.rowOverlay(context.colors);
-
-    return MxFocusRing(
+    final core = MxFocusRing(
       // Square, like the row: the ring traces the shape the ink takes.
       borderRadius: BorderRadius.zero,
       child: Material(
@@ -208,15 +229,21 @@ class MxSettingsRow extends StatelessWidget {
         // surface, the same move `MxListRow`/`MxListTile` make.
         type: MaterialType.transparency,
         child: InkWell(
-          onTap: onTap,
+          onTap: isEnabled ? onTap : null,
           hoverColor: overlay.resolve(const <WidgetState>{WidgetState.hovered}),
           focusColor: overlay.resolve(const <WidgetState>{WidgetState.focused}),
           splashColor: overlay.resolve(const <WidgetState>{
             WidgetState.pressed,
           }),
-          child: Semantics(button: true, enabled: isEnabled, child: content),
+          child: content,
         ),
       ),
     );
+
+    final dimmed = isEnabled
+        ? core
+        : Opacity(opacity: AppStateOpacity.disabled, child: core);
+
+    return Semantics(button: true, enabled: isEnabled, child: dimmed);
   }
 }

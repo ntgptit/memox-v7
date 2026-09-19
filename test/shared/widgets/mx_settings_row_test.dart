@@ -193,7 +193,10 @@ void main() {
       await tester.tap(find.byType(MxSettingsRow), warnIfMissed: false);
       await tester.pumpAndSettle();
       expect(taps, 0);
-      expect(find.byType(InkWell), findsNothing);
+      // The `InkWell` still exists (it carries the button's semantics), but
+      // its `onTap` is nulled — that is what actually drops the tap and the
+      // focus stop, not its absence.
+      expect(tester.widget<InkWell>(find.byType(InkWell)).onTap, isNull);
     });
 
     testWidgets(
@@ -220,6 +223,35 @@ void main() {
           reason:
               'a caller-supplied trailing control must stay reachable '
               'by Tab when the row itself does not navigate',
+        );
+      },
+    );
+
+    testWidgets(
+      'a wideControl stays Tab-reachable too — same code path as trailing',
+      (tester) async {
+        await pump(
+          tester,
+          MxSettingsRow(
+            label: 'Daily goal',
+            wideControl: TextButton(
+              onPressed: () {},
+              child: const Text('12 cards / day'),
+            ),
+          ),
+        );
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+
+        final buttonElement = tester.element(find.byType(TextButton));
+        final focusNode = Focus.maybeOf(buttonElement, scopeOk: true);
+        expect(
+          focusNode?.hasFocus ?? false,
+          isTrue,
+          reason:
+              'a caller-supplied wideControl must stay reachable by Tab '
+              'when the row itself does not navigate',
         );
       },
     );
