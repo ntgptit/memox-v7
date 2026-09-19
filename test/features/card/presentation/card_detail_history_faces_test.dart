@@ -361,13 +361,14 @@ void main() {
       await pumpCardDetail(tester, repository);
       await tester.pumpAndSettle();
 
-      // The button, not the glyph inside it: an `Icon` is 24dp by definition,
-      // and what has to clear 48 is the box that takes the tap.
+      // The button, not the glyph inside it: the glyph is 20dp and the
+      // `InkWell` is the painted 36dp circle by design, so what has to clear
+      // 48 is the `IconButton` box that takes the tap.
       final edit = tester.getSize(
         find
             .ancestor(
               of: find.byIcon(Icons.edit_outlined),
-              matching: find.byType(InkWell),
+              matching: find.byType(IconButton),
             )
             .first,
       );
