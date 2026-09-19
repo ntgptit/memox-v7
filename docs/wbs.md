@@ -1663,7 +1663,7 @@ của M2.
         widget được truyền.
 - **Checklist phases:** 7, 12.
 
-### M100.112 · IconButton (plain) đọc đúng hình học v3 — 36 vẽ, 48 chạm, bo tròn, glyph 20
+### M100.114 · IconButton (plain) đọc đúng hình học v3 — 36 vẽ, 48 chạm, bo tròn, glyph 20
 
 - **Status:** **done** — analyze, host suite 5290/5290 và guard xanh; golden vẽ lại
   trên Linux `TZ=UTC` (WSL, 44 file, 100 PNG đổi, không thêm/xoá).
