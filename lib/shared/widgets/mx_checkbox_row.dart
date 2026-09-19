@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/foundations/app_stroke.dart';
+import '../../core/theme/states/app_interaction_states.dart';
+import 'mx_focus_ring.dart';
+
 /// A checkbox row in a pick-many list.
 ///
-/// **Exists so no feature builds a `CheckboxListTile` again.** One site did
-/// (the tag filter sheet), and its three choices are the ones this widget
-/// fixes as the house spelling: the box leads (`leading` affinity — in a
-/// pick-many list the mark is what the eye scans down, so it sits on the
-/// reading edge), the row supplies no gutter of its own (`contentPadding`
-/// zero — the sheet or card around it owns the inset), and the whole row is
-/// the target with the tile merging label and box into one spoken node.
-///
-/// The checkbox's colours come entirely from `CheckboxThemeData`.
+/// The row, rather than its 20dp mark, is the target. Its public API contains
+/// only caller-owned copy and state; geometry and visual states belong here.
 class MxCheckboxRow extends StatelessWidget {
   const MxCheckboxRow({
     required this.label,
@@ -23,24 +23,125 @@ class MxCheckboxRow extends StatelessWidget {
   /// Already-localized words for the choice.
   final String label;
 
-  /// Secondary line under the label — a count, a hint.
+  /// Secondary line under the label — a count or a hint.
   final String? subtitle;
 
   final bool isChecked;
 
-  /// Called on any tap; the new value is `!isChecked`, so the caller toggles
-  /// rather than receives. `null` locks the row.
+  /// Called on a tap, Space, or Enter. `null` locks the row.
   final VoidCallback? onToggle;
+
+  bool get _isEnabled => onToggle != null;
 
   @override
   Widget build(BuildContext context) {
-    return CheckboxListTile(
-      value: isChecked,
-      onChanged: onToggle == null ? null : (_) => onToggle!(),
-      title: Text(label),
-      subtitle: subtitle == null ? null : Text(subtitle!),
-      controlAffinity: ListTileControlAffinity.leading,
-      contentPadding: EdgeInsets.zero,
+    final colors = Theme.of(context).colorScheme;
+
+    final content = Row(
+      children: <Widget>[
+        SizedBox(
+          width: AppSizing.touchTarget,
+          child: Center(child: _CheckboxMark(isChecked: isChecked)),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(label),
+              if (subtitle != null) Text(subtitle!),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    return Semantics(
+      checked: isChecked,
+      enabled: _isEnabled,
+      label: label,
+      onTap: _isEnabled ? onToggle : null,
+      child: MxFocusRing(
+        borderRadius: BorderRadius.zero,
+        child: FocusableActionDetector(
+          enabled: _isEnabled,
+          mouseCursor: _isEnabled
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.basic,
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                onToggle?.call();
+                return null;
+              },
+            ),
+          },
+          child: Material(
+            type: MaterialType.transparency,
+            child: Opacity(
+              opacity: _isEnabled ? 1 : AppStateOpacity.disabled,
+              child: InkWell(
+                onTap: onToggle,
+                overlayColor: AppInteractionStates.rowOverlay(colors),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: AppSizing.touchTarget,
+                  ),
+                  child: ExcludeSemantics(child: content),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
+
+class _CheckboxMark extends StatelessWidget {
+  const _CheckboxMark({required this.isChecked});
+
+  final bool isChecked;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      key: kMxCheckboxBoxKey,
+      width: _kBoxSize,
+      height: _kBoxSize,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isChecked ? colors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.xs),
+          border: isChecked
+              ? null
+              : Border.all(
+                  color: colors.outline,
+                  width: AppStroke.selectionControl,
+                ),
+        ),
+        child: isChecked
+            ? Icon(
+                Icons.check,
+                key: kMxCheckboxGlyphKey,
+                size: _kCheckGlyphSize,
+                color: colors.onPrimary,
+              )
+            : null,
+      ),
+    );
+  }
+}
+
+/// Test hooks for the fixed painted geometry.
+@visibleForTesting
+const Key kMxCheckboxBoxKey = ValueKey<String>('mx_checkbox_box');
+
+@visibleForTesting
+const Key kMxCheckboxGlyphKey = ValueKey<String>('mx_checkbox_glyph');
+
+const double _kBoxSize = 20;
+const double _kCheckGlyphSize = 14;

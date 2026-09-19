@@ -7,6 +7,7 @@ import 'package:memox/features/card/presentation/widgets/items/tag_catalog_row_w
 import 'package:memox/features/card/presentation/widgets/sections/card_filter_bar_widget.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
 import 'support/fake_card_repository.dart';
@@ -197,7 +198,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.sell_outlined).first);
       await tester.pumpAndSettle();
 
-      final row = tester.getRect(find.byType(CheckboxListTile).first);
+      final row = tester.getRect(find.byType(MxCheckboxRow).first);
       final actions = tester.getRect(find.text('Clear'));
 
       expect(actions.left, greaterThanOrEqualTo(row.left - epsilon));
@@ -209,7 +210,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.sell_outlined).first);
       await tester.pumpAndSettle();
 
-      final row = tester.getRect(find.byType(CheckboxListTile).first);
+      final row = tester.getRect(find.byType(MxCheckboxRow).first);
       expect(row.height, greaterThanOrEqualTo(48 - epsilon));
 
       // Tap the far end of the row, well away from the checkbox.
@@ -218,8 +219,8 @@ void main() {
 
       expect(
         tester
-            .widget<CheckboxListTile>(find.byType(CheckboxListTile).first)
-            .value,
+            .widget<MxCheckboxRow>(find.byType(MxCheckboxRow).first)
+            .isChecked,
         isTrue,
       );
     });
