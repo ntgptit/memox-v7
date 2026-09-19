@@ -11,6 +11,7 @@ import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
 import 'package:memox/shared/widgets/mx_option_row.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
+import 'package:memox/shared/widgets/mx_settings_row.dart';
 import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -965,6 +966,64 @@ WidgetbookComponent iconTileComponent() {
               MxIconTile(icon: Icons.folder, size: MxIconTileSize.lg),
             ],
           ),
+        ),
+      ),
+    ],
+  );
+}
+
+/// The settings-screen row — navigable, with a trailing control, with a wide
+/// control, and static with no leading icon.
+WidgetbookComponent settingsRowComponent() {
+  return WidgetbookComponent(
+    name: 'MxSettingsRow',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Navigable',
+        builder: (BuildContext context) => CatalogCenterPage(
+          child: MxSettingsRow(
+            label: 'Theme',
+            sub: 'System default',
+            leadingIcon: Icons.palette_outlined,
+            isEnabled: context.knobs.boolean(
+              label: 'enabled',
+              initialValue: true,
+            ),
+            onTap: _noop,
+          ),
+        ),
+      ),
+      WidgetbookUseCase(
+        name: 'With a trailing control',
+        builder: (BuildContext context) => CatalogCenterPage(
+          child: MxSettingsRow(
+            label: 'Notifications',
+            sub: 'Reminders and study nudges',
+            leadingIcon: Icons.notifications_outlined,
+            trailing: Switch(
+              value: context.knobs.boolean(label: 'on', initialValue: true),
+              onChanged: _noopBool,
+            ),
+          ),
+        ),
+      ),
+      WidgetbookUseCase(
+        name: 'With a wide control',
+        builder: (BuildContext context) => const CatalogCenterPage(
+          child: MxSettingsRow(
+            label: 'Daily goal',
+            leadingIcon: Icons.psychology_outlined,
+            wideControl: OutlinedButton(
+              onPressed: _noop,
+              child: Text('12 cards / day'),
+            ),
+          ),
+        ),
+      ),
+      WidgetbookUseCase(
+        name: 'Static, no leading icon',
+        builder: (BuildContext context) => const CatalogCenterPage(
+          child: MxSettingsRow(label: 'App version', sub: '1.4.2 (build 218)'),
         ),
       ),
     ],

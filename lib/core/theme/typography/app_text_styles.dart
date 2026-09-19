@@ -27,6 +27,8 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.listRowTitle,
     required this.optionRowTitle,
     required this.optionRowDescription,
+    required this.settingsRowLabel,
+    required this.settingsRowSub,
   });
 
   /// Both styles, derived from the built [texts] so they inherit whatever the
@@ -85,6 +87,20 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       optionRowDescription: (texts.bodySmall ?? const TextStyle()).copyWith(
         height: AppTypography.optionRowDescriptionHeight,
       ),
+      // SettingsRow's label: `body-lg` raised to the emphatic weight and
+      // closed up by the kit's own tracking — see [listRowTitle] for the same
+      // shape at the row's other rung.
+      settingsRowLabel: AppTypography.withWeight(
+        (texts.bodyLarge ?? const TextStyle()).copyWith(
+          letterSpacing: AppTypography.settingsRowLabelTracking,
+        ),
+        FontWeight.w600,
+      ),
+      // SettingsRow's sub line: `body-sm` led at the kit's own 1.45 rather
+      // than the caption rung's 1.4 — see [optionRowDescription].
+      settingsRowSub: (texts.bodySmall ?? const TextStyle()).copyWith(
+        height: AppTypography.settingsRowSubHeight,
+      ),
     );
   }
 
@@ -133,6 +149,13 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// [AppTypography.optionRowDescriptionHeight].
   final TextStyle optionRowDescription;
 
+  /// The settings row's label — see [AppTypography.settingsRowLabelTracking].
+  /// Colour stays with the caller — `AppInk.stated` at the row.
+  final TextStyle settingsRowLabel;
+
+  /// The settings row's sub line — see [AppTypography.settingsRowSubHeight].
+  final TextStyle settingsRowSub;
+
   @override
   AppTextStyles copyWith({
     TextStyle? cardPrompt,
@@ -144,6 +167,8 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     TextStyle? listRowTitle,
     TextStyle? optionRowTitle,
     TextStyle? optionRowDescription,
+    TextStyle? settingsRowLabel,
+    TextStyle? settingsRowSub,
   }) => AppTextStyles(
     cardPrompt: cardPrompt ?? this.cardPrompt,
     sectionLabel: sectionLabel ?? this.sectionLabel,
@@ -154,6 +179,8 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     listRowTitle: listRowTitle ?? this.listRowTitle,
     optionRowTitle: optionRowTitle ?? this.optionRowTitle,
     optionRowDescription: optionRowDescription ?? this.optionRowDescription,
+    settingsRowLabel: settingsRowLabel ?? this.settingsRowLabel,
+    settingsRowSub: settingsRowSub ?? this.settingsRowSub,
   );
 
   @override
@@ -178,6 +205,12 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
         other.optionRowDescription,
         t,
       )!,
+      settingsRowLabel: TextStyle.lerp(
+        settingsRowLabel,
+        other.settingsRowLabel,
+        t,
+      )!,
+      settingsRowSub: TextStyle.lerp(settingsRowSub, other.settingsRowSub, t)!,
     );
   }
 }
