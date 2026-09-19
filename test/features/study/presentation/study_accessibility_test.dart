@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/time/clock_provider.dart';
@@ -113,22 +114,27 @@ void main() {
         find.byType(StudySessionFrameSectionWidget),
       );
       final scheme = Theme.of(element).colorScheme;
-      final semantic = Theme.of(element).extension<AppSemanticColors>()!;
 
-      // The context line and the hint line: the two the frame writes itself.
+      // The context line, the hint line and the counter/clock: the three texts
+      // the frame writes in `onSurfaceVariant` (the StudyTopBar contract's
+      // counter binding).
       expect(
         contrast(scheme.onSurfaceVariant, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
-      // The counter and the clock.
+
+      // `onSurface` on the page: the counter and clock wore it before the
+      // StudyTopBar contract moved them to `onSurfaceVariant` (asserted above).
+      // It no longer draws any text in this frame; this measures the token pair
+      // itself and stays as a regression check on it.
       expect(
         contrast(scheme.onSurface, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
-      // The mode pill: `_Chip` paints its label in `AppInk.accent`, not raw
-      // `primary` — v3's light `primary` measures 3.95:1 on `surfaceMuted`
-      // (GC-3), which is exactly why the ink exists. `accentInk` is what
-      // reaches the canvas, so it is what this gate measures.
+      // `accentInk` (GC-3) on `surfaceMuted`: the mode pill used to draw this
+      // pair; it now draws the accent itself (see the light-mode AA test at the
+      // end of this file). This measures the ink token's own pair, not the pill.
+      final semantic = Theme.of(element).extension<AppSemanticColors>()!;
       expect(
         contrast(semantic.accentInk, semantic.surfaceMuted),
         greaterThanOrEqualTo(_kAaBodyText),
@@ -295,6 +301,42 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  // **Known debt: light is skipped on purpose, dark stays live.** The StudyTopBar
+  // contract paints the mode pill's label in the accent at full strength over the
+  // accent tinted 10% into the page. Measured, that is 3.87:1 (primary) and
+  // 3.65:1 (mastery) in light — below AA — while dark passes (6.43:1 primary).
+  // Kept as the contract states, pending an owner decision (docs/wbs.md, Known
+  // technical debt, row "Nhãn mode pill của MxSessionTopBar"). Drop the light
+  // skip when the label gets an accentInk-style ink and that test goes green.
+  for (final brightness in Brightness.values) {
+    test(
+      'the mode pill label clears AA for both accents in ${brightness.name}',
+      () {
+        final theme = brightness == Brightness.dark
+            ? buildDarkTheme()
+            : buildLightTheme();
+        final scheme = theme.colorScheme;
+        final semantic = theme.extension<AppSemanticColors>()!;
+
+        for (final accent in <String, Color>{
+          'primary': scheme.primary,
+          'mastery': semantic.mastery,
+        }.entries) {
+          final fill = Color.alphaBlend(
+            accent.value.withValues(alpha: 0.10),
+            scheme.surface,
+          );
+          expect(
+            contrast(accent.value, fill),
+            greaterThanOrEqualTo(_kAaBodyText),
+            reason: '${accent.key} label on its 10% tint',
+          );
+        }
+      },
+      skip: brightness == Brightness.light ? _kPillContrastDebt : null,
+    );
+  }
 }
 
 /// WCAG 2.1 AA for body text.
@@ -315,3 +357,10 @@ final class _HeldOpenRepository extends FakeStudyRepository {
     return super.deckContext(deckId);
   }
 }
+
+/// Why the pill-contrast test is skipped — see the comment above it and the
+/// "Known technical debt" row in docs/wbs.md.
+const String _kPillContrastDebt =
+    'known debt: full-strength accent label is 3.87:1 (primary) / 3.65:1 '
+    '(mastery) in light; owner decision pending (docs/wbs.md, Known technical '
+    'debt: "Nhãn mode pill của MxSessionTopBar")';

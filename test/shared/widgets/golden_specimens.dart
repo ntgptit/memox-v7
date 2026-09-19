@@ -369,25 +369,29 @@ class SessionTopBarSpecimen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    final accent = context.colors.primary;
+
+    return Scaffold(
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
         child: Column(
           children: <Widget>[
             MxSessionTopBar(
               label: 'Browse',
               progress: 0.3,
-              trailing: Text('3 / 10'),
+              trailing: const Text('3 / 10'),
               onClose: _noop,
               closeLabel: 'Close session',
+              accent: accent,
             ),
-            SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.xl),
             MxSessionTopBar(
               label: 'Ghép cặp từ và nghĩa',
               progress: 0.85,
-              trailing: Text('0:12'),
+              trailing: const Text('0:12'),
               onClose: _noop,
               closeLabel: 'Close session',
+              accent: accent,
             ),
           ],
         ),

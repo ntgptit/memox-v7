@@ -29,12 +29,19 @@ enum MxProgressBarSize {
 
 /// Determinate progress — how much of a deck is learned, how far a session ran.
 ///
-/// **It draws in its own colour family, never the accent**, and that is the whole
-/// reason it is a component rather than a themed `LinearProgressIndicator`. A bar
-/// filled with `primary` sits directly beside a button filled with `primary`, and
-/// nothing tells the eye which of the two it can press. The fill is a lighter
-/// tint of the same indigo — related to the brand, not competing with its call to
-/// action.
+/// **By default it draws in its own colour family, not the accent**, and that is
+/// the whole reason it is a component rather than a themed
+/// `LinearProgressIndicator`. A bar filled with `primary` sits directly beside a
+/// button filled with `primary`, and nothing tells the eye which of the two it
+/// can press. The fill is a lighter tint of the same indigo — related to the
+/// brand, not competing with its call to action.
+///
+/// [fillColor] (and [duration]/[curve] alongside it) exists for the one caller
+/// that is not this situation: `MxSessionTopBar`'s track is not beside a button,
+/// it *is* the accent for the study mode it belongs to, and the contract asks
+/// for it to move on the bar's own faster, less decelerated sweep rather than
+/// this widget's own ceiling. Every other caller leaves all three null and gets
+/// exactly today's behaviour.
 ///
 /// At 100% the fill and the value label both turn `success`. That is the one
 /// place this interface congratulates anybody, and it is deliberate: BR-88's
@@ -52,6 +59,9 @@ class MxProgressBar extends StatelessWidget {
     this.label,
     this.valueLabel,
     this.size = MxProgressBarSize.md,
+    this.fillColor,
+    this.duration,
+    this.curve,
     super.key,
   });
 
@@ -69,12 +79,27 @@ class MxProgressBar extends StatelessWidget {
 
   final MxProgressBarSize size;
 
+  /// Overrides the fill this widget would otherwise pick for itself
+  /// (`progressFill`, or `success` at 100%).
+  ///
+  /// Null keeps today's behaviour. This exists for `MxSessionTopBar`, whose
+  /// track fill is a per-instance accent (`COMPONENT_INPUT`) rather than this
+  /// widget's own colour family — every other caller leaves it null.
+  final Color? fillColor;
+
+  /// Overrides the sweep's [AppDurations.slow] default. Null keeps it.
+  final Duration? duration;
+
+  /// Overrides the sweep's [AppDurations.decelerate] default. Null keeps it.
+  final Curve? curve;
+
   @override
   Widget build(BuildContext context) {
     final fraction = value.clamp(0.0, 1.0);
     final isComplete = fraction >= 1;
     final semantic = context.semanticColors;
-    final fill = isComplete ? semantic.success : semantic.progressFill;
+    final fill =
+        fillColor ?? (isComplete ? semantic.success : semantic.progressFill);
 
     return Semantics(
       label: label,
@@ -113,9 +138,9 @@ class MxProgressBar extends StatelessWidget {
                 // value, the colour and the announced label are identical.
                 duration: AppMotionPolicy.durationOf(
                   context,
-                  AppDurations.slow,
+                  duration ?? AppDurations.slow,
                 ),
-                curve: AppDurations.decelerate,
+                curve: curve ?? AppDurations.decelerate,
                 tween: Tween<double>(end: fraction),
                 builder: (context, animated, child) => LinearProgressIndicator(
                   value: animated,

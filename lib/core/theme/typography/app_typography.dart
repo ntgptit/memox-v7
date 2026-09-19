@@ -189,6 +189,11 @@ abstract final class AppTypography {
   /// [labelTracking] is still right there.
   static const double listHeadingTracking = 0.72;
 
+  /// The weight of a mode badge's label (StudyTopBar contract: 12/700). Named
+  /// here because `w700` may only be spelled in the sources the weight
+  /// registry lists; a component reaches bold through a constant, not a literal.
+  static const FontWeight badgeLabelWeight = FontWeight.w700;
+
   /// The content row's title: `body-md` closed up a hair, so a one-line deck
   /// or tag name reads as the row's head rather than as running text.
   static const double listRowTitleTracking = -0.1;

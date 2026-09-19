@@ -29,6 +29,7 @@ import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:memox/core/theme/extensions/app_ink.dart';
+import 'package:memox/core/theme/foundations/app_colors.dart';
 import 'package:memox/shared/widgets/mx_hero_card.dart';
 
 /// The specimen set for the stress suite: every shared component, built with
@@ -214,6 +215,7 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       trailing: Text('12 / 240'),
       onClose: _noop,
       closeLabel: kLongLabel,
+      accent: AppColors.primaryLight,
     ),
     isInteractive: true,
   ),
