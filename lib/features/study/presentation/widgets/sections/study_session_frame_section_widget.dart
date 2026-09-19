@@ -25,13 +25,16 @@ import '../support/study_labels_widget.dart';
 /// time the user came back the app would offer to resume something they thought
 /// they had closed.
 ///
-/// **One accent, and mode is told apart by the word on the chip** (§7.8). The
-/// design gives modes two colour families; this app has no token meaning "which
-/// mode is this", and the nearest green is `success`, which means *correct* — a
-/// chip in it reads as a verdict handed down before the user has answered, and
-/// on `match` the same colour would then mark both "this mode" and "this pair
-/// was right" on one screen. That is why `MxSessionTopBar` takes a *word* and no
-/// colour: there is nothing for a caller to vary.
+/// **The chip's colour varies by mode, narrowly** (§7.8, StudyTopBar handoff).
+/// `MxSessionTopBar` takes an `accent`, and this frame hands it `primary` by
+/// default and `mastery` only for `recall`/`fill` — the two modes that resolve
+/// to an answer and hold it on screen alone, with no pair-correctness feedback
+/// sharing the page. This is not the same move as handing every mode its own
+/// hue: the nearest green is still `success`, which means *correct*, and a chip
+/// in it would read as a verdict handed down before the user has answered. On
+/// `match` that collision is real — the same colour would mark both "this mode"
+/// and "this pair was right" on one screen — so `match` keeps `primary`, and
+/// nothing here gives it `mastery`.
 ///
 /// **The bar itself is `MxSessionTopBar`, and it is not study's.** Nothing in it
 /// is about cards — a way out, a name, a measure and a figure is what any
@@ -100,6 +103,12 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
     // responsible for its own gutter. Read once from the same helper the shell
     // uses, so the frame and the screens either side of it agree at 320 too.
     final gutter = mxScreenGutter(context);
+    // §7.8, StudyTopBar handoff: `mastery` only where a turn resolves and holds
+    // its answer alone (`recall`, `fill`) — every other mode keeps `primary`.
+    // See the class doc comment for why `match` is deliberately not here.
+    final accent = mode == StudyMode.recall || mode == StudyMode.fill
+        ? context.semanticColors.mastery
+        : context.colors.primary;
 
     return Padding(
       // Vertical only, and it is the half of the screen padding the shell is no
@@ -115,6 +124,7 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
             trailing: _TrailingFigure(progress: progress, timeLeft: timeLeft),
             onClose: onClose,
             closeLabel: context.l10n.studyFrameClose,
+            accent: accent,
           ),
           const SizedBox(height: AppSpacing.sm),
           Padding(
@@ -243,10 +253,12 @@ class _Figure extends StatelessWidget {
     maxLines: 1,
     softWrap: false,
     overflow: TextOverflow.ellipsis,
-    // Tabular so a counter ticking 9 -> 10 does not shift the row.
+    // Tabular so a counter ticking 9 -> 10 does not shift the row. `quiet`
+    // (`onSurfaceVariant`) per the StudyTopBar contract's counter binding —
+    // this is chrome reporting a count, not the page's primary ink.
     style: context.texts.labelMedium!.inked(
       context,
-      AppInk.stated,
+      AppInk.quiet,
       isEmphasized: true,
       isTabular: true,
     ),
