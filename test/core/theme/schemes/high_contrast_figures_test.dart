@@ -49,6 +49,10 @@ void main() {
         // v3 moved `primary` (GC-1), which is `borderAccent`'s base hue.
         expect(r(base.borderAccent), isLight ? '1.31' : '2.04');
         expect(r(hc.borderAccent), isLight ? '4.39' : '7.39');
+        // `borderGhost` is re-pointed to `borderControl`'s target, so the
+        // high-contrast cell is that one.
+        expect(r(base.borderGhost), isLight ? '1.14' : '1.47');
+        expect(r(hc.borderGhost), isLight ? '7.20' : '8.50');
         // v3 moved `onSurface` (GC-1), which `onDisabled` is struck from.
         expect(r(base.onDisabled), isLight ? '2.39' : '3.11');
         expect(r(hc.onDisabled), isLight ? '4.91' : '6.42');
@@ -69,6 +73,7 @@ void main() {
         for (final (String name, Color token) in <(String, Color)>[
           ('borderControl', hc.borderControl),
           ('borderAccent', hc.borderAccent),
+          ('borderGhost', hc.borderGhost),
           ('onDisabled', hc.onDisabled),
         ]) {
           expect(
