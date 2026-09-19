@@ -1562,6 +1562,51 @@ của M2.
   - [x] `rows` rỗng bị assert (fail fast).
 - **Checklist phases:** 7, 12.
 
+### M100.113 · MxSwitch — công tắc trần, không nhãn, của v3
+
+- **Status:** **done** — analyze sạch, `mx_switch_test.dart` + `mx_stress_test.dart`
+  xanh; chưa màn nào dùng.
+- **Goal:** shared component cho hợp đồng Toggle của v3 mà `MxSwitchRow` không phủ
+  được: một công tắc **không có hàng và không có nhãn**, cho chỗ gọi tự ghép nhãn.
+  `MxSwitchRow` bọc `SwitchListTile` của Flutter, và `SwitchThemeData` chỉ chỉnh được
+  màu — track 44×26 và thumb 20 cố định không có chỗ để đặt — nên đây là widget tự vẽ.
+- **Scope:** `lib/shared/widgets/mx_switch.dart`, `mx_switch_test.dart`, specimen
+  stress, entry Widgetbook (`MxSwitch` trong `selectionRowsComponent`).
+- **Out of scope:**
+  - `app_toggle_themes.dart` vẫn resolve thumb **đang bật** của `Switch` stock thành
+    `onPrimary`, còn registry v3 (`2026-09-18-memox-v3-theme-prerequisite.md`) và
+    `MxSwitch` dùng `surfaceBright` ở cả hai trạng thái. **Không sửa ở đây**; đã báo
+    lên để phân loại riêng.
+  - Chưa chuyển `MxSwitchRow` sang render qua `MxSwitch` — đó là thay đổi riêng, và
+    sẽ đóng mục "tap cả hàng" trong `flutter-theme-design/references/input-selection.md`.
+  - Chưa có golden: golden chỉ author trên Linux, nên là việc sau.
+  - Chưa kiểm vai (role) TalkBack trên thiết bị — chỉ kiểm cờ `toggled`/`enabled`
+    và action `tap` qua semantics tree.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_switch_test.dart`, `mx_stress_test.dart`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_switch.dart`.
+- **Acceptance criteria:**
+  - [x] Track 44×26 `AppRadius.pill`, thumb 20 tròn, đi từ x=3 đến x=21; thumb
+        `surfaceBright` ở cả hai trạng thái, đổ bóng `cardWhisperShadow`; track
+        `surfaceContainerHighest` → `primary`. Không tham số màu nào cho chỗ gọi.
+  - [x] Chiếm hộp 48×48 (`AppSizing.touchTarget`), track căn giữa và không bị nới;
+        chạm bất kỳ đâu trong hộp đều bật/tắt.
+  - [x] 160ms là hằng riêng của component (không rung nào của `AppDurations` bằng 160),
+        curve `AppDurations.standard`; giảm chuyển động (`AppMotionPolicy`) thì thumb
+        đến nơi ngay trong cùng frame.
+  - [x] Vô hiệu (`onChanged == null`): `Opacity(AppStateOpacity.disabled)` phủ track +
+        thumb, không tap/hover/focus, semantics `enabled: false` và không có action `tap`.
+  - [x] Vòng focus là `MxFocusRing` với khe **đúng `AppStroke.focusRingOffset`**. Đo
+        được lỗi: `MxFocusRing` vẽ viền 2dp **vào trong** hộp của child, nên padding 2dp
+        quanh track bị viền ăn hết — khe đo được **0.0 ở cả bốn cạnh**. Sửa: padding
+        `focusRingOffset + focus` = 4, hộp vòng 52×34 tràn ra ngoài hộp 48×48 (chỉ vẽ;
+        layout và hit-test vẫn 48×48) — khe đo lại **2.0 ở cả bốn cạnh**.
+  - [x] Space/Enter (`ActivateIntent`) bật/tắt như tap; wash tròn tâm thumb khi
+        pressed/hovered từ `AppInteractionStates.controlOverlay`; RTL đảo chiều thumb.
+  - [x] Semantics: `toggled`, `enabled`, `label` (`semanticLabel`), action `tap`.
+- **Checklist phases:** 7, 12.
+
 
 ### M100.110 · MxIconTile — ô vuông tô màu dẫn đầu một hàng, theo hợp đồng IconTile của v3
 
