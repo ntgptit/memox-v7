@@ -46,20 +46,26 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
     slot: 'destructive',
     file: _buttons,
     scope: 'MxFilledPair.fillOf',
-    requires: <String>['error'],
-    refuses: <String>['errorContainer', 'primary', 'tertiary'],
+    requires: <String>[],
+    requiresSemantic: <String>['errorFill'],
+    refuses: <String>['error', 'errorContainer', 'primary', 'tertiary'],
     because:
-        'A destructive action is a FilledButton on the error pair — `error` is '
-        '`danger` at the palette level, so this is not a second red.',
+        'Repinned from `error` (Task 2, v3 Button): a destructive action is a '
+        'FilledButton on the SOLID `errorFill`, which the handoff distinguishes '
+        'from `error` — the text/icon colour. The fill is an app token with no '
+        'ColorScheme role, hence an empty requires.',
   ),
   RoleBinding(
     component: 'FilledButton label',
     slot: 'destructive',
     file: _buttons,
     scope: 'MxFilledPair.labelOf',
-    requires: <String>['onError'],
-    refuses: <String>['onErrorContainer', 'onPrimary', 'onSurface'],
-    because: 'The label that travels with `error` is `onError`.',
+    requires: <String>[],
+    requiresSemantic: <String>['onErrorFill'],
+    refuses: <String>['onError', 'onErrorContainer', 'onPrimary', 'onSurface'],
+    because:
+        'Repinned from `onError` (Task 2, v3 Button): the label that travels '
+        'with `errorFill` is `onErrorFill`.',
   ),
   // The slot #432 §5 was opened for: the state layer must be the *pair's*
   // `on` role, never the brand. Two rows, because a swap on one pair while
@@ -81,11 +87,44 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
     slot: 'destructive',
     file: _buttons,
     scope: 'MxFilledPair.stateLayerOf',
-    requires: <String>['onError'],
-    refuses: <String>['primary', 'error', 'onSurface', 'onErrorContainer'],
+    requires: <String>[],
+    requiresSemantic: <String>['onErrorFill'],
+    refuses: <String>[
+      'primary',
+      'error',
+      'onError',
+      'onSurface',
+      'onErrorContainer',
+    ],
     because:
-        'The layer over `error` is `onError`. `primary` here painted indigo '
+        'Repinned from `onError` (Task 2, v3 Button): the layer over '
+        '`errorFill` is `onErrorFill`. `primary` here painted indigo '
         'over red and rotated the fill 345.7° → 338.5° on every press.',
+  ),
+  // The chip-sized button (Task 5, v3 Button): a fixed look, so one row per
+  // slot rather than one per pair. The edge is `border-ghost` and names no
+  // ColorScheme role at the slot.
+  RoleBinding(
+    component: 'Chip button fill',
+    slot: 'backgroundColor',
+    file: _buttons,
+    scope: 'buildChipButtonStyle',
+    requires: <String>['surfaceContainerLowest'],
+    refuses: <String>['primary', 'surfaceContainer', 'error'],
+    because:
+        'The handoff binds the chip rung to surfaceContainerLowest and gives '
+        'it no per-tone row.',
+  ),
+  RoleBinding(
+    component: 'Chip button label',
+    slot: 'foregroundColor',
+    file: _buttons,
+    scope: 'buildChipButtonStyle',
+    requires: <String>['onSurfaceVariant'],
+    refuses: <String>['onSurface', 'onPrimary', 'onError'],
+    because:
+        'onSurfaceVariant is what app_chip_theme.dart puts on the same fill '
+        'for an unselected pill; two answers for one pairing would drift.',
   ),
   RoleBinding(
     component: 'TextField',

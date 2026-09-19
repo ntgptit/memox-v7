@@ -125,7 +125,9 @@ class DeckStudyButtonWidget extends StatelessWidget {
         // later pass had to choose between a fill that repeats four times in a
         // viewport and an outline that says "alternative" on a row with
         // nothing to be an alternative to. M100.73 added the value that ends
-        // the loop — the weight M3 defines for exactly this list.
+        // the loop — the weight, between filled and outlined, that fits exactly
+        // this list. (Its colours are the v3 handoff's `surfaceContainer` pair
+        // since M100.112, not M3's tonal roles; the weight argument is unchanged.)
         //
         // M100.71's finding is not undone by this: the root's hero CTA is
         // still gone, so the accent is still not spent on a signpost. What

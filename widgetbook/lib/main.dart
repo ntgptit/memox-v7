@@ -199,6 +199,8 @@ class MemoxWidgetbook extends StatelessWidget {
             metricWellComponent(),
             badgeComponent(),
             listTileComponent(),
+            iconTileComponent(),
+            listRowComponent(),
             selectionRowsComponent(),
             toggleComponent(),
             sessionTopBarComponent(),
