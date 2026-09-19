@@ -58,6 +58,7 @@ void main() {
         for (final border in <(String, Color)>[
           ('borderControl', semantic.borderControl),
           ('borderAccent', semantic.borderAccent),
+          ('borderGhost', semantic.borderGhost),
         ]) {
           for (final ground in groundsOf(hc)) {
             expect(
@@ -204,6 +205,26 @@ void main() {
         );
       }
     });
+  });
+
+  test('the ghost edge that identifies a chip takes the control edge', () {
+    // The unselected `MxFilterChip` is `surfaceContainerLowest` with a 1px
+    // `borderGhost` hairline: the edge is the only thing identifying the
+    // control, so 1.4.11 protects it and it is re-pointed with `borderControl`.
+    for (final entry in pairs.entries) {
+      final (base, hc) = entry.value;
+
+      expect(
+        semanticOf(hc).borderGhost,
+        semanticOf(hc).borderControl,
+        reason: '${entry.key}: the chip edge parted from the control edge',
+      );
+      expect(
+        semanticOf(hc).borderGhost,
+        isNot(semanticOf(base).borderGhost),
+        reason: '${entry.key}: borderGhost was left at normal strength',
+      );
+    }
   });
 
   group('what high contrast must not change', () {

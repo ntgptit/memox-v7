@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.115 |
+| **Updated by task** | M100.116 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1745,7 +1745,7 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
-### M100.116 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
+### M100.117 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
 
 - **Status:** **done** — analyze sạch, `mx_card_*` + `mx_section_test` +
   `mx_app_bar_test` xanh, golden vẽ lại trên Linux (44 file, 121 PNG; compare
@@ -1792,6 +1792,45 @@ của M2.
   là hai giá trị khác nhau cùng được mô tả là "hero" ở hai chỗ trong theme;
   `.tonal` vẫn đọc `surfaceEmphasis`. Gộp hay không là quyết định khi migrate caller.
 - **Checklist phases:** 7, 12.
+
+### M100.116 · MxFilterChip — control một-trong-N 28dp, caller đầu tiên của `border-ghost`
+
+- **Status:** **done** — code, test, Widgetbook, specimen và golden Linux `TZ=UTC`
+  đã xong; CI `goldens (linux)` là người so pixel lần cuối.
+- **Goal:** Ba dòng `FilterChip` của `COMPONENT_MIGRATION_PENDING` có caller mà
+  không chạm `ChipThemeData` dùng chung, nên `ChoiceChip` và `MxPillButton`
+  không đổi.
+- **Scope:** `lib/shared/widgets/mx_filter_chip.dart` (`MxFilterChip`: 28dp cố
+  định, count tuỳ chọn, tick thay glyph khi chọn); tái dùng `AppSizing.controlChip`
+  (M100.112, cùng nấc chip 28), thêm `AppBorderColors.borderGhost*`, `AppSemanticColors.borderGhost` (khai báo cùng
+  caller đầu tiên theo R7, và bản high-contrast của nó); entry Widgetbook;
+  specimen golden `FilterChipGroupSpecimen` / `FilterChipStatesSpecimen`; bảng §7
+  của `theme-architecture.md` và dòng R7 của `v3-foundations.md`.
+- **Out of scope:** `ChipThemeData` và mọi component đang dùng nó; `MxPillButton`
+  (không đụng, kể cả trích `_TapTarget` dùng chung — `MxFilterChip` chép nguyên
+  văn và ghi rõ đó là ứng viên cho task trích riêng); nối chip vào màn hình nào.
+- **Dependencies:** M100.101, M100.112 (`AppSizing.controlChip`).
+- **Tests required:** `mx_filter_chip_test.dart`, specimen stress trong
+  `mx_stress_selection_specimens.dart`, `high_contrast_figures_test.dart`,
+  `widgetbook_coverage_test.dart`, hai golden mới.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/theme-architecture.md`,
+  `docs/design-system/v3-foundations.md`
+- **Output:** `lib/shared/widgets/`, `lib/core/theme/foundations/`, `widgetbook/`,
+  `test/shared/widgets/`
+- **Acceptance criteria:**
+  - [x] `MxFilterChip` cao 28dp, hộp chạm 48dp, vòng focus vẽ theo hình 28dp.
+  - [x] Viền `border-ghost` đo **1.14 / 1.47** trên `surface` (số ghim bởi
+        `high_contrast_figures_test.dart`, thay cho ước lượng 1.19 / 1.28 đã ghi
+        trước đó); high-contrast đẩy nó lên **7.20 / 8.50** vì với chip chưa chọn
+        đây là thứ duy nhất nhận diện control (WCAG 1.4.11).
+  - [x] Đã đăng ký trong Widgetbook; `widgetbook_coverage_test.dart` xanh.
+  - [x] Golden `mx_filter_chip_group_*` / `mx_filter_chip_states_*` vẽ trên
+        Linux `TZ=UTC` (WSL), commit cùng PR; file `mx_components_golden_test`
+        vẽ lại thì chỉ bốn PNG mới xuất hiện, golden cũ không đổi byte nào.
+  - [x] Gate: analyze sạch, guard, architecture, `check_docs`, host suite
+        (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
+- **Checklist phases:** 7, 12.
+
 
 ## Known technical debt
 

@@ -380,6 +380,7 @@ void main() {
         'app_typography.dart', // the headline and title roles
         'app_button_themes.dart', // `buttonLabelWeight`
         'app_bold_text.dart', // the OS bold-text setting, every rung
+        'mx_filter_chip.dart', // the filter chip's count, `_countWeight`
       });
     });
 
