@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../core/theme/foundations/app_icon_size.dart';
 import '../../core/theme/foundations/app_radius.dart';
-import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import 'mx_focus_ring.dart';
+import 'mx_tap_target.dart';
 
 /// A selectable pill: the app's control for switching between a small, fixed set
 /// of views of the same content.
@@ -56,7 +55,7 @@ import 'mx_focus_ring.dart';
 /// in a 48 × 48 hit box, and a ring drawn around *that* floated 7dp clear of a
 /// short pill at a different corner. The chip is built `shrinkWrap`, the ring
 /// wraps the painted shape, and the 48 target is restored *outside* the ring
-/// by [_TapTarget] — the same redirecting pad `ButtonStyleButton` uses — so
+/// by [MxTapTarget] — the same redirecting pad `ButtonStyleButton` uses — so
 /// the ring and the target are two separate geometry facts.
 class MxPillButton extends StatelessWidget {
   const MxPillButton({
@@ -123,7 +122,7 @@ class MxPillButton extends StatelessWidget {
     return MergeSemantics(
       child: Semantics(
         inMutuallyExclusiveGroup: true,
-        child: _TapTarget(
+        child: MxTapTarget(
           child: MxFocusRing(
             borderRadius: BorderRadius.circular(AppRadius.pill),
             child: ChoiceChip(
@@ -149,7 +148,7 @@ class MxPillButton extends StatelessWidget {
               labelStyle: _labelStyle(context),
               selected: isSelected,
               onSelected: pressed == null ? null : (_) => pressed(),
-              // The target is [_TapTarget]'s, outside the ring — see the class
+              // The target is [MxTapTarget]'s, outside the ring — see the class
               // note. `padded` here would put the 48 box *inside* the ring.
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
@@ -220,112 +219,6 @@ class _Content extends StatelessWidget {
         // responsibility with it.
         Flexible(child: Text(label, semanticsLabel: semanticLabel)),
       ],
-    );
-  }
-}
-
-/// The 48 × 48 finger box around a painted shape that is smaller than it.
-///
-/// **The same redirecting pad `ButtonStyleButton` keeps as `_InputPadding`,
-/// and `RawChip` as `_ChipRedirectingHitDetectionWidget`.** Both are private
-/// to the SDK; this one exists so the pill can put its focus ring *between*
-/// the target and the shape. A tap that lands in the padding is redirected to
-/// the child's centre, so the chip's own `InkWell` runs its ripple and its
-/// haptic exactly as if the finger had hit the shape — the target grows the
-/// area, never the paint.
-class _TapTarget extends SingleChildRenderObjectWidget {
-  const _TapTarget({required super.child});
-
-  @override
-  RenderObject createRenderObject(BuildContext context) => _RenderTapTarget();
-}
-
-class _RenderTapTarget extends RenderShiftedBox {
-  _RenderTapTarget() : super(null);
-
-  static const Size _minimum = Size.square(AppSizing.touchTarget);
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    final child = this.child;
-    final double width = child?.getMinIntrinsicWidth(height) ?? 0;
-
-    return width < _minimum.width ? _minimum.width : width;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    final child = this.child;
-    final double width = child?.getMaxIntrinsicWidth(height) ?? 0;
-
-    return width < _minimum.width ? _minimum.width : width;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    final child = this.child;
-    final double height = child?.getMinIntrinsicHeight(width) ?? 0;
-
-    return height < _minimum.height ? _minimum.height : height;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    final child = this.child;
-    final double height = child?.getMaxIntrinsicHeight(width) ?? 0;
-
-    return height < _minimum.height ? _minimum.height : height;
-  }
-
-  Size _sizeFor(Size childSize) => Size(
-    childSize.width < _minimum.width ? _minimum.width : childSize.width,
-    childSize.height < _minimum.height ? _minimum.height : childSize.height,
-  );
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    final child = this.child;
-    if (child == null) return constraints.constrain(_minimum);
-
-    return constraints.constrain(_sizeFor(child.getDryLayout(constraints)));
-  }
-
-  @override
-  void performLayout() {
-    final child = this.child;
-    if (child == null) {
-      size = constraints.constrain(_minimum);
-      return;
-    }
-
-    child.layout(constraints, parentUsesSize: true);
-    size = constraints.constrain(_sizeFor(child.size));
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = Alignment.center.alongOffset(
-      size - child.size as Offset,
-    );
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    final child = this.child;
-    if (child == null || !size.contains(position)) return false;
-    if (super.hitTest(result, position: position)) return true;
-
-    // In the padding: hand the event to the shape's centre, so the chip's own
-    // ink and feedback run — exactly what `_ChipRedirectingHitDetection` did
-    // for the box it used to own.
-    final Offset center = child.size.center(Offset.zero);
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
-    final Offset target = childParentData.offset + center;
-
-    return result.addWithRawTransform(
-      transform: MatrixUtils.forceToPoint(target),
-      position: target,
-      hitTest: (BoxHitTestResult result, Offset position) {
-        assert(position == target);
-        return child.hitTest(result, position: center);
-      },
     );
   }
 }

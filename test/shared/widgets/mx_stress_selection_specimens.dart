@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
+import 'package:memox/shared/widgets/mx_chip_trigger.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
 import 'package:memox/shared/widgets/mx_filter_chip.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
@@ -147,6 +148,19 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
         isSelected: true,
         onPressed: _noop,
       ),
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Deliberately *not* `kLongLabel`: a trigger never wraps or ellipsizes, it
+    // grows, and a caller with a long label scrolls the row that holds it —
+    // so an unbounded label here would measure the caller, not the trigger.
+    // The realistic worst case is the sort label plus a leading glyph.
+    name: 'MxChipTrigger',
+    build: () => const MxChipTrigger(
+      label: 'Newest first',
+      leadingIcon: Icons.swap_vert,
+      onPressed: _noop,
     ),
     isInteractive: true,
   ),
