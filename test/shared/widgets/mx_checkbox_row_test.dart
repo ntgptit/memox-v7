@@ -81,7 +81,21 @@ void main() {
     final glyph = tester.widget<Icon>(find.byKey(kMxCheckboxGlyphKey));
     expect(glyph.icon, Icons.check);
     expect(glyph.size, 14);
-    expect(glyph.color, buildLightTheme().colorScheme.onPrimary);
+    expect(glyph.color, isNull);
+    expect(
+      tester
+          .widget<IconTheme>(
+            find
+                .ancestor(
+                  of: find.byKey(kMxCheckboxGlyphKey),
+                  matching: find.byType(IconTheme),
+                )
+                .first,
+          )
+          .data
+          .color,
+      buildLightTheme().colorScheme.onPrimary,
+    );
   });
 
   testWidgets('Space and Enter toggle a focused row', (tester) async {

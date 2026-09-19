@@ -124,11 +124,13 @@ class _CheckboxMark extends StatelessWidget {
                 ),
         ),
         child: isChecked
-            ? Icon(
-                Icons.check,
-                key: kMxCheckboxGlyphKey,
-                size: _kCheckGlyphSize,
-                color: colors.onPrimary,
+            ? IconTheme(
+                data: IconThemeData(color: colors.onPrimary),
+                child: const Icon(
+                  Icons.check,
+                  key: kMxCheckboxGlyphKey,
+                  size: _kCheckGlyphSize,
+                ),
               )
             : null,
       ),
