@@ -228,4 +228,64 @@ void main() {
       expect(small, lessThan(indicatorOf(tester).minHeight!));
     });
   });
+
+  group('overrides', () {
+    // MxSessionTopBar is the one caller that passes these; every other
+    // caller leaves them null and is covered by the groups above.
+    const overrideAccent = Color(0xFF123456);
+
+    testWidgets('fillColor wins over progressFill and over success', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        const MxProgressBar(value: 0.5, fillColor: overrideAccent),
+      );
+      await tester.pumpAndSettle();
+      expect(indicatorOf(tester).color, overrideAccent);
+
+      // Even at 100%, where the un-overridden widget turns `success` — the
+      // override is the caller's colour, not a colour this widget picks for
+      // itself.
+      await pumpApp(
+        tester,
+        const MxProgressBar(value: 1, fillColor: overrideAccent),
+      );
+      await tester.pumpAndSettle();
+      expect(indicatorOf(tester).color, overrideAccent);
+    });
+
+    testWidgets('null fillColor keeps today\'s progressFill/success pick', (
+      tester,
+    ) async {
+      await pumpApp(tester, const MxProgressBar(value: 0.5));
+      await tester.pumpAndSettle();
+      expect(indicatorOf(tester).color, semantic.progressFill);
+    });
+
+    testWidgets('duration overrides the sweep\'s AppDurations.slow default', (
+      tester,
+    ) async {
+      // `slow` (320ms) has not finished at 60ms past a value change; a
+      // shorter override should have.
+      await pumpApp(
+        tester,
+        const MxProgressBar(value: 0, duration: Duration(milliseconds: 40)),
+      );
+      await tester.pumpAndSettle();
+
+      await pumpApp(
+        tester,
+        const MxProgressBar(value: 1, duration: Duration(milliseconds: 40)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+
+      expect(
+        indicatorOf(tester).value,
+        1,
+        reason: 'a 40ms override should be done well before 60ms has passed',
+      );
+    });
+  });
 }
