@@ -60,11 +60,14 @@ enum MxIconButtonShape {
 /// "button", "enabled" and the tap action; the icon's label merges into that
 /// node instead and leaves all three intact.
 ///
-/// Size comes from `AppIconSize` and the 48×48 minimum from
-/// `IconButtonThemeData`. [isCompact] is the one adjustment, and it moves the
-/// **glyph**, never the target. It exists for the study session's top bar, where
-/// the close button shares a row with a progress track that has to read as a
-/// measure — see `AppIconSize.mdCompact`.
+/// The glyph is a fixed `AppIconSize.mdCompact` (20) — the MemoX v3
+/// IconButton component spec, 2026-09-18 — and the 48×48 minimum touch
+/// target comes from `IconButtonThemeData`, which also draws the plain
+/// style's own 36×36 circle inside it. [isCompact] no longer touches glyph
+/// size; it is the one adjustment left, and it constrains the **box**, not
+/// the glyph. It exists for the study session's top bar, where the close
+/// button shares a row with a progress track that has to read as a measure —
+/// see `MxSessionTopBar`.
 class MxIconButton extends StatelessWidget {
   const MxIconButton({
     required this.icon,
@@ -91,17 +94,18 @@ class MxIconButton extends StatelessWidget {
   /// two cannot drift apart.
   final String? tooltip;
 
-  /// Drops the glyph to [AppIconSize.mdCompact], for a control sharing a row
-  /// with something that needs the width.
+  /// Tightens the box to exactly 48×48 with zero padding, for a control
+  /// sharing a row with something that needs the width.
   ///
-  /// **It does not make the button narrower, and it never did.** This used to
-  /// constrain the box to 36 wide; Material's tap-target padding re-inflated it
-  /// to 48 and centred the 36 inside, so the row spent 48 either way. The
-  /// constraint is gone rather than fixed — 48 is [AppSizing.touchTarget]
-  /// and shrinking below it fails `androidTapTargetGuideline`, which
-  /// `study_accessibility_test.dart` asserts. A row that needs its leading glyph
-  /// closer to the screen edge than 14px has to be laid out edge-to-edge; see
-  /// `MxSessionTopBar`.
+  /// **It no longer touches glyph size — the glyph is [AppIconSize.mdCompact]
+  /// either way.** This used to drop the glyph as its own effect; now that the
+  /// v3 spec fixes every plain `MxIconButton`'s glyph at `mdCompact`
+  /// unconditionally, [isCompact]'s only remaining job is the tight
+  /// `BoxConstraints` below. It does not make the button narrower than
+  /// [AppSizing.touchTarget] — shrinking below that fails
+  /// `androidTapTargetGuideline`, which `study_accessibility_test.dart`
+  /// asserts. A row that needs its leading glyph closer to the screen edge
+  /// than 14px has to be laid out edge-to-edge; see `MxSessionTopBar`.
   final bool isCompact;
 
   /// What the glyph means. [MxIconButtonTone.standard] keeps the theme's ink,
@@ -152,7 +156,9 @@ class MxIconButton extends StatelessWidget {
       padding: isCompact ? EdgeInsets.zero : null,
       icon: Icon(
         icon,
-        size: isCompact ? AppIconSize.mdCompact : AppIconSize.md,
+        // Fixed regardless of `isCompact` — the v3 spec has no
+        // compact/non-compact split for the glyph, only for the box.
+        size: AppIconSize.mdCompact,
         semanticLabel: semanticLabel,
       ),
     );

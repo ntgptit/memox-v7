@@ -100,7 +100,7 @@ void main() {
         find
             .ancestor(
               of: find.byIcon(Icons.more_vert).first,
-              matching: find.byType(InkWell),
+              matching: find.byType(IconButton),
             )
             .first,
       );
