@@ -59,7 +59,7 @@ void main() {
 
     expect(tester.getSize(find.byKey(kMxCheckboxBoxKey)), const Size(20, 20));
     final decoration = decorationOf(tester);
-    expect(decoration.color, Colors.transparent);
+    expect(decoration.color, isNull);
     expect(decoration.borderRadius, BorderRadius.circular(AppRadius.xs));
     expect(decoration.border, isA<Border>());
     final border = decoration.border! as Border;

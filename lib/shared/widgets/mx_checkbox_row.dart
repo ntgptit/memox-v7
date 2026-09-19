@@ -114,7 +114,7 @@ class _CheckboxMark extends StatelessWidget {
       height: _kBoxSize,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: isChecked ? colors.primary : Colors.transparent,
+          color: isChecked ? colors.primary : null,
           borderRadius: BorderRadius.circular(AppRadius.xs),
           border: isChecked
               ? null
