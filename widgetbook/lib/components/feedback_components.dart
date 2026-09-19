@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -233,6 +234,16 @@ WidgetbookComponent sessionTopBarComponent() {
             label: 'trailing',
             initialValue: '3 / 10',
           );
+          // Accent is content-driven (primary by default, mastery in Recall
+          // and Fill) — a knob rather than a fixed value, so the catalog is
+          // not stuck showing only the brand-accent chip.
+          final accentName = context.knobs.object.dropdown<String>(
+            label: 'accent',
+            options: <String>['primary', 'mastery'],
+          );
+          final accent = accentName == 'mastery'
+              ? context.semanticColors.mastery
+              : context.colors.primary;
 
           return Scaffold(
             body: SafeArea(
@@ -246,6 +257,7 @@ WidgetbookComponent sessionTopBarComponent() {
                       trailing: Text(trailing),
                       onClose: _noop,
                       closeLabel: 'Close session',
+                      accent: accent,
                     ),
                   ],
                 ),

@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.112 |
+| **Updated by task** | M100.115 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1607,6 +1607,30 @@ của M2.
   - [x] Semantics: `toggled`, `enabled`, `label` (`semanticLabel`), action `tap`.
 - **Checklist phases:** 7, 12.
 
+### M100.115 · SelectionCheckbox — ô chọn hàng đa lựa chọn của v3
+
+- **Status:** done — full Definition-of-Done gate xanh.
+- **Goal:** đưa hợp đồng v3 SelectionCheckbox vào shared component đang có
+  (`MxCheckboxRow`) mà không thay đổi state hay business rule của caller.
+- **Scope:** box sơn 20dp, bo 4dp, viền `outline` 2dp khi chưa chọn; khi chọn
+  dùng `primary`, glyph check 14dp `onPrimary`, row là target tối thiểu 48dp,
+  focus ring và disabled opacity theo token hiện hữu; migrate assertions của
+  tag-filter khỏi implementation `CheckboxListTile` đã bị thay thế.
+- **Out of scope:** selection count, bulk-action availability, caller offsets,
+  và thay đổi state/domain của Card.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_checkbox_row.dart` và focused tests/catalogue.
+- **Acceptance criteria:**
+  - [x] API `MxCheckboxRow` giữ nguyên; không còn phụ thuộc box stock 18dp.
+  - [x] Màu chỉ đọc từ `ColorScheme`; không thêm role/tokens cục bộ.
+  - [x] Shared and Card consumer tests assert component semantics/state thay vì
+        `CheckboxListTile` bị xoá.
+  - [x] `dod_check.sh` xanh sau khi generated sources/l10n available.
+- **Dependencies:** M100.101.
+- **Tests required:** `mx_checkbox_row_test.dart`,
+  `card_tag_filter_sheet_test.dart`, Widgetbook coverage.
+- **Checklist phases:** 7, 12, 15.
+
 
 ### M100.110 · MxIconTile — ô vuông tô màu dẫn đầu một hàng, theo hợp đồng IconTile của v3
 
@@ -1721,7 +1745,7 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
-### M100.115 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
+### M100.116 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
 
 - **Status:** **done** — analyze sạch, `mx_card_*` + `mx_section_test` +
   `mx_app_bar_test` xanh, golden vẽ lại trên Linux (44 file, 121 PNG; compare
@@ -1801,3 +1825,4 @@ của M2.
 | Chín trong mười bốn hợp đồng đóng băng của V1 chỉ được giữ bằng test | M100.41 | Guard quét `lib/features/` cho 5 dòng (mục 2, 4, 5, 12, 13); 9 dòng còn lại — role identity, ThemeData mapping, shared API, sàn 48dp, ripple/state, high contrast, depth của card, chrome của shell, golden Linux-only — chỉ có test giữ. Test là file trong repo, nên một nhánh feature nới nó ra là đi qua được, và **guard không đỏ khi chính nó bị sửa** | ~~Một cơ chế thay cho một câu văn (CODEOWNERS, hoặc rule guard đọc diff)~~ — **rút, 2026-09-17.** Chủ dự án đã mở khoá V1: sửa một file Enforcement nay là việc hợp lệ của task design-system, nên một cơ chế chặn nó sẽ chặn đúng thứ cần làm được. Lỗ hổng gốc — một PR feature nới lỏng gate rồi đi qua — nay dựa vào review diff và luật "no drive-by refactors", không dựa vào một lớp canh |
 | `StudySessionScreen` rời shell bằng `Navigator.push` chứ không bằng `GoRoute` | trước A8, đo ở A8 P2-15 (`docs/reviews/a8-navigation-chrome-audit.md` §10.5), đo lại ở C4 SC-C4-18 | Phiên học không có location: trong suốt lúc nó ở trên cùng, `GoRouterState.matchedLocation` vẫn đọc là `/study/<id>` hoặc `/decks/<id>/study`, nên không có gì deep-link hay restore vào một phiên đang chạy, và `GoRouterState` nói sai trong đúng khoảng thời gian dài nhất của app | **ACCEPTED, chờ quyết định của chủ dự án.** Phần *root navigator* đã có lý do và không phải nợ — nó là thứ giữ BR-82 một lối ra duy nhất (comment tại `study_entry_screen.dart` `_open`); chỉ **cơ chế** là còn mở. C4 cố ý chỉ mount `StudyOptionsScreen` (composition thuần: nó vốn đã render trong shell, chỉ thêm location) và **không** mount phiên học, vì bán kính nổ nằm ngoài tầm một task chrome: IT-NAV, đường resume khoá theo `sessionId` (BR-200, BR-103) và hợp đồng một-lối-ra của BR-82 đều chạm nó, và không cái nào verify được bằng host test. Khi mở lại: mount với `parentNavigatorKey: rootNavigatorKey` đúng như wizard import, `resumeSessionId`/`direction` đi bằng `extra`, và closure test là `currentConfiguration.uri` gọi tên route phiên |
 | `CardEditorScreen` (edit) xếp chồng hai dải pinned ở đáy | trước C4, đo ở C4 SC-C4-04 | Route edit nằm trong `StatefulShellBranch` của Decks, nên `MxNavigationBar` bốn đích vẫn vẽ dưới nó; màn hình lại ghim action bar của chính nó vào `MxContentShell.footer` (`MxButtonPair` ≥48dp + `sm` + một dòng `bodySmall` + 2×`md`). **Đo, mount qua `createAppRouter`:** footer **96dp** + nav bar **80dp** = **176dp** chrome đáy. Không golden nào thấy được: `card_screens_demo_test.dart` pump thẳng `CardEditorScreen`, ngoài `createAppRouter` | **ACCEPTED — variance có chủ đích, không phải nợ nhánh route.** Edit là **page** được push lên card list và quay về đó (mũi tên back nói đúng điều đó), và nó push tiếp một branch route cho history của thẻ — đưa nó lên root navigator sẽ render Card Detail **dưới** editor. Wizard import thoát khỏi branch được vì nó là task không push branch route nào; đây không phải trường hợp đó. Đã ghi tại `app_router.dart` ngay trên `RouteNames.cardEditorEdit` để nó thôi là hệ quả tình cờ của việc lồng route. **Đính chính phép đo gốc:** SC-C4-04 viết edit là màn *duy nhất* xếp chồng hai dải — sai. Create cũng ghim footer từ SC-C1-02 và cũng nằm trong branch, nên nó xếp chồng y hệt; nửa mâu thuẫn thật sự là create, vì `✕` của nó tuyên bố một task trong khi thanh branch vẫn ở đó. Sửa nửa đó là SC-C4-19 (`parentNavigatorKey: rootNavigatorKey` cho `cardCreateRelative`), **không** nằm trong cụm C4 này | Khi 176dp chrome đáy được phán là không chấp nhận được trên thiết bị: lúc đó câu hỏi là "editor là page hay task" — một quyết định của chủ dự án, không phải một phép sửa composition. Hoặc khi SC-C4-19 được giao, vì nó chốt nửa create của cùng câu hỏi |
+| Nhãn mode pill của `MxSessionTopBar` không đạt AA ở light | StudyTopBar Task 1 (2026-09-18) | Hợp đồng handoff bắt nhãn tô bằng `accent` ở full strength trên nền là chính `accent` pha 10% vào `surface`, thay cho `AppInk.accent` (`accentInk`, sinh ra đúng vì `primary` thô không đủ AA làm chữ). Đo được: light **3.87:1** (primary) và **3.65:1** (mastery), dưới ngưỡng 4.5; dark đạt **6.43:1** (primary). Chip 12sp không được miễn ngưỡng chữ lớn. Chữ chỉ tên mode, và tên đã có ở `Semantics(namesRoute)`, nên không mất thông tin — nhưng người thị lực kém ở light mode đọc chip khó hơn bản trước (4.78:1) | **Cần chủ dự án quyết:** giữ nguyên hợp đồng, hoặc thêm một ink kiểu `accentInk` cho nhãn (ví dụ `AppInk`-style role cho từng accent), hoặc nâng độ đậm tint. Test `study_accessibility_test.dart` "the mode pill label clears AA for both accents" (primary + mastery × light + dark) đang `skip` với lý do này — bỏ `skip` khi sửa xong |

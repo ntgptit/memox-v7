@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/domain/models/tag_catalog_entry_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 
 import 'support/fake_card_repository.dart';
 import 'support/fake_tag_catalog_repository.dart';
@@ -66,7 +67,7 @@ void main() {
     // `MxActionButton` since M100.36 (4N) — a command, not a pill.
     await tester.tap(find.widgetWithText(MxActionButton, 'Tags'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(CheckboxListTile).first);
+    await tester.tap(find.byType(MxCheckboxRow).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Apply'));
     // Applying re-subscribes the list under the new tag filter — that

@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
+import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 
 import 'support/study_widget_harness.dart';
 
@@ -26,6 +29,9 @@ const _askingHints = <StudyMode, String>{
 
 /// The chrome the five study screens share (M5.18, §7.2, §7.3, §7.8).
 void main() {
+  final light = buildLightTheme();
+  final semantic = light.extension<AppSemanticColors>()!;
+
   Widget frame({
     StudyMode mode = StudyMode.match,
     StudySessionKind kind = StudySessionKind.reviewing,
@@ -390,5 +396,125 @@ void main() {
     // And the row ends where its last child ends. Slack here is the symptom:
     // it is space the track was refused.
     expect(figure.right, closeTo(row.right, 1));
+  });
+
+  group('accent (StudyTopBar contract)', () {
+    testWidgets('primary drives the chip and the track by default', (
+      tester,
+    ) async {
+      await pumpFrame(tester, frame(mode: StudyMode.guess));
+
+      final chipLabel = tester.widget<Text>(find.text('GUESS'));
+      expect(
+        chipLabel.style?.color,
+        light.colorScheme.primary,
+        reason: 'guess is neither recall nor fill, so it keeps primary',
+      );
+      expect(chipLabel.style?.fontWeight, FontWeight.w700);
+
+      final chipFill =
+          tester
+                  .widget<DecoratedBox>(
+                    find
+                        .ancestor(
+                          of: find.text('GUESS'),
+                          matching: find.byType(DecoratedBox),
+                        )
+                        .first,
+                  )
+                  .decoration
+              as BoxDecoration;
+      expect(
+        chipFill.color,
+        Color.alphaBlend(
+          light.colorScheme.primary.withValues(alpha: 0.10),
+          light.colorScheme.surface,
+        ),
+        reason: 'the chip fill is the accent tinted, not surfaceMuted',
+      );
+
+      final indicator = tester.widget<LinearProgressIndicator>(
+        find.byType(LinearProgressIndicator),
+      );
+      expect(indicator.color, light.colorScheme.primary);
+    });
+
+    testWidgets(
+      'match keeps primary too, so it never collides with the success verdict',
+      (tester) async {
+        // Named even though it is the default: the pair is the point of the
+        // test, and a reader should not have to look up which one `frame`
+        // picks.
+        // ignore: avoid_redundant_argument_values
+        await pumpFrame(tester, frame(mode: StudyMode.match));
+
+        final chipLabel = tester.widget<Text>(find.text('MATCH'));
+        expect(chipLabel.style?.color, light.colorScheme.primary);
+      },
+    );
+
+    testWidgets('mastery drives the accent in recall and fill only', (
+      tester,
+    ) async {
+      const chipWords = <StudyMode, String>{
+        StudyMode.recall: 'RECALL',
+        StudyMode.fill: 'FILL IN',
+      };
+      for (final mode in chipWords.keys) {
+        await pumpFrame(tester, frame(mode: mode));
+
+        final chipLabel = tester.widget<Text>(find.text(chipWords[mode]!));
+        expect(
+          chipLabel.style?.color,
+          semantic.mastery,
+          reason: '${mode.name} chip label',
+        );
+        final chipFill =
+            tester
+                    .widget<DecoratedBox>(
+                      find
+                          .ancestor(
+                            of: find.text(chipWords[mode]!),
+                            matching: find.byType(DecoratedBox),
+                          )
+                          .first,
+                    )
+                    .decoration
+                as BoxDecoration;
+        expect(
+          chipFill.color,
+          Color.alphaBlend(
+            semantic.mastery.withValues(alpha: 0.10),
+            light.colorScheme.surface,
+          ),
+          reason: '${mode.name} chip fill',
+        );
+
+        final indicator = tester.widget<LinearProgressIndicator>(
+          find.byType(LinearProgressIndicator),
+        );
+        expect(
+          indicator.color,
+          semantic.mastery,
+          reason: '${mode.name} resolves and holds its answer alone',
+        );
+      }
+    });
+
+    testWidgets('the counter reads onSurfaceVariant, not onSurface', (
+      tester,
+    ) async {
+      await pumpFrame(tester, frame());
+
+      final counter = tester.widget<Text>(find.text('3 / 8'));
+      expect(counter.style?.color, light.colorScheme.onSurfaceVariant);
+    });
+
+    testWidgets('the bar is fixed at kToolbarHeight', (tester) async {
+      await pumpFrame(tester, frame());
+
+      final size = tester.getSize(find.byType(MxSessionTopBar));
+      expect(size.height, kToolbarHeight);
+    });
   });
 }

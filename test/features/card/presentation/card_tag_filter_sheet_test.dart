@@ -8,6 +8,7 @@ import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_async_view.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
+import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_sheet_insets.dart';
 
@@ -106,12 +107,12 @@ void main() {
     await pump(tester);
     await openSheet(tester);
 
-    expect(find.byType(CheckboxListTile), findsNWidgets(2));
+    expect(find.byType(MxCheckboxRow), findsNWidgets(2));
     expect(find.text('12 cards'), findsOneWidget);
-    for (final tile in tester.widgetList<CheckboxListTile>(
-      find.byType(CheckboxListTile),
+    for (final row in tester.widgetList<MxCheckboxRow>(
+      find.byType(MxCheckboxRow),
     )) {
-      expect(tile.value, isFalse);
+      expect(row.isChecked, isFalse);
     }
   });
 
@@ -177,10 +178,10 @@ void main() {
     await tester.tap(find.text('Clear'));
     await tester.pumpAndSettle();
 
-    for (final tile in tester.widgetList<CheckboxListTile>(
-      find.byType(CheckboxListTile),
+    for (final row in tester.widgetList<MxCheckboxRow>(
+      find.byType(MxCheckboxRow),
     )) {
-      expect(tile.value, isFalse);
+      expect(row.isChecked, isFalse);
     }
   });
 

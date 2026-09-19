@@ -139,6 +139,8 @@ void main() {
     // untended or third-party one degrades on-palette. `app_theme.dart` names
     // each of these where it sets them.
     'cardTheme': 'safety net for a bare `Card`; MxCard paints itself',
+    'checkboxTheme':
+        'safety net for a bare Checkbox; MxCheckboxRow paints its own mark',
     // The waiting room. Every entry here is justified in
     // `app_planned_themes.dart`, and this list is what stops it growing.
     'datePickerTheme': 'planned — reminder date, deferred history range',
