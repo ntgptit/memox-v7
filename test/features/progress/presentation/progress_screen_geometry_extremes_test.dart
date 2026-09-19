@@ -329,7 +329,7 @@ void main() {
     // 44.67dp against 64.0. Still a breach, so debt 5 is still open — the
     // witness below is what keeps holding that, not the absolute figure.
     //
-    // **Re-measured for the 20dp card padding (M100.110).** The card's own
+    // **Re-measured for the 20dp card padding (M100.114).** The card's own
     // padding grew by 4dp a side, so this content column is 8dp narrower
     // (256 -> 248) and the bar follows it one for one: 36.67dp against the
     // same 64.0 floor. A wider breach, the same open debt 5.

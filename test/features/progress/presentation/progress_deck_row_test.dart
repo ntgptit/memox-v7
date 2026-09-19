@@ -275,7 +275,7 @@ void main() {
 
       // The row is a lazy sliver child below the overview sections, so whether
       // it is built at all depends on how tall they are — 20dp card padding
-      // (M100.110) pushed it out of a 640dp viewport at this scale. The axis
+      // (M100.114) pushed it out of a 640dp viewport at this scale. The axis
       // under test is width, so scroll to it rather than pin a height.
       await tester.dragUntilVisible(
         find.byType(ProgressDeckRowWidget),

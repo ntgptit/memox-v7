@@ -347,7 +347,7 @@ void main() {
       );
       // Built is not visible: the sliver builds a row just past the fold, and
       // a long press on it misses the screen. With the 20dp card padding
-      // (M100.110) the first row lands there at this scale.
+      // (M100.114) the first row lands there at this scale.
       await tester.ensureVisible(find.byType(CardTileWidget).first);
       await tester.pumpAndSettle();
       await tester.longPress(find.byType(CardTileWidget).first);

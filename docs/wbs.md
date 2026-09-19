@@ -1478,7 +1478,7 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
-### M100.110 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
+### M100.114 · Card — góc 20, padding 20 và recipe `hero` theo hợp đồng v3
 
 - **Status:** **done** — analyze sạch, `mx_card_*` + `mx_section_test` +
   `mx_app_bar_test` xanh, golden vẽ lại trên Linux (44 file, 121 PNG; compare
