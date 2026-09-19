@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.115 |
+| **Updated by task** | M100.116 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1745,7 +1745,7 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
-### M100.115 · MxFilterChip — control một-trong-N 28dp, caller đầu tiên của `border-ghost`
+### M100.116 · MxFilterChip — control một-trong-N 28dp, caller đầu tiên của `border-ghost`
 
 - **Status:** **done** — code, test, Widgetbook, specimen và golden Linux `TZ=UTC`
   đã xong; CI `goldens (linux)` là người so pixel lần cuối.
