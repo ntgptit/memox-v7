@@ -235,6 +235,11 @@ void main() {
       //   the page every time focus arrived. It has nothing to show until a
       //   descendant is focused, which a static specimen cannot arrange;
       //   `mx_pill_button_focus_test.dart` reaches it with a real Tab instead.
+      // * `MxTapTarget` only pads its child up to the 48 floor and redirects a
+      //   hit in the padding to it; the child is whatever the caller passed.
+      //   It is stressed through both callers' specimens (`MxPillButton`,
+      //   `MxChipTrigger`, each under `androidTapTargetGuideline`), and its
+      //   redirect is asserted in `mx_chip_trigger_test.dart`.
       // * `MxScrollEndInset` is an `InheritedWidget` and one function — the
       //   shell's answer to how far a list ends from its edge. Nothing lays
       //   out; `mx_content_shell_geometry_test.dart` reads the answer under
@@ -251,6 +256,7 @@ void main() {
         'MxMessenger',
         'MxScrollEndInset',
         'MxSheetInsets',
+        'MxTapTarget',
         'MxUndoSnackBar',
       });
     });

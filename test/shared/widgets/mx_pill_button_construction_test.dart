@@ -30,7 +30,7 @@ void main() {
       contains('MaterialTapTargetSize.shrinkWrap'),
       reason:
           "`padded` puts RawChip's 48 box inside the focus ring; the target "
-          'is grown outside it by _TapTarget',
+          'is grown outside it by MxTapTarget',
     );
   });
 

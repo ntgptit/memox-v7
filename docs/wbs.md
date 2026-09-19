@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.116 |
+| **Updated by task** | M100.118 |
 | **Last updated** | 2026-09-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1829,6 +1829,63 @@ của M2.
         vẽ lại thì chỉ bốn PNG mới xuất hiện, golden cũ không đổi byte nào.
   - [x] Gate: analyze sạch, guard, architecture, `check_docs`, host suite
         (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
+- **Checklist phases:** 7, 12.
+
+### M100.118 · MxChipTrigger — the ghost menu-trigger chip
+
+- **Status:** done — đã chạy và pass: `flutter test --exclude-tags golden`
+  **+5281**, `widgetbook` **+8**, `flutter analyze` `No issues found!`, guard 0
+  violation, `check_architecture.sh` sạch, `check_docs.py` xanh. Không chạy golden
+  (không màn hình nào dùng chip này, không golden mới).
+- **Goal:** Thêm `MxChipTrigger` — chip ghost 28dp mở menu do caller sở hữu, không
+  bao giờ đọc là "đã chọn". Component đầu tiên hiện thực contract "menu trigger"
+  của MemoX v3 design kit (nhóm B · Actions & controls).
+- **Scope:** `lib/shared/widgets/mx_chip_trigger.dart` (mới),
+  `lib/shared/widgets/mx_tap_target.dart` (mới — `MxTapTarget`, chuyển nguyên hành vi
+  từ `_TapTarget` của `mx_pill_button.dart`, nay dùng chung),
+  `lib/shared/widgets/mx_pill_button.dart` (dùng `MxTapTarget`, bỏ bản private),
+  `test/shared/widgets/mx_chip_trigger_test.dart` (mới),
+  `test/shared/widgets/mx_stress_selection_specimens.dart` (specimen bắt buộc của
+  `mx_stress_test`), `test/shared/widgets/mx_stress_test.dart` (miễn trừ có lý do cho
+  `MxTapTarget`), `test/shared/widgets/mx_pill_button_construction_test.dart` (một
+  chuỗi `reason:` đổi tên `_TapTarget` → `MxTapTarget`),
+  `test/visual_audit/render_classification.dart` (comment trỏ tới file mới),
+  `test/app/shared_api_closure_test.dart` (`mx_chip_trigger.dart` vào
+  `kClosedApiFiles`), `widgetbook/lib/components/control_components.dart`,
+  `widgetbook/lib/main.dart`.
+- **Ghi chú:** ở text scale > 1, dải nội dung 28dp là **cố định** (handoff bắt
+  buộc) nên dòng chữ có thể vẽ lấn nhẹ ra ngoài dải; caller cuộn hàng chứa nó.
+  Đánh số lại bốn lần khi merge: M100.102 → M100.115 → M100.116 → M100.117 →
+  M100.118 — M100.102 bị hai PR khác chiếm (#580, #581), M100.115 bị #594
+  (SelectionCheckbox) chiếm tiếp, M100.116 bị #595 (MxFilterChip) chiếm nốt,
+  rồi M100.117 bị #596 (Card v3) chiếm nốt luôn, tất cả trong lúc nhánh này
+  còn mở — hàng loạt task design-system chạy song song cùng ngày. `MxFilterChip` (#595) và nhánh này cùng đụng
+  `mx_stress_selection_specimens.dart` và `widgetbook/lib/components/
+  control_components.dart` — merge giữ cả hai specimen/entry, không cái nào
+  ghi đè cái kia. `MxFilterChip` tự chép `_TapTarget` riêng thay vì dùng
+  `MxTapTarget` mới của task này (task đó merge trước, chưa thấy
+  `MxTapTarget`) — việc gộp hai bản sao để sau, không phải phạm vi của task này.
+- **Out of scope:** nối `MxChipTrigger` vào bất kỳ màn hình nào (CardFilterBarWidget,
+  deck toolbar, …) — handoff để ngỏ, caller sở hữu menu và quyết định khi nào dùng.
+- **Dependencies:** không — dùng token/thành phần đã có (`MxFocusRing`, `MxIcon`,
+  `AppInk`, `AppSpacing`, `AppRadius`); `MxTapTarget` tách ra từ `MxPillButton`.
+- **Tests required:** `mx_chip_trigger_test.dart` (interaction, semantics, layout,
+  theming, focus).
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_chip_trigger.dart`.
+- **Acceptance criteria:**
+  - [x] Không có `isSelected`/trạng thái "đã chọn" nào trong API hay semantics.
+  - [x] Cao 28dp (nội dung), chạm tối thiểu 48×48 **nhận được cả bằng con trỏ**
+        (`MxTapTarget` chuyển hit ở vùng đệm vào giữa chip; có test chạm ở đệm dọc
+        và ngang), hình pill, không viền không nền.
+  - [x] Nhãn ở `label-md` (12/600), ink `AppInk.quiet` (`onSurfaceVariant`); khi
+        disabled cả nhãn lẫn hai glyph đổi sang `AppInk.disabled` (`onDisabled`,
+        38% ink chính). Không có `Color` thô — guard `no_text_restyle` và
+        `icon_ink_boundary_test` cấm chúng trong shared kit.
+  - [x] Chevron `Icons.expand_more` 16dp luôn vẽ; icon dẫn đầu là slot tuỳ chọn.
+  - [x] Focus ring dùng `MxFocusRing` nguyên trạng — không thêm cơ chế focus mới;
+        ring cao đúng 28dp (đo bằng test), nằm trong `MxTapTarget`.
+  - [x] Đăng ký trong Widgetbook (`chipTriggerComponent()`).
 - **Checklist phases:** 7, 12.
 
 
