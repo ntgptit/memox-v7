@@ -11,6 +11,7 @@ import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
 import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
+import 'package:memox/shared/widgets/mx_stepper.dart';
 
 import 'mx_stress_specimens.dart';
 
@@ -44,6 +45,19 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
     // tap target the guideline checks at every text scale.
     name: 'MxSwitch',
     build: () => const MxSwitch(isOn: true, onChanged: _noopBool),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // A shared numeric control has no label to wrap. Its resilience contract
+    // is the pair of 48dp targets around a wide value column at 2.0x.
+    name: 'MxStepper',
+    build: () => const MxStepper(
+      value: -123456789,
+      decrementSemanticLabel: 'Decrease quantity',
+      incrementSemanticLabel: 'Increase quantity',
+      onDecrement: _noop,
+      onIncrement: _noop,
+    ),
     isInteractive: true,
   ),
   MxStressSpecimen(

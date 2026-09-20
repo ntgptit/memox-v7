@@ -197,6 +197,22 @@ void main() {
     );
   });
 
+  test('the stepper value is body-large, bold and tabular', () {
+    final styles = buildLightTheme().extension<AppTextStyles>()!;
+    expectRole(
+      'stepperValue',
+      styles.stepperValue,
+      size: 16,
+      weight: FontWeight.w700,
+      height: 1.5,
+      tracking: 0,
+    );
+    expect(
+      styles.stepperValue.fontFeatures,
+      contains(const FontFeature.tabularFigures()),
+    );
+  });
+
   test('dark resolves the same scale as light', () {
     // Colour differs by theme; size never does. A scale that drifted between
     // modes would make every golden pair disagree for a reason nobody could see.
@@ -380,6 +396,7 @@ void main() {
         'app_typography.dart', // the headline and title roles
         'app_button_themes.dart', // `buttonLabelWeight`
         'app_bold_text.dart', // the OS bold-text setting, every rung
+        'app_text_styles.dart', // the Stepper's named value role
         'mx_filter_chip.dart', // the filter chip's count, `_countWeight`
       });
     });

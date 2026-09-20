@@ -48,6 +48,12 @@ enum AppInk {
   /// grounds. Same ink as [danger] and [overdue]: this app spends one red.
   error,
 
+  /// `ColorScheme.error` at full strength. This is deliberately distinct
+  /// from [error]: it is for a component handoff that explicitly binds a
+  /// compact state mark to M3's error role, rather than ordinary error text
+  /// on a page ground.
+  errorDirect,
+
   /// `AppSemanticColors.tertiaryInk` — the steel-blue "same family as info,
   /// quieter job" role, as text; the import preview wears it for duplicates.
   tertiary,
@@ -95,6 +101,7 @@ enum AppInk {
       AppInk.danger => semantic.dangerInk,
       AppInk.info => semantic.info,
       AppInk.error => semantic.dangerInk,
+      AppInk.errorDirect => colors.error,
       AppInk.tertiary => semantic.tertiaryInk,
       AppInk.secondary => semantic.secondaryInk,
       AppInk.overdue => semantic.dangerInk,

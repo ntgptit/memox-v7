@@ -233,6 +233,7 @@ void main() {
       AppInk.warning,
       AppInk.danger,
       AppInk.error,
+      AppInk.errorDirect,
       AppInk.overdue,
       AppInk.secondary,
       AppInk.tertiary,
@@ -261,6 +262,7 @@ void main() {
         expect(resolved[AppInk.warning], semantic.warningInk);
         expect(resolved[AppInk.danger], semantic.dangerInk);
         expect(resolved[AppInk.error], semantic.dangerInk);
+        expect(resolved[AppInk.errorDirect], entry.value.colorScheme.error);
         expect(resolved[AppInk.overdue], semantic.dangerInk);
         expect(resolved[AppInk.secondary], semantic.secondaryInk);
         expect(resolved[AppInk.tertiary], semantic.tertiaryInk);

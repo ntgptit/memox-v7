@@ -45,6 +45,7 @@ const List<String> kClosedApiFiles = <String>[
   // The menu trigger: label, glyph and callback cross the constructor; no
   // colour, padding or style does (M100.118).
   'lib/shared/widgets/mx_chip_trigger.dart',
+  'lib/shared/widgets/mx_stepper.dart',
 ];
 
 /// Types a closed component API may expose: content, behaviour, identity.
@@ -55,6 +56,7 @@ const Set<String> kAllowedTypeNames = <String>{
   'bool',
   'Key',
   'IconData',
+  'int',
   // A return type, not a payload — nothing rides in or out through `void`.
   'void',
 };
