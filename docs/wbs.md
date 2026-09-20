@@ -1833,8 +1833,9 @@ của M2.
 
 ### M100.120 · MxSegmentedTray — exclusive selector dùng chung cho Settings và Progress
 
-- **Status:** **done** — focused component, Settings, Progress và Widgetbook
-  coverage xanh; xem concern verification trong task report.
+- **Status:** **blocked** — focused component, Settings, Progress và Widgetbook
+  coverage xanh, nhưng final review xác nhận golden Linux của Settings/Progress
+  phải được regenerate và kiểm tra trước khi task đạt Definition of Done.
 - **Goal:** Thay radio/pill rời rạc bằng một segmented tray typed cho 2–3 lựa
   chọn loại trừ nhau.
 - **Scope:** `MxSegmentedTray`, migration chọn 7/30 ngày ở Progress, theme và
@@ -1850,9 +1851,9 @@ của M2.
   - [x] Progress, Settings theme và thứ tự thẻ mới giữ nguyên state transition,
         failure/submitting behavior và localized labels.
   - [x] Widgetbook có knobs 2/3 option, selection, enabled, variant; focused
-        non-golden verification xanh. Full gate concern được ghi riêng vì
-        verifier profile không có trên disk và một geometry assertion Progress
-        ngoài scope đã đỏ.
+        non-golden verification xanh. **Blocked:** chạy Linux golden gate để
+        regenerate và review baseline Settings/Progress; verifier profile không
+        có trên disk và một geometry assertion Progress ngoài scope đã đỏ.
 - **Dependencies:** M100.118 (`MxTapTarget`), M100.119 (v3 shared controls).
 - **Tests required:** `mx_segmented_tray_test.dart`, focused Settings/Progress
   presentation tests, Widgetbook coverage and non-golden suite.
