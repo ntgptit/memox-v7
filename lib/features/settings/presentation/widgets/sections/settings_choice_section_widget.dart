@@ -32,7 +32,7 @@ class SettingsChoiceSectionWidget<T extends Enum> extends StatefulWidget {
     required this.labelOf,
     required this.onChanged,
     required this.isSubmitting,
-    this.usesSegmentedTray = false,
+    this.shouldUseSegmentedTray = false,
     this.failure,
     super.key,
   });
@@ -57,7 +57,7 @@ class SettingsChoiceSectionWidget<T extends Enum> extends StatefulWidget {
   /// Appearance is the second settings caller of the compact shared control.
   /// Language keeps its radio rows because its labels are deliberately allowed
   /// to grow at high text scale.
-  final bool usesSegmentedTray;
+  final bool shouldUseSegmentedTray;
 
   final Failure? failure;
 
@@ -103,7 +103,7 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              if (widget.usesSegmentedTray)
+              if (widget.shouldUseSegmentedTray)
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: mxScreenGutter(context),

@@ -118,7 +118,7 @@ class _Body extends ConsumerWidget {
           isSubmitting: theme.isSubmitting,
           failure: theme.failure,
           onChanged: (mode) => _saveTheme(ref, mode),
-          usesSegmentedTray: true,
+          shouldUseSegmentedTray: true,
         ),
         const SizedBox(height: SettingsScreen.sectionGap),
         SettingsChoiceSectionWidget<AppLanguage>(

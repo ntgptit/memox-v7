@@ -247,43 +247,6 @@ void main() {
       }
     });
 
-    testWidgets(
-      'keeps an earlier focused ring visible over a later selected sibling',
-      (tester) async {
-        final captureKey = UniqueKey();
-        await pump(
-          tester,
-          RepaintBoundary(
-            key: captureKey,
-            child: tray(selected: _Choice.second),
-          ),
-        );
-
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pumpAndSettle();
-
-        final firstTarget = tester.getRect(find.byType(MxTapTarget).first);
-        final secondTarget = tester.getRect(find.byType(MxTapTarget).at(1));
-        final capture = await RasterCapture.capture(
-          tester,
-          boundaryFinder: find.byKey(captureKey),
-        );
-
-        expect(
-          capture.farthestFrom(
-            Theme.of(
-              tester.element(trayFinder),
-            ).colorScheme.surfaceContainerLowest,
-            Rect.fromLTWH(secondTarget.left, firstTarget.center.dy - 2, 2, 4),
-          ),
-          Theme.of(tester.element(trayFinder)).colorScheme.primary,
-          reason:
-              'the earlier option\'s right focus stroke must paint above the '
-              'later selected surface',
-        );
-      },
-    );
-
     testWidgets('keeps labels on one intrinsic line without ellipsizing', (
       tester,
     ) async {

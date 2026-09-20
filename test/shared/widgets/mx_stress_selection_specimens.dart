@@ -9,6 +9,7 @@ import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_option_row.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
+import 'package:memox/shared/widgets/mx_segmented_tray.dart';
 import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 
@@ -26,6 +27,21 @@ void _noopBool(bool value) {}
 void _noopNullableIndex(int? index) {}
 
 List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
+  MxStressSpecimen(
+    // Short labels are the tray's contract; callers use an option row rather
+    // than making a long product string wrap or truncate inside this control.
+    name: 'MxSegmentedTray',
+    build: () => MxSegmentedTray<int>(
+      options: const <MxSegmentedTrayOption<int>>[
+        MxSegmentedTrayOption<int>(value: 0, label: 'Week'),
+        MxSegmentedTrayOption<int>(value: 1, label: 'Month'),
+      ],
+      selected: 0,
+      variant: MxSegmentedTrayVariant.settings,
+      onChanged: _noopIndex,
+    ),
+    isInteractive: true,
+  ),
   MxStressSpecimen(
     // The anchor is the standard overflow glyph; the long words live in the
     // tooltip and the (closed) menu, so the stress here is the anchor's
