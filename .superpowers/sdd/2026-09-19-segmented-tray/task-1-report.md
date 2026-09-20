@@ -89,3 +89,24 @@ Verification:
   17 tests, including the LTR earlier-focus/later-selected raster regression.
 - `flutter analyze --no-pub` started but did not complete within this runner's
   30-second command limit; it produced no diagnostic before termination.
+
+## Fix round 3/5
+
+The round-2 overlay had used the 48dp interaction target as its paint bounds.
+The focus painter now receives each option's 32dp visual-thumb bounds instead.
+Its 2dp stroke has a centerline inflated by 3dp, yielding a 40dp outer ring and
+exactly 2dp clear space from the thumb on every edge. The tray-level paint order
+remains unchanged, so a later selected sibling cannot obscure an earlier
+focused option.
+
+Changed files:
+
+- `lib/shared/widgets/mx_segmented_tray.dart`
+- `test/shared/widgets/mx_segmented_tray_test.dart`
+- `.superpowers/sdd/2026-09-19-segmented-tray/task-1-report.md`
+
+Verification:
+
+- `flutter test test/shared/widgets/mx_segmented_tray_test.dart` — passed,
+  17 tests. The focus geometry raster test now samples the visible indicator and
+  its absence beyond the 40dp outer bounds on left, right, top, and bottom.

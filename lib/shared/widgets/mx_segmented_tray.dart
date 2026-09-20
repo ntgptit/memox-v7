@@ -73,6 +73,7 @@ class MxSegmentedTray<T> extends StatefulWidget {
 
 class _MxSegmentedTrayState<T> extends State<MxSegmentedTray<T>> {
   late List<GlobalKey> _optionKeys;
+  late List<GlobalKey> _visualKeys;
   int? _focusedOption;
 
   bool get _showsFocusRing =>
@@ -83,6 +84,7 @@ class _MxSegmentedTrayState<T> extends State<MxSegmentedTray<T>> {
   void initState() {
     super.initState();
     _optionKeys = _keysFor(widget.options.length);
+    _visualKeys = _keysFor(widget.options.length);
     FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
   }
 
@@ -91,6 +93,7 @@ class _MxSegmentedTrayState<T> extends State<MxSegmentedTray<T>> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.options.length != widget.options.length) {
       _optionKeys = _keysFor(widget.options.length);
+      _visualKeys = _keysFor(widget.options.length);
       _focusedOption = null;
     }
   }
@@ -145,6 +148,7 @@ class _MxSegmentedTrayState<T> extends State<MxSegmentedTray<T>> {
                       isEnabled: widget.onChanged != null,
                       horizontalPadding: _horizontalPadding,
                       onChanged: widget.onChanged,
+                      visualKey: _visualKeys[index],
                       onFocusChanged: (hasFocus) =>
                           _onFocusChanged(index, hasFocus),
                     ),
@@ -156,7 +160,7 @@ class _MxSegmentedTrayState<T> extends State<MxSegmentedTray<T>> {
                 Positioned.fill(
                   child: IgnorePointer(
                     child: _MxSegmentedTrayFocusLayer(
-                      targetKey: _optionKeys[focusedIndex],
+                      targetKey: _visualKeys[focusedIndex],
                     ),
                   ),
                 ),
@@ -227,6 +231,7 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
     required this.isEnabled,
     required this.horizontalPadding,
     required this.onChanged,
+    required this.visualKey,
     required this.onFocusChanged,
   });
 
@@ -235,6 +240,7 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
   final bool isEnabled;
   final double horizontalPadding;
   final ValueChanged<T>? onChanged;
+  final GlobalKey visualKey;
   final ValueChanged<bool> onFocusChanged;
 
   @override
@@ -274,9 +280,12 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
         onFocusChange: onFocusChanged,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xs),
-          child: isSelected
-              ? _MxSegmentedTrayThumb(child: optionBody)
-              : SizedBox(height: AppSizing.controlDense, child: optionBody),
+          child: KeyedSubtree(
+            key: visualKey,
+            child: isSelected
+                ? _MxSegmentedTrayThumb(child: optionBody)
+                : SizedBox(height: AppSizing.controlDense, child: optionBody),
+          ),
         ),
       ),
     );
@@ -357,8 +366,8 @@ class _RenderFocusPaintOffset extends RenderShiftedBox {
 }
 
 /// Paints after the row, so a focused earlier option is never hidden by a
-/// later selected Material surface. The 4dp outside extent keeps 2dp clear of
-/// the 2dp indicator without changing the 2dp option layout gap.
+/// later selected Material surface. It surrounds the 32dp visual thumb with a
+/// 2dp clear gap and does not alter the 48dp interaction target or 2dp gap.
 class _MxSegmentedTrayFocusLayer extends StatefulWidget {
   const _MxSegmentedTrayFocusLayer({required this.targetKey});
 
@@ -390,6 +399,10 @@ class _MxSegmentedTrayFocusLayerState
 }
 
 class _MxSegmentedTrayFocusPainter extends CustomPainter {
+  static const double _ringCenterInflation = 3;
+  static const double _ringCenterRadius = AppRadius.md - 1;
+  static const double _ringStrokeWidth = 2;
+
   const _MxSegmentedTrayFocusPainter({
     required this.target,
     required this.overlay,
@@ -406,15 +419,15 @@ class _MxSegmentedTrayFocusPainter extends CustomPainter {
 
     final Offset origin = target!.localToGlobal(Offset.zero, ancestor: overlay);
     final RRect ring = RRect.fromRectAndRadius(
-      (origin & target!.size).inflate(AppSpacing.xs),
-      const Radius.circular(AppRadius.md),
+      (origin & target!.size).inflate(_ringCenterInflation),
+      const Radius.circular(_ringCenterRadius),
     );
     canvas.drawRRect(
       ring,
       Paint()
         ..color = color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
+        ..strokeWidth = _ringStrokeWidth,
     );
   }
 

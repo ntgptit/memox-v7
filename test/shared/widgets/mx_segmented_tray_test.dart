@@ -223,6 +223,28 @@ void main() {
         ),
         color,
       );
+      expect(
+        capture.farthestFrom(
+          Theme.of(tester.element(trayFinder)).colorScheme.surfaceContainer,
+          Rect.fromLTWH(thumbRect.center.dx - 2, thumbRect.top - 4, 4, 2),
+        ),
+        color,
+      );
+      expect(
+        capture.farthestFrom(
+          Theme.of(tester.element(trayFinder)).colorScheme.surfaceContainer,
+          Rect.fromLTWH(thumbRect.center.dx - 2, thumbRect.bottom + 2, 4, 2),
+        ),
+        color,
+      );
+      for (final outsideRing in <Offset>[
+        Offset(thumbRect.left - 5, thumbRect.center.dy),
+        Offset(thumbRect.right + 5, thumbRect.center.dy),
+        Offset(thumbRect.center.dx, thumbRect.top - 5),
+        Offset(thumbRect.center.dx, thumbRect.bottom + 5),
+      ]) {
+        expect(capture.colorAt(outsideRing), isNot(color));
+      }
     });
 
     testWidgets(
