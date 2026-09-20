@@ -8,6 +8,8 @@ import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/shared/widgets/mx_segmented_tray.dart';
 import 'package:memox/shared/widgets/mx_tap_target.dart';
 
+import '../../visual_audit/audit_raster.dart';
+
 enum _Choice { first, second, third }
 
 void main() {
@@ -191,43 +193,74 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('shows the canonical focus ring on keyboard focus', (
+    testWidgets('shows the canonical focus geometry on keyboard focus', (
       tester,
     ) async {
-      await pump(tester, tray());
+      final captureKey = UniqueKey();
+      await pump(tester, RepaintBoundary(key: captureKey, child: tray()));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      final ring = tester.widget<DecoratedBox>(
-        find
-            .byWidgetPredicate(
-              (widget) =>
-                  widget is DecoratedBox &&
-                  widget.position == DecorationPosition.foreground,
-            )
-            .first,
-      );
-      expect((ring.decoration as BoxDecoration).border, isNotNull);
-
-      final ringRect = tester.getRect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is DecoratedBox &&
-              widget.position == DecorationPosition.foreground &&
-              (widget.decoration as BoxDecoration).border != null,
-        ),
-      );
       final thumbRect = tester.getRect(find.byKey(MxSegmentedTray.thumbKey));
-      expect(ringRect.width - thumbRect.width, 8);
-      expect(ringRect.height - thumbRect.height, 8);
-      expect(thumbRect.left - ringRect.left, 4);
-      expect(thumbRect.top - ringRect.top, 4);
-      final border = (ring.decoration as BoxDecoration).border! as Border;
-      expect(border.top.width, 2);
-      expect(thumbRect.left - (ringRect.left + border.left.width), 2);
-      expect(thumbRect.top - (ringRect.top + border.top.width), 2);
+      final capture = await RasterCapture.capture(
+        tester,
+        boundaryFinder: find.byKey(captureKey),
+      );
+      final color = Theme.of(tester.element(trayFinder)).colorScheme.primary;
+
+      expect(
+        capture.farthestFrom(
+          Theme.of(tester.element(trayFinder)).colorScheme.surfaceContainer,
+          Rect.fromLTWH(thumbRect.left - 4, thumbRect.center.dy - 2, 2, 4),
+        ),
+        color,
+      );
+      expect(
+        capture.farthestFrom(
+          Theme.of(tester.element(trayFinder)).colorScheme.surfaceContainer,
+          Rect.fromLTWH(thumbRect.right + 2, thumbRect.center.dy - 2, 2, 4),
+        ),
+        color,
+      );
     });
+
+    testWidgets(
+      'keeps an earlier focused ring visible over a later selected sibling',
+      (tester) async {
+        final captureKey = UniqueKey();
+        await pump(
+          tester,
+          RepaintBoundary(
+            key: captureKey,
+            child: tray(selected: _Choice.second),
+          ),
+        );
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+
+        final firstTarget = tester.getRect(find.byType(MxTapTarget).first);
+        final secondTarget = tester.getRect(find.byType(MxTapTarget).at(1));
+        final capture = await RasterCapture.capture(
+          tester,
+          boundaryFinder: find.byKey(captureKey),
+        );
+
+        expect(
+          capture.farthestFrom(
+            Theme.of(
+              tester.element(trayFinder),
+            ).colorScheme.surfaceContainerLowest,
+            Rect.fromLTWH(secondTarget.left, firstTarget.center.dy - 2, 2, 4),
+          ),
+          Theme.of(tester.element(trayFinder)).colorScheme.primary,
+          reason:
+              'the earlier option\'s right focus stroke must paint above the '
+              'later selected surface',
+        );
+      },
+    );
 
     testWidgets('keeps labels on one intrinsic line without ellipsizing', (
       tester,

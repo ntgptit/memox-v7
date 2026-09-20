@@ -63,3 +63,29 @@ Addressed the review's six important findings:
 - `flutter test test/shared/widgets/mx_segmented_tray_test.dart test/features/progress/presentation/progress_deck_screen_test.dart test/features/settings/presentation/settings_accessibility_test.dart test/features/settings/presentation/settings_screen_states_test.dart test/features/settings/presentation/settings_screen_geometry_test.dart test/app/widgetbook_coverage_test.dart` — passed, 70 tests.
 - `flutter analyze --no-pub` — passed with no issues.
 - `cd widgetbook && flutter test` — passed, 8 tests.
+
+## Fix round 2/5
+
+The per-option focus indicator used a foreground decoration in each Row child.
+That meant an earlier focused option could still be obscured by a later selected
+option's opaque Material surface. `MxSegmentedTray` now collects descendant
+focus at the tray, and paints the same 2dp primary indicator in a tray-level
+overlay after all option surfaces. The overlay preserves the existing 4dp
+external focus extent, 2dp clear gap, 2dp option spacing, 32dp thumb, 48dp
+target, and keyboard-only focus-visible behavior.
+
+Changed files:
+
+- `lib/shared/widgets/mx_segmented_tray.dart`
+- `test/shared/widgets/mx_segmented_tray_test.dart`
+- `.superpowers/sdd/2026-09-19-segmented-tray/task-1-report.md`
+
+Verification:
+
+- RED: `flutter test test/shared/widgets/mx_segmented_tray_test.dart` failed
+  at the raster assertion because the later selected surface painted over the
+  earlier focused option's right indicator.
+- `flutter test test/shared/widgets/mx_segmented_tray_test.dart` — passed,
+  17 tests, including the LTR earlier-focus/later-selected raster regression.
+- `flutter analyze --no-pub` started but did not complete within this runner's
+  30-second command limit; it produced no diagnostic before termination.

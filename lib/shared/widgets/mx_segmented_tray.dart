@@ -10,7 +10,6 @@ import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/states/app_interaction_states.dart';
-import 'mx_focus_ring.dart';
 import 'mx_tap_target.dart';
 
 /// The component-owned horizontal gap between adjacent choices.
@@ -43,7 +42,7 @@ class MxSegmentedTrayOption<T> {
 /// The recessed tray, raised selected thumb, hit target and focus treatment
 /// belong here so Settings and Progress cannot drift while retaining ownership
 /// of their localized labels and state transitions.
-class MxSegmentedTray<T> extends StatelessWidget {
+class MxSegmentedTray<T> extends StatefulWidget {
   static const Key surfaceKey = ValueKey<String>('mx-segmented-tray-surface');
   static const Key thumbKey = ValueKey<String>('mx-segmented-tray-thumb');
 
@@ -68,10 +67,59 @@ class MxSegmentedTray<T> extends StatelessWidget {
   final ValueChanged<T>? onChanged;
   final MxSegmentedTrayVariant variant;
 
-  double get _horizontalPadding => switch (variant) {
+  @override
+  State<MxSegmentedTray<T>> createState() => _MxSegmentedTrayState<T>();
+}
+
+class _MxSegmentedTrayState<T> extends State<MxSegmentedTray<T>> {
+  late List<GlobalKey> _optionKeys;
+  int? _focusedOption;
+
+  bool get _showsFocusRing =>
+      _focusedOption != null &&
+      FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+
+  @override
+  void initState() {
+    super.initState();
+    _optionKeys = _keysFor(widget.options.length);
+    FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant MxSegmentedTray<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.options.length != widget.options.length) {
+      _optionKeys = _keysFor(widget.options.length);
+      _focusedOption = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_onHighlightModeChanged);
+    super.dispose();
+  }
+
+  void _onHighlightModeChanged(FocusHighlightMode _) {
+    if (_focusedOption != null) setState(() {});
+  }
+
+  List<GlobalKey> _keysFor(int optionCount) =>
+      List<GlobalKey>.generate(optionCount, (_) => GlobalKey());
+
+  double get _horizontalPadding => switch (widget.variant) {
     MxSegmentedTrayVariant.settings => AppSpacing.md,
     MxSegmentedTrayVariant.progressRange => AppSpacing.lg,
   };
+
+  void _onFocusChanged(int index, bool hasFocus) {
+    if (hasFocus) {
+      setState(() => _focusedOption = index);
+      return;
+    }
+    if (_focusedOption == index) setState(() => _focusedOption = null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,22 +127,40 @@ class MxSegmentedTray<T> extends StatelessWidget {
       alignment: AlignmentDirectional.centerStart,
       widthFactor: 1,
       child: _MxSegmentedTraySurface(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: _optionGap,
-            children: <Widget>[
-              for (final option in options)
-                _SegmentedTrayOption<T>(
-                  option: option,
-                  isSelected: option.value == selected,
-                  isEnabled: onChanged != null,
-                  horizontalPadding: _horizontalPadding,
-                  onChanged: onChanged,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: _optionGap,
+                children: <Widget>[
+                  for (var index = 0; index < widget.options.length; index++)
+                    _SegmentedTrayOption<T>(
+                      key: _optionKeys[index],
+                      option: widget.options[index],
+                      isSelected:
+                          widget.options[index].value == widget.selected,
+                      isEnabled: widget.onChanged != null,
+                      horizontalPadding: _horizontalPadding,
+                      onChanged: widget.onChanged,
+                      onFocusChanged: (hasFocus) =>
+                          _onFocusChanged(index, hasFocus),
+                    ),
+                ],
+              ),
+            ),
+            if (_showsFocusRing)
+              if (_focusedOption case final focusedIndex?)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: _MxSegmentedTrayFocusLayer(
+                      targetKey: _optionKeys[focusedIndex],
+                    ),
+                  ),
                 ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -155,11 +221,13 @@ class _MxSegmentedTrayThumb extends StatelessWidget {
 
 class _SegmentedTrayOption<T> extends StatelessWidget {
   const _SegmentedTrayOption({
+    super.key,
     required this.option,
     required this.isSelected,
     required this.isEnabled,
     required this.horizontalPadding,
     required this.onChanged,
+    required this.onFocusChanged,
   });
 
   final MxSegmentedTrayOption<T> option;
@@ -167,6 +235,7 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
   final bool isEnabled;
   final double horizontalPadding;
   final ValueChanged<T>? onChanged;
+  final ValueChanged<bool> onFocusChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -198,9 +267,11 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
       ),
     );
 
-    final Widget visual = _MxFocusRingOffset(
-      child: MxFocusRing(
-        borderRadius: BorderRadius.circular(AppRadius.md),
+    final Widget visual = _MxFocusPaintOffset(
+      child: Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onFocusChange: onFocusChanged,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xs),
           child: isSelected
@@ -223,31 +294,31 @@ class _SegmentedTrayOption<T> extends StatelessWidget {
   }
 }
 
-/// Lets [MxFocusRing] paint 2dp clear of the thumb without changing its
-/// content-driven footprint or pushing a neighbouring option away.
-class _MxFocusRingOffset extends SingleChildRenderObjectWidget {
-  const _MxFocusRingOffset({required super.child});
+/// Reserves the focus ring's 4dp exterior without widening the option's layout
+/// footprint. Its child is no longer the painter: the tray-level overlay owns
+/// that so it can draw over every sibling surface.
+class _MxFocusPaintOffset extends SingleChildRenderObjectWidget {
+  const _MxFocusPaintOffset({required super.child});
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      _RenderFocusRingOffset();
+      _RenderFocusPaintOffset();
 }
 
-class _RenderFocusRingOffset extends RenderShiftedBox {
-  _RenderFocusRingOffset() : super(null);
+class _RenderFocusPaintOffset extends RenderShiftedBox {
+  _RenderFocusPaintOffset() : super(null);
 
   static const double _extent = AppSpacing.xs;
 
-  Size _contentSize(Size ringSize) => Size(
-    math.max(0, ringSize.width - (_extent * 2)),
-    math.max(0, ringSize.height - (_extent * 2)),
+  Size _contentSize(Size childSize) => Size(
+    math.max(0, childSize.width - (_extent * 2)),
+    math.max(0, childSize.height - (_extent * 2)),
   );
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     final child = this.child;
     if (child == null) return constraints.constrain(Size.zero);
-
     return constraints.constrain(
       _contentSize(child.getDryLayout(constraints.loosen())),
     );
@@ -276,10 +347,80 @@ class _RenderFocusRingOffset extends RenderShiftedBox {
       size = constraints.constrain(Size.zero);
       return;
     }
-
     child.layout(constraints.loosen(), parentUsesSize: true);
     size = constraints.constrain(_contentSize(child.size));
-    final parentData = child.parentData! as BoxParentData;
-    parentData.offset = const Offset(-_extent, -_extent);
+    (child.parentData! as BoxParentData).offset = const Offset(
+      -_extent,
+      -_extent,
+    );
   }
+}
+
+/// Paints after the row, so a focused earlier option is never hidden by a
+/// later selected Material surface. The 4dp outside extent keeps 2dp clear of
+/// the 2dp indicator without changing the 2dp option layout gap.
+class _MxSegmentedTrayFocusLayer extends StatefulWidget {
+  const _MxSegmentedTrayFocusLayer({required this.targetKey});
+
+  final GlobalKey targetKey;
+
+  @override
+  State<_MxSegmentedTrayFocusLayer> createState() =>
+      _MxSegmentedTrayFocusLayerState();
+}
+
+class _MxSegmentedTrayFocusLayerState
+    extends State<_MxSegmentedTrayFocusLayer> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => mounted ? setState(() {}) : null,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+    painter: _MxSegmentedTrayFocusPainter(
+      target: widget.targetKey.currentContext?.findRenderObject() as RenderBox?,
+      overlay: context.findRenderObject() as RenderBox?,
+      color: context.colors.primary,
+    ),
+  );
+}
+
+class _MxSegmentedTrayFocusPainter extends CustomPainter {
+  const _MxSegmentedTrayFocusPainter({
+    required this.target,
+    required this.overlay,
+    required this.color,
+  });
+
+  final RenderBox? target;
+  final RenderBox? overlay;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (target == null || overlay == null) return;
+
+    final Offset origin = target!.localToGlobal(Offset.zero, ancestor: overlay);
+    final RRect ring = RRect.fromRectAndRadius(
+      (origin & target!.size).inflate(AppSpacing.xs),
+      const Radius.circular(AppRadius.md),
+    );
+    canvas.drawRRect(
+      ring,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_MxSegmentedTrayFocusPainter oldDelegate) =>
+      target != oldDelegate.target ||
+      overlay != oldDelegate.overlay ||
+      color != oldDelegate.color;
 }
