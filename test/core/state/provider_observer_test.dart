@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqlite3/common.dart';
+import 'package:memox/core/error/failure.dart';
 import 'package:memox/core/state/provider_observer.dart';
 import 'package:memox/core/state/retry_policy.dart';
 
@@ -78,6 +80,69 @@ void main() {
       expect(() => container.read(failing), throwsA(isA<Exception>()));
 
       expect(lines, isNotEmpty);
+    });
+  });
+
+  group('a Failure names its cause', () {
+    // Without this the line read `deckListProvider failed` and the sink's
+    // error printed `Instance of 'UnknownFailure'`: a migration that could not
+    // run looked like an unexplained spinner.
+    test('a SQLite cause reports its code and message', () {
+      final container = containerWith(observer());
+      final failing = Provider<int>(
+        (ref) => throw DatabaseFailure(
+          message: 'Could not save your changes. Please try again.',
+          cause: SqliteException(
+            extendedResultCode: 1,
+            message: 'duplicate column name: sibling_position',
+          ),
+        ),
+        name: 'migratingProvider',
+      );
+
+      expect(() => container.read(failing), throwsA(isA<Exception>()));
+
+      expect(lines.single, contains('migratingProvider failed'));
+      expect(lines.single, contains('SqliteException(1)'));
+      expect(lines.single, contains('duplicate column name: sibling_position'));
+    });
+
+    test('never prints a bound parameter (AD-08)', () {
+      final container = containerWith(observer());
+      final failing = Provider<int>(
+        (ref) => throw DatabaseFailure(
+          message: 'Could not save your changes. Please try again.',
+          cause: SqliteException(
+            extendedResultCode: 2067,
+            message: 'UNIQUE constraint failed: cards.id',
+            causingStatement: 'INSERT INTO cards (front) VALUES (?)',
+            parametersToStatement: <Object?>[privateCardContent],
+          ),
+        ),
+        name: 'cardWriteProvider',
+      );
+
+      expect(() => container.read(failing), throwsA(isA<Exception>()));
+
+      expect(lines.single, contains('UNIQUE constraint failed: cards.id'));
+      expect(lines.single, isNot(contains(privateCardContent)));
+      expect(lines.single, isNot(contains('INSERT INTO')));
+    });
+
+    test('any other cause is reduced to its type', () {
+      final container = containerWith(observer());
+      final failing = Provider<int>(
+        (ref) => throw UnknownFailure(
+          message: 'Could not save your changes. Please try again.',
+          cause: StateError('failed for $privateCardContent'),
+        ),
+        name: 'unknownProvider',
+      );
+
+      expect(() => container.read(failing), throwsA(isA<Exception>()));
+
+      expect(lines.single, contains('StateError'));
+      expect(lines.single, isNot(contains(privateCardContent)));
     });
   });
 
