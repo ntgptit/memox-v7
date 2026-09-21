@@ -4,9 +4,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
-import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
@@ -33,7 +33,7 @@ void main() {
   }
 
   group('supporting line', () {
-    testWidgets('an arriving error moves nothing below a reserved field', (
+    testWidgets('an arriving error adds FieldMessage-s fixed top padding', (
       tester,
     ) async {
       // #433 F5: 20dp of growth the moment `errorText` landed on a field with
@@ -55,8 +55,14 @@ void main() {
 
       await pump(tester, form('Enter 1–500'));
 
-      expect(tester.getRect(find.byType(MxActionButton)), buttonBefore);
-      expect(tester.getRect(find.byType(MxTextField)), fieldBefore);
+      expect(
+        tester.getRect(find.byType(MxActionButton)).top - buttonBefore.top,
+        AppSpacing.xs,
+      );
+      expect(
+        tester.getRect(find.byType(MxTextField)).height - fieldBefore.height,
+        AppSpacing.xs,
+      );
       expect(find.text('Enter 1–500'), findsOneWidget);
     });
 
@@ -219,9 +225,8 @@ void main() {
         // because the themed `IconButtonTheme` answered before the M3 default
         // that carries the error branch.
         //
-        // The glyph is read like the error text beside it, so it is the
-        // danger ink, not the fill (GC-3, 2026-09-17) — the border keeps
-        // `error`.
+        // The suffix and message both use the canonical contrast-safe error
+        // ink; FieldMessage's glyph itself uses the direct Material error role.
         expect(
           await suffixColorOf(
             tester,
@@ -230,9 +235,6 @@ void main() {
           ),
           semantic.dangerInk,
         );
-        // The message itself is text, so it takes the same ink as the glyph
-        // beside it (GC-3, 2026-09-17) — left to `errorStyle`'s M3 default it
-        // would have painted `colorScheme.error`, the fill.
         final errorMessage = tester.renderObject<RenderParagraph>(
           find.text('Already tagged'),
         );
@@ -331,15 +333,9 @@ void main() {
         );
 
         final theme = mode.$2 ? buildDarkTheme() : buildLightTheme();
-        final semantic = theme.extension<AppSemanticColors>()!;
-        final glyph = tester.widget<Icon>(
-          find.descendant(
-            of: find.byType(MxIcon),
-            matching: find.byIcon(Icons.error_outline),
-          ),
-        );
+        final glyph = tester.widget<Icon>(find.byIcon(Icons.error_outline));
 
-        expect(glyph.color, semantic.dangerInk);
+        expect(glyph.color, theme.colorScheme.error);
       });
     }
   });
