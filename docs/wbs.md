@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.121 |
+| **Updated by task** | M100.122 |
 | **Last updated** | 2026-09-21 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1831,7 +1831,7 @@ của M2.
         (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
 - **Checklist phases:** 7, 12.
 
-### M100.121 · MxSegmentedTray — exclusive selector dùng chung cho Settings và Progress
+### M100.122 · MxSegmentedTray — exclusive selector dùng chung cho Settings và Progress
 
 - **Status:** **done** — focused component, Settings, Progress và Widgetbook
   coverage xanh; golden Linux `TZ=UTC` của Settings/Progress đã regenerate và
