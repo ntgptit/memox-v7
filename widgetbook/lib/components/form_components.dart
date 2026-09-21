@@ -9,6 +9,7 @@ import 'package:memox/shared/widgets/mx_list_row.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
+import 'package:memox/shared/widgets/mx_field_message.dart';
 import 'package:memox/shared/widgets/mx_option_row.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
 import 'package:memox/shared/widgets/mx_settings_row.dart';
@@ -22,6 +23,40 @@ import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/core/theme/extensions/app_well_fill.dart';
 
 void _noop() {}
+
+WidgetbookComponent fieldMessageComponent() => WidgetbookComponent(
+  name: 'MxFieldMessage',
+  useCases: <WidgetbookUseCase>[
+    WidgetbookUseCase(
+      name: 'Variants',
+      builder: (BuildContext context) {
+        final tone = context.knobs.object.dropdown<MxFieldMessageTone>(
+          label: 'tone',
+          options: MxFieldMessageTone.values,
+          labelBuilder: (MxFieldMessageTone value) => value.name,
+        );
+        final message = context.knobs.string(
+          label: 'message',
+          initialValue: 'Enter a valid value',
+        );
+
+        return CatalogCenterPage(
+          child: MxFieldMessage(message: message, tone: tone),
+        );
+      },
+    ),
+    WidgetbookUseCase(name: 'Long content', builder: _longFieldMessage),
+  ],
+);
+
+Widget _longFieldMessage(BuildContext context) => const CatalogCenterPage(
+  child: SizedBox(
+    width: 240,
+    child: MxFieldMessage(
+      message: 'Tên bộ thẻ không được để trống hoặc chỉ chứa khoảng trắng',
+    ),
+  ),
+);
 
 WidgetbookComponent textFieldComponent() {
   return WidgetbookComponent(

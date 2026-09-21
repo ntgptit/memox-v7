@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_icon_tile.dart';
+import 'package:memox/shared/widgets/mx_field_message.dart';
 import 'package:memox/shared/widgets/mx_list_row.dart';
 import 'package:memox/shared/widgets/mx_reading_column.dart';
 import 'package:memox/shared/widgets/mx_section.dart';
@@ -12,6 +13,10 @@ import 'mx_stress_specimens.dart';
 /// The semantic owners the Design System V1 closure added (A20.1 Phase 4),
 /// split out of `mx_stress_specimens.dart` at the 400-line guard.
 List<MxStressSpecimen> ownerStressSpecimens() => <MxStressSpecimen>[
+  MxStressSpecimen(
+    name: 'MxFieldMessage',
+    build: () => const MxFieldMessage(message: kLongMessage),
+  ),
   MxStressSpecimen(
     // One line, ellipsised: a heading that wrapped would push the list it
     // names; the stress is the long label at 2.0x staying on its line.
