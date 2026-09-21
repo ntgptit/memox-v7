@@ -8,7 +8,7 @@
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
 | **Updated by task** | M100.121 |
-| **Last updated** | 2026-09-20 |
+| **Last updated** | 2026-09-21 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -1863,10 +1863,9 @@ của M2.
 
 ### M100.121 · MxStepper — bộ điều khiển số nguyên dùng chung của v3
 
-- **Status:** **in progress** — `mx_stepper_test.dart`, `mx_stress_test.dart`,
-  API closure, Widgetbook và các static gate xanh. Full DoD còn bị chặn bởi
-  279 golden/demo card diffs có sẵn ngoài scope Stepper (ví dụ
-  `card_states_dark.png`, 0.98% / 20,349px).
+- **Status:** **done** — PR #601 merged after the required remote CI gate
+  passed: host tests, Linux goldens, Widgetbook, format/analyze/guards and
+  tooling/docs.
 - **Goal:** shared component cho Stepper v3: hai icon well 36dp quanh giá trị
   số nguyên, trong khi caller vẫn sở hữu bounds, clamp, validation message và
   ý nghĩa của số.
