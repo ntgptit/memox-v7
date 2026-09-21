@@ -1,203 +1,165 @@
-# MemoX v3 Handoff Full Implementation Plan
+# MemoX v3 Handoff Implementation Plan
 
 | | |
 |---|---|
 | **Status** | active |
-| **Purpose** | Thực hiện và chứng minh parity với 50 Markdown files của MemoX v3 handoff |
-| **Scope** | Four reference documents, 46 component contracts, direct consumers, Widgetbook, visual and device verification |
-| **Source of truth for** | Thứ tự thực thi và bằng chứng hoàn thành redesign v3 |
+| **Purpose** | Điều phối việc thực hiện đầy đủ handoff v3 mà không sao chép lại specification |
+| **Scope** | 4 tài liệu tham chiếu và 46 component contracts trong `docs/design/v3/` |
+| **Source of truth for** | Thứ tự triển khai, evidence ledger và Definition of Done của M100.122 |
 | **Depends on** | `docs/design/v3/00-index.md` · `01-foundations.md` · `02-theme-binding.md` · `99-traceability.md` · `docs/wbs.md` |
 | **Updated by task** | M100.122 |
 | **Last updated** | 2026-09-21 |
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to execute this plan task-by-task. This plan orchestrates the v3 documents; it never replaces them.
 
-**Goal:** Complete every v3 component contract with a verified Flutter owner, while preserving business behaviour, data flow, routing and localized copy.
+**Goal:** Make the Flutter app conform to every requirement in the existing MemoX v3 handoff documents, with evidence for all 46 component contracts.
 
-**Architecture:** `lib/core/theme/` owns colours, type, effects and Material defaults. `lib/shared/widgets/` owns reusable visual and interaction contracts. Feature widgets compose those owners with caller-supplied labels, view data and callbacks. A contract is complete only when its focused test, direct callers, Widgetbook use case and audit record all agree.
+**Architecture:** The handoff Markdown files are the visual and interaction specification. `lib/core/theme/` owns tokens and Material 3 binding; `lib/shared/widgets/` owns reusable contracts; feature presentation code only composes them and supplies view data/callbacks. The plan records who reads and proves each contract, not copied values from the contract.
 
-**Tech Stack:** Flutter stable · Material 3 · Dart · existing `Mx*` shared kit · Widgetbook · Flutter widget/accessibility tests · Linux/WSL golden tests.
+**Tech Stack:** Flutter stable · Material 3 · Dart · existing `Mx*` shared widgets · Widgetbook · Flutter widget/accessibility tests · Linux/WSL golden tests.
 
-**Spec:** `docs/design/v3/00-index.md`, `01-foundations.md`, `02-theme-binding.md`, all files in `docs/design/v3/components/`, and `99-traceability.md`.
+**Spec:** Every file indexed by `docs/design/v3/00-index.md`. When this plan and a handoff document disagree, the handoff document wins.
 
 ## Global Constraints
 
-- Do not change business rules, domain/data layers, routes, controller interfaces, or ARB copy policy.
-- Resolve colour, type, spacing, radius, sizing, shadow and state through the canonical theme/token owner; no raw visual inputs or literals in a public API.
-- Material 3 anatomy and supported platform semantics take priority over handoff HTML/CSS mechanics.
-- StatusBar and Scrim are platform/framework-owned; verify insets and modal barrier semantics without fake app widgets.
-- Preserve explicit handoff visual decisions; document measured accessibility exceptions in `docs/wbs.md` rather than silently weakening tests.
-- Interactive controls retain a 48dp target and test disabled, focus/keyboard, RTL and text scale 2.0 where relevant.
-- Every public new shared widget has a focused test and Widgetbook specimen. Update every direct caller in the same task as a public API migration.
-- Goldens are authored only in Linux/WSL with `TZ=UTC`. Update `docs/wbs.md` with each code commit.
+- Do not duplicate geometry, palette, state matrices, theme-role tables or HTML translation notes from `docs/design/v3/**` into this plan.
+- Before changing a component, read its own handoff file plus `01-foundations.md` and `02-theme-binding.md`. Use `99-traceability.md` for source-name or owner ambiguity.
+- Do not change business rules, domain/data layers, routes, controller interfaces or ARB copy policy.
+- Resolve visuals through canonical tokens/theme owners and Material 3; do not copy web-specific mechanics.
+- StatusBar and Scrim are platform/framework-owned. Verify them, but do not create fake app widgets.
+- Preserve explicit handoff visuals. Record any measured accessibility exception in `docs/wbs.md`; do not silently suppress a test.
+- New public shared widgets require focused tests and Widgetbook registration. Migrate direct callers in the same task as a public API migration.
+- Goldens are authored only in Linux/WSL with `TZ=UTC`. Update `docs/wbs.md` with every code commit.
 
 ---
 
 ## 5Why
 
-1. **Why re-audit before implementing?** A name-to-owner map proves only that documentation exists; it does not prove dimensions, states, semantics or consumers satisfy the handoff.
-2. **Why keep theme work separate?** The contracts refer to semantic roles. Local colour fixes would fork light/dark binding and make later components drift.
-3. **Why execute A through H?** Chrome and controls establish primitives that surfaces, feedback and shells compose. Dependency order prevents temporary feature-local visual recipes.
-4. **Why create missing shared widgets?** Their contracts recur by semantic meaning. Screen-local copies would immediately diverge.
-5. **Why close with screens, goldens and a device run?** Isolated widgets do not prove real layout, platform font rendering, system insets or interaction continuity.
+1. **Why use pointers rather than restate 50 files?** The MD files are already the source of truth. Copying them would create a competing specification that drifts.
+2. **Why require a ledger?** A pointer cannot prove an agent implemented every file. One evidence record per contract makes omissions visible.
+3. **Why execute A–H?** The index groups components by shared vocabulary and dependency; later surfaces/shells compose earlier controls.
+4. **Why create missing shared widgets?** Their semantics recur; screen-local copies would immediately diverge.
+5. **Why finish with screens, goldens and device checks?** Isolated widgets cannot prove real layout, platform fonts, system insets or interaction continuity.
 
-## Complete Contract Map
+## Required Ledger
 
-| Wave | Contract document → owner |
-|---|---|
-| Audit/reference | `00-index`, `99-traceability` → `v3_handoff_coverage_test`; `01-foundations`, `02-theme-binding` → `lib/core/theme/**` |
-| A | `status-bar` → platform; `app-bar` → `MxAppBar`; `bottom-nav` → `MxNavigationBar`; `breadcrumb` → `MxBreadcrumb`; `study-top-bar` → `MxSessionTopBar`; `fab` → `MxFab` |
-| B | `button` → `MxActionButton`; `icon-button` → `MxIconButton`; `filter-chip` → `MxFilterChip`; `chip-trigger` → `MxChipTrigger` |
-| C | `search-field` → `MxSearchField`; `text-field` → `MxTextField`; `toggle` → `MxSwitch`; `option-row` → `MxOptionRow`; `selection-checkbox` → `MxCheckboxRow`; `segmented-tray` → `MxSegmentedTray`; `stepper` → `MxStepper`; `field-message` → `MxFieldMessage` |
-| D | `card` → `MxCard`; `section` → `MxSection`; `list-row` → `MxListRow`; `settings-row` → `MxSettingsRow`; `icon-tile` → `MxIconTile`; `action-sheet-command-row` → `MxActionSheet`; `list-section-header` → `MxSectionLabel` |
-| E | `badge` → `MxBadge`; `status-badge` → `MxStatusBadge`; `tag-chip` → `MxTagChip`; `note` → `MxNote`; `mastery-ramp` → `MxMasteryRamp`; `workload-breakdown-line` → `MxWorkloadBreakdownLine`; `mastery-donut` → `MxMasteryDonut` |
-| F | `scrim` → platform; `dialog` → `MxAlertDialog`/`MxConfirmDialog`; `bottom-sheet` → `MxSheet`; `sheet-actions` → `MxSheetActions`; `snackbar` → `MxUndoSnackBar`; `inline-banner` → `MxFeedbackBand`; `deck-picker-sheet` → `MxDeckPickerSheet` |
-| G | `skeleton` → `MxSkeleton`; `spinner` → `MxSpinner`; `empty-state` → `MxEmptyState`; `error-state` → `MxErrorState` |
-| H | `app-shell` → `AppNavigationShell`/`MxContentShell`; `screen-scroll` → `MxScrollEndInset`; `footer-bar` → `MxFooterBar` |
+`test/design_audit/v3_handoff_coverage_test.dart` is the execution ledger. It must contain exactly one `V3ContractAudit` record for every component link in `00-index.md`:
 
-## Evidence Protocol
+```dart
+const V3ContractAudit(
+  document: 'components/C-inputs-selection/segmented-tray.md',
+  owner: 'lib/shared/widgets/mx_segmented_tray.dart',
+  focusedTest: 'test/shared/widgets/mx_segmented_tray_test.dart',
+  callerSearch: "rg 'MxSegmentedTray' lib test widgetbook",
+  status: V3AuditStatus.auditing,
+);
+```
 
-Each of the 46 entries in `test/design_audit/v3_handoff_coverage_test.dart` must carry: source document, owner source path, focused test path, direct-caller search command, and status (`auditing` or `verified`). The audit test only validates this evidence record. A component becomes `verified` only in its wave after focused tests pass and its call-site migration is reviewed.
+Mark a record `verified` only after the executor has read its component MD and Foundations/Theme Binding, added focused tests for all requirements declared there, reviewed direct callers, registered public additions in Widgetbook, and run the wave’s focused tests. File existence or an owner name alone is never parity evidence.
 
-### Task 1: Make the 46-contract audit truthful
+## Execution Waves
 
-**Files:** Modify `test/design_audit/v3_handoff_coverage_test.dart`, `docs/wbs.md`.
+### Task 1: Establish truthful coverage
 
-**Produces:** `V3ContractAudit(document, ownerFile, testFile, callerSearch, status)` for every contract.
+**Read:** `00-index.md`, `99-traceability.md`.
 
-- [ ] Write a failing audit that requires all five fields for all 46 contracts and checks referenced files exist.
-- [ ] Run `flutter test test/design_audit/v3_handoff_coverage_test.dart`; confirm it names currently missing owner/test files.
-- [ ] Populate source/test/caller evidence; mark every not-yet-reviewed item `auditing`, never `verified`.
+**Modify:** `test/design_audit/v3_handoff_coverage_test.dart`, `docs/wbs.md`.
+
+- [ ] Replace the name-only map with one ledger record for each of the 46 indexed component documents.
+- [ ] Initialize every not-rechecked contract as `auditing`, never `verified`.
 - [ ] Run `flutter test test/design_audit/v3_handoff_coverage_test.dart` and `python .claude/skills/flutter-workflow/scripts/check_docs.py`.
-- [ ] Commit `test(design): make v3 contract evidence explicit`.
+- [ ] Commit `test(design): make v3 handoff evidence explicit`.
 
-### Task 2: Audit Foundations and Theme Binding
+### Task 2: Foundation and theme prerequisite
 
-**Files:** Read `01-foundations.md`, `02-theme-binding.md`, `docs/design-system/v3-foundations.md`; modify only failed owners under `lib/core/theme/**`; test `test/core/theme/**` and `test/design_audit/audit_theme_steps.dart`.
+**Read:** `01-foundations.md`, `02-theme-binding.md`, and every component’s theme-role section.
 
-**Produces:** all light/dark roles consumed by A–H through existing `context.colors`, `context.semanticColors`, `context.texts`, decoration and interaction-state helpers.
+**Modify only if audit fails:** canonical owners under `lib/core/theme/**` and their tests.
 
-- [ ] Add a failing test for every consumed role absent from the theme audit: surface containers, status colours, progress track, feedback roles, focus and disabled overlays.
-- [ ] Run `flutter test test/core/theme test/design_audit/audit_theme_steps.dart` and reproduce failures before editing theme code.
-- [ ] Bind a missing role only in its canonical theme/foundation extension; do not add a component fallback.
-- [ ] Run focused theme tests, `flutter analyze`, and `.claude/skills/flutter-architecture/scripts/check_architecture.sh`.
-- [ ] Commit `feat(theme): complete v3 handoff bindings`.
+- [ ] Add focused light/dark tests for each consumed role not already proved by the theme audit.
+- [ ] Run `flutter test test/core/theme test/design_audit/audit_theme_steps.dart`, `flutter analyze`, and `.claude/skills/flutter-architecture/scripts/check_architecture.sh`.
+- [ ] Commit a theme prerequisite before any component consumes a newly bound role.
 
-### Task 3: Execute A — chrome and navigation
+### Task 3: Groups A and B — chrome, navigation and actions
 
-**Files:** `lib/shared/widgets/mx_app_bar.dart`, `mx_navigation_bar.dart`, `mx_breadcrumb.dart`, `mx_session_top_bar.dart`, `mx_fab.dart`; their tests; direct shell/feature callers; Widgetbook entries.
+**Read before each owner:** its individual file in `components/A-chrome-navigation/` or `components/B-actions-controls/`, Foundations and Theme Binding.
 
-**Contract tests:** AppBar/BottomNav height, selected semantics, 48dp targets, light/dark and keyboard focus; Breadcrumb RTL order/focus; StudyTopBar state/accessibility; Fab size, focus and scroll clearance. StatusBar is verified by shell inset tests only.
+**Owners:** platform StatusBar; `MxAppBar`, `MxNavigationBar`, `MxBreadcrumb`, `MxSessionTopBar`, `MxFab`; `MxActionButton`, `MxIconButton`, `MxFilterChip`, `MxChipTrigger`.
 
-- [ ] Add the failing contract tests above, then run `flutter test test/shared/widgets/mx_app_bar_test.dart test/shared/widgets/mx_navigation_bar_test.dart test/shared/widgets/mx_breadcrumb_test.dart test/shared/widgets/mx_fab_test.dart`.
-- [ ] Correct owners through existing M3 themes/tokens; migrate direct matches from `rg 'Mx(AppBar|NavigationBar|Breadcrumb|SessionTopBar|Fab)' lib test widgetbook`.
-- [ ] Run A tests plus `test/features/study/presentation/study_accessibility_test.dart`, mark only proven A audit entries `verified`, and commit `feat(design): reconcile v3 chrome`.
+- [ ] Use each component MD to write failing tests for its own geometry, direct theme roles, states, semantics, interaction target and long-content requirement.
+- [ ] Make each test fail before implementation; correct its existing owner only through tokens/M3 APIs.
+- [ ] Review direct callers via that record’s `callerSearch`; update Widgetbook for each public API or variant.
+- [ ] Run all focused A/B tests, verify only evidenced ledger records, and commit one owner or coherent dependency pair at a time.
 
-### Task 4: Execute B — actions and controls
+### Task 4: Group C — inputs and selection
 
-**Files:** `mx_action_button.dart`, `mx_icon_button.dart`, `mx_filter_chip.dart`, `mx_chip_trigger.dart`, relevant component theme builders, focused tests and Widgetbook.
+**Read before each owner:** every individual file in `components/C-inputs-selection/`, Foundations and Theme Binding.
 
-**Contract tests:** Button/IconButton default, disabled, loading, pressed and focus states; loading-width stability; FilterChip/ChipTrigger selected state, truncation, semantics, compact geometry and 48dp targets.
+**Owners:** `MxSearchField`, `MxTextField`, `MxSwitch`, `MxOptionRow`, `MxCheckboxRow`, `MxSegmentedTray`, `MxStepper`, `MxFieldMessage`.
 
-- [ ] Add the named failing state-matrix tests and run the matching test files before implementation.
-- [ ] Correct only existing enum/theme/token owners; preserve callback and semantics labels at callers.
-- [ ] Register new public variants in Widgetbook and run `test/app/shared_api_closure_test.dart`.
-- [ ] Mark proven B entries `verified` and commit `feat(design): reconcile v3 action controls`.
+- [ ] Apply a red-to-green focused test cycle per contract using only requirements in its MD.
+- [ ] Keep validation, selection and controller state caller-owned; shared widgets own only presentation/interaction declared in their MD.
+- [ ] Run C focused tests, `test/app/shared_api_closure_test.dart`, Widgetbook coverage and direct feature tests before verifying the eight ledger records.
 
-### Task 5: Execute C — inputs and selection
+### Task 5: Group D — surfaces and content
 
-**Files:** `mx_search_field.dart`, `mx_text_field.dart`, `mx_switch.dart`, `mx_option_row.dart`, `mx_checkbox_row.dart`, `mx_radio_rows.dart`, `mx_segmented_tray.dart`, `mx_stepper.dart`, `mx_field_message.dart`; focused form tests and Widgetbook.
+**Read before each owner:** every file in `components/D-surfaces-content/`, Foundations and Theme Binding.
 
-**Contract tests:** fields’ focused/error/disabled/counter/large-text states; rows’ selected/disabled/group semantics/48dp state; tray’s 2–3 option bound, 4/2/12/32/8 geometry and exclusive semantics; stepper bounds; field-message error announcement.
+**Owners:** `MxCard`, `MxSection`, `MxListRow`, `MxSettingsRow`, `MxIconTile`, `MxActionSheet`, `MxSectionLabel`.
 
-- [ ] Write a failing case for every untested state/value listed above, then run all C focused tests.
-- [ ] Reconcile fields and selection rows without moving validation/business rules from callers.
-- [ ] Correct `MxSegmentedTray<T>`, `MxStepper`, and `MxFieldMessage` only through their typed closed APIs; migrate direct caller matches.
-- [ ] Run `flutter test` over all `mx_*field*`, `mx_*row*`, `mx_switch_test.dart`, `mx_segmented_tray_test.dart`, `mx_stepper_test.dart`, and `mx_form_components_test.dart`.
-- [ ] Mark C entries `verified` and commit `feat(design): complete v3 input selection`.
+- [ ] Derive all tests from each component’s own MD; do not carry values from memory or this plan.
+- [ ] Implement only in the listed shared owner, replace direct visual duplicates found by the ledger search, and preserve caller-owned commands/state.
+- [ ] Run focused D tests and Widgetbook coverage, then verify and commit each independently reviewable owner.
 
-### Task 6: Execute D — surfaces and content
+### Task 6: Group E — status and metadata
 
-**Files:** `mx_card.dart`, `mx_section.dart`, `mx_list_row.dart`, `mx_settings_row.dart`, `mx_icon_tile.dart`, `mx_action_sheet.dart`, `mx_section_label.dart`; matching tests and Widgetbook.
+**Read before each owner:** every file in `components/E-status-metadata/`, Foundations and Theme Binding.
 
-**Contract tests:** Card/Section radius, internal padding, elevation, long content and theme surface; ListRow/SettingsRow/IconTile alignment, min height, truncation, RTL/focus; ActionSheet command order/destructive treatment; SectionLabel geometry.
+**Owners:** `MxBadge`, `MxStatusBadge`, `MxTagChip`, `MxNote`, `MxMasteryRamp`, `MxWorkloadBreakdownLine`, `MxMasteryDonut`.
 
-- [ ] Add failing geometry/state tests for every item above and run the D focused suite.
-- [ ] Correct existing surface/row owners using tokens; keep commands and feature state in callers.
-- [ ] Migrate direct callers, register changed variants in Widgetbook, then run D tests.
-- [ ] Mark D entries `verified` and commit `feat(design): reconcile v3 surfaces`.
+- [ ] Create required missing owners `MxNote` and `MxWorkloadBreakdownLine`; do not substitute screen-local recipes.
+- [ ] Audit existing owners against their own MD, including non-interactive semantics and semantic summaries for chart-like visuals.
+- [ ] Run focused E tests, shared API closure and Widgetbook coverage; verify rows only after all evidence is green.
 
-### Task 7: Execute E — status and metadata
+### Task 7: Group F — overlays and feedback
 
-**Files:** modify `mx_badge.dart`, `mx_status_badge.dart`, `mx_tag_chip.dart`, `mx_mastery_ramp.dart`, `mx_mastery_donut.dart`; create `mx_note.dart`, `mx_workload_breakdown_line.dart`; create focused tests and Widgetbook entries.
+**Read before each owner:** every file in `components/F-overlays-feedback/`, Foundations and Theme Binding.
 
-**New interfaces:** `MxNote(message)`; `MxWorkloadBreakdownLine(overdue, today, newCards)`; existing `MxStatusBadge(status, {label, dotOnly})`, `MxTagChip(label, {dense})`, `MxMasteryRamp.colorFor(context, progress)`, `MxMasteryDonut(progress)` remain closed semantic APIs.
+**Owners:** framework Scrim; `MxAlertDialog`/`MxConfirmDialog`, `MxSheet`, `MxSheetActions`, `MxUndoSnackBar`, `MxFeedbackBand`, `MxDeckPickerSheet`.
 
-**Contract tests:** Badge/StatusBadge/TagChip geometry and non-interactive semantics; Note 10×12 padding, ghost border, 16dp glyph and multiline text; ramp thresholds at 0/33/34/66/67/100%; Donut 56dp semantic percentage; workload zero-term omission, urgency ordering, one-line ellipsis and tabular figures.
+- [ ] Create `MxSheetActions` and `MxDeckPickerSheet` if absent. They accept view data/localized labels/callbacks only and never import a feature provider or repository.
+- [ ] Test each MD’s supported route/barrier semantics, focus, dismissal, action order, announcement and long-content rule.
+- [ ] Review direct feature consumers, update Widgetbook, verify the seven ledger rows and commit coherent overlay units.
 
-- [ ] Write failing tests for the listed values, including new Note and Workload files; run them before production code.
-- [ ] Implement the two missing widgets with theme roles only and no data/provider imports.
-- [ ] Reconcile existing metadata owners, add Widgetbook specimens, run focused E tests and shared API closure.
-- [ ] Mark E entries `verified` and commit `feat(design): complete v3 metadata`.
+### Task 8: Groups G and H — states and shell
 
-### Task 8: Execute F — overlays and feedback
+**Read before each owner:** every file in `components/G-loading-empty-error/` and `components/H-layout-shell/`, Foundations and Theme Binding.
 
-**Files:** modify `mx_alert_dialog.dart`, `mx_confirm_dialog.dart`, `mx_sheet.dart`, `mx_undo_snack_bar.dart`, `mx_feedback_band.dart`; create `mx_sheet_actions.dart`, `mx_deck_picker_sheet.dart`; focused overlay tests and Widgetbook.
+**Owners:** `MxSkeleton`, `MxSpinner`, `MxEmptyState`, `MxErrorState`, `AppNavigationShell`/`MxContentShell`, `MxScrollEndInset`, `MxFooterBar`.
 
-**New interfaces:** `MxSheetActions(actions)` accepts localized view-action models; `MxDeckPickerSheet<T>(items, onSelected)` accepts view data and callback only, with no feature/provider/repository import.
+- [ ] Create missing owners `MxSkeleton`, `MxSpinner` and `MxFooterBar`.
+- [ ] Test only the loading/layout stability, retry, reduced-motion, semantic, system-inset, scroll-tail, navigation, RTL and large-text requirements written in each owner’s MD.
+- [ ] Confirm shared state/shell widgets import no feature, provider, repository or controller; migrate direct consumers and add Widgetbook specimens.
+- [ ] Verify all seven ledger entries and commit per independently reviewable owner.
 
-**Contract tests:** Dialog/Sheet route barrier, focus trap, Escape/system-back dismissal, title/body/action order and destructive confirmation; SheetActions ordering/48dp target; Snackbar/Banner announcement and callback forwarding; DeckPicker long labels, keyboard selection and callback forwarding. Scrim is verified through modal routes only.
+### Task 9: Screen integration and closure
 
-- [ ] Write the listed failing overlay tests and reproduce each before implementation.
-- [ ] Implement through supported Material route APIs and token-backed component composition.
-- [ ] Run overlay/focus tests, affected feature tests and Widgetbook; mark F verified and commit `feat(design): complete v3 feedback overlays`.
+**Read:** each affected component MD, final ledger, `99-traceability.md` and `docs/wbs.md`.
 
-### Task 9: Execute G — loading, empty and error
-
-**Files:** modify `mx_loading_state.dart`, `mx_empty_state.dart`, `mx_error_state.dart`; create `mx_skeleton.dart`, `mx_spinner.dart`; create focused/reduced-motion tests and Widgetbook.
-
-**New interfaces:** `MxSkeleton` exposes only closed shape variants; `MxSpinner` owns visual/semantic progress only; `MxErrorState` forwards the caller retry callback.
-
-**Contract tests:** Skeleton shape, layout stability, reduced motion and no semantic noise; Spinner size/reduced motion/announcement; Empty/Error long text, retry forwarding, light/dark and 320dp × text scale 2.0.
-
-- [ ] Write failing tests, implement the two missing primitives with no feature imports, then run G tests.
-- [ ] Audit shared source imports to prove no provider/repository/controller dependency.
-- [ ] Register Widgetbook entries, mark G verified and commit `feat(design): complete v3 state views`.
-
-### Task 10: Execute H — shell and layout
-
-**Files:** modify `lib/app/shell/app_navigation_shell.dart`, `mx_content_shell.dart`, `mx_scroll_end_inset.dart`; create `mx_footer_bar.dart`; focused shell tests and Widgetbook.
-
-**New interface:** `MxFooterBar(child)` owns visual/safe-area geometry only; it does not own commands or route state.
-
-**Contract tests:** AppShell/ScreenScroll safe insets, nav coexistence, keyboard inset, scroll tail, RTL and text scale 2.0; FooterBar visual treatment, safe-area handling, action targets and scroll-tail interaction.
-
-- [ ] Write the failures first; implement shell corrections without moving routing/state into shared widgets.
-- [ ] Migrate direct caller matches from `rg 'Mx(ContentShell|ScrollEndInset)|AppNavigationShell' lib test widgetbook`.
-- [ ] Run shell suite, register Widgetbook, mark H verified and commit `feat(design): complete v3 shell layout`.
-
-### Task 11: Integrate direct consumers and close visual evidence
-
-**Files:** direct feature matches from `rg 'Mx[A-Z]' lib/features lib/app widgetbook test`; affected feature tests; `test/design_audit/v3_handoff_coverage_test.dart`; `docs/wbs.md`; Linux/WSL-only goldens and gallery output.
-
-- [ ] For every changed screen, add a mount test for loading, empty, error and loaded state before replacing local visual recipes with shared owners.
-- [ ] Preserve callback targets, controller state transitions, routes and ARB strings; run feature tests and Widgetbook coverage.
-- [ ] Make the audit fail unless all 46 contracts are `verified`, owner/test paths exist and caller searches reveal no legacy duplicate recipe.
-- [ ] Run `.claude/skills/flutter-workflow/scripts/dod_check.sh` after focused tests are green.
-- [ ] On Linux/WSL run `TZ=UTC flutter test --tags golden --update-goldens`, review every changed image against its handoff, then run `python .claude/skills/flutter-testing/scripts/build_screen_gallery.py` and record `ảnh <digest>`.
-- [ ] Run `flutter test integration_test/ -d emulator-5554 --flavor development`; require 9 passing, 0 failing. If the device is unavailable, keep M100.122 open with exact evidence.
-- [ ] Close WBS only after every required check passes; commit `feat(design): complete MemoX v3 handoff parity`.
+- [ ] For every changed feature screen, test loading, empty, error and loaded compositions before replacing a local visual recipe; preserve callbacks, routes and ARB usage.
+- [ ] Make the ledger fail unless all 46 records are `verified` and their owner/test paths and caller searches remain valid.
+- [ ] Run `.claude/skills/flutter-workflow/scripts/dod_check.sh`.
+- [ ] On Linux/WSL only, run `TZ=UTC flutter test --tags golden --update-goldens`; compare each changed image against its component MD. Then run `python .claude/skills/flutter-testing/scripts/build_screen_gallery.py` and record `ảnh <digest>` in WBS.
+- [ ] Run `flutter test integration_test/ -d emulator-5554 --flavor development`; require 9 passing, 0 failing. If unavailable, keep M100.122 open with exact device evidence.
+- [ ] Close M100.122 only after all evidence is green; commit `feat(design): complete MemoX v3 handoff parity`.
 
 ## Self-Review
 
-- **Coverage:** The map lists all 46 component documents, while Tasks 1–2 cover the four non-component handoff files.
-- **Starting gaps:** `MxNote`, `MxWorkloadBreakdownLine`, `MxSheetActions`, `MxDeckPickerSheet`, `MxSkeleton`, `MxSpinner`, and `MxFooterBar` are absent today; Tasks 7–10 create them explicitly.
-- **No shortcut:** A component is not complete merely because its mapped class exists. Each wave requires values, state/semantics, caller migration, Widgetbook and audit evidence.
-- **Boundaries:** All new APIs accept semantic view data/callbacks, never raw styling or feature/data dependencies.
+- `00-index.md` remains the complete authoritative list; this plan only points agents at its 46 contracts.
+- No design values or state tables are duplicated, so the handoff has one source to update.
+- The ledger creates a mechanical omission check; each wave requires tests, caller review and Widgetbook evidence rather than owner-name presence.
+- The delivery owners currently absent are explicitly queued: `MxNote`, `MxWorkloadBreakdownLine`, `MxSheetActions`, `MxDeckPickerSheet`, `MxSkeleton`, `MxSpinner`, `MxFooterBar`.
 
 ## Execution Handoff
 
-Plan complete and saved to `docs/superpowers/plans/2026-09-21-memox-v3-handoff-full-implementation.md`.
-
-1. **Subagent-driven:** execute isolated tasks with `superpowers:subagent-driven-development`, reviewing each commit before the next task.
-2. **Inline execution:** use `superpowers:executing-plans` sequentially, preserving test-first checkpoints and the commit boundaries above.
+Execute in wave order using `superpowers:executing-plans`. Before changing an owner, open its existing MD and implement every requirement in that file; this plan is not a replacement specification.
