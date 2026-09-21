@@ -57,6 +57,33 @@ const V3ContractAudit(
 
 Mark a record `verified` only after the executor has read its component MD and Foundations/Theme Binding, added focused tests for all requirements declared there, reviewed direct callers, registered public additions in Widgetbook, and run the wave’s focused tests. File existence or an owner name alone is never parity evidence.
 
+## Strict Execution Runbook
+
+Run the documents in this order. Each numbered step is a checkpoint: finish its
+focused tests and ledger updates before reading implementation work from the
+next step. This is the handoff order `FOUNDATIONS → THEME_BINDING →
+SHARED_COMPONENTS → SCREENS`, expanded by the component-composition edges in
+`99-traceability.md`.
+
+| Order | Read and execute | Why it precedes the next step |
+|---:|---|---|
+| 0 | `00-index.md`, `99-traceability.md` | Establish the complete 46-record ledger and the source composition graph. |
+| 1 | `01-foundations.md` | Defines typography, sizing, radius, spacing, effect and semantic vocabulary; nothing may recreate these locally. |
+| 2 | `02-theme-binding.md` | Binds all component-consumed roles to Flutter before any widget reads them. |
+| 3 | `button.md`, `icon-button.md`, `filter-chip.md`, `badge.md`, `status-badge.md`, `tag-chip.md`, `chip-trigger.md`, `mastery-ramp.md`, `note.md`, `skeleton.md`, `spinner.md`, `screen-scroll.md` | Leaf primitives. ChipTrigger follows Button/Badge and now precedes ListSectionHeader; later components compose these stable APIs. |
+| 4 | `field-message.md`, `icon-tile.md`, `toggle.md`, `option-row.md`, `selection-checkbox.md`, `segmented-tray.md`, `stepper.md` | FieldMessage must exist before TextField. IconTile must exist before ListRow/SettingsRow. The remaining selections are independent leaves. |
+| 5 | `search-field.md`, `text-field.md`, `list-row.md`, `settings-row.md`, `list-section-header.md`, `card.md`, `section.md`, `action-sheet-command-row.md`, `mastery-donut.md`, `workload-breakdown-line.md` | These consume or align to the step-3/4 primitives: TextField uses FieldMessage; rows use IconTile; ListSectionHeader selects ChipTrigger/Badge/Button. |
+| 6 | `app-bar.md`, `bottom-nav.md`, `breadcrumb.md`, `fab.md`, `study-top-bar.md`, `empty-state.md`, `error-state.md`, `footer-bar.md` | EmptyState/ErrorState/FooterBar compose the verified Button. Chrome is now safe to integrate with stabilized actions/tokens. |
+| 7 | `dialog.md`, `bottom-sheet.md`, `snackbar.md`, `inline-banner.md`, `sheet-actions.md` | Overlay foundations use stabilized Button and action styling. SheetActions composes Button and is required by DeckPickerSheet. |
+| 8 | `deck-picker-sheet.md` | It composes BottomSheet, ListRow, EmptyState and SheetActions; run only after all four are verified. |
+| 9 | `app-shell.md` | Compose stabilized BottomNav, chrome, state views, screen scrolling and footer treatment into the application shell. |
+| 10 | Direct screen handoffs, callers, Widgetbook, goldens and device suite | Screen composition is last; it must consume verified primitives rather than define visual policy. |
+
+`ChipTrigger` deliberately follows Button/Badge in step 3 and precedes
+ListSectionHeader in step 5. When a shared leaf API changes, re-run every
+direct composite consumer test before advancing; this includes the Card,
+Section and row compositions in step 5.
+
 ## Execution Waves
 
 ### Task 1: Establish truthful coverage
@@ -80,67 +107,66 @@ Mark a record `verified` only after the executor has read its component MD and F
 - [ ] Run `flutter test test/core/theme test/design_audit/audit_theme_steps.dart`, `flutter analyze`, and `.claude/skills/flutter-architecture/scripts/check_architecture.sh`.
 - [ ] Commit a theme prerequisite before any component consumes a newly bound role.
 
-### Task 3: Groups A and B — chrome, navigation and actions
+### Task 3: Execute leaf primitives in runbook order 3
 
-**Read before each owner:** its individual file in `components/A-chrome-navigation/` or `components/B-actions-controls/`, Foundations and Theme Binding.
+**Read before each owner:** the exact document in the Strict Execution Runbook, Foundations and Theme Binding.
 
-**Owners:** platform StatusBar; `MxAppBar`, `MxNavigationBar`, `MxBreadcrumb`, `MxSessionTopBar`, `MxFab`; `MxActionButton`, `MxIconButton`, `MxFilterChip`, `MxChipTrigger`.
+**Owners:** `MxActionButton`, `MxIconButton`, `MxFilterChip`, `MxBadge`, `MxStatusBadge`, `MxTagChip`, `MxChipTrigger`, `MxMasteryRamp`, `MxNote`, `MxSkeleton`, `MxSpinner`, `MxScrollEndInset`.
 
-- [ ] Use each component MD to write failing tests for its own geometry, direct theme roles, states, semantics, interaction target and long-content requirement.
+- [ ] Execute runbook step 3 in its stated order. For each component MD, write failing tests for its own geometry, direct theme roles, states, semantics, interaction target and long-content requirement.
 - [ ] Make each test fail before implementation; correct its existing owner only through tokens/M3 APIs.
 - [ ] Review direct callers via that record’s `callerSearch`; update Widgetbook for each public API or variant.
-- [ ] Run all focused A/B tests, verify only evidenced ledger records, and commit one owner or coherent dependency pair at a time.
+- [ ] Run all focused leaf tests, verify only evidenced ledger records, and commit one owner or coherent dependency pair at a time.
 
-### Task 4: Group C — inputs and selection
+### Task 4: Execute input and surface composites in runbook order 4–5
 
-**Read before each owner:** every individual file in `components/C-inputs-selection/`, Foundations and Theme Binding.
+**Read before each owner:** its exact runbook document, Foundations and Theme Binding. Do not start a composite document before its row/field dependency is `verified`.
 
-**Owners:** `MxSearchField`, `MxTextField`, `MxSwitch`, `MxOptionRow`, `MxCheckboxRow`, `MxSegmentedTray`, `MxStepper`, `MxFieldMessage`.
+**Owners:** `MxFieldMessage`, `MxIconTile`, `MxSwitch`, `MxOptionRow`, `MxCheckboxRow`, `MxSegmentedTray`, `MxStepper`, `MxSearchField`, `MxTextField`, `MxListRow`, `MxSettingsRow`, `MxSectionLabel`, `MxCard`, `MxSection`, `MxActionSheet`, `MxMasteryDonut`, `MxWorkloadBreakdownLine`.
 
 - [ ] Apply a red-to-green focused test cycle per contract using only requirements in its MD.
 - [ ] Keep validation, selection and controller state caller-owned; shared widgets own only presentation/interaction declared in their MD.
-- [ ] Run C focused tests, `test/app/shared_api_closure_test.dart`, Widgetbook coverage and direct feature tests before verifying the eight ledger records.
+- [ ] Run C/D/E focused tests, `test/app/shared_api_closure_test.dart`, Widgetbook coverage and direct feature tests before verifying these ledger records.
 
-### Task 5: Group D — surfaces and content
+### Task 5: Execute chrome and state composites in runbook order 6
 
-**Read before each owner:** every file in `components/D-surfaces-content/`, Foundations and Theme Binding.
+**Read before each owner:** its exact runbook document, Foundations and Theme Binding.
 
-**Owners:** `MxCard`, `MxSection`, `MxListRow`, `MxSettingsRow`, `MxIconTile`, `MxActionSheet`, `MxSectionLabel`.
+**Owners:** `MxAppBar`, `MxNavigationBar`, `MxBreadcrumb`, `MxFab`, `MxSessionTopBar`, `MxEmptyState`, `MxErrorState`, `MxFooterBar`.
 
 - [ ] Derive all tests from each component’s own MD; do not carry values from memory or this plan.
 - [ ] Implement only in the listed shared owner, replace direct visual duplicates found by the ledger search, and preserve caller-owned commands/state.
-- [ ] Run focused D tests and Widgetbook coverage, then verify and commit each independently reviewable owner.
+- [ ] Run focused A/G/H tests and Widgetbook coverage, then verify and commit each independently reviewable owner.
 
-### Task 6: Group E — status and metadata
+### Task 6: Execute overlays in runbook order 7–8
 
-**Read before each owner:** every file in `components/E-status-metadata/`, Foundations and Theme Binding.
+**Read before each owner:** its exact runbook document, Foundations and Theme Binding. DeckPickerSheet is blocked until BottomSheet, ListRow, EmptyState and SheetActions are verified.
 
-**Owners:** `MxBadge`, `MxStatusBadge`, `MxTagChip`, `MxNote`, `MxMasteryRamp`, `MxWorkloadBreakdownLine`, `MxMasteryDonut`.
+**Owners:** `MxAlertDialog`/`MxConfirmDialog`, `MxSheet`, `MxUndoSnackBar`, `MxFeedbackBand`, `MxSheetActions`, `MxDeckPickerSheet`; framework owns Scrim.
 
-- [ ] Create required missing owners `MxNote` and `MxWorkloadBreakdownLine`; do not substitute screen-local recipes.
-- [ ] Audit existing owners against their own MD, including non-interactive semantics and semantic summaries for chart-like visuals.
-- [ ] Run focused E tests, shared API closure and Widgetbook coverage; verify rows only after all evidence is green.
+- [ ] Verify Dialog, BottomSheet, Snackbar and InlineBanner first; then create/verify SheetActions; create/verify DeckPickerSheet last.
+- [ ] Do not import feature providers or repositories into the two new overlay primitives; they receive view data and callbacks only.
+- [ ] Run focused F tests, shared API closure and Widgetbook coverage; verify ledger rows only after all evidence is green.
 
-### Task 7: Group F — overlays and feedback
+### Task 7: Execute shell composition in runbook order 9
 
-**Read before each owner:** every file in `components/F-overlays-feedback/`, Foundations and Theme Binding.
+**Read:** `app-shell.md` after all runbook step 3–8 dependencies are verified.
 
-**Owners:** framework Scrim; `MxAlertDialog`/`MxConfirmDialog`, `MxSheet`, `MxSheetActions`, `MxUndoSnackBar`, `MxFeedbackBand`, `MxDeckPickerSheet`.
+**Owners:** `AppNavigationShell` and `MxContentShell`.
 
-- [ ] Create `MxSheetActions` and `MxDeckPickerSheet` if absent. They accept view data/localized labels/callbacks only and never import a feature provider or repository.
-- [ ] Test each MD’s supported route/barrier semantics, focus, dismissal, action order, announcement and long-content rule.
-- [ ] Review direct feature consumers, update Widgetbook, verify the seven ledger rows and commit coherent overlay units.
+- [ ] Test system insets, stabilized bottom navigation/chrome, state-view slots and screen-scroll composition as the AppShell MD requires.
+- [ ] Keep routing and feature state outside shared layout widgets.
+- [ ] Run shell-focused tests and verify the AppShell ledger record.
 
-### Task 8: Groups G and H — states and shell
+### Task 8: Execute screens only after all shared components
 
-**Read before each owner:** every file in `components/G-loading-empty-error/` and `components/H-layout-shell/`, Foundations and Theme Binding.
+**Read:** affected component MDs, `99-traceability.md` and corresponding screen handoff material.
 
-**Owners:** `MxSkeleton`, `MxSpinner`, `MxEmptyState`, `MxErrorState`, `AppNavigationShell`/`MxContentShell`, `MxScrollEndInset`, `MxFooterBar`.
+**Owners:** direct feature presentation widgets and Widgetbook compositions only.
 
-- [ ] Create missing owners `MxSkeleton`, `MxSpinner` and `MxFooterBar`.
-- [ ] Test only the loading/layout stability, retry, reduced-motion, semantic, system-inset, scroll-tail, navigation, RTL and large-text requirements written in each owner’s MD.
-- [ ] Confirm shared state/shell widgets import no feature, provider, repository or controller; migrate direct consumers and add Widgetbook specimens.
-- [ ] Verify all seven ledger entries and commit per independently reviewable owner.
+- [ ] Replace only local visual duplication with verified owners; preserve callbacks, route calls, controller states and ARB usage.
+- [ ] Mount loading, empty, error and loaded screen states in tests before each composition migration.
+- [ ] Run feature tests and Widgetbook coverage, then re-run the corresponding component-focused test before marking a screen integration complete.
 
 ### Task 9: Screen integration and closure
 
