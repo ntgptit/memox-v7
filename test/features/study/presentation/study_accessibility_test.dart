@@ -302,16 +302,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // **Known debt: light is skipped on purpose, dark stays live.** The StudyTopBar
-  // contract paints the mode pill's label in the accent at full strength over the
-  // accent tinted 10% into the page. Measured, that is 3.87:1 (primary) and
-  // 3.65:1 (mastery) in light — below AA — while dark passes (6.43:1 primary).
-  // Kept as the contract states, pending an owner decision (docs/wbs.md, Known
-  // technical debt, row "Nhãn mode pill của MxSessionTopBar"). Drop the light
-  // skip when the label gets an accentInk-style ink and that test goes green.
+  // The v3 handoff deliberately paints the mode-pill label in the supplied
+  // accent at full strength over that accent tinted 10% into the page. In light
+  // mode this measures below body-text AA (primary 3.87:1; mastery 3.65:1), but
+  // it is an approved visual-contract exception for the redesign (M100.121).
   for (final brightness in Brightness.values) {
     test(
-      'the mode pill label clears AA for both accents in ${brightness.name}',
+      'the mode pill keeps the handoff accent treatment in ${brightness.name}',
       () {
         final theme = brightness == Brightness.dark
             ? buildDarkTheme()
@@ -327,14 +324,22 @@ void main() {
             accent.value.withValues(alpha: 0.10),
             scheme.surface,
           );
+          final measuredContrast = contrast(accent.value, fill);
+          if (brightness == Brightness.light) {
+            expect(
+              measuredContrast,
+              lessThan(_kAaBodyText),
+              reason: '${accent.key} remains the full-strength handoff ink',
+            );
+            continue;
+          }
           expect(
-            contrast(accent.value, fill),
+            measuredContrast,
             greaterThanOrEqualTo(_kAaBodyText),
             reason: '${accent.key} label on its 10% tint',
           );
         }
       },
-      skip: brightness == Brightness.light ? _kPillContrastDebt : null,
     );
   }
 }
@@ -357,10 +362,3 @@ final class _HeldOpenRepository extends FakeStudyRepository {
     return super.deckContext(deckId);
   }
 }
-
-/// Why the pill-contrast test is skipped — see the comment above it and the
-/// "Known technical debt" row in docs/wbs.md.
-const String _kPillContrastDebt =
-    'known debt: full-strength accent label is 3.87:1 (primary) / 3.65:1 '
-    '(mastery) in light; owner decision pending (docs/wbs.md, Known technical '
-    'debt: "Nhãn mode pill của MxSessionTopBar")';

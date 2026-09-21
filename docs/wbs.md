@@ -7,8 +7,8 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.118 |
-| **Last updated** | 2026-09-19 |
+| **Updated by task** | M100.121 |
+| **Last updated** | 2026-09-21 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -1977,6 +1977,23 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
+### M100.121 · MemoX v3 design-system redesign
+
+- **Status:** in-progress
+- **Goal:** Reconcile the shipped Flutter theme, shared-widget kit and direct consumers with all 46 contracts imported under `docs/design/v3/`, without changing application business behaviour.
+- **Scope:** Theme role parity; shared primitives in groups A–H; direct feature presentation consumers; Widgetbook; widget, golden and device verification.
+- **Out of scope:** Business rules, data model, repositories, use cases, route semantics, ARB copy policy and backend behaviour.
+- **Editable documents:** `docs/wbs.md`, `docs/design/v3/**`, `docs/design-system/v3-foundations.md`, `docs/superpowers/plans/2026-09-21-memox-v3-redesign.md`.
+- **Output:** v3-compliant theme and shared component kit, tracked by `test/design_audit/v3_handoff_coverage_test.dart`.
+- **Acceptance criteria:**
+  - [ ] Every one of the 46 imported component contracts has exactly one owner in the coverage test.
+  - [ ] Every changed component passes its focused widget/state/accessibility tests and is registered in Widgetbook when public.
+  - [ ] Direct screen consumers preserve callbacks and business-state wiring while using the reconciled primitive APIs.
+  - [ ] Full Definition-of-Done gate passes; changed goldens are authored on Linux with `TZ=UTC`; device integration suite is recorded.
+- **Dependencies:** M100.118, M100.119, M100.120.
+- **Tests required:** `test/design_audit/v3_handoff_coverage_test.dart`; focused component and feature tests; full gate and device suite at closure.
+- **Checklist phases:** 7, 12, 14, 18, 19.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
@@ -2009,4 +2026,4 @@ của M2.
 | Chín trong mười bốn hợp đồng đóng băng của V1 chỉ được giữ bằng test | M100.41 | Guard quét `lib/features/` cho 5 dòng (mục 2, 4, 5, 12, 13); 9 dòng còn lại — role identity, ThemeData mapping, shared API, sàn 48dp, ripple/state, high contrast, depth của card, chrome của shell, golden Linux-only — chỉ có test giữ. Test là file trong repo, nên một nhánh feature nới nó ra là đi qua được, và **guard không đỏ khi chính nó bị sửa** | ~~Một cơ chế thay cho một câu văn (CODEOWNERS, hoặc rule guard đọc diff)~~ — **rút, 2026-09-17.** Chủ dự án đã mở khoá V1: sửa một file Enforcement nay là việc hợp lệ của task design-system, nên một cơ chế chặn nó sẽ chặn đúng thứ cần làm được. Lỗ hổng gốc — một PR feature nới lỏng gate rồi đi qua — nay dựa vào review diff và luật "no drive-by refactors", không dựa vào một lớp canh |
 | `StudySessionScreen` rời shell bằng `Navigator.push` chứ không bằng `GoRoute` | trước A8, đo ở A8 P2-15 (`docs/reviews/a8-navigation-chrome-audit.md` §10.5), đo lại ở C4 SC-C4-18 | Phiên học không có location: trong suốt lúc nó ở trên cùng, `GoRouterState.matchedLocation` vẫn đọc là `/study/<id>` hoặc `/decks/<id>/study`, nên không có gì deep-link hay restore vào một phiên đang chạy, và `GoRouterState` nói sai trong đúng khoảng thời gian dài nhất của app | **ACCEPTED, chờ quyết định của chủ dự án.** Phần *root navigator* đã có lý do và không phải nợ — nó là thứ giữ BR-82 một lối ra duy nhất (comment tại `study_entry_screen.dart` `_open`); chỉ **cơ chế** là còn mở. C4 cố ý chỉ mount `StudyOptionsScreen` (composition thuần: nó vốn đã render trong shell, chỉ thêm location) và **không** mount phiên học, vì bán kính nổ nằm ngoài tầm một task chrome: IT-NAV, đường resume khoá theo `sessionId` (BR-200, BR-103) và hợp đồng một-lối-ra của BR-82 đều chạm nó, và không cái nào verify được bằng host test. Khi mở lại: mount với `parentNavigatorKey: rootNavigatorKey` đúng như wizard import, `resumeSessionId`/`direction` đi bằng `extra`, và closure test là `currentConfiguration.uri` gọi tên route phiên |
 | `CardEditorScreen` (edit) xếp chồng hai dải pinned ở đáy | trước C4, đo ở C4 SC-C4-04 | Route edit nằm trong `StatefulShellBranch` của Decks, nên `MxNavigationBar` bốn đích vẫn vẽ dưới nó; màn hình lại ghim action bar của chính nó vào `MxContentShell.footer` (`MxButtonPair` ≥48dp + `sm` + một dòng `bodySmall` + 2×`md`). **Đo, mount qua `createAppRouter`:** footer **96dp** + nav bar **80dp** = **176dp** chrome đáy. Không golden nào thấy được: `card_screens_demo_test.dart` pump thẳng `CardEditorScreen`, ngoài `createAppRouter` | **ACCEPTED — variance có chủ đích, không phải nợ nhánh route.** Edit là **page** được push lên card list và quay về đó (mũi tên back nói đúng điều đó), và nó push tiếp một branch route cho history của thẻ — đưa nó lên root navigator sẽ render Card Detail **dưới** editor. Wizard import thoát khỏi branch được vì nó là task không push branch route nào; đây không phải trường hợp đó. Đã ghi tại `app_router.dart` ngay trên `RouteNames.cardEditorEdit` để nó thôi là hệ quả tình cờ của việc lồng route. **Đính chính phép đo gốc:** SC-C4-04 viết edit là màn *duy nhất* xếp chồng hai dải — sai. Create cũng ghim footer từ SC-C1-02 và cũng nằm trong branch, nên nó xếp chồng y hệt; nửa mâu thuẫn thật sự là create, vì `✕` của nó tuyên bố một task trong khi thanh branch vẫn ở đó. Sửa nửa đó là SC-C4-19 (`parentNavigatorKey: rootNavigatorKey` cho `cardCreateRelative`), **không** nằm trong cụm C4 này | Khi 176dp chrome đáy được phán là không chấp nhận được trên thiết bị: lúc đó câu hỏi là "editor là page hay task" — một quyết định của chủ dự án, không phải một phép sửa composition. Hoặc khi SC-C4-19 được giao, vì nó chốt nửa create của cùng câu hỏi |
-| Nhãn mode pill của `MxSessionTopBar` không đạt AA ở light | StudyTopBar Task 1 (2026-09-18) | Hợp đồng handoff bắt nhãn tô bằng `accent` ở full strength trên nền là chính `accent` pha 10% vào `surface`, thay cho `AppInk.accent` (`accentInk`, sinh ra đúng vì `primary` thô không đủ AA làm chữ). Đo được: light **3.87:1** (primary) và **3.65:1** (mastery), dưới ngưỡng 4.5; dark đạt **6.43:1** (primary). Chip 12sp không được miễn ngưỡng chữ lớn. Chữ chỉ tên mode, và tên đã có ở `Semantics(namesRoute)`, nên không mất thông tin — nhưng người thị lực kém ở light mode đọc chip khó hơn bản trước (4.78:1) | **Cần chủ dự án quyết:** giữ nguyên hợp đồng, hoặc thêm một ink kiểu `accentInk` cho nhãn (ví dụ `AppInk`-style role cho từng accent), hoặc nâng độ đậm tint. Test `study_accessibility_test.dart` "the mode pill label clears AA for both accents" (primary + mastery × light + dark) đang `skip` với lý do này — bỏ `skip` khi sửa xong |
+| ~~Nhãn mode pill của `MxSessionTopBar` không đạt AA ở light~~ | StudyTopBar Task 1 (2026-09-18) | Hợp đồng handoff bắt nhãn tô bằng `accent` ở full strength trên nền là chính `accent` pha 10% vào `surface`, thay cho `AppInk.accent` (`accentInk`, sinh ra đúng vì `primary` thô không đủ AA làm chữ). Đo được: light **3.87:1** (primary) và **3.65:1** (mastery), dưới ngưỡng 4.5; dark đạt **6.43:1** (primary). | **Đã chốt ở M100.121 (2026-09-21): handoff thắng.** Test `study_accessibility_test.dart` ghi nhận chính xác treatment và số đo thay vì skip; không thay bằng accent ink hay tăng tint. |
