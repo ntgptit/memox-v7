@@ -52,12 +52,8 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        // Seven: the Scaffold, the AppBar, the save button, the transparent
-        // Material each of the three radio groups puts inside its card so its
-        // rows' ripples are not painted behind it, and a seventh for the same
-        // reason on the daily-reminder row (M99.29) — a `ListTile` inside an
-        // `MxCard` has no Material of its own, and without one Flutter paints
-        // its ink behind the card and asserts.
+        // Twelve: the original seven Material layers plus one for each of the
+        // five options in the two MxSegmentedTrays.
         //
         // **It was eight, and the reset link is the one that left.** Binding
         // each heading to its card at `sm` rather than `xs` (SC-C5-06) made
@@ -67,7 +63,7 @@ void main() {
         // `settings_reset_test.dart` still drives it end to end through
         // `ensureVisible`, and its ink and shape are the same two nodes the
         // save button's allowances above already describe.
-        expectedMatches: 7,
+        expectedMatches: 12,
         rationale:
             'Material ink layers. Splash and highlight are painted onto '
             'Material, so no render object carries them; the overlay colours '
@@ -77,10 +73,8 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_RadioPainter',
-        // Eight radios: three themes, three languages and the two new-card
-        // orders, which stopped being pills when W6's "not by colour alone"
-        // was applied to them too.
-        expectedMatches: 8,
+        // Three language radios; theme and new-card order use MxSegmentedTray.
+        expectedMatches: 3,
         rationale:
             'The radio marks. Their fill comes from RadioThemeData, which '
             'app_radio_theme.dart measures against the 3:1 WCAG 1.4.11 floor '
@@ -116,17 +110,18 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        expectedMatches: 5,
+        expectedMatches: 9,
         rationale:
-            'A clip with no painter: the card-limit field, the three radio '
-            'groups and the daily-reminder row each clip through a CustomPaint '
-            'with no painter of its own.',
+            'A clip with no painter: the card-limit field, the three language '
+            'rows, the daily-reminder row and five segmented options each clip '
+            'through a CustomPaint with no painter of its own.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
-        // One — the save button — which is the default and therefore left
+        expectedMatches: 2,
+        // The save button and the visible reset link.
         // unwritten: a second shaped control painting here would miscount and
         // fail rather than pass quietly. The reset link draws the same rounded
         // shape through the same painter and is off the audit's 1040 fold
@@ -136,6 +131,16 @@ void main() {
             'Buttons draw their rounded shape through a ShapeBorder painter; '
             'the shape comes from the button theme and is pinned by the '
             'mx_components goldens.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderFocusPaintOffset',
+        expectedMatches: 5,
+        rationale:
+            'The 3-option appearance tray and 2-option new-card-order tray '
+            'each give every option a Focus boundary. The focused ring is '
+            'pinned by mx_segmented_tray_focus_test.dart.',
       ),
     ],
   );
