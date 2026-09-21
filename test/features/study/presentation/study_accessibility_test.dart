@@ -305,7 +305,7 @@ void main() {
   // The v3 handoff deliberately paints the mode-pill label in the supplied
   // accent at full strength over that accent tinted 10% into the page. In light
   // mode this measures below body-text AA (primary 3.87:1; mastery 3.65:1), but
-  // it is an approved visual-contract exception for the redesign (M100.121).
+  // it is an approved visual-contract exception for the redesign (M100.122).
   for (final brightness in Brightness.values) {
     test(
       'the mode pill keeps the handoff accent treatment in ${brightness.name}',

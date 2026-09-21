@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.121 |
+| **Updated by task** | M100.122 |
 | **Last updated** | 2026-09-21 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -2010,7 +2010,7 @@ của M2.
 - **Checklist phases:** 7, 12.
 
 
-### M100.121 · MemoX v3 design-system redesign
+### M100.122 · MemoX v3 design-system redesign
 
 - **Status:** in-progress
 - **Goal:** Reconcile the shipped Flutter theme, shared-widget kit and direct consumers with all 46 contracts imported under `docs/design/v3/`, without changing application business behaviour.

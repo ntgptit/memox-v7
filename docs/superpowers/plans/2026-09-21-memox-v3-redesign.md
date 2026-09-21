@@ -88,10 +88,10 @@ name; `platform` means verify integration only.
 
 **Interfaces:**
 
-- Produces WBS task `M100.121` covering this redesign and a test-owned inventory that locks the contract-to-primitive map above.
+- Produces WBS task `M100.122` covering this redesign and a test-owned inventory that locks the contract-to-primitive map above.
 - Consumes the 46 component documents under `docs/design/v3/components/`.
 
-- [ ] Add WBS entry `M100.121` with this plan and all `docs/design/v3/**` files as its sources; explicitly exclude business-rule, data-model and feature-flow changes.
+- [ ] Add WBS entry `M100.122` with this plan and all `docs/design/v3/**` files as its sources; explicitly exclude business-rule, data-model and feature-flow changes.
 - [ ] Write a failing inventory test with a `const Map<String, String>` containing all 46 component names and the exact target in the contract-to-primitive map; assert the map has length 46 and every mapped source document exists.
 - [ ] Run `flutter test test/design_audit/v3_handoff_coverage_test.dart` and confirm the baseline fails until the inventory is complete.
 - [ ] Complete the inventory from `00-index.md`, then run the test again and commit the ledger/inventory as `docs(design): establish v3 redesign inventory`.
