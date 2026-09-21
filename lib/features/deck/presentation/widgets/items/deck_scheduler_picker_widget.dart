@@ -6,6 +6,7 @@ import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_field_message.dart';
 import '../../../domain/models/scheduler_type_model.dart';
 import '../support/deck_labels_widget.dart';
 
@@ -93,13 +94,7 @@ class DeckSchedulerPickerWidget extends StatelessWidget {
             context.l10n.schedulerLockNotice,
             style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
-        if (errorText != null) ...<Widget>[
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            errorText!,
-            style: context.texts.bodySmall!.inked(context, AppInk.danger),
-          ),
-        ],
+        if (errorText != null) ...<Widget>[MxFieldMessage(message: errorText!)],
       ],
     );
   }

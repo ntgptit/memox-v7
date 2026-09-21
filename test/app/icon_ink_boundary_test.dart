@@ -65,7 +65,7 @@ void main() {
 
   /// Kit files allowed to pass a `Color` to a raw `Icon`, and why.
   ///
-  /// Two entries, both argued rather than assumed. A third should cost the
+  /// Three entries, each argued rather than assumed. A fourth should cost the
   /// same argument — that is the difference between an exception and a habit,
   /// and the staleness check below makes a spent entry fail rather than
   /// quietly become permission for whatever is edited into that file next.
@@ -84,6 +84,11 @@ void main() {
         'directly on a chevron_right — AppInk has no member for that '
         'boundary-only M3 slot, and one call site does not justify adding one '
         '(docs/superpowers/plans/2026-09-18-breadcrumb-v3-geometry.md).',
+    'mx_field_message.dart':
+        'the validation glyph is a direct severity fill: Material error for '
+        'an error and the semantic warning fill for a warning. AppInk is '
+        'reserved for the adjacent readable text; neither glyph role has an '
+        'equivalent ink token.',
   };
 
   Iterable<File> dartFilesUnder(String root) => Directory(root)
