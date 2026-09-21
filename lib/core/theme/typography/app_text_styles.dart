@@ -29,6 +29,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.optionRowDescription,
     required this.settingsRowLabel,
     required this.settingsRowSub,
+    required this.stepperValue,
   });
 
   /// Both styles, derived from the built [texts] so they inherit whatever the
@@ -101,6 +102,16 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       settingsRowSub: (texts.bodySmall ?? const TextStyle()).copyWith(
         height: AppTypography.settingsRowSubHeight,
       ),
+      // Stepper's figure is body-large at its own emphatic 700 weight. The
+      // tabular feature belongs to this named role: a numeric control must
+      // not shift its neighbours as a digit changes.
+      stepperValue:
+          AppTypography.withWeight(
+            texts.bodyLarge ?? const TextStyle(),
+            FontWeight.w700,
+          ).copyWith(
+            fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+          ),
     );
   }
 
@@ -156,6 +167,9 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// The settings row's sub line — see [AppTypography.settingsRowSubHeight].
   final TextStyle settingsRowSub;
 
+  /// Stepper's fixed-width numeric readout: body-large, bold and tabular.
+  final TextStyle stepperValue;
+
   @override
   AppTextStyles copyWith({
     TextStyle? cardPrompt,
@@ -169,6 +183,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     TextStyle? optionRowDescription,
     TextStyle? settingsRowLabel,
     TextStyle? settingsRowSub,
+    TextStyle? stepperValue,
   }) => AppTextStyles(
     cardPrompt: cardPrompt ?? this.cardPrompt,
     sectionLabel: sectionLabel ?? this.sectionLabel,
@@ -181,6 +196,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     optionRowDescription: optionRowDescription ?? this.optionRowDescription,
     settingsRowLabel: settingsRowLabel ?? this.settingsRowLabel,
     settingsRowSub: settingsRowSub ?? this.settingsRowSub,
+    stepperValue: stepperValue ?? this.stepperValue,
   );
 
   @override
@@ -211,6 +227,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
         t,
       )!,
       settingsRowSub: TextStyle.lerp(settingsRowSub, other.settingsRowSub, t)!,
+      stepperValue: TextStyle.lerp(stepperValue, other.stepperValue, t)!,
     );
   }
 }
