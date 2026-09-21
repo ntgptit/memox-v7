@@ -2045,6 +2045,10 @@ của M2.
 - **Out of scope:** Business rules, data model, repositories, use cases, route semantics, ARB copy policy and backend behaviour.
 - **Editable documents:** `docs/wbs.md`, `docs/design/v3/**`, `docs/design-system/v3-foundations.md`, `docs/superpowers/plans/2026-09-21-memox-v3-redesign.md`.
 - **Output:** v3-compliant theme and shared component kit, tracked by `test/design_audit/v3_handoff_coverage_test.dart`.
+- **Execution evidence (2026-09-21):** baseline/theme/A/B/C audits are green;
+  `MxFieldMessage`, `MxStepper` and `MxSegmentedTray` are integrated. Wave E
+  now also owns committed `MxStatusBadge`, `MxTagChip`, `MxMasteryRamp` and
+  `MxMasteryDonut`; their focused tests and targeted analyzer runs are green.
 - **Acceptance criteria:**
   - [ ] Every one of the 46 imported component contracts has exactly one owner in the coverage test.
   - [ ] Every changed component passes its focused widget/state/accessibility tests and is registered in Widgetbook when public.
