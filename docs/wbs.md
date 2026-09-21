@@ -1861,6 +1861,39 @@ của M2.
   - [x] Cause khác `SqliteException` chỉ ghi tên kiểu, không ghi text của nó.
 - **Checklist phases:** 12.
 
+### M100.121 · MxStepper — bộ điều khiển số nguyên dùng chung của v3
+
+- **Status:** **in progress** — `mx_stepper_test.dart`, `mx_stress_test.dart`,
+  API closure, Widgetbook và các static gate xanh. Full DoD còn bị chặn bởi
+  279 golden/demo card diffs có sẵn ngoài scope Stepper (ví dụ
+  `card_states_dark.png`, 0.98% / 20,349px).
+- **Goal:** shared component cho Stepper v3: hai icon well 36dp quanh giá trị
+  số nguyên, trong khi caller vẫn sở hữu bounds, clamp, validation message và
+  ý nghĩa của số.
+- **Scope:** `lib/shared/widgets/mx_stepper.dart`, test widget/stress/API closure
+  và catalogue Widgetbook cho resting, invalid, busy, disabled và một action bị
+  khoá tại bound.
+- **Out of scope:** migrate Settings/Study options; min/max/clamping; message
+  validation; theme/tokens; persistence hay state của caller.
+- **Dependencies:** M100.113 (`MxSwitch`, pattern 48dp target quanh paint nhỏ);
+  M100.118 (`MxTapTarget`, redirect hit target).
+- **Tests required:** `test/shared/widgets/mx_stepper_test.dart`,
+  `mx_stress_test.dart`, `shared_api_closure_test.dart`, Widgetbook coverage,
+  full `.claude/skills/flutter-workflow/scripts/dod_check.sh`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `MxStepper` shared primitive plus catalogue and test coverage.
+- **Acceptance criteria:**
+  - [x] Painted minus/plus wells are 36dp, `radius-md`, `surfaceContainer`; each
+        retains an Android 48dp target without inflating paint.
+  - [x] Value column has 48dp minimum, tabular 16/700 ink, 1dp transparent/error
+        ring with no invalid layout shift; busy keeps width and paints a primary
+        spinner.
+  - [x] Global disabled uses `op-disabled` once; caller-null callbacks alone
+        determine an at-bound action's interaction.
+  - [x] Widgetbook and stress suite cover both themes, narrow/text-scale layout,
+        RTL, semantics and tap-target accessibility.
+- **Checklist phases:** 7, 12, 13, 15.
+
 ### M100.119 · MxSettingsRow — hàng cài đặt của v3 (label 16/600, sub, control cuối hàng)
 
 - **Status:** **done** — analyze sạch, `mx_settings_row_test.dart` +
