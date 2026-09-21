@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/foundations/app_sizing.dart';
-import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
-import 'mx_icon.dart';
 import 'mx_icon_button.dart';
+import 'mx_field_message.dart';
 import '../../core/theme/extensions/app_ink.dart';
 
 /// A button drawn inside a field, at its trailing edge.
@@ -226,8 +225,7 @@ class MxTextField extends StatelessWidget {
   /// floating label, which is every caller that existed before the card editor.
   final MxTextFieldLabelPlacement labelPlacement;
 
-  /// How many lines [helperText] and [errorText] may occupy before they
-  /// ellipsize.
+  /// How many lines [helperText] may occupy before it ellipsizes.
   ///
   /// **An app-wide change, not a per-caller option, and that is deliberate.**
   /// Material's default is one line, and it was found by rendering: the card
@@ -240,8 +238,8 @@ class MxTextField extends StatelessWidget {
   /// leave every existing field on the truncating default and hand the next
   /// author the same defect to rediscover. There is no field in this app whose
   /// error is better read cut in half, so there is nothing for a caller to
-  /// decide. It applies to the error as well, so the two states cannot resize
-  /// the field differently.
+  /// decide. Error text instead goes through [MxFieldMessage], whose
+  /// content-driven contract never truncates a validation message.
   static const int _maxMessageLines = 3;
 
   /// The empty helper that keeps the subtext row laid out — see
@@ -304,32 +302,13 @@ class MxTextField extends StatelessWidget {
     );
   }
 
-  /// The message with its glyph. `InputDecoration.error` stands in for
-  /// `errorText` because only a widget can carry the icon; the border and
-  /// suffix error states key off "either is non-null", so nothing else moves.
+  /// `InputDecoration.error` keeps the Material error border/suffix state,
+  /// while [MxFieldMessage] owns the shared validation-message anatomy.
   Widget? _buildError(BuildContext context) {
     final message = errorText;
     if (message == null) return null;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const MxIcon(
-          Icons.error_outline,
-          ink: AppInk.error,
-          size: MxIconSize.sm,
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Expanded(
-          child: Text(
-            message,
-            maxLines: _maxMessageLines,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).inputDecorationTheme.errorStyle,
-          ),
-        ),
-      ],
-    );
+    return MxFieldMessage(message: message);
   }
 
   Widget? _buildSuffix() {

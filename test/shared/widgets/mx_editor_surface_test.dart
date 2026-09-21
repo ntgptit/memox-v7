@@ -275,7 +275,7 @@ void main() {
       );
     });
 
-    testWidgets('helper and error both get three lines, app-wide', (
+    testWidgets('helper gets three lines while errors remain untruncated', (
       tester,
     ) async {
       final controller = TextEditingController();
@@ -301,8 +301,8 @@ void main() {
           .decoration!;
       expect(decoration.helperMaxLines, 3);
 
-      // The error is a widget since it gained its glyph, so `errorMaxLines` no
-      // longer applies; the cap now lives on the message's own `Text`.
+      // Errors now use FieldMessage, whose contract is content-driven: unlike
+      // helper copy, validation guidance must never be ellipsized.
       await pump(
         tester,
         MxTextField(
@@ -311,14 +311,11 @@ void main() {
           errorText: 'an error long enough to need more than one line',
         ),
       );
-      expect(
-        tester
-            .widget<Text>(
-              find.text('an error long enough to need more than one line'),
-            )
-            .maxLines,
-        3,
+      final error = tester.widget<Text>(
+        find.text('an error long enough to need more than one line'),
       );
+      expect(error.maxLines, isNull);
+      expect(error.overflow, isNull);
     });
   });
 }

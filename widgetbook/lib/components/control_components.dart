@@ -17,6 +17,7 @@ import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_segmented_tray.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
+import 'package:memox/shared/widgets/mx_stepper.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../support/catalog_page.dart';
@@ -452,6 +453,52 @@ WidgetbookComponent iconButtonComponent() {
               tone: tone,
               shape: shape,
               onPressed: isEnabled ? _noop : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent stepperComponent() {
+  return WidgetbookComponent(
+    name: 'MxStepper',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final value = context.knobs.int.slider(
+            label: 'value',
+            initialValue: 4,
+            min: -999,
+            max: 999,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+          final isInvalid = context.knobs.boolean(label: 'invalid');
+          final isBusy = context.knobs.boolean(label: 'busy');
+          final canDecrement = context.knobs.boolean(
+            label: 'decrement available',
+            initialValue: true,
+          );
+          final canIncrement = context.knobs.boolean(
+            label: 'increment available',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: MxStepper(
+              value: value,
+              decrementSemanticLabel: 'Decrease quantity',
+              incrementSemanticLabel: 'Increase quantity',
+              onDecrement: canDecrement ? _noop : null,
+              onIncrement: canIncrement ? _noop : null,
+              isInvalid: isInvalid,
+              isBusy: isBusy,
+              isEnabled: isEnabled,
             ),
           );
         },

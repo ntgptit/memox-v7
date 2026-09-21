@@ -48,6 +48,17 @@ enum AppInk {
   /// grounds. Same ink as [danger] and [overdue]: this app spends one red.
   error,
 
+  /// `ColorScheme.error` at full strength. This is deliberately distinct
+  /// from [error]: it is for a component handoff that explicitly binds a
+  /// compact state mark to M3's error role, rather than ordinary error text
+  /// on a page ground.
+  errorDirect,
+
+  /// No visible paint while a component retains its geometry. This belongs in
+  /// the closed role set so a layout-preserving border does not introduce a
+  /// raw transparent colour at a product call site.
+  noPaint,
+
   /// `AppSemanticColors.tertiaryInk` — the steel-blue "same family as info,
   /// quieter job" role, as text; the import preview wears it for duplicates.
   tertiary,
@@ -95,6 +106,8 @@ enum AppInk {
       AppInk.danger => semantic.dangerInk,
       AppInk.info => semantic.info,
       AppInk.error => semantic.dangerInk,
+      AppInk.errorDirect => colors.error,
+      AppInk.noPaint => Colors.transparent,
       AppInk.tertiary => semantic.tertiaryInk,
       AppInk.secondary => semantic.secondaryInk,
       AppInk.overdue => semantic.dangerInk,
