@@ -11,6 +11,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
+import 'package:memox/shared/widgets/mx_segmented_tray.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:memox/features/study/domain/models/new_card_order_model.dart';
 
@@ -21,16 +22,6 @@ import 'support/settings_widget_harness.dart';
 void main() {
   final english = AppLocalizationsEn();
 
-  /// The radio row for [label], which is what a user taps.
-  ///
-  /// `byWidgetPredicate` rather than `byType`: `RadioListTile` is generic and
-  /// `find.byType(RadioListTile<Object>)` matches no `RadioListTile<AppThemeMode>`
-  /// at all — it fails by finding nothing, which reads like the row is missing.
-  Finder choiceRow(String label) => find.ancestor(
-    of: find.text(label),
-    matching: find.byWidgetPredicate((widget) => widget is RadioListTile),
-  );
-
   /// Scrolls [label] into view, then taps it.
   ///
   /// `ensureVisible` first, because the Language group sits below the fold at
@@ -40,7 +31,7 @@ void main() {
   Future<void> tapChoice(WidgetTester tester, String label) async {
     await tester.ensureVisible(find.text(label));
     await tester.pumpAndSettle();
-    await tester.tap(choiceRow(label));
+    await tester.tap(find.text(label));
     await tester.pumpAndSettle();
   }
 
@@ -332,10 +323,12 @@ void main() {
       expect(find.text(english.settingsSaveErrorTitle), findsOneWidget);
       expect(
         tester
-            .widget<RadioGroup<AppThemeMode>>(
-              find.byType(RadioGroup<AppThemeMode>),
+            .widget<MxSegmentedTray<AppThemeMode>>(
+              find.byWidgetPredicate(
+                (widget) => widget is MxSegmentedTray<AppThemeMode>,
+              ),
             )
-            .groupValue,
+            .selected,
         AppThemeMode.system,
       );
       expect(repository.current.themeMode, AppThemeMode.system);
@@ -385,7 +378,7 @@ void main() {
       await tester.pump();
 
       final SemanticsNode theme = tester.getSemantics(
-        find.byType(RadioListTile<AppThemeMode>).first,
+        find.text(english.settingsThemeSystem).first,
       );
       expect(
         theme.getSemanticsData().flagsCollection.isEnabled,

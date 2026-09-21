@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.121 |
+| **Updated by task** | M100.122 |
 | **Last updated** | 2026-09-21 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -1830,6 +1830,34 @@ của M2.
   - [x] Gate: analyze sạch, guard, architecture, `check_docs`, host suite
         (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
 - **Checklist phases:** 7, 12.
+
+### M100.122 · MxSegmentedTray — exclusive selector dùng chung cho Settings và Progress
+
+- **Status:** **done** — focused component, Settings, Progress và Widgetbook
+  coverage xanh; golden Linux `TZ=UTC` của Settings/Progress đã regenerate và
+  được kiểm tra trực quan.
+- **Goal:** Thay radio/pill rời rạc bằng một segmented tray typed cho 2–3 lựa
+  chọn loại trừ nhau.
+- **Scope:** `MxSegmentedTray`, migration chọn 7/30 ngày ở Progress, theme và
+  thứ tự thẻ mới ở Settings, Widgetbook và focused widget coverage.
+- **Out of scope:** palette/theme foundation, `MxPillButton`, ngôn ngữ Settings
+  ba lựa chọn, controller/domain/persistence và golden Windows.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `lib/shared/widgets/mx_segmented_tray.dart` và các caller/catalog
+  trực tiếp.
+- **Acceptance criteria:**
+  - [x] Tray typed chỉ nhận 2 hoặc 3 option, công bố selection exclusive, thumb
+        32dp trong target 48dp và giữ geometry 4/2/12/32/8.
+  - [x] Progress, Settings theme và thứ tự thẻ mới giữ nguyên state transition,
+        failure/submitting behavior và localized labels.
+  - [x] Widgetbook có knobs 2/3 option, selection, enabled, variant; focused
+        non-golden verification xanh. Golden Settings/Progress đã regenerate
+        trên Linux `TZ=UTC` và được review; verifier profile không có trên disk
+        và một geometry assertion Progress ngoài scope đã đỏ.
+- **Dependencies:** M100.118 (`MxTapTarget`), M100.119 (v3 shared controls).
+- **Tests required:** `mx_segmented_tray_test.dart`, focused Settings/Progress
+  presentation tests, Widgetbook coverage and non-golden suite.
+- **Checklist phases:** 7, 12, 15.
 
 ### M100.120 · Observer nêu nguyên nhân khi provider fail (cause của `Failure`)
 

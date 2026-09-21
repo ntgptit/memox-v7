@@ -47,6 +47,11 @@ import 'audit_model.dart';
 /// `_RenderChip` itself, which lays out and paints its own shape through a
 /// private render object no extractor claims.
 ///
+/// [segmentedOptions] is the number of options in an `MxSegmentedTray`. Each
+/// option hosts the same ink layer and rounded clip as a pill, but its `Focus`
+/// boundary reports `_RenderFocusPaintOffset` instead of ChoiceChip's private
+/// `_RenderChip`.
+///
 /// [filledButtons] is the number of `FilledButton`s *inside the screen item* —
 /// the deck card's Study action. Each is an ink host and draws its own rounded
 /// `_ShapeBorderPainter`, the same pair an icon button contributes; it is a
@@ -72,6 +77,7 @@ List<AuditSkipAllowance> deckShellAllowances({
   bool hasBackButton = false,
   int tappableCards = 0,
   int pills = 0,
+  int segmentedOptions = 0,
   int filledButtons = 0,
   int breadcrumbSteps = 0,
   bool hasFloatingAction = false,
@@ -103,10 +109,16 @@ List<AuditSkipAllowance> deckShellAllowances({
   // [breadcrumbSteps] stays a parameter because it still says whether a state
   // *has* a path, which the states below read as documentation.
   final inkHosts =
-      iconButtons + tappableCards + pills + filledButtons + floatingActions;
+      iconButtons +
+      tappableCards +
+      pills +
+      segmentedOptions +
+      filledButtons +
+      floatingActions;
   // The InkWell's rounded clip, once per host that has one. Icon buttons draw a
   // `_ShapeBorderPainter` instead, which is counted separately below.
-  final unnamedPainters = tappableCards + pills + floatingActions;
+  final unnamedPainters =
+      tappableCards + pills + segmentedOptions + floatingActions;
 
   return <AuditSkipAllowance>[
     // One per Navigator: the harness's own MaterialApp, GoRouter's root, and the
@@ -189,6 +201,17 @@ List<AuditSkipAllowance> deckShellAllowances({
             'Both come from chipTheme in app_theme.dart and the selected and '
             'unselected fills are asserted to differ, in both themes, in '
             'mx_pill_button_test.dart.',
+      ),
+    if (segmentedOptions > 0)
+      AuditSkipAllowance(
+        itemId: screenItemId,
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderFocusPaintOffset',
+        expectedMatches: segmentedOptions,
+        rationale:
+            'MxSegmentedTray gives each option a Focus boundary. The private '
+            'render object has no readable colour at rest; the focused ring is '
+            'pinned by mx_segmented_tray_focus_test.dart.',
       ),
     if (iconButtons + filledButtons > 0)
       AuditSkipAllowance(

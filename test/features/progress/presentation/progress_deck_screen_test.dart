@@ -4,7 +4,6 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
 import 'package:memox/features/progress/presentation/widgets/items/progress_deck_row_widget.dart';
-import 'package:memox/features/progress/presentation/widgets/sections/progress_range_selector_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -251,7 +250,7 @@ void main() {
       expect(order(), <String>['steady', 'sprint']);
     });
 
-    testWidgets('the selected pill is marked by more than its colour', (
+    testWidgets('the selected range is announced as an exclusive choice', (
       tester,
     ) async {
       await pumpProgressScreen(
@@ -260,16 +259,22 @@ void main() {
         screen: const ProgressDeckScreen(),
       );
 
-      // A tick beside the selected label, because `chipTheme` turns Material's
-      // own checkmark off — leaving fill as the only difference, which a
-      // greyscale screenshot and a colour-blind reader both lose.
+      final semantics = tester.ensureSemantics();
       expect(
-        find.descendant(
-          of: find.byType(ProgressRangeSelectorWidget),
-          matching: find.byIcon(Icons.check),
+        tester.getSemantics(find.text(english.progressRange7Label)),
+        matchesSemantics(
+          isButton: true,
+          isSelected: true,
+          isInMutuallyExclusiveGroup: true,
+          hasSelectedState: true,
+          isFocusable: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+          label: english.progressRange7SemanticLabel,
         ),
-        findsOneWidget,
       );
+      semantics.dispose();
     });
   });
 

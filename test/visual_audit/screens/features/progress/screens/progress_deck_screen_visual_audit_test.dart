@@ -125,7 +125,7 @@ void main() {
         // Stated rather than defaulted: the zero is the measurement.
         // ignore: avoid_redundant_argument_values
         tappableCards: 0,
-        pills: 2,
+        segmentedOptions: 2,
         // No search on this branch.
         hasSearchField: false,
       ),
@@ -135,18 +135,6 @@ void main() {
         detailContains: '_RenderPinnedHeaderSliver',
         rationale:
             'PinnedHeaderSliver lays its child out and paints nothing of its own — it has no colour, no border and no shape. The strip it pins is an MxSubheaderBand over a DecoratedBox whose surface colour the audit reads directly, one node below this one.',
-      ),
-      const AuditSkipAllowance(
-        itemId: 'progress_screen',
-        reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
-        rationale:
-            'The unselected range pill declares a surface tint that its resting '
-            'state does not fill, and `_RenderChip` paints what it does fill '
-            'through a private render object. Same case the card list records '
-            'for its filter chips; the pill colours are pinned by the '
-            'mx_pill_button goldens and the selected/unselected fills are '
-            'asserted to differ, in both themes, in mx_pill_button_test.dart.',
       ),
     ],
   );
@@ -178,7 +166,7 @@ void main() {
         // Same reason as above, and `tappableCards` is again left at its
         // default of zero: the rows sit below the fold on the composed screen,
         // so no tappable card is on the surface being read.
-        pills: 2,
+        segmentedOptions: 2,
         hasSearchField: false,
       ),
       const AuditSkipAllowance(
@@ -187,13 +175,6 @@ void main() {
         detailContains: '_RenderPinnedHeaderSliver',
         rationale:
             'PinnedHeaderSliver lays its child out and paints nothing of its own — it has no colour, no border and no shape. The strip it pins is an MxSubheaderBand over a DecoratedBox whose surface colour the audit reads directly, one node below this one.',
-      ),
-      const AuditSkipAllowance(
-        itemId: 'progress_screen',
-        reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
-        rationale:
-            'The unselected range pill, exactly as in the mixed state above.',
       ),
     ],
   );

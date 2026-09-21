@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_pill_button.dart';
+import '../../../../../shared/widgets/mx_segmented_tray.dart';
 import '../../../domain/models/progress_range_model.dart';
 import '../support/progress_labels_widget.dart';
 
@@ -37,20 +36,18 @@ class ProgressRangeSelectorWidget extends StatelessWidget {
     return Semantics(
       container: true,
       label: context.l10n.progressRangeSelectorSemanticLabel,
-      child: Row(
-        spacing: AppSpacing.sm,
-        children: <Widget>[
+      child: MxSegmentedTray<ProgressRange>(
+        options: <MxSegmentedTrayOption<ProgressRange>>[
           for (final ProgressRange option in ProgressRange.values)
-            MxPillButton(
+            MxSegmentedTrayOption<ProgressRange>(
+              value: option,
               label: context.progressRangeLabel(option),
               semanticLabel: context.progressRangeSemanticLabel(option),
-              isSelected: option == range,
-              // The tick is the component's now (M100.36 4M): every selected
-              // pill in the app carries it in a slot that is laid out either
-              // way, so this screen stopped being the one that drew its own.
-              onPressed: () => onRangeChanged(option),
             ),
         ],
+        selected: range,
+        variant: MxSegmentedTrayVariant.progressRange,
+        onChanged: onRangeChanged,
       ),
     );
   }

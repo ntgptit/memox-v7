@@ -91,14 +91,12 @@ void main() {
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.unknownRenderType,
-        detailContains: '_RenderChip',
+        detailContains: '_RenderFocusPaintOffset',
         expectedMatches: 2,
         rationale:
-            'ChoiceChip lays out and paints through a private _RenderChip, so '
-            'neither its fill nor its border is reachable from the render tree. '
-            'Both come from chipTheme in app_theme.dart and the selected and '
-            'unselected fills are asserted to differ, in both themes, in '
-            'mx_pill_button_test.dart.',
+            'MxSegmentedTray gives each of its two options a Focus boundary. '
+            'The private render object has no readable colour at rest; the '
+            'focused ring is pinned by mx_segmented_tray_focus_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
@@ -106,16 +104,6 @@ void main() {
         detailContains: '_RenderPinnedHeaderSliver',
         rationale:
             'PinnedHeaderSliver lays its child out and paints nothing of its own — it has no colour, no border and no shape. The strip it pins is an MxSubheaderBand over a DecoratedBox whose surface colour the audit reads directly, one node below this one.',
-      ),
-      AuditSkipAllowance(
-        itemId: 'shell',
-        reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
-        rationale:
-            'The unselected range pill declares a surface tint that its resting '
-            'state does not fill, and _RenderChip paints what it does fill '
-            'through a private render object. Same case the deck level records '
-            'for the same two pills.',
       ),
     ],
   );
@@ -169,14 +157,12 @@ void main() {
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.unknownRenderType,
-        detailContains: '_RenderChip',
+        detailContains: '_RenderFocusPaintOffset',
         expectedMatches: 2,
         rationale:
-            'ChoiceChip lays out and paints through a private _RenderChip, so '
-            'neither its fill nor its border is reachable from the render tree. '
-            'Both come from chipTheme in app_theme.dart and the selected and '
-            'unselected fills are asserted to differ, in both themes, in '
-            'mx_pill_button_test.dart.',
+            'MxSegmentedTray gives each of its two options a Focus boundary. '
+            'The private render object has no readable colour at rest; the '
+            'focused ring is pinned by mx_segmented_tray_focus_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
@@ -184,16 +170,6 @@ void main() {
         detailContains: '_RenderPinnedHeaderSliver',
         rationale:
             'PinnedHeaderSliver lays its child out and paints nothing of its own — it has no colour, no border and no shape. The strip it pins is an MxSubheaderBand over a DecoratedBox whose surface colour the audit reads directly, one node below this one.',
-      ),
-      AuditSkipAllowance(
-        itemId: 'shell',
-        reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
-        rationale:
-            'The unselected range pill declares a surface tint that its resting '
-            'state does not fill, and _RenderChip paints what it does fill '
-            'through a private render object. Same case the deck level records '
-            'for the same two pills.',
       ),
     ],
   );
