@@ -175,9 +175,7 @@ class _ValueColumn extends StatelessWidget {
       child: DecoratedBox(
         key: const ValueKey<String>('mx-stepper-value-column'),
         decoration: BoxDecoration(
-          border: Border.all(
-            color: ringInk.resolve(context),
-          ),
+          border: Border.all(color: ringInk.resolve(context)),
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: ConstrainedBox(
