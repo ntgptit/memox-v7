@@ -7,11 +7,14 @@ import '../../core/theme/extensions/theme_context_extension.dart';
 /// It owns only fixed threshold-to-role mapping; callers own the percentage
 /// and the geometry that displays it.
 abstract final class MxMasteryRamp {
+  static const double _reviewingThreshold = .34;
+  static const double _masteredThreshold = .67;
+
   static Color colorFor(BuildContext context, double progress) {
     final double value = progress.clamp(0, 1);
     final semantic = context.semanticColors;
-    if (value < .34) return semantic.statusLearning;
-    if (value < .67) return semantic.statusReviewing;
+    if (value < _reviewingThreshold) return semantic.statusLearning;
+    if (value < _masteredThreshold) return semantic.statusReviewing;
     return semantic.statusMastered;
   }
 

@@ -8,6 +8,8 @@ import 'mx_mastery_ramp.dart';
 
 /// A read-only 56dp mastery percentage ring.
 class MxMasteryDonut extends StatelessWidget {
+  static const double _boxSize = 56;
+  static const double _labelSize = 9;
   MxMasteryDonut({required this.progress, super.key}) {
     if (progress < 0 || progress > 1) {
       throw ArgumentError.value(progress, 'progress', 'must be from 0 to 1');
@@ -24,13 +26,13 @@ class MxMasteryDonut extends StatelessWidget {
       label: '$percentage mastery',
       child: ExcludeSemantics(
         child: SizedBox(
-          width: 56,
-          height: 56,
+          width: _boxSize,
+          height: _boxSize,
           child: Stack(
             alignment: Alignment.center,
             children: <Widget>[
               CustomPaint(
-                size: const Size.square(56),
+                size: const Size.square(_boxSize),
                 painter: _MasteryDonutPainter(
                   progress: progress,
                   track: context.colors.surfaceContainer,
@@ -40,7 +42,10 @@ class MxMasteryDonut extends StatelessWidget {
               Text(
                 percentage,
                 style: AppTypography.withWeight(
-                  context.texts.labelSmall!.copyWith(color: color, fontSize: 9),
+                  context.texts.labelSmall!.copyWith(
+                    color: color,
+                    fontSize: _labelSize,
+                  ),
                   FontWeight.w700,
                 ),
               ),
@@ -53,6 +58,8 @@ class MxMasteryDonut extends StatelessWidget {
 }
 
 class _MasteryDonutPainter extends CustomPainter {
+  static const double _stroke = 3;
+  static const double _radius = 17;
   const _MasteryDonutPainter({
     required this.progress,
     required this.track,
@@ -66,12 +73,11 @@ class _MasteryDonutPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Rect rect = Offset.zero & size;
-    const double stroke = 3;
-    final Rect arcRect = rect.deflate((size.width - 34) / 2);
+    final Rect arcRect = rect.deflate((size.width - (_radius * 2)) / 2);
     final Paint base = Paint()
       ..color = track
       ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
+      ..strokeWidth = _stroke
       ..strokeCap = StrokeCap.round;
     canvas.drawArc(arcRect, -math.pi / 2, math.pi * 2, false, base);
     if (progress == 0) return;

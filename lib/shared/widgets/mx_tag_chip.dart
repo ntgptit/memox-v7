@@ -7,6 +7,9 @@ import '../../core/theme/foundations/app_spacing.dart';
 
 /// A read-only metadata tag; interactive tag editing uses a control instead.
 class MxTagChip extends StatelessWidget {
+  static const double _maxWidth = 140;
+  static const double _defaultHeight = 22;
+  static const double _denseHeight = 18;
   const MxTagChip({required this.label, this.dense = false, super.key});
 
   final String label;
@@ -14,9 +17,9 @@ class MxTagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
-    constraints: const BoxConstraints(maxWidth: 140),
+    constraints: const BoxConstraints(maxWidth: _maxWidth),
     child: Container(
-      height: dense ? 18 : 22,
+      height: dense ? _denseHeight : _defaultHeight,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       decoration: BoxDecoration(
         color: context.colors.surfaceContainer,

@@ -11,6 +11,10 @@ enum MxCardStatus { newCard, learning, reviewing, mastered }
 
 /// A non-interactive card lifecycle marker, either a named pill or bare dot.
 class MxStatusBadge extends StatelessWidget {
+  static const double _height = 22;
+  static const double _pillDot = 6;
+  static const double _leftPadding = 6;
+  static const double _containerTint = .12;
   const MxStatusBadge({
     required this.status,
     this.label,
@@ -41,7 +45,7 @@ class MxStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color color = _color(context);
-    final double dotSize = dotOnly ? AppSizing.statusDot : 6;
+    final double dotSize = dotOnly ? AppSizing.statusDot : _pillDot;
     final Widget dot = SizedBox(
       key: dotKey,
       width: dotSize,
@@ -56,10 +60,13 @@ class MxStatusBadge extends StatelessWidget {
       label: label ?? _defaultLabel,
       child: ExcludeSemantics(
         child: Container(
-          height: 22,
-          padding: const EdgeInsets.only(left: 6, right: AppSpacing.sm),
+          height: _height,
+          padding: const EdgeInsets.only(
+            left: _leftPadding,
+            right: AppSpacing.sm,
+          ),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: .12),
+            color: color.withValues(alpha: _containerTint),
             borderRadius: BorderRadius.circular(AppRadius.pill),
           ),
           child: Row(
