@@ -163,6 +163,7 @@ class _ValueColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppInk valueInk = isInvalid ? AppInk.errorDirect : AppInk.stated;
+    final AppInk ringInk = isInvalid ? AppInk.errorDirect : AppInk.noPaint;
     final TextStyle valueStyle = context.textStyles.stepperValue.inked(
       context,
       valueInk,
@@ -175,7 +176,7 @@ class _ValueColumn extends StatelessWidget {
         key: const ValueKey<String>('mx-stepper-value-column'),
         decoration: BoxDecoration(
           border: Border.all(
-            color: context.colors.error.withValues(alpha: isInvalid ? 1 : 0),
+            color: ringInk.resolve(context),
           ),
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
