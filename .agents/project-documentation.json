@@ -30,8 +30,8 @@
     }
   ],
   "pin": {
-    "version": "2.0.2",
+    "version": "2.2.2",
     "source_id": "urn:agent-skill:project-documentation",
-    "digest": "2b7ddf63edbb0a3fca3ff3bc3e4b3d6848df490e01eac4066874f53c9972d36c"
+    "digest": "137f29909b82907ca9c44b49cb480ebca16ac8612c1804d09f7bf6a36729bf91"
   }
 }

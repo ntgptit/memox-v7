@@ -22,7 +22,24 @@ sampling is partial. UPDATE can limit coverage to affected sources/dependents.
 | Unsupported claims | Evidence records | Inference is never silently a fact or approval |
 | Generated docs | Provenance and deterministic rerun | Generator owns bytes; analysis stays separate |
 
+## Output set completion gate
+
+MUST reconcile every family and required section in
+[output-contract.md](output-contract.md) against actual files and content. Check
+conditional applicability, canonical locations, consolidation authority, expected
+versus actual unique file counts, and missing/empty sections. Matching headings
+without meaningful content is not a pass. UPDATE/REPAIR remain scoped to affected
+families; report unrelated gaps separately without expanding writes.
+MUST check every generated Markdown file against its selected full-file template
+and mapped local sections. Reject unresolved placeholders, empty sample rows,
+unexpanded record insertion points and omitted applicable fields. Template links
+must not leak into product docs; destination links resolve from the output file.
+
 ## Business coverage completion gate
+
+For BR/UC documents MUST apply the record-level review in
+[business-records.md](templates/business-records.md#record-level-review), including
+field completeness, evidence/confidence justification and reciprocal BR/UC links.
 
 MUST review the behavior-to-document map defined in
 [documentation-contract.md](documentation-contract.md#business-completeness-not-code-narration).
@@ -55,6 +72,10 @@ Reproduce, then repair only evidence-supported eligible documentation. Recheck l
 tree and inbound links. Missing proof, conflicting authority and protected files
 retain explicit unresolved dispositions. Do not change a rule to match a source bug.
 A recurring unchanged failure stops that repair loop. AUDIT never edits docs.
+For business conflicts, MUST verify that the user was asked under
+[the resolution protocol](evidence-rules.md#business-conflicts-require-user-resolution).
+Record the question, pending/answered state and exact decision evidence; neither a
+reviewer recommendation nor a green check can substitute for the user's answer.
 
 ## Verification
 
