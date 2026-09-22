@@ -1,15 +1,15 @@
 # Generic documentation contract
 
-## Required knowledge, optional files
+## Required knowledge and output set
 
 MUST account for purpose, use/verification, folder architecture, responsibilities
-and dependency direction. These are knowledge requirements, not a fixed file list.
-A small project may use one entry document. Apply approved local document types,
-headings and metadata; absent conventions do not prevent documentation work.
+and dependency direction. MUST resolve the file set and required sections using
+[output-contract.md](output-contract.md). Apply approved local document types,
+headings and metadata; absent conventions use the catalog defaults.
 
 | Knowledge | Include when | Canonical location decision |
 |---|---|---|
-| Purpose, use, verification | Every project | Existing entry document, or smallest useful root entry |
+| Purpose, use, verification | Every project | Catalog entry/product/verification families or approved local equivalents |
 | Folders, modules, ownership, dependencies | Every project | Existing architecture guide/section or entry-document section |
 | Rules, terminology, workflows | Domain behavior needs explanation | Existing authority; split only for distinct responsibility/audience |
 | Use cases, state transitions | Branching/state needs explanation | Beside the rule/feature contract it illustrates |
@@ -19,10 +19,8 @@ headings and metadata; absent conventions do not prevent documentation work.
 | Generated tree/index/schema | Deterministic content adds value | Existing generated area/block or temporary run output |
 
 MUST search headings, authority declarations, identifiers and inbound links before
-creating content. Preserve local naming/language. Without a convention, use a concise
-title and descriptive kebab-case prose filenames. New generic entry documents SHOULD
-cover purpose/usage, folder responsibilities, dependency direction and verification;
-labels may follow the project's language. Avoid empty template sections.
+creating content. Preserve local naming/language. Without a convention, use the
+catalog's default filenames and section names. Avoid empty template sections.
 
 Without local metadata rules, new authored content MUST state scope and whether it
 is current, proposed or historical, with locators for material claims. Concise prose

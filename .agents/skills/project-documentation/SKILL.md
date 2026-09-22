@@ -76,6 +76,8 @@ ownership where present, documentation authorities, terms, flows, and persistenc
 where applicable. UPDATE follows changed sources and dependent docs. Full modes
 enumerate all first-party areas and exclusions. MUST build the contract's
 behavior-to-document map; investigation coverage alone is not documentation coverage.
+MUST resolve the applicable file set and per-file sections with
+[output-contract.md](references/output-contract.md), including an output manifest.
 
 Use scoped subagents for independent investigations when useful and compliant with
 the target's runtime/model/spend policy; load applicable local agent presets.
@@ -95,13 +97,19 @@ evidence, authority and exact edit eligibility. AUDIT skips step 4.
 
 MUST update canonical content before creating files. Combine generic contract and
 approved local conventions with optional deltas; do not fork the workflow per repo.
-With no docs, a write mode creates only the smallest useful entry document at the
-location justified by discovery, covering all in-scope behavior from the map.
-Smallest refers to structure, not omitted business detail. No docs directory or database document is required
-by name. Preserve protected/frozen authorities unless the task permits changing them.
+MUST read [template-rules.md](references/templates/template-rules.md) and each selected
+full-file template before writing. Compose BR/UC record templates into their file
+templates; do not emit outlines, empty scaffolds or only representative records.
+With no docs, create the applicable catalog files at locations justified by discovery,
+limited to the requested scope. Do not collapse the set to an entry document without
+an explicit user/local consolidation rule. No docs directory or database is assumed.
+Preserve protected/frozen authorities unless the task permits changing them.
 
 MUST repair descriptive drift only with evidence, retaining product-rule conflicts
 instead of changing rules to match bugs. Update metadata and inbound references.
+On a business conflict, MUST ask the user and pause dependent edits under
+[business conflict resolution](references/evidence-rules.md#business-conflicts-require-user-resolution).
+Apply this as soon as a conflict is found in any phase; do not defer it to the final report.
 Use deterministic generators for mechanical content; keep authored analysis separate.
 
 **Exit:** each edit traces to evidence/scope, with no invented requirement or duplicate
@@ -124,7 +132,8 @@ business coverage completion gate in audit-rules.md before claiming write comple
 
 MUST run generic checks and the target's required gates using
 [audit-rules.md](references/audit-rules.md#verification). Check final diff/worktree.
-Report mode, coverage/exclusions, edits, findings, evidence gaps, reviewer type and
+Report mode, expected/actual file counts and missing sections from the output manifest,
+coverage/exclusions, edits, findings, evidence gaps, reviewer type and
 actual command outcomes. Keep evidence in chat unless a persisted report was
 requested, then follow that target's format.
 
