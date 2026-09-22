@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "context_files": [
+    "CLAUDE.md",
+    "docs/document-conventions.md"
+  ],
+  "document_rules": [
+    {
+      "glob": "docs/*.md",
+      "header_fields": [
+        "Status",
+        "Purpose",
+        "Scope",
+        "Source of truth for",
+        "Depends on",
+        "Updated by task",
+        "Last updated"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "repository-document-integrity",
+      "argv": [
+        "{python}",
+        ".claude/skills/flutter-workflow/scripts/check_docs.py",
+        "--quiet"
+      ],
+      "read_only": true
+    }
+  ],
+  "pin": {
+    "version": "2.0.2",
+    "source_id": "urn:agent-skill:project-documentation",
+    "digest": "2b7ddf63edbb0a3fca3ff3bc3e4b3d6848df490e01eac4066874f53c9972d36c"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "digest": "2b7ddf63edbb0a3fca3ff3bc3e4b3d6848df490e01eac4066874f53c9972d36c",
+  "files": {
+    "SKILL.md": "6ed7df687a44879bb9c3ea224ae76a687471a1c46fd69e38409b66ad7ecb22e0",
+    "references/audit-rules.md": "0c49add0a95bca8475d8492d22debde4c732979638a659f16a150b9c54ce72cd",
+    "references/configuration.md": "6a7ebf71a8af0d08fecb888f983aa70a03e87f25233747785b5670a94587c503",
+    "references/discovery.md": "6f9ae26e622a701b2656355904ddc5769c0b0b3c3ebe36f5fd4d6b9f756a36e8",
+    "references/distribution.md": "4e31ea4e893fa8c74e16868701f81f52e9df503a014bc9bae320cd3074660fc4",
+    "references/documentation-contract.md": "9074378934932a0adca8e00d893886bb96c9402c57f51f781b3b51d0694c4995",
+    "references/evidence-rules.md": "50bf80dcc7d1962bd1d7d0a94a2558e3373807bd8f19e8d0cb85b6593c625748",
+    "references/templates/agent-handoff.md": "cf03c1e80cf1e2469a210c5d40e265db591f8f24448494c9c4a299679bfd1830",
+    "scripts/repository_context.py": "ca3071e2ccd083723b9d5987a841f77295cd8063d4e4e0fefd051aa3eef6d507",
+    "scripts/scan_docs.py": "e8d20576d91537cd12f9b9aaebf3a155a459c14b6e289a37dd0a132e8ef5571d",
+    "scripts/skill_distribution.py": "f6f98a0b4f49189376b5d6dece58c1ddc07a6dc5aa48d137ecfdb2230da18fda",
+    "scripts/tests/test_distribution.py": "2dee406c5415d0ce0c5a006544986187b533c04e71bdc1d16fcf650226b41560",
+    "scripts/tests/test_documentation_tools.py": "d2837aed1cfd61761ca1559a9af0564304bace698abe971549a2c465d1d18510",
+    "scripts/validate_docs.py": "e482fd79156bdb3b147af4407b6cf111667ad003b6cef5640938c4e2ecd92ee9"
+  },
+  "format_version": 1,
+  "name": "project-documentation",
+  "source_id": "urn:agent-skill:project-documentation",
+  "version": "2.0.2"
+}
