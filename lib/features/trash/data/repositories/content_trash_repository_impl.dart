@@ -42,7 +42,7 @@ final class ContentTrashRepositoryImpl implements ContentTrashRepository {
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
 
-  /// Injected — no default, for the reason AD-06 gives. UTC always.
+  /// Injected — no default, for the reason AD-13 gives. UTC always.
   final DateTime Function() _clock;
 
   @override

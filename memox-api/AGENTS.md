@@ -95,5 +95,5 @@ Read only what the task touches:
 - [`../docs/business-rules.md`](../docs/business-rules.md) — the `BR-xx` this
   module implements
 - [`../docs/superpowers/specs/2026-09-06-memox-api-design.md`](../docs/superpowers/specs/2026-09-06-memox-api-design.md) — design and phase plan
-- [`../docs/reviews/memox-api-spring-standards-audit.md`](../docs/reviews/memox-api-spring-standards-audit.md) — standards audit
+- [`../docs/reviews/memox-api-spring-standards-audit.md`](../docs/reviews/memox-api-spring-standards-audit.md) — standards audit, **closed snapshot at `ba6f7928` (2026-09-09)**. B1, R2, R3, R4, R5 are fixed (M9.W1–M9.W3); history, not a live checklist
 - `src/main/resources/db/migration/` — Flyway, `V1`…`V5`, immutable once merged

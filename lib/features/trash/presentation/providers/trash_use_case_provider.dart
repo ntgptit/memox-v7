@@ -10,7 +10,7 @@ import '../../domain/usecases/purge_expired_trash_use_case.dart';
 
 part 'trash_use_case_provider.g.dart';
 
-/// Dependency wiring only — no state, no commands (AD-14).
+/// Dependency wiring only — no state, no commands (AD-12).
 ///
 /// `_provider`, not `_controller`, and the distinction decides which guard rules
 /// apply: anything that holds state or a command belongs in `controllers/`.

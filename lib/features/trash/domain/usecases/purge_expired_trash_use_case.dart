@@ -4,7 +4,7 @@ import '../repositories/trash_repository.dart';
 ///
 /// [now] is a parameter rather than a clock read, so the thirty-day boundary is
 /// testable from both sides and no layer below the composition root owns "now"
-/// (AD-06).
+/// (AD-13).
 class PurgeExpiredTrashUseCase {
   const PurgeExpiredTrashUseCase(this._repository);
 

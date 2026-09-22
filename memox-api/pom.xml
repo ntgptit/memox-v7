@@ -320,11 +320,12 @@
                         even on the run where the check fails - a failure you cannot inspect is a
                         failure you will delete.
 
-                        The thresholds are properties, not literals, and they are UNSET on purpose.
-                        The suite has never once run green on this machine (21 of 32 tests error
-                        without a database), so any number written here today would be invented,
-                        and an invented threshold is lowered the first time it fails. The first
-                        green run measures it; see README, "Setting the coverage floor".
+                        The thresholds are properties, not literals, and they are now SET - see
+                        jacoco.minimum.instruction / jacoco.minimum.branch at the top of this file.
+                        They were deliberately left unset until a green run existed to measure,
+                        because a number invented before the first green run is lowered the first
+                        time it fails. That run happened on 2026-09-09; the floor is that
+                        measurement minus a 0.02 margin. See README, "Setting the coverage floor".
                     -->
                     <execution>
                         <id>check-coverage-threshold</id>

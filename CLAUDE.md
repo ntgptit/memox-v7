@@ -48,9 +48,11 @@ and they are the ones most likely to be violated by accident:
   destroys this property, and it only shows up when the backend lands.
 - **SQL lives in `.drift` files**, not Dart table classes, so `drift_dev`
   type-checks queries at build time.
-- **No auth yet, auth-ready.** One local profile. Tables carry a nullable
-  `owner_id`; IDs are client-generated UUIDs from day one. No login screen, no
-  token storage, no `AuthRepository` — do not build them.
+- **No auth yet, auth-ready.** One local profile. The three tables that own an
+  identity — `decks`, `tags`, `delete_batches` — carry a nullable `owner_id`;
+  the rest inherit ownership through their foreign key, so do not add the column
+  to `cards` or anything under it. IDs are client-generated UUIDs from day one.
+  No login screen, no token storage, no `AuthRepository` — do not build them.
 - **No network yet.** `dio` is deliberately not a dependency. Add it with the
   first real request.
 - **Android is the release target.** Web must keep building because it is the
@@ -66,16 +68,21 @@ and they are the ones most likely to be violated by accident:
   (BR-163); there is no manual reset. A root deck stays `deck` forever. Resolve the
   root via `root_deck_id` — **never** `COALESCE(parent_deck_id, id)`, which
   silently returns the wrong deck from the third level down.
-- **Scheduler belongs to the root deck and is locked after the first review.**
-  MVP ships both `eight_box` and `sm2`; every root deck must pick one at
-  creation. Every descendant inherits type, version and generation. After the
-  first `scheduled` review the choice is locked — changing it requires Reset
-  learning progress. Moving a subtree under a root with a different scheduler or
-  generation is blocked, never silently converted.
-- **`review_kind` and session `status`/`end_reason` are stored, never inferred.**
-  Deriving `review_kind` by diffing before/after state is wrong for a `scheduled`
-  review of a box-8 card, and history written with the wrong label cannot be
-  recomputed later.
+- **Scheduler belongs to the root deck and locks when the first card in its tree
+  finishes the learning chain** (BR-13, BR-144). MVP ships both `eight_box` and
+  `sm2`; every root deck must pick one at creation. Every descendant inherits
+  type, version and generation. After that first completion the choice is locked
+  — changing it requires Reset learning progress. Moving a subtree under a root
+  with a different scheduler or generation is blocked, never silently converted.
+
+  **Not "after the first review", which this file used to say.** A learning chain
+  produces no `scheduled` turn at all, so the first review lands at least one
+  interval *later* than the lock actually fires. The column is still called
+  `first_answered_at`, which is what makes the wrong reading so easy.
+- **A review's `kind` and session `status`/`end_reason` are stored, never
+  inferred.** Deriving `study_answers.kind` by diffing before/after state is wrong
+  for a `scheduled` review of a box-8 card, and history written with the wrong
+  label cannot be recomputed later.
 - **The two schedulers have different action sets** — `eight_box` uses
   `forgotten`/`remembered`, `sm2` uses `again`/`hard`/`good`/`easy`. The review
   UI renders buttons from the scheduler's `supportedActions`; hardcoding four
@@ -86,8 +93,8 @@ and they are the ones most likely to be violated by accident:
   un-resets itself.
 - **Content, schedule and history are three tables.** `cards` holds content only
   — no SRS columns, no generation; content survives every reset.
-  `card_review_states` holds the schedule, `review_history` is append-only and is
-  kept across resets. Editing a card must never touch a review state.
+  `card_study_states` holds the schedule, `study_answers` is append-only and is
+  kept across resets. Editing a card must never touch a study state.
 - **Reset and scheduler change run in one Drift transaction.** A deck must never
   have two active schedulers, or card state from two generations.
 - **Starter decks are templates; users get a copy.** Template updates never

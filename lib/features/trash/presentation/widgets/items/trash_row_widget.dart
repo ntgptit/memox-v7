@@ -38,7 +38,7 @@ class TrashRowWidget extends StatelessWidget {
   final TrashBatchEntity batch;
 
   /// Read once by the screen and passed down, so every row on one frame
-  /// measures its countdown against the same instant (AD-06, AD-13).
+  /// measures its countdown against the same instant (AD-13).
   final DateTime now;
 
   final bool isSelecting;

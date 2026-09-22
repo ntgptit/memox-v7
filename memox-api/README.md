@@ -4,7 +4,10 @@ Spring Boot 3.5 / Java 17 backend for MemoX. PostgreSQL, Flyway, MyBatis with al
 `src/main/resources/mybatis/*_mapper.xml`.
 
 Design and phase plan: `../docs/superpowers/specs/2026-09-06-memox-api-design.md`.
-Standards audit: `../docs/reviews/memox-api-spring-standards-audit.md`.
+Standards audit: `../docs/reviews/memox-api-spring-standards-audit.md` — a **closed
+snapshot** taken at commit `ba6f7928` on 2026-09-09, not a live checklist. Its
+findings B1, R2, R3, R4 and R5 have since been fixed (M9.W1–M9.W3 in `../docs/wbs.md`);
+read it as history, and check the code before acting on anything it lists as open.
 
 ## The development database
 

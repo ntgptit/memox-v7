@@ -38,7 +38,7 @@ mixin _TrashPurgeOperations implements TrashRepository {
       final eligible = await _dao.eligibleBatches(
         // `<= cutoff`, so a batch at exactly thirty days goes (BR-264). The
         // moment arrives as a value: nothing below the composition root reads
-        // a clock (AD-06).
+        // a clock (AD-13).
         TrashRetention.cutoffFor(now),
       );
       if (eligible.isEmpty) return 0;

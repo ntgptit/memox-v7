@@ -1831,6 +1831,45 @@ của M2.
         (5490 pass trước đợt sửa cuối, 2004 pass trên vùng chạm sau đó).
 - **Checklist phases:** 7, 12.
 
+### M100.123 · Tài liệu: lấp bốn family còn trống, sáu README feature, và sửa drift đã đo
+
+- **Status:** **done** — `check_docs.py`, `verify_invariants.py`,
+  `check_architecture.py` và code-verification guard đều exit 0; một auditor
+  read-only độc lập đã soát lại và mọi finding của nó đã được sửa.
+- **Goal:** Chạy FULL_SYNC tài liệu theo skill `project-documentation`: đọc code,
+  đối chiếu với `docs/`, viết cái đang thiếu, sửa cái đã lệch.
+- **Scope:** Bốn family chưa có tài liệu nào (`glossary.md`, `verification.md`,
+  `security.md`, `operations.md`) cộng `interfaces.md` cho bề mặt `memox-api`;
+  README cho sáu feature chưa có (progress, reminder, search, settings, study,
+  trash); và các drift đã đo được: ba tên bảng/cột không tồn tại trong
+  `CLAUDE.md`, mốc khoá scheduler sai trong `CLAUDE.md`, phạm vi `owner_id`,
+  quick start thiếu `build_runner`, comment JaCoCo tự mâu thuẫn trong
+  `memox-api/pom.xml`, số invariant cũ trong `invariant_queries.dart`, và
+  mười citation AD sai trong `lib/features/trash/`.
+- **Out of scope:** Sinh lại nội dung của năm tài liệu canonical
+  (`product.md`, `architecture.md`, `business-rules.md`, `data-model.md`,
+  `use-cases.md`) — chúng đã được spot-check và khớp code; `wbs.md` và
+  `checklist.md` là sổ tiến độ và quy trình, không suy ra được từ code.
+- **Editable documents:** `docs/README.md`, `docs/glossary.md`,
+  `docs/interfaces.md`, `docs/verification.md`, `docs/security.md`,
+  `docs/operations.md`, `docs/wbs.md`, `CLAUDE.md`, `README.md`,
+  `memox-api/README.md`, `memox-api/AGENTS.md`.
+- **Output:** 5 tài liệu mới trong `docs/`, 6 README feature, và 17 file sửa.
+- **Acceptance criteria:**
+  - [x] Mọi tài liệu mới trong `docs/` có đủ header bảy dòng và không trùng
+        `Source of truth for` với tài liệu nào đang có.
+  - [x] Mọi drift được sửa đều có bằng chứng `file:line` đối chiếu với code,
+        không sửa theo suy đoán.
+  - [x] ID BR/AD/UC được giữ nguyên — 306/313 ID đang được code hoặc test trích
+        dẫn, đổi số sẽ làm mồ côi toàn bộ.
+  - [x] `check_docs.py` và `verify_invariants.py` xanh trước và sau; baseline
+        trước khi sửa đã được ghi lại để so sánh.
+- **Dependencies:** none.
+- **Tests required:** none — document only. Bốn guard cơ học đã chạy; `flutter
+  analyze`/`flutter test` không chạy vì worktree thiếu `.drift.dart` và thay đổi
+  không chạm ngữ nghĩa Dart (chỉ comment).
+- **Checklist phases:** 1, 15, 20.
+
 ### M100.122 · MxSegmentedTray — exclusive selector dùng chung cho Settings và Progress
 
 - **Status:** **done** — focused component, Settings, Progress và Widgetbook

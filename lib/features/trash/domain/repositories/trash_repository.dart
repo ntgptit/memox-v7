@@ -65,6 +65,6 @@ abstract interface class TrashRepository {
   /// for it, and failing the sweep would block every other batch behind it.
   ///
   /// Returns how many batches went. [now] is passed in — no layer reads the
-  /// wall clock (AD-06).
+  /// wall clock (AD-13).
   Future<int> purgeExpired(DateTime now);
 }
