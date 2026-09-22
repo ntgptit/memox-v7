@@ -2,7 +2,7 @@
 /// `data-model.md`.
 ///
 /// **A subset of the document's, and its numbering, not a fresh sequence.**
-/// The document specifies thirty-two; the ones here are the ones with an executable
+/// The document specifies thirty-seven; the ones here are the ones with an executable
 /// fixture. The keys keep the document's ids so a failure names the rule rather
 /// than a position in this map — which is why `Q29` sits next to `Q2` and `Q30`
 /// next to `Q11`, each beside the rule it is about rather than at the end.

@@ -57,8 +57,13 @@ SQLite → watch() Stream → mapper → entity → AsyncValue → MxAsyncView �
 Reads are `Stream` (`watch`), writes are `Future`. Nothing refreshes manually: a
 write lands in SQLite, the stream re-emits, every screen watching it rebuilds.
 
-Thirteen use cases in `domain/usecases/`, one per interaction (AD-12). Each takes
-the repository **contract**, never an implementation.
+One use case per interaction in `domain/usecases/` (AD-12). Each takes the
+repository **contract**, never an implementation.
+
+**The count is deliberately not written here.** It was — "thirteen" — and the
+directory held fourteen by the time anyone read it, for the same reason §2 stopped
+listing identifier names: a number the filesystem already maintains, copied into
+prose, is a copy that goes stale silently. Count the directory.
 
 **Two of them change the scheduler, and keeping them apart is the point.**
 `ChangeUnlockedSchedulerUseCase` (BR-12) runs while `first_answered_at` is still
@@ -70,11 +75,11 @@ once BR-13 has closed it. Folding them into one call with a flag would make ever
 caller decide which warning to show, and the first one to get it wrong would show
 a destruction warning for a deck with nothing to destroy.
 
-Three of the six write use cases hold input validation, and that is why they are
-not indirection. (The other three — delete, reset and move — validate nothing:
-their rules need the tree as it stands at write time and stay in the repository.
-So the split is *five that do something and five that forward*, not the
-read/write line it is tempting to draw.) BR-01 used to run **three** times for
+Some of the write use cases hold input validation, and that is why they are not
+indirection. The rest — delete, reset, move, reorder — validate nothing: their
+rules need the tree as it stands at write time and stay in the repository. So the
+split is *the ones that do something* against *the ones that forward*, not the
+read/write line it is tempting to draw. BR-01 used to run **three** times for
 one submit: the controller
 called `DeckEntity.nameProblem`, the repository called `DeckEntity.validateName`
 again, and the screen re-derived the problem from the raw text to decide which

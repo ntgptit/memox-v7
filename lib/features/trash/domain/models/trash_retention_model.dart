@@ -7,7 +7,7 @@
 /// the world and is testable at its edge.
 ///
 /// Nothing here reads a clock. `now` arrives from `clockProvider` at the top and
-/// travels down as a value, because "now" having two owners is what AD-06
+/// travels down as a value, because "now" having two owners is what AD-13
 /// exists to stop.
 abstract final class TrashRetention {
   /// How long a deleted item stays recoverable (BR-264).

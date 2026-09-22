@@ -219,7 +219,7 @@ class _TrashBody extends ConsumerWidget {
     }
 
     // One clock reading for the whole frame, so every countdown on screen is
-    // measured against the same instant (AD-06, AD-13).
+    // measured against the same instant (AD-13).
     final now = ref.watch(clockProvider)();
     final isBusy = ref.watch(trashPurgeControllerProvider).isSubmitting;
 

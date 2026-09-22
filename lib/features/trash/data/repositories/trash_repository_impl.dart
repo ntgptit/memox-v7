@@ -43,7 +43,7 @@ final class TrashRepositoryImpl
   @override
   final TrashDao _dao;
 
-  /// Injected — no default (AD-06). UTC always.
+  /// Injected — no default (AD-13). UTC always.
   @override
   final DateTime Function() _clock;
 

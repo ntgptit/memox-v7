@@ -27,6 +27,11 @@ Format và thứ tự đọc: [`document-conventions.md`](document-conventions.m
 | [`master-flow.md`](master-flow.md) | Đồ thị nối UC-01…20 thành hành trình, tách theo đối tượng deck / card / study | active |
 | [`business-rules.md`](business-rules.md) | BR-01…270 (phần StudyMode ở `business-rules/study-mode.md`): cây deck, hai scheduler, kind, session lifecycle, reset/generation, starter template, trạng thái thẻ, cờ và tag, import/export, tiến độ, Study Home, Settings, nhắc học, tìm kiếm, Trash | **frozen for MVP** |
 | [`data-model.md`](data-model.md) | Schema v13 + 37 câu query bất biến: decks (cây nhiều cấp), cards, card_study_states, tags, study_sessions, study_answers, study_queue_items, app_settings, delete_batches; template là asset, không phải bảng runtime | **frozen for MVP** |
+| [`glossary.md`](glossary.md) | Định nghĩa thuật ngữ và tên cột; mục "Tên dễ nhầm" tách các cặp đã từng gây nhầm (`kind` ↔ `session_kind`, `first_answered_at` ↔ "lượt ôn đầu tiên", Thư viện ↔ Decks) | active |
+| [`interfaces.md`](interfaces.md) | Ranh giới HTTP của `memox-api`: backend hiện có gì, app **chưa** gọi nó, hình dạng lỗi chung, và phân kỳ Postgres ↔ Drift. Danh sách endpoint nằm ở `memox-api/openapi.json`, không chép lại | active |
+| [`verification.md`](verification.md) | Gate nào chạy ở PR CI và gate nào chỉ chạy khi có người bấm — `ci-full.yml` và `ci-device.yml` đều là `workflow_dispatch` | active |
+| [`security.md`](security.md) | Tài sản riêng tư, ba đường rò rỉ thật (log, thông báo, export), biện pháp đang có và rủi ro còn mở | active |
+| [`operations.md`](operations.md) | Flavor → entrypoint → applicationId, trạng thái ký release (đang dùng khoá debug), và cái gì còn thiếu để phát hành được | active |
 
 "Frozen for MVP" nghĩa là đặc tả đã chốt và code được viết theo nó. Đổi một tài
 liệu frozen là một quyết định có chủ đích, phải kèm cập nhật mọi tài liệu tham
@@ -78,13 +83,30 @@ needed", which is worse than an obvious gap.
 
 | Document | Created during | Owning skill |
 |---|---|---|
-| `api-spec.md` | Phase 10.2 — **not until the Spring Boot backend exists** (AD-05) | `flutter-data-layer` |
+| `api-spec.md` | Phase 10.2 — điều kiện **đang nhập nhằng**, xem mục kế tiếp | `flutter-data-layer` |
 | `design-system.md` | Phase 7 | `flutter-design-system` |
-| `testing-strategy.md` | Phase 15 | `flutter-testing` |
-| `release-checklist.md` | Phase 20–21 | `flutter-ship` |
+| `testing-strategy.md` | Phase 15 — phần *viết test thế nào*; phần *gate nào chạy ở đâu* đã có | `flutter-testing` |
+| `release-checklist.md` | Phase 20–21 — phần *quy trình phát hành*; phần *hiện trạng* đã có | `flutter-ship` |
 
 Templates for the Phase 0–1 documents are in
 `.claude/skills/flutter-product-spec/assets/`.
+
+## Điều kiện của `api-spec` đã trở nên nhập nhằng
+
+Dòng trên từng ghi điều kiện là *"not until the Spring Boot backend exists
+(AD-05)"*. Backend **đã tồn tại**: `memox-api/` có 8 controller, 37 endpoint, 5
+migration Flyway, 310 test, và một job CI riêng. Nhưng AD-05 phát biểu mốc khác —
+dependency mạng hoãn tới *"đúng lúc bắt đầu tích hợp Spring Boot"* — và tích hợp
+thì **chưa** bắt đầu: app không có `dio` và không gọi backend.
+
+Hai cách đọc đều chống đỡ được từ cùng một AD. Đây là một quyết định còn mở, không
+phải một tài liệu bị quên. Bề mặt backend hiện tại được mô tả ở
+[`interfaces.md`](interfaces.md).
+
+`check_docs.py` sẽ không bao giờ phát hiện việc này: `_check_not_written_yet()`
+chỉ kiểm file có tồn tại trên đĩa hay không, nó không đọc điều kiện viết bằng
+prose. Nó được thiết kế để bắt lỗi ngược lại — một tài liệu đã viết mà quên xoá
+khỏi bảng.
 
 ## The rule that keeps this useful
 
